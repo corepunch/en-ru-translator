@@ -247,3 +247,115 @@ action bytes against `$` (0x24), `T` (0x54), `K` (0x4B) and dispatches according
 <!-- TODO: Trace the full call chain from entry point to rule application.
      Identify how multiple tables are iterated.
      Map priority flags to processing order. -->
+
+## Creating New Python Tools
+
+When r2 isn't enough for a task, create a Python tool. Place them in `LTGOLD/`.
+
+### When to Create a New Tool
+
+- r2's `axt` doesn't find cross-references (common in 16-bit code)
+- Need to parse a custom data format
+- Need to search for patterns across the entire binary
+- Need to visualize or count occurrences
+- Need to extract data for further analysis
+
+### Tool Template
+
+```python
+#!/usr/bin/env python3
+"""
+Purpose: [What this tool does]
+Usage: python3 tool_name.py [args]
+"""
+import struct
+import sys
+
+FILENAME = "/Users/igor/Developer/en-ru-translator/LTGOLD/LTGOLD.EXE"
+
+def read_cstring(data, base, offset):
+    """Read null-terminated string from data at base+offset."""
+    if offset == 0:
+        return None
+    pos = base + offset
+    buf = []
+    while pos < len(data) and data[pos] != 0:
+        buf.append(data[pos])
+        pos += 1
+    return bytes(buf).decode('cp866', errors='replace')
+
+def main():
+    with open(FILENAME, 'rb') as f:
+        data = f.read()
+    
+    # Your analysis logic here
+    # ...
+
+if __name__ == "__main__":
+    main()
+```
+
+### Common Tasks
+
+**Find all pointers to an address:**
+```python
+target = 0x0D2E  # offset to find references to
+for i in range(len(data) - 1):
+    val = struct.unpack_from('<H', data, i)[0]
+    if val == target:
+        print(f'Pointer at {i:08X}')
+```
+
+**Extract function bytes:**
+```python
+func_start = 0xD608
+func_size = 3144  # from r2 afl output
+func_bytes = data[func_start:func_start + func_size]
+with open('function.bin', 'wb') as f:
+    f.write(func_bytes)
+```
+
+**Count occurrences of a byte pattern:**
+```python
+pattern = bytes([0x2A, 0x00])  # "*\0"
+count = data.count(pattern)
+print(f'Found {count} occurrences of pattern')
+```
+
+**Extract all strings near an offset:**
+```python
+offset = 0x523F5  # near rule patterns
+for i in range(offset - 100, offset + 100):
+    if data[i] == 0x00:  # null terminator
+        # try to read string before this
+        j = i - 1
+        while j > 0 and data[j] != 0x00:
+            j -= 1
+        s = data[j+1:i]
+        if len(s) > 2:
+            try:
+                print(f'{j+1:08X}: {s.decode("cp866")}')
+            except:
+                pass
+```
+
+### r2 vs Python
+
+| Task | r2 | Python |
+|------|-----|--------|
+| Decompile function | ✅ `pdg` | ❌ |
+| Find cross-references | ✅ `axt` | ⚠️ Basic scanning only |
+| Parse custom formats | ⚠️ `pf` templates | ✅ Full control |
+| Search binary patterns | ✅ `/x` | ✅ With encoding support |
+| Hex dump with context | ✅ `px` | ✅ Custom formatting |
+| Batch analysis | ❌ | ✅ |
+| CP866/Cyrillic support | ❌ | ✅ |
+
+### r2 Features That Replace Python
+
+- **`/x PATTERN`** — search for hex bytes (equivalent to `findaddr.py` for simple cases)
+- **`axt @ ADDR`** — find cross-references (replaces manual pointer scanning)
+- **`pdg @ ADDR`** — decompile to C (replaces manual disassembly)
+- **`pf`** — print formatted data structures (replaces custom parsers)
+
+But r2 has limitations with 16-bit code — Python tools give more control.

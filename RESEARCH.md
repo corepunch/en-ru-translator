@@ -2,6 +2,26 @@
 
 Document of all findings from reverse-engineering LTGOLD.EXE. Updated as we discover new things.
 
+## Provenance Research
+
+**Status: UNCONFIRMED** — LTGOLD's exact identity and lineage remain unconfirmed.
+
+No forum thread, changelog, leaked source tree, or documentation page mentioning "LTGOLD" by that exact name turned up, despite searching:
+- old-dos.ru (site-restricted search and general queries)
+- BetaArchive, VOGONS-adjacent abandonware indexes
+- exetools.com's DOS-reversing forum
+- ACL Anthology's MT Summit/TMI archive
+- Russian-language searches for Cократ/Арсеналъ/Стилус/ПРОМТ history
+
+**What is independently confirmed (not proof of lineage):**
+
+- Globalink and MicroTac led the early-1990s PC machine-translation market and merged in December 1994
+- Globalink's engine "Barcelona" is documented as a rule-based transfer system with a proprietary rule editor exposing pattern→action "keyed rules" — same two-part shape as `rules.lua` entries
+- "Sokrat" was built by Arsenal (founded 1995, part of "Russian Office" suite) and is treated as one of exactly two competing engines of that era (the other being PROMT/Stylus)
+- No evidence suggesting Sokrat licensed a Western engine — reads as independently-built Russian product
+
+**Bottom line:** LTGOLD's exact identity and lineage remain unconfirmed.
+
 ## Tooling Decision
 
 **Primary tool:** radare2 with r2ghidra for decompilation and analysis.
@@ -35,14 +55,18 @@ in `LTGOLD.dat`, not as compiled code in the EXE.
 
 | Table | Offset | Entries | Record Size | Purpose |
 |-------|--------|---------|-------------|---------|
-| 1 | 3374 | 47 | 10 bytes | Core structural patterns (verb phrases, negation, conditionals) |
-| 2 | 3854 | 157 | 10 bytes | Detailed grammatical transformations (articles, pronouns, tenses) |
-| 3 | 5434 | 136 | 10 bytes | Preposition handling, conjunction processing, special constructions |
-| 4 | 11981 | 178 | 9 bytes | Passive voice, gerunds, complex verb forms |
-| 5 | 16610 | 9 | 10 bytes | Final cleanup rules |
-| 6 | 16874 | 56 | 10 bytes | Noun agreement patterns |
-| 7 | 17972 | 35 | 8 bytes | Preposition/case rules (no actions — pattern-only) |
-| 8 | 19158 | 83 | 8 bytes | Final rules (no actions — pattern-only) |
+| 1 | 3374 | 47 | 10 bytes | Clause-boundary detection, discourse connectives |
+| 2 | 3854 | 157 | 10 bytes | Modal auxiliaries, passive "with/by", relative clauses |
+| 3 | 5434 | 136 | 10 bytes | "that"-clauses, relative pronoun resolution |
+| 4 | 11981 | 178 | 9 bytes | Idiom/collocation lexicalization, tag normalization |
+| 5 | 16610 | 9 | 10 bytes | Late cleanup (copula agreement, "is the") |
+| 6 | 16874 | 56 | 10 bytes | Structural stabilizers — no rewrite (protect compounds) |
+| 7 | 17972 | 35 | 8 bytes | Final structural validation — no rewrite |
+| 8 | 19158 | 83 | 8 bytes | Additional validation rules |
+
+**Note:** Tables 6 and 7 have **no action strings** — they match patterns but don't modify
+tokens. These are "recognize-and-leave-alone" rules that mark patterns as already
+resolved, preventing downstream rules from mis-firing.
 
 ### Record Formats
 
@@ -66,8 +90,9 @@ Offset 0 means "no pattern" or "no action".
 
 ### Tables Without Actions
 
-Tables 7 and 8 have **no action strings** — they match patterns but don't modify
-tokens. These likely set internal flags or control subsequent rule processing.
+Tables 6 and 7 have **no action strings** — they match patterns but don't modify
+tokens. These are "recognize-and-leave-alone" rules that mark patterns as already
+resolved, preventing downstream rules from mis-firing.
 
 ## Code Structure
 

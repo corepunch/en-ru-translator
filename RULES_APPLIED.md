@@ -6,8 +6,24 @@ Each finding is documented so work can be stopped and resumed quickly.
 ## Pipeline Overview
 
 ```
-Input English → Tokenize → Apply Rules → Compile → Russian Output
+Input English → Tokenize → Table 1 → Table 2 → Table 3 → Table 4 → Table 5 → Table 6 → Table 7 → Compile → Russian Output
 ```
+
+**644 rules total** across 7 tables (hand-counted).
+
+## Table Structure
+
+| Table | Rules | Tuple Shape | Role |
+|-------|-------|-------------|------|
+| 1 | 47 | `{priority, pattern, replacement}` | Clause-boundary detection, discourse connectives |
+| 2 | 157 | `{priority, pattern, replacement}` | Modal auxiliaries, passive "with/by", relative clauses |
+| 3 | 136 | `{priority, pattern, replacement}` | "that"-clauses, relative pronoun resolution |
+| 4 | 177 | `{priority, pattern, replacement}` | Idiom/collocation lexicalization, tag normalization |
+| 5 | 9 | `{priority, pattern, replacement}` | Late cleanup (copula agreement, "is the", "what X") |
+| 6 | 35 | `{priority, pattern}` | Structural stabilizers — no rewrite (protect compounds) |
+| 7 | 83 | `{priority, pattern}` | Final structural validation — no rewrite |
+
+**Key insight:** Tables 6 and 7 have **no replacement field**. They are "recognize-and-leave-alone" rules that mark patterns as already resolved, preventing downstream rules from mis-firing.
 
 ## Step 1: Tokenization
 
@@ -50,7 +66,9 @@ Output tokens (each is a string with grammatical tags + Russian translations):
 
 **File:** `parser.lua:229-242`
 
-Rules are applied in 5 passes (each pass = one `table.insert(rules, {...})` in `rules.lua`).
+Rules are applied in **7 passes** (each pass = one `table.insert(rules, {...})` in `rules.lua`).
+
+**Important:** Tables 6 and 7 have **no replacement field** — they are "recognize-and-leave-alone" rules that mark patterns as already resolved.
 
 ### How Pattern Matching Works
 
@@ -109,7 +127,68 @@ find_and_replace(ts, j, target_tag)
       replace token with that form
 ```
 
-## Step 3: Concrete Rule Traces
+### Lowercase Tags — "Already Processed" Markers
+
+Uppercase tags have lowercase counterparts (`d, g, j, k, l, n, w, x, y, e, u, v, b, p, a, c, m, q, r, s, t`). These indicate "this token's category has already been resolved/consumed by an earlier rule."
+
+Example from Table 4 (end of pass):
+```lua
+{ 0x12, "n", "N" },   -- normalize plural noun back to canonical form
+{ 0x1B, "g", "G" },   -- normalize gerund back to canonical form
+```
+
+This is a standard technique in hand-written cascaded rule systems: casing is used as a cheap "already handled" flag rather than a separate boolean field.
+
+## Step 3: Tag Reference
+
+### Confirmed Tags (from `compiler.lua` printer dispatch)
+
+| Tag | Printer | Function |
+|-----|---------|----------|
+| `N` | `noun()` | Inflect for case/number/gender |
+| `Z`, `V` | `verb()` | Conjugate for tense/person/aspect |
+| `A`, `S` | `adjective()` | Decline to agree with governed noun |
+| `P` | `preposition()` | Set grammatical case |
+| `R` | `pronoun()` | Set person/number |
+| `X` | `infinitive()` | Mark infinitive/auxiliary-verb form |
+| `U` | `unique()` | Modal auxiliaries ("must," "can") |
+| `F` | `passive()` | Past passive form |
+| `G` | `gerund()` | Present participle |
+| `T` | `separator()` | Outputs empty string (articles) |
+
+### Inferred Tags (from rule patterns)
+
+| Tag | Best guess | Evidence |
+|-----|------------|----------|
+| `W` | Multi-function "phrase" tag for compound/idiomatic nouns | Token 17 ("front") labeled `W` in worked example |
+| `B` | The verb "to be" (copula), distinct from general `Z`/`V` | Constant co-occurrence with literal `` `be` `` |
+| `C` | Conjunction ("and," "but," "or") | Used as clause-joining slot throughout |
+| `J` | Complementizer/subordinator "that" (post-resolution) | `` G`that` `` → `GJ` — literal "that" becomes tag `J` |
+| `L` | Relative pronoun (which/who/whose, resolved) | `` `which`<KdD>[XYUVR] `` → `L` |
+| `Q` | Quantifier ("all," "some," "each") | Appears governing `N`/`Z` slots |
+| `M` | Adverbial modifier | Frequently trailing verbs/adjectives as optional slot |
+| `D` | "do"-support auxiliary | Co-occurs with `d` (lowercase form) in modal contexts |
+| `K` | Modal marker (can/could-class) | Grouped with `U` (confirmed modal tag) throughout |
+| `Y` | "will/would"-class auxiliary, or aspect marker | Co-occurs with `E` in perfect/passive contexts |
+| `E` | Past-participle / perfect-aspect marker | Feeds `F` (confirmed passive) via `with`/`by` phrases |
+| `H` | Possessive/genitive marker (`'s`) | Appears wherever following-noun genitive is being resolved |
+| `I` | Second/bare infinitive form | Co-occurs with `X` (confirmed infinitive tag) in near-identical slots |
+| `O` | Adverb, or object-case marker | Appears interchangeably with `A` in several rules |
+| `#` | Unknown/unresolved word | Confirmed: token 16 "boarded" stays tagged `#` |
+
+### `Z` vs `V` — Two Stages of Verb Category
+
+Both dispatch to `verb()`, but they aren't interchangeable:
+- `Z` = **raw dictionary tag** straight out of tokenization
+- `V` = **resolved clause-verb slot** — the finite predicate position that word-order/agreement rules key off
+
+Rules routinely convert `Z`-tagged tokens into `V` once their role in the clause is settled.
+
+### `A` vs `S` — Two Forms of Adjective
+
+Both go to `adjective()`. `S` appears in plural/agreement contexts (`SGP`, `S<AO>N`, `[PB]SZ`) more than bare adjective slots, suggesting `S` = an inflected/agreement-marked adjective form (comparative, or carrying a plural/case marker) rather than the citation form `A`.
+
+## Step 4: Concrete Rule Traces
 
 ### Rule: `Z` → `N` (verb to noun)
 

@@ -225,3 +225,103 @@ r2 -q -e bin.cache=true -A -c "pdg @ 0x0004d608" -c q LTGOLD.EXE | sed 's/\x1b\[
 - [radare2 book](https://book.rada.re/)
 - [r2ghidra](https://github.com/radareorg/r2ghidra)
 - [Borland C++ DOS calling conventions](https://en.wikipedia.org/wiki/Borland_C%2B%2B)
+
+## Advanced Tools: dis86 and Spice86
+
+### dis86 (xorvoid/dis86)
+
+Purpose-built decompiler for **16-bit real-mode DOS binaries**. Better than
+r2ghidra for this specific task.
+
+**Status:** Built successfully (with one fix: `mem.rs:25` needs `as *const i8`).
+
+**Installation:**
+```sh
+git clone https://github.com/xorvoid/dis86.git /tmp/dis86
+# Fix compilation error in src/emu86/mem.rs:25:
+# Change: slice.as_ptr()
+# To:     slice.as_ptr() as *const i8
+source ~/.cargo/env && cd /tmp/dis86/dis86 && cargo build --release
+```
+
+**Usage:**
+```sh
+# Requires a BSL config file describing the binary structure
+/tmp/dis86/dis86/target/release/dis86 \
+  --config <config.bsl> \
+  --binary-exe LTGOLD.EXE \
+  --start-addr <seg:off> \
+  --end-addr <seg:off> \
+  --emit-dis output.dis
+```
+
+**BSL Config Format:** Describes memory layout, functions, and data structures.
+See `bsl/foo.bsl` for example. Needs to be created for LTGOLD.EXE.
+
+**Workflow:**
+1. Create BSL config describing LTGOLD.EXE structure
+2. Identify function segment:offset ranges (from r2 `afl`)
+3. Run dis86 on each function
+4. Verify decompiled C code executes identically
+5. Refactor: name variables, symbolize globals, introduce higher-level constructs
+
+**Blog series:** Documents internals in detail at [xorvoid.com](https://www.xorvoid.com)
+
+### Spice86 (OpenRakis/Spice86)
+
+Emulator/debugger for real-mode DOS programs. Generates self-contained C# projects
+from running binaries. Great for **tracing pointers at runtime**.
+
+**Status:** Cloned, requires .NET 10 to build.
+
+**Installation:**
+```sh
+# Requires .NET 10 SDK
+git clone https://github.com/OpenRakis/Spice86.git /tmp/Spice86
+# Build with: dotnet build
+```
+
+**Usage:**
+```sh
+# Run the EXE and dump runtime data
+Spice86 -e LTGOLD.EXE
+
+# Dumped files:
+# - spice86dumpMemoryDump.bin (memory snapshot)
+# - spice86dumpExecutionFlow.json (execution trace)
+# - spice86dumpGhidraSymbols.txt (Ghidra-compatible symbols)
+# - spice86dumpCfgBlocks.json (control flow graph)
+# - spice86dumpCfgGeneratedOverrides.cs (C# overrides)
+```
+
+**Key Features:**
+- **Structure view:** Enter segment:offset address, watch memory update live
+- **C# generation:** Directly generates runnable C# code from assembly
+- **CFG dumping:** Builds control flow graph during execution
+- **Ghidra export:** Dumps symbols for optional Ghidra analysis
+
+**Workflow:**
+1. Run LTGOLD.EXE in Spice86
+2. Step through execution to understand rule processing
+3. Use Structure view to trace pointer accesses
+4. Export CFG for Ghidra analysis
+5. Gradually rewrite generated C# overrides
+
+### When to Use Which Tool
+
+| Task | dis86 | Spice86 | r2 |
+|------|-------|---------|-----|
+| Static decompilation | ✅ Best | ❌ | ⚠️ OK |
+| Runtime tracing | ❌ | ✅ Best | ❌ |
+| Structure inspection | ❌ | ✅ Best | ❌ |
+| CFG generation | ⚠️ Manual | ✅ Auto | ⚠️ Manual |
+| Quick analysis | ❌ | ❌ | ✅ Best |
+| Config required | BSL file | None | None |
+
+### Recommended Workflow
+
+1. **Quick scan** — Use r2 to find interesting functions (`afl`, `axt`)
+2. **Static decompile** — Use dis86 for best 16-bit decompilation
+3. **Runtime trace** — Use Spice86 to trace pointer accesses and data flow
+4. **Deep analysis** — Load dumps into Ghidra via spice86-ghidra-plugin
+5. **Iterate** — Gradually rewrite and verify decompiled code

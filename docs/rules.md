@@ -195,7 +195,36 @@ Each rule has a priority byte (first element, `0x00`-`0x3F`). These control
 rule ordering within a pass — lower priority fires first. The actual mapping
 of priority values to rule categories is not yet fully understood.
 
+### Multiple Rule Tables
+
+LTGOLD stores rules in **multiple separate tables** in `LTGOLD.dat`, not one.
+Each table is processed sequentially. Found via `extract2.py`:
+
+| Table | Offset | Entries | Record Size | Purpose |
+|-------|--------|---------|-------------|---------|
+| 1 | 3374 | 47 | 10 bytes | Core structural patterns (verb phrases, negation, conditionals) |
+| 2 | 3854 | 157 | 10 bytes | Detailed grammatical transformations (articles, pronouns, tenses) |
+| 3 | 5434 | 136 | 10 bytes | Preposition handling, conjunction processing, special constructions |
+| 4 | 11981 | 178 | 9 bytes | Passive voice, gerunds, complex verb forms |
+| 5 | 16610 | 9 | 10 bytes | Final cleanup rules |
+| 6 | 16874 | 56 | 10 bytes | Noun agreement patterns |
+| 7 | 17972 | 35 | 8 bytes | Preposition/case rules (no actions — pattern-only) |
+| 8 | 19158 | 83 | 8 bytes | Final rules (no actions — pattern-only) |
+
+**Record formats:**
+
+10-byte record: `[pattern_offset:u16] [unknown:u16] [action_offset:u16] [unknown:u16] [flags:u16]`
+9-byte record: `[flags:u8] [pattern_offset:u16] [unknown:u16] [action_offset:u16] [unknown:u8]`
+8-byte record: `[pattern_offset:u16] [unknown:u16] [action_offset:u16] [flags:u16]`
+
+Pattern and action are null-terminated C-strings stored in the same data block.
+Offset 0 means "no pattern" or "no action".
+
+**Tables with no actions** (tables 7, 8) likely match patterns but don't modify
+tokens — they may set flags or control subsequent rule processing.
+
 <!-- TODO: Document all replacement token meanings.
      Understand the `$` capture reference system in detail.
      Map priority values (0x00-0x3F) to their meaning — do they control rule ordering?
-     Document what `^`, `=`, `;` do exactly in replacements. -->
+     Document what `^`, `=`, `;` do exactly in replacements.
+     Determine how tables are referenced from code (function call chain). -->

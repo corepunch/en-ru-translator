@@ -206,3 +206,44 @@ Read with: `python3 -c "print(open('file', 'rb').read().decode('cp866'))"`.
 - `*` separator between word and grammatical codes
 - Multi-word entries use spaces
 - Dictionary expansion system documented
+
+## Disassembly Findings (r2)
+
+Disassembled `LTGOLD.EXE` with radare2 to understand rule processing:
+
+### Rule Table Locations
+
+Rules are stored in `LTGOLD.dat` (embedded in EXE), not as compiled code.
+The data section starts at file offset `0x6900`. Key rule table offsets
+(discovered via `extract2.py` and hex analysis):
+
+```
+0x0D2E (3374)  - Table 1: 47 entries, 10-byte records
+0x0F0E (3854)  - Table 2: 157 entries, 10-byte records
+0x153A (5434)  - Table 3: 136 entries, 10-byte records
+0x2ED5 (11981) - Table 4: 178 entries, 9-byte records
+0x40E2 (16610) - Table 5: 9 entries, 10-byte records
+0x41EA (16874) - Table 6: 56 entries, 10-byte records
+0x4634 (17972) - Table 7: 35 entries, 8-byte records (no actions)
+0x4AC6 (19158) - Table 8: 83 entries, 8-byte records (no actions)
+```
+
+### Code Analysis
+
+The main rule processing function appears to be around `0x4D608` (called from
+`0x418FE`). Key observations:
+
+1. **Pattern matching** compares token types against pattern characters (Z, N, V, etc.)
+2. **`*` (wildcard)** checks `j==1` (start) or `j>#ts` (end) — confirmed sentence boundary
+3. **`~` (negation)** inverts the match result via XOR
+4. **`[` (select)** matches one of listed characters
+5. **`<` (any)** matches zero or more of listed characters
+6. **`@` in action** triggers `find_and_replace()` on the current token
+7. **`$` in action** references captured groups from `<...>` or `(...)`
+
+The function at `0x4E1E3` handles replacement token processing — it compares
+action bytes against `$` (0x24), `T` (0x54), `K` (0x4B) and dispatches accordingly.
+
+<!-- TODO: Trace the full call chain from entry point to rule application.
+     Identify how multiple tables are iterated.
+     Map priority flags to processing order. -->

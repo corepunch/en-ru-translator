@@ -4,23 +4,46 @@ Document of all findings from reverse-engineering LTGOLD.EXE. Updated as we disc
 
 ## Provenance Research
 
-**Status: UNCONFIRMED** — LTGOLD's exact identity and lineage remain unconfirmed.
+**Status: CONFIRMED** — LTGOLD is the English-branded version of SARMA 2.0.
 
-No forum thread, changelog, leaked source tree, or documentation page mentioning "LTGOLD" by that exact name turned up, despite searching:
-- old-dos.ru (site-restricted search and general queries)
-- BetaArchive, VOGONS-adjacent abandonware indexes
-- exetools.com's DOS-reversing forum
-- ACL Anthology's MT Summit/TMI archive
-- Russian-language searches for Cократ/Арсеналъ/Стилус/ПРОМТ history
+### Key Discovery: SARMA 2.0
 
-**What is independently confirmed (not proof of lineage):**
+LTGOLD and SARMA 2.0 are **the same translation engine** from the same company:
+- **Company:** САРМА ЛТД (SARMA LTD), Saint Petersburg, Russia
+- **Address:** Невский пр., д.176, а/я 562, тел. (812) 349-1940
+- **Date:** 1992 (SARMA 2.0 documentation)
+- **Copyright:** 1990-1993 LinguaTech Systems, USA / Russia (LTGOLD documentation)
 
+### Relationship
+
+| Product | Language | Documentation |
+|---------|----------|---------------|
+| SARMA 2.0 | Russian | `SAR2BI/SARMA1.DOC`, `SARMA2.DOC`, `DIC.DOC` |
+| LTGOLD | English | `LTGOLD/README.ENG`, `LTGOLD/README.CYR` |
+
+Both products:
+- Use the same dictionary format (`*.DIC`, `*.RUS`)
+- Use the same rule engine (pattern→action rules)
+- Are from the same company (САРМА ЛТД / LinguaTech Systems)
+- Translate English → Russian
+
+### What SARMA Documentation Reveals
+
+The `SAR2BI/DIC.DOC` file is the **dictionary system documentation** — it explains:
+- How to encode English words with grammatical tags
+- How to encode Russian words with morphological codes
+- The dictionary format and structure
+
+This documentation directly explains the codes we see in `BASE.DIC` and `BASE.RUS`.
+
+### External Sources
+
+**Confirmed:**
 - Globalink and MicroTac led the early-1990s PC machine-translation market and merged in December 1994
-- Globalink's engine "Barcelona" is documented as a rule-based transfer system with a proprietary rule editor exposing pattern→action "keyed rules" — same two-part shape as `rules.lua` entries
-- "Sokrat" was built by Arsenal (founded 1995, part of "Russian Office" suite) and is treated as one of exactly two competing engines of that era (the other being PROMT/Stylus)
-- No evidence suggesting Sokrat licensed a Western engine — reads as independently-built Russian product
+- Globalink's engine "Barcelona" is documented as a rule-based transfer system with a proprietary rule editor exposing pattern→action "keyed rules"
+- "Sokrat" was built by Arsenal (founded 1995, part of "Russian Office" suite) — a separate, competing product
 
-**Bottom line:** LTGOLD's exact identity and lineage remain unconfirmed.
+**Searched but found nothing relevant:** BetaArchive forums, exetools.com reversing forum, direct site-restricted queries against old-dos.ru for "LTGOLD"
 
 ## Tooling Decision
 

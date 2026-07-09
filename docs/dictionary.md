@@ -5,6 +5,10 @@ The code is a sequence of CP866 bytes encoding grammatical information.
 
 See [Pipeline](pipeline.md) for how dictionaries are loaded.
 
+**Source:** Extracted from `LTGOLD.EXE` via `extract.py` and `load.lua`. Format
+documented in `LTGOLD/dic.txt` (SARMA DIC format, CP866 encoded, in Russian).
+Additional notes in `LTGOLD/README.CYR` and `LTGOLD/NEWLTGE.DOC`.
+
 ## BASE.DIC (English) Code Format
 
 ```
@@ -16,13 +20,19 @@ Each character is a grammatical tag, optionally followed by a 3-digit paradigm I
 
 ### Grammatical Tags
 
+From `load.lua:35-37` (commented-out reference):
+```lua
+-- N="noun", V="verb", A="adjective", D="adverb", E="past participle",
+-- W="phrase", I="idiom", P="preposition", n="noun plural"
+```
+
 | Tag | Part of speech | Notes |
 |-----|---------------|-------|
-| `Z` | Verb | Followed by paradigm ID (e.g. `Z001`) |
+| `Z` | Verb | Followed by paradigm ID (e.g. `Z001`). Maps to `V` internally |
 | `N` | Noun | Followed by paradigm ID |
-| `V` | Adjective | Same as `A` |
+| `V` | Adjective | Same as `A` (used interchangeably) |
 | `A` | Adjective | Same as `V` |
-| `P` | Preposition | May have case government info |
+| `P` | Preposition | May have case government info (e.g. `PР` = preposition governing Род. падеж) |
 | `D` | Adverb | |
 | `E` | Past participle | |
 | `G` | Gerund / present participle | |
@@ -39,6 +49,8 @@ Each character is a grammatical tag, optionally followed by a 3-digit paradigm I
 | `?` | Unknown word | |
 | `n` | Noun (plural) | lowercase = modifier |
 | `w` | Lowercase modifier | |
+| `W` | Phrase marker | Multi-word entry indicator |
+| `I` | Idiom marker | |
 
 ### Example Codes
 

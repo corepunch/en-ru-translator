@@ -3,6 +3,9 @@
 The patterns in `rules.lua` use a compact notation to match grammatical sequences.
 See [Pipeline](pipeline.md) for how rules are applied.
 
+**Source:** Extracted from `LTGOLD.EXE` binary via `extract2.py`. Original format
+documented in `LTGOLD/dic.txt` (SARMA DIC format, CP866 encoded).
+
 ## Basic Token Matching
 
 | Syntax | Matches | Example |
@@ -11,7 +14,24 @@ See [Pipeline](pipeline.md) for how rules are applied.
 | `N` | A noun token | `N` matches any noun |
 | `V` | An adjective token | `V` matches any adjective |
 | `P` | A preposition token | `P` matches any preposition |
-| `*` | Any sequence of tokens | `*Z` = anything then a verb |
+| `*` | Sentence boundary | Start or end of token stream (see below) |
+
+### Sentence Boundary `*`
+
+`*` is **not** a generic wildcard — it matches sentence boundaries:
+
+- `*` at **start** of pattern = matches beginning of token stream (`j==1`)
+- `*` at **end** of pattern = matches end of token stream (`j>#ts`)
+- `~*` = negated boundary (matches if NOT at boundary)
+
+**Example:** `*Z[?#]*` matches: **start-of-sentence** → verb → number/unknown → **end-of-sentence**
+
+This means the pattern only fires when the verb+number sequence spans the entire sentence.
+
+From `parser.lua:200`:
+```lua
+elseif t == 'wildcard' and xor(i, j==1 or j>#ts) then eat('@', f())
+```
 
 ## Character Classes `[...]`
 
@@ -57,17 +77,31 @@ Matches a specific English word:
 | `` `if` `` | The word "if" |
 | `` `that` `` | The word "that" |
 
+## Special Characters in Patterns
+
+| Char | Meaning | Source |
+|------|---------|--------|
+| `:` | Colon — punctuation token | `utils.lua:50` extracts `[,%!%.;:]?` |
+| `"` | Quote — punctuation token | Same extraction |
+| `(` | Left paren — captured as literal | Used in `(G)` pattern |
+| `)` | Right paren — captured as literal | Used in `(G)` pattern |
+| `!` | Exclamation — punctuation token | `utils.lua:50` |
+| `?` | Unknown word marker | `#word` prefix for unrecognized |
+| `#` | Number marker | Attached to numeric tokens |
+| `/` | Separator in patterns | `N[C/]G` — conjunction or slash |
+
 ## Complex Pattern Examples
 
 Decoding actual rules from `rules.lua`:
 
 ```lua
 -- Rule: "*Z[?#]*"
--- Matches: anything, verb, number/unknown, anything
--- Purpose: skip verb-number sequences
+-- Matches: start-of-sentence, verb, number/unknown, end-of-sentence
+-- Purpose: match sentences that are just a verb + number (e.g. "Runs 3")
+-- Note: the two * markers mean this only matches if the pattern spans the full sentence
 
 -- Rule: "*~<UVXY>Z*"
--- Matches: anything, (non-unique/non-verb/non-adjective/non-gerund)*, verb, anything
+-- Matches: start-of-sentence, (non-unique/non-verb/non-adjective/non-gerund)*, verb, end-of-sentence
 -- Purpose: match verbs not preceded by auxiliary verbs
 
 -- Rule: "*<dD,>B<dD>[VZ]<$>,"
@@ -85,6 +119,22 @@ Decoding actual rules from `rules.lua`:
 -- Rule: "*NZN<GFNwPDA>[,(*]"
 -- Matches: anything, noun, verb, noun, (gerund/passive/noun/lowercase/preposition/adverb/article)*, comma/lparen/anything
 -- Purpose: match SVO structures
+
+-- Rule: "(G)"
+-- Matches: captured gerund in parentheses
+-- Purpose: match parenthesized gerund phrases
+
+-- Rule: "V<TAO>NG"
+-- Matches: verb, (empty/adjective)*, noun, gerund
+-- Purpose: match verb phrases with following gerund
+
+-- Rule: "p[*)]"
+-- Matches: preposition, then one of: *, ), or unknown
+-- Purpose: match preposition at boundary
+
+-- Rule: "B<?>*"
+-- Matches: "be" auxiliary, unknown*, end-of-sentence
+-- Purpose: match "be" at end of sentence
 ```
 
 ## Replacement Tokens
@@ -103,23 +153,47 @@ The replacement string uses these conventions:
 | `=` | Set case marker |
 | `j` | Insert comma |
 | `;` | Insert separator |
+| ` ` (space) | Insert space in output |
 
 ### Example Replacements
 
 ```lua
 -- "@" = transform current token using the matched pattern
-"@$V"  → transform current, then next as verb
 "@N"   → transform to noun
 "@@"   → transform twice (double transformation)
+"@$V"  → transform current, then next as verb
+"@P"   → transform to preposition
+"@g"   → transform to gerund form
+"@J"   → transform to conjunction
+
+-- "." = keep current token unchanged
+".V"   → keep verb as-is
+".N"   → keep noun as-is
+".A"   → keep adjective as-is
+".$V"  → keep verb with case marker
 
 -- "$" = reference captured group
 "$V"   → use captured verb
 "$N"   → use captured noun
 "$J$j" → use captured conjunction, comma, captured conjunction again
+"$P$;" → use captured preposition, captured separator
 
 -- Literal Russian
-"`быть`" → insert Russian word "быть"
+"`быть`"    → insert Russian word "быть"
+"`для`"     → insert Russian word "для"
+"`Для`"     → insert capitalized Russian word
+
+-- Combined
+"@$V"   → transform current, use captured verb
+"@$NV"  → transform current, use captured noun then verb
+"@@\"$^NV" → double transform, quote, captured noun as noun, verb
 ```
+
+### Priority Values
+
+Each rule has a priority byte (first element, `0x00`-`0x3F`). These control
+rule ordering within a pass — lower priority fires first. The actual mapping
+of priority values to rule categories is not yet fully understood.
 
 <!-- TODO: Document all replacement token meanings.
      Understand the `$` capture reference system in detail.

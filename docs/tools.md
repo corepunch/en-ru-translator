@@ -176,3 +176,33 @@ modifying data sections.
 ```sh
 python3 clear.py LTGOLD.EXE 0x50000 0x1000  # zero 4KB at offset 0x50000
 ```
+
+## Russian Documentation Files
+
+These files in `LTGOLD/` contain original documentation (CP866 encoded).
+Read with: `python3 -c "print(open('file', 'rb').read().decode('cp866'))"`.
+
+| File | Content |
+|------|---------|
+| `README.CYR` | Original README in Russian — system requirements, installation, features |
+| `COMENT.DOC` | Modem/Connection board documentation (not translation-related) |
+| `dic.txt` | **SARMA DIC format documentation** — dictionary structure, menu system, coding system. Key reference for understanding `*.DIC` and `*.RUS` formats |
+| `NEWLTGE.DOC` | Update notes — transliteration codes `{~=...~}`, punctuation handling, dictionary peeking (`-@` switch) |
+| `LTDOC.DOC` | Word macros for integration |
+| `LTGOLDE.HLP` | English help text |
+| `LTGOLDR.HLP` | Russian help text |
+
+### Key Findings from Documentation
+
+**From `NEWLTGE.DOC`:**
+- Sentence boundary = period (`.`). Programs auto-detect abbreviations.
+- If no period found, sentence breaks at 512th word.
+- Transliteration markers: `{~=` (on), `~}` (off)
+- `-@` switch: peek at dictionary selections during translation
+- `-AR` switch: automatic Russian case generation (broken in this version)
+
+**From `dic.txt`:**
+- Dictionary format: `word*codes` per line
+- `*` separator between word and grammatical codes
+- Multi-word entries use spaces
+- Dictionary expansion system documented

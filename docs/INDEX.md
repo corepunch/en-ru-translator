@@ -27,7 +27,7 @@ T=empty  #=number  ?=unknown  n=noun(plural)  w=lowercase modifier
 [ZV]     = match one of Z or V
 <VXY>    = match zero or more of V, X, or Y
 ~Z       = match anything except Z
-*        = match anything
+*        = sentence boundary (start or end of token stream)
 `word`   = match literal English word
 ```
 

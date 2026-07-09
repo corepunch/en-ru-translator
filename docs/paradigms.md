@@ -7,6 +7,10 @@ before applying the paradigm.
 
 See [Dictionary Code Structure](dictionary.md) for how paradigm IDs are stored.
 
+**Source:** Extracted from `LTGOLD.EXE` via `extract2.py` and manual analysis.
+The verb paradigm comments in `paradigms.lua` list the verb types each pattern
+covers (e.g. "ать ять гать дать лать мать тать шать щать лять ывать ыпать арать итать").
+
 ## Noun Paradigms (`paradigms.nouns`)
 
 Structure: `paradigms.nouns[gender][paradigm_id] = { suffix_len, "forms" }`

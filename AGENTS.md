@@ -37,12 +37,11 @@ Rules use a pattern-matching language extracted from the original LTGOLD binary:
 |--------|---------|
 | `[...]` | Character class — match one of the listed grammatical tags |
 | `<...>` | Any-match — match zero or more of listed tags |
-| `*` | Wildcard — match anything |
+| `*` | Sentence boundary — start or end of token stream |
 | `~` | Negation — invert the next token's match |
 | `` `word` `` | Literal English word |
 
-**Example:** `*Z[?#]*` matches: anything, then a verb (`Z`), then a number or unknown (`?#`),
-then anything.
+**Example:** `*Z[?#]*` matches: **start-of-sentence**, then a verb (`Z`), then a number or unknown (`?#`), then **end-of-sentence**. The pattern only fires when it spans the full sentence.
 
 ## Grammatical Codes
 

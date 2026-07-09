@@ -70,6 +70,15 @@ Rules are applied in **7 passes** (each pass = one `table.insert(rules, {...})` 
 
 **Important:** Tables 6 and 7 have **no replacement field** — they are "recognize-and-leave-alone" rules that mark patterns as already resolved.
 
+### Pattern Syntax — UNDOCUMENTED
+
+The pattern matching syntax (`<>`, `[]`, `*`, `~`, `` ` ``) is **NOT documented** in the official SAR2BI/LTGOLD documentation. The only sources are:
+1. The code itself (`parser.lua:125-227`)
+2. The extracted rules (`rules.lua`)
+3. Our reverse-engineering
+
+This is a proprietary format that was never exposed to end users.
+
 ### How Pattern Matching Works
 
 **File:** `parser.lua:125-227`

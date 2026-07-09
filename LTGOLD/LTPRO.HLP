@@ -1,0 +1,100 @@
+Page 1 of 4 (English)
+                         LTPRO Command line Switches
+
+ LTPRO [/I]  <file>  [/O]  <file>  [/D] <path> [/SM] [/W(IWM)] [F-] [/A] [/M]
+       [/MM] [/R <#>] [/L(BE) <#>] [/C <cbu>] [/P(BE) <#>] [/FL]  [C(BE) <#>]
+       [/N] [/X] [/L-] [/B-] [/@] [/BW] [/AR- [/AM] [/HR] [/LS <#>] [/LH <#>]
+       [/ES <#>] [/EW <#>] [/FI MAC] [/FO MAC] [/?] [/H]
+
+┌──────────────────────────────────────┬─────────────────────────────────────┐
+│ /I inputfile  Name of Source File    │ /A       Add to Output File         │
+│ /I @parmfile  Name of Param. File    │ /N       New Output File            │
+│ /I #idenfile  Name of Hot Ids File   │ /SM      Display Multiple Meanings  │
+│ /O outputfile Name of Output File    │ /X       Tel-Lex (R) Mode           │
+│ /D pathname   Path to dictionaries   │ /L-      Transliteration Off        │
+│ /C dicchain   Dictionary Chain [cbu] │ /B-      Turn off completion Bell   │
+│ /R number     Right Output margin    │ /FL      Flush Output File          │
+│ /BW           Black and white screen │ /@       Dis/Wri dict. entries      │
+│ /F-           Disable Output Format  │ /M       Eng+Rus Source Text        │
+│ /BW           Black and white screen │ /@       Write dictionary entries   │
+│ /MM           Multiple Meanings      │ /ES #    Table of Contents control  │
+│ /HR           Russian Help Text      │ /EW #    Smart Sentence control     │
+│ /LS #         Characters per line    │ /LH #    Number of lines, sentence  │
+│ /U            Collect Unknown Words  │ /AM      Enable Automatic Meanings  │
+└──────────────────────────────────────┴─────────────────────────────────────┘
+@.
+Page 2 of 4 (English)
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │/W(IOM)   Write Source   - Input /WI - Output /WO - Multiple Meanings /WM │
+ │/S(IOM)   Display Source - Input /SI - Output /SO - Statistics /S         │
+ │/S(IOM)   Display Source - Multiple Meanings /SM                          │
+ │/P /(EE)  Edit each Sentence - Pre-edit /P - Post-Edit /E                 │
+ │/P /(EE)  Edit each Sentence - Post Edit Each Sentence /EE                │
+ │/FI MAC   Input file is in Apple Macintosh Format                         │
+ │/FO MAC   Output file should be in Apple Macintosh Format                 │
+ │/M        Russian Characters allowed in the Source File                   │
+ ├──────────────────────────────────────────────────────────────────────────┤
+ │ /? or /H     Display this message   -   You may replace all '/' with '-' │
+ └──────────────────────────────────────────────────────────────────────────┘
+
+                    Special Keys may be added to input file
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │{~        Translation OFF (turns off section of text not to be translated)│
+ │~}        Translation ON  (Turns off the {~ mode)                         │
+ │{~=       Transliteration ON  (Transliterate section of text)             │
+ │~}        Transliteration OFF (Turns off the {~= mode)                    │
+ │{~\#      Number of words per line of a list (# = 1-10)                   │
+ │{~\.      Turn off the list mode                                          │
+ └──────────────────────────────────────────────────────────────────────────┘
+
+@.
+Page 3 of 4 (Русский)
+
+                         Ключи командной строки ЛТПРО
+
+ LTPRO [/I]  <file>  [/O]  <file>  [/D] <path> [/SM] [/W(IWM)] [F-] [/A] [/M]
+       [/MM] [/R <#>] [/L(BE) <#>] [/C <cbu>] [/P(BE) <#>] [/FL]  [C(BE) <#>]
+       [/N] [/X] [/L-] [/B-] [/@] [/BW] [/AR- [/AM] [/HR] [/LS <#>] [/LH <#>]
+       [/ES <#>] [/EW <#>] [/FI MAC] [/FO MAC] [/?] [/H]
+
+┌──────────────────────────────────────┬─────────────────────────────────────┐
+│ /I inputfile  Исходный файл          │ /A       Добавить к Вых. файлу      │
+│ /I @parmfile  Файл с параметрами     │ /N       Новый Вых. файл            │
+│ /I #idenfile  Файл неперев. слов     │ /SM      Отображать множ. значения  │
+│ /O outputfile Выходной файл          │ /X       Режим Тел-Лекс (R)         │
+│ /D pathname   Маршрут словарей       │ /L-      Выкл. транслитерацию       │
+│ /C dicchain   Цепочка словарей [cbu] │ /B-      Выкл. сигнал окончания     │
+│ /R number     Длина вых. строки      │ /FL      Аварийное сохран.перевода  │
+│ /BW           Черно-белый дисплей    │ /@       Отобр./писать слов.статьи  │
+│ /F-           Выкл. формат.вых.файла │ /M       Англ+рус исходный файл     │
+│ /BW           Черно-белый дисплей    │ /@       Писать словарные статьи    │
+│ /MM           Множ. значения         │ /ES #    Управление оглавлением     │
+│ /HR           Рус. текст помощи      │ /EW #    Управл. автом. предлож.    │
+│ /LS #         Число знаков в строке  │ /LH #    Число слов в предложении   │
+│ /U            Сбор незнакомых слов   │ /AM      Вкл. автоматич. значений   │
+└──────────────────────────────────────┴─────────────────────────────────────┘
+@.
+Page 4 of 4 (Русский)
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │/W(IOM)   Писать Исходн. - Входн. /WI - Выходн. /WO - Множ.значения /WM   │
+ │/S(IOM)   Отобр. Исходн. - Входн. /SI - Выходн. /SO - Статистика /S       │
+ │/S(IOM)   Отобр. Исходн. - Множ. значения /SM                             │
+ │/P /(EE)  Ред. каждое предлож. - Пред-редакт. /P - Пост-редакт. /E        │
+ │/P /(EE)  Ред. каждое продлож. - Пост-редакт. каждое предлож. /EE         │
+ │/FI MAC   Входной файл в формате Эппл Макинтош                            │
+ │/FO MAC   Выходной файл должен быть в формате Эппл Макинтош               │
+ ├──────────────────────────────────────────────────────────────────────────┤
+ │ /? or /H     Отобразить сообщение  -  Вместо '/' можно использовать '-'  │
+ └──────────────────────────────────────────────────────────────────────────┘
+
+            Специальные ключи для использования во входном файле
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │{~        ВЫКЛ. трансляцию (отметить часть текста)                        │
+ │~}        ВКЛ. трансляцию  (отключение режима {~)                         │
+ │{~=       ВКЛ. транслитерацию (транслитерировать часть текста)            │
+ │~}        ВЫКЛ. транслитерацию (отключение режима {~=)                    │
+ │{~\#      Число слов в строке списка (# = 1-10)                           │
+ │{~\.      Отключение режима списка                                        │
+ └──────────────────────────────────────────────────────────────────────────┘
+@.
+

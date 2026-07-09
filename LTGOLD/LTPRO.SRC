@@ -1,0 +1,32 @@
+{(C) 1990-1993 by LinguaTech Systems}
+$MACRO ltpro;
+Macro_To_Key(<Ctrlz>, 'ltpro', Edit);
+{Saving}
+Def_Int(vl);
+vl := REFRESH;
+Create_Window;
+REFRESH := 0;
+{Size_Window(79, 1, 80, 2);}
+Pass_Key(13, 224);
+Make_Message('Translation ...');
+File_Name := 'ltpro.in';
+Save_File;
+if Error_Level <> 0 then
+ Run_Macro('MEERROR');
+end;
+Erase_Window;
+shell_to_dos('ltpro.exe ltpro.in ltpro.out -I @ltpro.cmd', true);
+load_file('ltpro.out');
+if Error_Level <> 0 then
+ RM('MEERROR');
+end;
+Str_Block_Begin;
+Eof;
+Block_End;
+Pass_Key(45, 74);
+Delete_Window;
+Switch_Window(Cur_Window - 1);
+Pass_Key(13, 224);
+REFRESH := vl;
+Make_Message('Translation completed');
+END_MACRO;

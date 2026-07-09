@@ -1,0 +1,329 @@
+                      LTGOLD and LTPRO
+
+     The following additions have been added to your  version
+of  LTGOLD  and  LTPRO.  The  switches  show  a number at the
+beginning (IE:  3.1 C:\LTGOLD\LTGOLD -BW).  Do  not  use  the
+number  (3.1)  in  the  command line.  It is only there as an
+Index   number.   If   you   are   running   LTPRO,   replace
+C:\LTGOLD\LTGOLD with C:\LTGOLD\LTPRO.
+
+                          1.0 INDEX
+
+1.0 INDEX                                                  1
+
+2.0 TRANSLITERATION                                        1
+
+3.0 BLACK AND WHITE MONITORS                               2
+    3.1 C:\LTGOLD\LTGOLD -BW                               2
+
+4.0 RUSSIAN HELP TEXT                                      2
+    4.1 C:\LTGOLD\LTGOLD -HR                               2
+
+5.0 AUTOMATIC RUSSIAN                                      2
+    5.1 C:\LTGOLD\LTGOLD -AR                               2
+
+6.0 PEEKING AT THE DICTIONARY                              2
+    6.1 C:\LTGOLD\LTGOLD -@                                3
+
+7.0 AUTOMATIC MEANINGS                                     3
+    7.1 C:\LTGOLD\LTGOLD -AM                               3
+
+8.0 HANDY HINTS                                            3
+    8.1 MISSPELLED WORDS                                   3
+    8.2 PUNCTUATION                                        4
+    8.3 LISTS OR ITEMS                                     4
+
+9.0 LTPRO MACHINE TRANSLATION FROM
+    MICROSOFT(TM) WORD(TM) FOR WINDOWS(TM) 2.0             5
+    9.1 TRANSLATE THE WHOLE DOCUMENT NO MATTER
+        WHAT THE SIZE IS                                   5
+    9.2 TRANSLATE ONLY MARKED TEXT FROM WINWORD            5
+    9.3 INSERT THE TRANSLATED TEXT BACK INTO
+        YOUR DOCUMENT                                      6
+
+                     2.0 TRANSLITERATION
+
+     Transliteration switch:
+
+     The programs  now  allow  the  user  to  mark  text  for
+transliteration. The use is as follows:
+
+     {~=     Transliteration on
+     ~}      Transliteration off
+
+     You may   mark  a  word,  phrase,  sentence,  paragraph,
+section of the document,  or the total  document.  All  words
+within   the   transliteration   codes   will   be   directly
+transliterated.
+
+     The code  works  best  when  used  with  paragraphs,  if
+inserted against the far left margin (start and stop codes).
+
+     We added  this  feature to allow addresses on letters to
+be directly transliterated.  This feature will  also  convert
+text from the Tel-Lex mode back into Cyrillics.
+
+
+                            - 2 -
+
+                3.0 BLACK AND WHITE MONITORS
+
+     When you start LTGOLD or LTPRO,  you may now define your
+monitor type as "BLACK AND  WHITE"  (works  well  with  older
+laptop  computers).  In  order  to  accomplish  this  add the
+following switch when running LTGOLD or LTPRO:
+
+     3.1 C:\LTGOLD\LTGOLD -BW
+     or  C:\LTGOLD\LTGOLD -BW+
+
+     You will  notice  that  the  screen  layout  is slightly
+different. This allows the program to give you a much sharper
+image than the color version.
+
+                    4.0 RUSSIAN HELP TEXT
+
+     When you start LTGOLD or LTPRO,  you may now define  the
+language you want the help text in (either English or Russian
+at this time).  The default language is English.  In order to
+have  Russian Help text add the following switch when running
+LTGOLD or LTPRO:
+
+     4.1 C:\LTGOLD\LTGOLD -HR
+
+                    5.0 AUTOMATIC RUSSIAN
+
+     LTGOLD and LTPRO have a program feature which allows  it
+to  generate  the correct case and features of Russian words.
+This feature is instead of the Russian words being programmed
+into the Russian dictionary. If you find that the endings are
+not to your liking,  you may disable this feature  by  adding
+the following switch when running LTGOLD or LTPRO:
+
+     5.1 C:\LTGOLD\LTGOLD -AR
+
+NOTE: Sorry, in this version this feature does not work.
+
+                6.0 PEEKING AT THE DICTIONARY
+
+     The developers of LTGOLD found that  it  was  easier  to
+work  on  the  dictionary  if  they  could  follow  what  the
+dictionary selected when generating a sentence.  This  allows
+for  easy  identification  of  problems if they should arise.
+Users find this handy when looking for explanations as to the
+reason  for a specific translation of a word.  It can also be
+used to let us know if you find an error and what it is.
+
+     We find it is easiest to use from the CON input  but  it
+will  accept  files.  When  checking files be sure to turn on
+Edit Each Sentence or the lists of words will run by you. You
+should  also turn off "Display Synonyms" as you will see them
+in the displayed text.
+
+     Certain words will not display for linguistical reasons.
+If you type "for, to, it, etc, all you may see is a period or
+some other character.  Don't be alarmed, this is correct. The
+translation may not look exactly like the words listed in the
+display.  This is caused by the program doing a  linguistical
+change  to  the words for proper attributes.  The base of the
+word will look the same but ending may change. This is caused
+by the programming of the Russian word.
+
+                           - 3 -
+
+     This feature  can  also  help  when using the additional
+dictionary program to assure that words that  are  programmed
+work properly To enable this feature add the following switch
+when running LTGOLD or LTPRO:
+
+
+     6.1 C:\LTGOLD\LTGOLD -@
+
+
+                   7.0 AUTOMATIC MEANINGS
+
+     One of  the unique features of LTGOLD and LTPRO is their
+ability to allow the user to define the order of selection of
+words  for  business  or  computer  meanings.  If  the second
+dictionary is computer,  certain words will be  selected  for
+their  meaning  as  they  apply  to this application.  If the
+second dictionary is business then the meaning will be of the
+business  nature.  If  only the Basic dictionary is enabled a
+generic meaning of the word will be used.  The user should be
+aware that unless the text is 100%  business or 100% computer
+this option may be a problem.
+
+     An example could be the word "drive".  If this option is
+selected and the computer dictionary is enabled as the second
+dictionary,  every time the program encounters the word drive
+it will be translated into a computer disk drive.  A sentence
+like, "We have to drive over and pick up the disk drive" will
+not work as it will translate into "We  have  to  disk  drive
+over to pick up the disk drive". This is a simple example but
+we feel it is important to point out. To enable this feature,
+either  select  it  from  the  "Format Output" section of the
+Options menu from within the program  or  add  the  following
+switch when running LTGOLD or LTPRO:
+
+     7.1 C:\LTGOLD\LTGOLD -AM
+
+
+                       8.0 HANDY HINTS
+
+     8.1 MISSPELLED WORDS
+
+     Most translation  programs  are  only  as  good  as  the
+spelling of the words it reads.  We recommend that you always
+use a spell checker to assure the program the  best  possible
+translation.  We  realize  that not everyone spells correctly
+and that there are common spelling  mistakes  that  are  made
+time   after  time.  We  have  programmed  several  of  these
+misspellings into the program to allow even a  document  with
+misspellings  to end up being translated.  We programmed only
+words that are not in conflict with other words.  If you  are
+using  the  LTWORD program, always be sure to spell check any
+word you add to the dictionary (both Russian and English).
+
+                           - 4 -
+     8.2 PUNCTUATION
+
+     Second only   to  spelling,  correct  punctuation is  an
+important requirement of any document to be translated. There
+are several very good diction programs available to guarantee
+you have put the correct punctuation into your  document.  We
+use  Right  Writer,  but  there  are  several others that are
+equally  effective.  LTGOLD  and  LTPRO   are   designed   to
+compensate  for most punctuation errors but some may not have
+been  anticipated.  Remember,  the  better  the  document  is
+written, the better it will translate.
+
+     8.3 LISTS OR ITEMS
+
+     Unlike a  word for word translation program,  LTGOLD and
+LTPRO translate,  sentence by sentence,  and take punctuation
+marks  into  their  decision making process.  The end of each
+sentence is assumed to be at the  period  (.).  The  programs
+understand  most abbreviations as such.  Not seeing a period,
+the programs will  create  one  at  the  512th  word  in  the
+sentence.  This  concept  allows  both  LTGOLD  and  LTPRO to
+produce very  accurate  translations  most  of  the  time.  A
+problem  could  arise if you are translating a list or column
+of words. The programs will create a sentence out of the list
+and  translate  it  as  such.  In  order to prevent this from
+happening,  you should put a period at the end of each  word,
+phrase,  or individual statement you want translated.  If you
+wanted to translate Dr.  Maslow's hierarchy  of  needs,  they
+should be listed as:
+
+                        Self-Esteem.
+                        Recognition.
+                            Love.
+                          Security.
+                          Physical.
+
+
+                           - 5 -
+
+            9.0 LTPRO MACHINE TRANSLATION FROM
+         MICROSOFT(TM) WORD(TM) FOR WINDOWS(TM) 2.0
+
+Several users of the LTGOLD and LTPRO programs have requested
+access to these programs from the same macro features
+available with WORD 5.0 5.5 and Multi Edit. We have created
+a series of MACROS and other files which will now allow you to
+translate documents or marked text while in WORD for WINDOWS
+(WINWORD). We will explain the 3 MACROS and the reasons for
+all three of them.
+
+
+9.1  TRANSLATE THE WHOLE DOCUMENT NO MATTER WHAT THE SIZE IS
+
+Go to the "Tools" command on your upper ribbon (while in
+WINWORD). Select "Macro...". Name the Macro LTDOC (or another
+name you feel comfortable with). Choose EDIT. Open File
+LTDOC.DOC or enter the following text.
+
+Sub MAIN
+FileSaveAs.Name="c:\ltgold\winword.txt",.Format=5,.LockAnnot=0,
+.Password=""
+Shell "c:\ltgold\ltpro.pif", 0
+End Sub
+
+Close the Edit Window. Select Yes.
+
+NOTE: You may change Name= to the path you want to use. DO NOT
+use a file name you normally use as the Macro deletes the old
+version without prompting you. This Macro creates output file
+WINWORD.OUT. The 3rd Macro in this document will allow you to
+import this file with your translation.
+
+
+9.2 TRANSLATE ONLY MARKED TEXT FROM WINWORD
+
+WINWORD does not have a means to export only marked text.
+Having said this, we were be able to find a way to save the
+portion of text you have marked and translate it. The problem
+with this routine is that it does not allow you to select the
+type of charactes you are exporting to the file. It only
+allows you to export ASCII 7bit characters (Cyrillic's are
+actually graphics in the 8th bit). The bottom line with this
+routine is that you can only translate marked text which is
+all English and if you send Russian out it will look like a
+bunch of garbage. We hope that Microsoft will correct this in
+the future.
+Please create a Macro named LTSELECT (File LTSELECT.DOC),
+following the same procedures as defined above. The Macro
+should consist of the following 6 lines:
+
+Sub MAIN
+Open "c:\ltgold\winword.txt" For Output As #1
+Print #1, Selection$()
+Close #1
+Shell "c:\ltgold\ltpro.pif", 0
+End Sub
+
+Always be sure to have highlighted text before running this
+Macro and WINWORD will only allow a maximum of 32,000 bytes
+of text in the highlighted area (several pages).
+
+                           - 6 -
+
+
+9.3 INSERT THE TRANSLATED TEXT BACK INTO YOUR DOCUMENT
+
+The third Macro brings the translated text back into your
+document. The reason this Macro could not be combined into
+either of the first 2 Macros is that WINWORD does not process
+each command prior to moving on to the next command. This
+deficiency does not give the prior Macros enough time to save
+your text and then translate it before bring the translated
+text back into the document. One other point is that WINWORD
+will not allow you to automatically define the format of the
+text you are importing. Select DOS Text and the translated
+text will be inserted at the same location as you have placed
+the cursor. Please note that if the imported text looks like
+garbage, you must highlight it and change the font to a
+Cyrillic font. This Macro should be created the same as in the
+two other Macros (use file LTINSERT.DOC).
+
+Sub MAIN
+InsertFile.Name="c:\ltgold\winword.out",.Range="",.Link=0
+End Sub
+
+If you highlight the text prior to running this Macro, your
+marked text will be replaced with the translation. If you want
+to keep the English, do NOT highlight the text.
+
+After editing a Macro you may get a prompt asking if you want
+to update the GLOSSARY. Please select Yes.
+
+The last item you may edit is the LTPRO.PIF file for LTPRO.
+You may change LTGOLD directory and Optional Parameters.
+Please see your LTGOLD/LTPRO manual for the switches for
+LTPRO. You should also read your Windows manual for additional
+information on PIF files.
+
+We will continue to keep our users updated on changes to
+WINWORD which might correct some of the current deficiencies.
+
+For additional assistance please contact us at (503) 370-7420,
+in Salem, Oregon.

@@ -1,0 +1,826 @@
+                                     - 1 -
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                             QUESTIONS AND ANSWERS
+
+                                      for
+
+                              LinguaTech Gold 2.0
+                                   (LTGOLD)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              NOTE: In   this   document  we  use  the  "Tel-Lex  (R)"
+                    translation  mode  of  the  program  to  show  all
+                    Russian  words  and  letters  in  regular  English
+                    letters.
+
+
+
+
+
+
+
+
+         Copyright (c) 1990,1991,1992,1993 LinguaTech Systems, Russia
+         Copyright (c) 1990,1991,1992,1993 LinguaTech Systems, USA
+
+                                    - 2 -
+                                  LTGOLD Q&A
+
+
+              Table of Contents                                   Page #
+
+
+
+         1. PROGRAM CONCEPTS                                        3
+
+              A. Knowing Russian not Required                       3
+              B. Why use an Electronic Translator                   4
+              C. LTPRO                                              4
+              D. Major Improvements Using LTGOLD                    4
+              E. Control of Translation within a File               4
+              F. LTGOLD.IDS                                         4
+              G. Modifying Dictionaries                             5
+              H. Distribution of Dictionary Programs                5
+              I. Dictionary Coding Service                          5
+              J. Specific Dictionaries                              5
+              K. Modifying the BASE.DIC                             5
+
+         2. FILES AND COMPUTER                                      6
+
+              A. Free Space on Hard Drive                           6
+              B. Important Files                                    6
+              C. High Density Floppy Drives                         6
+              D. SMARTDRV.SYS                                       6
+              E. Memory Resident Programs                           6
+              F. Additional Memory                                  7
+              G. HIMEM.SYS & RAMDRIVE.SYS                           7
+              H. Cyrillic Screen Driver                             7
+              I. Laptop Computers and Cyrillics                     7
+              J. Key Disk NOT Required                              8
+
+         3. LTGOLD PROGRAM                                         10
+
+              A. Installing Dictionaries                           10
+              B. Installing all Dictionaries                       10
+              C. Moving BASE.DIC                                   10
+              D. Word Processor Interfaces                         10
+              E. Cyrillic Word Processors                          11
+              F. Translating from within Your Word Processor       11
+              G. Editing Russian Text                              11
+              H. Headers and Footers                               11
+              I. Electronically Transmitting Files                 12
+              J. Tel-Lex (R) Mode                                  13
+              K. Statistics                                        13
+              L. Charging for Translations                         13
+              M. Transliteration                                   13
+              N. Changing Options                                  13
+              O. User Feedback                                     14
+
+
+
+
+
+
+
+
+
+
+                                    - 3 -
+                                  LTGOLD Q&A
+
+                              1. PROGRAM CONCEPTS
+
+         A. I  don't know Russian,  will I still be able to use LTGOLD
+            to translate documents?
+
+              The main problem with any electronic translation program
+              is in  the  area  of  multiple  meaning  words.  Without
+              knowledge of a language, the whole meaning of a sentence
+              can be lost due to the use of a wrong noun or adjective.
+              In  LTGOLD  we solved this problem by giving the English
+              synonyms for the multiple meaning words.  An example  of
+              this feature follows:
+
+           Original English:
+
+              "This new  file  formation  is written in Russian.  As a
+         Russian file, it may be accessed on little or no notice. Your
+         immediate attention is requested,  or we shall not be able to
+         deliver the product before the end of fall. If the product is
+         not delivered by this time, we can expect a fall in sales."
+
+           Translated Russian:
+
+         Electronically Translated by LTGOLD 2.0
+         PART.REA PART.OUT                         Dec 28 10:04:43 1992
+
+
+                                     ÚÄÄÄ The first form of the word
+                                     ³           ÚÄÄ the second form
+                                     ³           ³
+              ETO NOVOE FAJLOVOE FORMIROVANIE {1.STROJ}, NAPISANNOE NA
+              RUSSKOM.  KAK RUSSKIJ FAJL ON  SMOJET  YNPABLYATJSYA  ZA
+              MALENJKOE {2.KOROTKIJ} VREMYA ILI  VOOBSCE NE IZVESCENIE
+              {3.ZAMECHATJ}.    VASHE    BEZOTLAGATELJNOE     VNIMANIE
+              ZAPRASHIVAETSYA,  ILI  MY  NE  SMOJEM  POLUCHATJ PRODUKT
+              PERED KONCOM  PADENIE   {4.OSENJ}.   ESLI   PRODUCT   NE
+              DOSTAVLEN K  ETOMU  VREMENI,  MY  MOJEM  OJIDATJ PADENIE
+              {5.OSENJ} PRODAJ.
+
+
+         MULTIPLE MEANINGS:
+
+          1 FORMATION:   TO MOLD - FORMIROVANIE,    TO LINE UP - STROJ
+          2 LITTLE:      SIZE - MALENJKOE,          TIME - KOROTKIJ
+          3 NOTICE:      PAPER - IZVESCENIE,        TO NOTICE - ZAMECHATJ
+          4 FALL:        FALLING DOWN - PADENIE     TIME OF YR - OSENJ
+          5 FALL:        FALLING DOWN - PADENIE     TIME OF YR - OSENJ
+
+
+       PART.REA PART.OUT                          Dec 28 10:04:45 1992
+       LINES: 10 CHARS: 369 WORDS: 57 FOUND: 57 (100) TIME 0:00:07
+       CHARGE PER WORD: .10    AMOUNT PAYABLE: 5.70
+
+              The completed  translated  text allows you to select the
+              correct meaning of the word.  The  words  with  multiple
+              meanings  are enclosed in brackets and numbered from the
+              top to  bottom  of  each paragraph.  Each paragraph will
+              have its own Multiple Meanings list.
+
+                                    - 4 -
+                                  LTGOLD Q&A
+
+         B. I  am  a  professional  translator,  why  would  I  use an
+            electronic translation program?
+
+              One of  the  most time consuming tasks in translation is
+              typing the text from English  to  Russian.  The  program
+              does this for you and also allows you to modify the text
+              on a sentence by sentence  basis.  Each  translator  has
+              their  own  style  and LTGOLD is not intended to replace
+              this style but to enhance it.
+
+         C. I  am a professional translator and all I want the program
+            for is to save me time in typing and  having  to  look  up
+            complex  words and structures.  If I don't need all of the
+            bells and whistles of LTGOLD what are my options?
+
+              Along with LTGOLD we supply LTPRO.  LTPRO is a fast,  no
+              frills version of LTGOLD. The translator puts all of the
+              commands  in  one  line  and the program will create the
+              translated output file. LTPRO also allows the Translator
+              to  build  a  batch  file  that  could  include  several
+              chapters or documents to be processed  without  operator
+              intervention.  With  LTPRO  the  translator  is  able to
+              design a batch file to translate thousands of  pages  of
+              text  during  the night when the computer would normally
+              be just collecting dust.
+
+         D. What percentage can we expect to improve the time for  our
+            translations through the use of LTGOLD?
+
+              This depends totally on the workload of the translators.
+              The programs should increase their productivity  by  80%
+              or more.
+
+         E. I  have documents that include charts and graphs that I do
+            not want translated.  Is there a way to prevent  different
+            parts from translation?
+
+              Yes, a unique feature in LTGOLD allows you to put a stop
+              and start translation code anywhere in the file. You may
+              mark  a word,  phrase,  sentence or section (one or more
+              paragraphs) not to be translated.
+
+         F. I do not want my company name or product names translated.
+            Is  there a way for me to install a list of words I always
+            want left in English?
+
+              Yes, the program includes a  file  called  "LTGOLD.IDS".
+              This  file can be edited with any ASCII editor and looks
+              at the way a word is written.  An example is the company
+              NeXT. Anytime the program sees this word written in this
+              format it will leave it in english.  If the program sees
+              NEXT, Next, or next, it will be translated into Russian.
+
+
+
+
+
+
+
+                                    - 5 -
+                                  LTGOLD Q&A
+
+         G. I  would  like  to  modify  the dictionaries supplied with
+            LTGOLD. Can I do this?
+
+              Yes, our product, LinguaTech Dictionaries (LTWORD), is a
+              user friendly dictionary development tool.  It is a must
+              for those who want to modify  existing  dictionaries  or
+              create their own specific dictionaries.
+
+         H. Why  don't  you  supply the LinguaTech Dictionary programs
+            with LTGOLD?
+
+              We found that most users do not have the qualified staff
+              or time to develop dictionaries. Even though  LTWORD  is
+              an easy program to  use, it  requires  a  good   working
+              knowledge of both English and Russian to code words into
+              their proper format.
+
+         I.  I do not have the time or staff to code additional words.
+             Is there a service available that can do this for me?
+
+              Yes, we  offer  a  service  of  coding  both Russian and
+              English words.  We  can  also  modify  the  distribution
+              dictionaries  to  your  specific  needs.  For additional
+              information on this subject please contact  your  dealer
+              or distributor.
+
+         J.  Most of my documents are related to a specific  industry.
+             Are there  industry  specific  dictionaries available for
+             translation of these documents?
+
+              As with  any  specific area of interest such as medical,
+              scientific,   biological,   military,   etc.   we   have
+              dictionaries available or can develop them. If there are
+              specific terms or words that are of interest we are able
+              to code them into the specific dictionaries.
+
+         K.  I like the BASIC dictionary but would like certain  words
+             coded specifically  to  my  needs.  Is  there  a  service
+             available to do this.
+
+              Yes, we  are  able  to  modify the basic dictionaries to
+              meet your specific needs.  When developing a  dictionary
+              of  this  magnitude we must use the most generic meaning
+              of a word as the primary form of translation and  always
+              try to put multiple meanings with the basic meaning.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    - 6 -
+                                  LTGOLD Q&A
+
+                             2. FILES AND COMPUTER
+
+         A. How  much disk space do I need on my hard drive to install
+            LTGOLD?
+
+              a minimum of 2.5 megabytes (free space 2,500,000 bytes).
+
+         B. Do I need all of the files on my hard drive at all times?
+
+              There are  four  dictionaries supplied with the program.
+              The file  names  are  "BASE.DIC"  (main  English/Russian
+              dictionary  and  should  always be present),  "BASE.RUS"
+              (Russian  word  parameter  file  and  should  always  be
+              present),  "COMPUTER.DIC"  (computer specific dictionary
+              and does not need to  be  available  unless  translating
+              computer   oriented   documents),   and   "BUSINESS.DIC"
+              (business specific dictionary and does not  need  to  be
+              available    unless    translating   business   oriented
+              documents).
+
+              This distribution also includes LinguaTech Pro  (LTPRO).
+              If you do not want a command line translation version of
+              LinguaTech Gold 2.0 on your system you may  remove  them
+              for use later.
+
+         C. I have a high density floppy drive that formats to over  2
+            megabytes. Can I use this drive instead of my hard drive?
+
+              The short answer is yes.  If you are interested in speed
+              and  performance  the  hard  drive  is  always  the best
+              option.
+
+         D. My  computer  has  1024  Kb of main memory can the program
+            utilize the difference between 640K and 1024K?
+
+              Yes, Add  the  following  command to your CONFIG.SYS and
+              the program will automatically use it:
+
+              DEVICE=C:\DOS\SMARTDRV.SYS 320
+
+         E. Will  LinguaTech Gold 2.0 conflict with my memory resident
+            programs?
+
+              Our experience   has   not   indicated  a  problem  with
+              conflicts in this area.  It is impossible for us to  try
+              all  memory  resident  programs  to  verify  this.  If a
+              problem persists the first  suspect  is  usually  memory
+              resident  programs.  Remove all memory resident programs
+              and run the program.  If the problem goes away, add each
+              memory  resident  program  back  one at a time until you
+              find the culprit.
+
+
+
+
+
+
+
+
+                                    - 7 -
+                                  LTGOLD Q&A
+
+         F. I have 2 megabytes of additional memory  installed  in  my
+            computer.  Can the program use this memory and if so, what
+            value is it.
+
+              By installing the dictionaries in the additional  memory
+              the  program will translate several hundred times faster
+              than from the hard drive.
+
+         G. What do I have to do to install the dictionaries into this
+            additional memory.
+
+              First of  all,  your  "CONFIG.SYS"  file  must  have the
+              following commands:
+
+         "DEVICE=C:\DOC\HIMEM.SYS"
+                            À installs the DOS high memory driver
+
+         "DEVICE=C:\DOS\RAMDRIVE.SYS 2048 /E"
+                                           À Creates drive "E:" from the
+                                             high memory
+
+              NOTE: The  two  above  examples  assume  that  the files
+                    "HIMEM.SYS"  and  "RAMDRIVE.SYS"  are  located  on
+                    drive C: in the Subdirectory "DOS".
+
+              You can  now  copy  the ".DIC" and ".RUS" files to drive
+              E:. The command to start LTGOLD should read:
+
+                   ÚÄÄÄÄÄÄ Changes your default subdirectory to LTGOLD
+          "CD\LTGOLD"
+          "LTGOLD -D E:"
+                   ÀÄÄÄÄÄÄ Tells the program your dictionaries  are on
+                           your E: drive
+
+         H. When  I  run LTGOLD I get some letters that are garbled on
+            the screen.
+
+              This is  due  to the lack of a Cyrillic (Russian) screen
+              driver. Run "RKVGA.COM" before running LTGOLD.
+
+              The command should look like the following:
+
+              RKVGA/h
+                    ÀÄ font
+              To remove the driver type:
+
+              RKVGA/k
+                    ÀÄ kill the driver
+
+         I. I  have  a laptop and RKVGA does not work where I have the
+            cursor. Is this a problem with LTGOLD?
+
+              The problem is not with LTGOLD.  It is with the type  of
+              screen   you   have.   To  correct  this  problem,  most
+              manufacturers have included programs to change the  type
+              of  screen  emulation.  Try the different modes supplied
+              (MGA, CGA, EGA, and VGA). One of these modes should work
+              with the Cyrillic screen driver.
+
+                                    - 8 -
+                                  LTGOLD Q&A
+
+         J.  Does  LTGOLD  or  the other LinguaTech programs require a
+             key disk or an electronic device  to  allow  them  to  be
+             used.
+
+              No, We  feel  that  this   is   unnecessary   and   very
+              destructive  to  the  legitimate  user.  The reason that
+              other companies use to explain the use of these  devices
+              is  to  protect their software rights.  They do not look
+              past their own needs when  subjecting  a  user  to  such
+              brutal  tactics.  Here  are  the  negatives  of  the two
+              different forms of  protection  used  by  some  software
+              companies:
+
+              Key Disk:
+
+              A key disk  is  a  floppy  diskette  that  the  software
+              requires  to  be  in  the floppy drive at the startup or
+              during the running of the program.
+
+              a. Key Disks are not able to be copied by most users. If
+                 the  Key  Disk is destroyed for any reason you are no
+                 longer able to use the program until the manufacturer
+                 replaces  it.  This  is on a level of having to go to
+                 the car dealer every time you need gasoline for  your
+                 car.
+
+              b. The  "key  disk"  is  a  problem  for users of laptop
+                 computers. Most run on battery and when accessing the
+                 floppy  drive  more  power  is  consumed.  They  also
+                 prevent the user  from  translating  a  file  on  the
+                 floppy drive as the key disk must always be in place.
+                 Again, this defeats the reason for having a laptop if
+                 the key disk develops a problem.
+
+              c. Most  key  disks come in either 3.5" or 5.25" format.
+                 If the wrong size is shipped with the program or  you
+                 replace  your  computer  you  must  go  back  to  the
+                 software company for a replacement.
+
+              d. Most programs that require a key  disk  also  require
+                 you  to reboot the computer once you stop running the
+                 program.  This   is   very   inconvenient   for   the
+                 professional  or  business user who has to accomplish
+                 multiple tasks.
+
+              Electronic Key:
+
+              An Electronic  Key  is  a  device  that  connects to the
+              serial or parallel port of your computer. If this device
+              is not always present the program will not operate.
+
+              a. A   major  problem  reported  with  these  electronic
+                 devices is  their  reliability.  Several  users  have
+                 reported   damage  to  their  computers  due  to  bad
+                 manufacturing or design.
+
+
+
+
+                                    - 9 -
+                                  LTGOLD Q&A
+
+              b. Some smaller laptops do not have serial  or  parallel
+                 ports unless an external interface is connected. This
+                 requires additional  hardware  and  expense  for  the
+                 user.
+
+              c. Some  printers will not function correctly with these
+                 devices connected.
+
+              e. There are some very fast,  reliable,  and  productive
+                 backup  programs  that  find  a  conflict  when these
+                 devices are connected.
+
+              We feel both of these schemes also add to  the  cost  of
+              the  product  and  are passed on to the legitimate user.
+              They are easily  defeated  by  those  with  the  correct
+              knowledge and the desire to illegally copy the programs.
+
+              It is our policy to design products around our users. If
+              we do not trust our users,  we can not  expect  them  to
+              trust and believe in us.  Our distribution diskettes are
+              easily copied with  DISKCOPY  (DOS  program).  The  only
+              protection  we  include  is  designed for the user.  Our
+              protection requires the user to put their unique  serial
+              number into the program when they are installing it. The
+              main reason for this is to make sure that the user knows
+              their  serial number and that the program is stamped for
+              easier  trouble  shooting.  The  Install  program   also
+              verifies all of the options in the computer to allow the
+              programs to run more efficiently.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    - 10 -
+                                  LTGOLD Q&A
+
+                                 3. LTGOLD PROGRAM
+
+         A. I  would  like  to  always install the business dictionary
+            when I start the program.  Is there a command to allow  me
+            to do this?
+
+              Yes, when you start LTGOLD,  we allow several  different
+              options  or  defaults  to  be present.  To automatically
+              install the business dictionary your command to run  the
+              program should read:
+
+              LTGOLD -c b
+                        ÀÄÄÄÄ business.dic
+
+         B. I want to install all of the dictionaries when I start the
+            program. Is there a simple way to do this?
+
+              Yes, as  in  item  3A,  you  may define the options when
+              starting the program. To install all of the dictionaries
+              your command line should read:
+
+              LTGOLD -c bcu
+                        ³³ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ user.dic (4th .dic)
+                        ³ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ computer.dic (3rd .dic)
+                        ÀÄÄÄÄ business.dic (2nd .dic)
+
+
+              The priority  order  is  defined by where you instal the
+              dictionary in the command line.   BASE.DIC is always #1.
+
+         C. I  would  like to have the computer or business dictionary
+            before the basic dictionary. Is this possible?
+
+              Yes, it is possible but not recommended. It is important
+              to remember that the basic dictionary (BASE.DIC) has the
+              basic  forms  of  words  required  for the high level of
+              translation provided by LTGOLD.  We can not  assume  any
+              responsibility  for  the effects this could have on your
+              translations.
+
+         D. I use Word Perfect and Wordstar as my word processors. Can
+            LTGOLD translate documents from these programs?
+
+              Yes, most  word  processors  allow  you to convert their
+              format to an ASCII format.  It  is  usually  called  the
+              "document"  mode.  Export  the  document created by your
+              word processor as an  ASCII  file,  process  it  through
+              LTGOLD, bring it back into your word processor.
+
+
+
+
+
+
+
+
+
+
+
+                                    - 11 -
+                                  LTGOLD Q&A
+
+
+         E. My word processor does not work with Cyrillics. Is there a
+            way to modify it to do so?
+
+
+              Most word  processors  are  now   available   from   the
+              manufacturer  in a Cyrillic format.  Contact your dealer
+              or the manufacturer  for  further  information  on  this
+              subject. Use caution to make sure that you only purchase
+              a  manufacturer  modified  product.   Several   versions
+              available  have  been  modified by unethical parties for
+              the purpose of spreading viruses.
+
+
+         F. I  would  like  to  work  with  LTGOLD from within my word
+            processor. Is this possible?
+
+
+              Some word  processors  allow  interaction  between other
+              programs.  This is accomplished through a command called
+              "macros".  The  LTGOLD  distribution  disk  includes the
+              macros for WORD 5.0, 5.5 WINWORD 2.0, and MultiEdit. For 
+              other  word   processors,  please  contact  your  dealer  
+              or distributor.
+
+
+         G. I do not have an editor that works with Cyrillics.  How do
+            I edit Russian text created by LTGOLD?
+
+
+              LTGOLD has  a  built in editor.  It is simple to use and
+              allows the user to produce a finished product.
+
+
+         H. When I process a file through  LTGOLD  I  have  additional
+            text  on  the top and the bottom of the document.  What is
+            this for?
+
+
+              Several professional translators pointed out  that  they
+              had  trouble  keeping  track  of  when they translated a
+              document and which version  they  were  working  on.  We
+              included  the following text to assist with the document
+              information:
+
+
+    TOP OF FILE:
+
+
+    Electronically Translated by LTGOLD 2.0
+    À reminds user that file has been processed by LTGOLD and program version
+
+      PART.REA PART.OUT                         Dec 28 10:04:43 1992
+         ³        ÀÄÄÄÄÄÄÄÄ output file          ³  ³      ³    ÀÄÄÄ year
+         ÀÄÄÄÄÄÄÄ input file                     ³  ³      ÀÄÄ time
+                                                 ³  ÀÄÄÄÄ day
+                                                 ÀÄÄ month
+
+
+                                    - 12 -
+                                  LTGOLD Q&A
+    BOTTOM OF FILE:
+
+      PART.REA PART.OUT                         Dec 28 10:04:43 1992
+         ³        ÀÄÄÄÄÄÄÄÄ output file          ³  ³      ³    ÀÄÄÄ year
+         ÀÄÄÄÄÄÄÄ input file                     ³  ³      ÀÄÄ time
+                                                 ³  ÀÄÄÄÄ day
+                                                 ÀÄÄ month
+
+
+      LINES:10 CHARS:369 WORDS:57 FOUND:57 (100) TIME 0:00:07
+            ³        ³         ³        ³    ³          ÀÄ time to translate
+            ³        ³         ³        ³    ÀÄ percent of translation
+            ³        ³         ³        ÀÄ words translated
+            ³        ³         ÀÄ words processed
+            ³        ÀÄ characters processed
+            ÀÄÄ lines processed
+
+      CHARGE PER WORD: .10    AMOUNT PAYABLE: 5.70
+                        ³                     ÀÄ amount due for translation
+                        ÀÄ user defined charge per word (any currency)
+
+         I. I  have  a  friend  in Russia that I would like to send my
+            translated files to via  electronic  mail.  My  electronic
+            mail  system  only accepts ASCII and this document will be
+            used to create a contract so I can  not  use  the  Tel-Lex
+            mode. How can I sent my translated file?
+
+              We have  included  three files on the distribution disk.
+              They are compiled into  one  file  for  extraction.  The
+              extraction file is ATGGTA.EXE. This program contains the
+              following programs or files:
+
+              LTGTA.EXE ÄÄÄÄÄ Graphics (Cyrillics) to ASCII
+              LTATG.EXE ÄÄÄÄÄ ASCII to Graphics
+              README.DOC ÄÄÄÄ Instructions on how to use the programs
+
+              If you were going to send a Russian file via  Electronic
+              mail and your file name was RUSSIAN.TXT you would type:
+
+              LTGTA RUSSIAN.TXT RUSSIAN.ASC
+                ³        ³           ÀÄ output file
+                ³        ÀÄ input file
+                ÀÄ graphics to ascii
+
+              Once received in Russia the following would be  used  to
+              convert the file back:
+
+              LTATG RUSSIAN.ASC RUSSIAN.TXT
+                ³        ³           ÀÄ output file
+                ³        ÀÄ input file
+                ÀÄ ascii to graphics
+
+              These programs are free for distribution by any licensed
+              user of LTGOLD,  LTPRO, and LTDICS and for use only with
+              the above mentioned programs. No fee or compensation can
+              be  received  for  their distribution by any party other
+              than  the  author  or  their  authorized   dealers   and
+              distributors.
+
+
+                                    - 13 -
+                                  LTGOLD Q&A
+
+         J.  When  would I use the Tel-Lex (R) mode and is it readable
+             for most Russians?
+
+              The Tel-Lex mode  was  developed  to  overcome  a  major
+              international   Telex   problem   (and   most   recently
+              Electronic Mail systems).  Telex systems only allow  the
+              normal  ASCII characters.  Cyrillics are not usable even
+              in Russia.  Most Russian  companies  are  used  to  this
+              format   and  can  fully  understand  the  text.  It  is
+              important to remember that most Russians  learned  basic
+              English  in  school.  The  pronunciation  of the letters
+              created by this mode should not  create  a  problem  for
+              your recipient.
+
+              An additional use for the Tel-Lex mode is to help in the
+              pronunciation of Russian words.  Most of those  starting
+              to learn Russian like this feature to assist in learning
+              the proper pronunciation of Russian words.  The  student
+              should learn  to read and pronounce Cyrillics as soon as
+              possible, this feature may help in this process.
+
+         K.  Is there  a  way  to  see  how  many  words  the  program
+             translated while I am in the program?
+
+              Yes, You  are  able to turn "Statistics" on and off from
+              the "Options" menu.  You can review  statistics  anytime
+              from the "File" menu.
+
+         L.  I  would  like  to  charge  $.25  a word for every word I
+             translate. Can the program calculate this for me?
+
+              Yes, the statistics screen gives  you  this  information
+              and  the rate can be modified from the "File" menu.  The
+              currency does not matter as you  only  set  the  numeric
+              value.
+
+         M.  I notice the program transliterates my state, California.
+             I would  like  to leave  it  in  an  English  format  for
+             addressing envelopes. How do I accomplish this?
+
+              Most countries,  states,  cities, and personal names are
+              transliterated by the program. If you would like to keep
+              the English form, from the "Options" menu select "Format
+              Output File.."  and turn off Transliteration (remove the
+              [X] by pressing return over the selection).
+
+         N.  Can  I  change  the different options at any point of the
+             translation process?
+
+              Yes, there are two ways to do this. The first is to turn
+              on the "Edit Each Sentence" mode from the "Options" menu
+              and  hit  Esc  (Escape)  when  you  want  to  change the
+              options.  The second way is to hit Esc when the  program
+              is  processing  a  document and the program will suspend
+              the translation and allow you to change the options.
+
+
+
+
+                                    - 14 -
+                                  LTGOLD Q&A
+
+         O.  Are  the  developers  and distributors of LTGOLD,  LTPRO,
+             LTWORD interested in my feedback as a user?
+
+              Absolutely, the success of  these  programs  is  totally
+              dependant  on satisfying the needs of each user.  We are
+              always  interested  in  improvements,  enhancements  and
+              comments  to  assist us with keeping our products on the
+              leading edge of technology.  We feel no comment  is  too
+              small  or too bizarre to warrant investigation.  Keeping
+              us informed helps to make your translations  easier  and
+              more  cost  effective.  We  work very aggressively to be
+              professionals helping professionals. Our greatest joy is
+              to see the excitement on the faces of our many users.
+
+              Smile, and welcome to our family of satisfied users.
+
+              From the Developers, Staff, Distributors, and Dealers of
+              the LinguaTech line of professional products.
+

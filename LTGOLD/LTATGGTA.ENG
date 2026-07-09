@@ -1,0 +1,119 @@
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+                                     LTGTA
+       
+                                      and
+       
+                                     LTATG
+       
+       
+                      Electronic communications programs
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+                             
+       
+       
+                                                    
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+                            All rights reserved by:
+         Copyright (c) 1990-1993 Global Technologies Corporation, USA
+        Copyright (c) 1990-1993 Global Technologies Corporation, Russia
+                                   (rev. 2)
+
+                                    - 2 -
+                                 LTATGGTA.ENG
+       
+       
+       The two programs, LTATG.EXE and LTGTA, are used to send non ASCII
+       files  over any communications system.  LTATG stands for ASCII to
+       Graphics and LTGTA stands for Graphics to ASCII.  These  programs
+       remove  and  replace  the  8th  graphic  bit  used for Cyrillics,
+       Harvard Graphics,  Page Maker,  or other non  ASCII  text  files.
+       These  are free programs for users of the LinguaTech product line
+       and  may  be  distributed  freely  as  long  as  this  text  file
+       (LTATGGTA.ENG)   and   the  Russian  translation,  (LTATGGTA.RUS)
+       accompanies all copies.
+
+       LTGTA.EXE -  This  program  is  used  to  prepare a graphics,  or
+       Cyrillics file for transmittion  over  any  ASCII  communications
+       network.  The  ASCII  text in the document will stay as ASCII but
+       the non ASCII will look like garbage.  It is advisable to  always
+       add  the  following  first line to any document you use LTGTA on,
+       "THIS DOCUMENT REQUIRES LTATG TO REFORMAT".
+
+       Run LTGTA and enter the  ORIGINAL  document  name,  press  enter.
+       Enter the file name you want as your output (the document to send
+       via communications),  DO NOT  name  it  the  same  as  the  input
+       document.  The  program  will  take only a few seconds to convert
+       your file.  You can view the results with any editor  or  viewing
+       program  for standard ASCII files.  Another way to convert a file
+       is to type the following: LTGTA <INPUT-file> <OUTPUT-file> or run
+       GTA and follow the prompts.
+
+       Run LTATG  and  enter  the CONVERTED document name,  press enter.
+       Enter the file name you want as your output  (the  document  that
+       was sent to you),  DO NOT name it the same as the input document.
+       The program will take only a few seconds to  convert  your  file.
+       You  can  view the results with any editor or viewing program for
+       standard ASCII files.  Another way to convert a file is  to  type
+       the following: LTGTA <INPUT-file> <OUTPUT-file>
+
+       We have  noticed  that  if you don't put a name of the input file
+       the program  still  runs.  If  you  think  you  are  stuck  press
+       CONTROL-C to abort.
+
+       This program  is  free  for distribution as long as this document
+       file is included.  Please share it with your clients and friends.
+       If you have a problem please contact our Oregon office TeleFAX at
+       (503) 258-5773 or:
+
+                            GLOBAL
+                                 TECHNOLOGIES
+                                            CORPORATION
+
+                           18 Belgradskaya St. #227
+                         St. Petersburg, Russia 192212
+                          TeleFAX: (7-812) 109-85-35
+                               MCI Mail 494-2227
+                            Telex 4604942227 MCI UW
+                         INTERNET: LTGOLD@gltec.spb.su
+                  X.400: G=GTC;S=GM;DDA:ID=4942227;A=MCI;C=US
+

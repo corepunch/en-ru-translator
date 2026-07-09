@@ -1,0 +1,97 @@
+Page 1 of 4 (English)
+                         LTGOLD Command line Switches
+
+ LTGOLD [/I <file>] [/O <file>] [/D <path>] [/MM] [/W(IOM)] [/F-] [/A] [/MM]
+        [/R <#> ] [/C <cbu>] [/S(IOM)]   [/FL]  [/P /(EE)]  [/N]  [/X] [/L-]
+        [/B-] [/@]  [/BW]  [/AR]  [/AM]  [/HR] [/LS <#>] [/LH <#>] [/ES <#>]
+        [/EW <#>] [/FI MAC] [/FO MAC] [/?] [/H]
+
+ ┌─────────────────────────────────────┬────────────────────────────────────┐
+ │/I inputfile  Name of Source File    │ /A       Add to Output File        │
+ │/I #idenfile  Name of Hot Ids File   │ /N       New Output File           │
+ │/O outputfile Name of Output File    │ /MM      Display Multiple Meanings │
+ │/D pathname   Path to dictionaries   │ /X       Tel-Lex (R) Mode          │
+ │/C dicchain   Dictionary Chain [cbu] │ /L-      Transliteration Off       │
+ │/R number     Right Output margin    │ /B-      Turn off completion Bell  │
+ │/T Translate Immediately             │ /FL      Empty Output Buffer       │
+ │/BW           Black and white screen │ /@       Dis/Wri dict. entries     │
+ │/F-           Disable Output Format  │ /ES #    Table of Contents control │
+ │/HR           Russian Help Text      │ /EW #    Smart Sentence control    │
+ │/LS #         Characters per line    │ /LH #    Number of lines, sentence │
+ │/U            Collect Unknown Words  │ /AR      Enable Automatic Meanings │
+ └─────────────────────────────────────┴────────────────────────────────────┘
+@.
+Page 2 of 4 (English)
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │/W(IOM)   Write Source   - Input /WI - Output /WO - Multiple Meanings /WM │
+ │/S(IOM)   Display Source - Input /SI - Output /SO - Statistics /S         │
+ │/S(IOM)   Display Source - Multiple Meanings /SM                          │
+ │/P /(EE)  Edit each Sentence - Pre-edit /P - Post-Edit /E                 │
+ │/P /(EE)  Edit each Sentence - Post Edit Each Sentence /EE                │
+ │/FI MAC   Input file is in Apple Macintosh Format                         │
+ │/FO MAC   Output file should be in Apple Macintosh Format                 │
+ │/M        Russian Characters allowed in the Source File                   │
+ ├──────────────────────────────────────────────────────────────────────────┤
+ │ /? or /H     Display this message   -   You may replace all '/' with '-' │
+ └──────────────────────────────────────────────────────────────────────────┘
+
+                    Special Keys may be added to input file
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │{~        Translation OFF (turns off section of text not to be translated)│
+ │~}        Translation ON  (Turns off the {~ mode)                         │
+ │{~=       Transliteration ON  (Transliterate section of text)             │
+ │~}        Transliteration OFF (Turns off the {~= mode)                    │
+ │{~\#      Number of words per line of a list (# = 1-10)                   │
+ │{~\.      Turn off the list mode                                          │
+ └──────────────────────────────────────────────────────────────────────────┘
+@.
+Page 3 of 4 (Русский)
+
+                      Ключи командной строки ЛТГОЛД
+
+ LTGOLD [/I <file>] [/O <file>] [/D <path>] [/MM] [/W(IOM)] [/F-] [/A] [/MM]
+        [/R <#> ] [/C <cbu>] [/S(IOM)]   [/FL]  [/P /(EE)]  [/N]  [/X] [/L-]
+        [/B-] [/@]  [/BW]  [/AR]  [/AM]  [/HR] [/LS <#>] [/LH <#>] [/ES <#>]
+        [/EW <#>] [/FI MAC] [/FO MAC] [/?] [/H]
+
+ ┌─────────────────────────────────────┬────────────────────────────────────┐
+ │/I inputfile  Исходный файл          │ /A       Добавить к Вых. файлу     │
+ │/I #idenfile  Файл неперев. слов     │ /N       Новый Вых. файл           │
+ │/O outputfile Выходной файл          │ /MM      Отображать множ. значения │
+ │/D pathname   Маршрут словарей       │ /X       Режим Тел-Лекс (R)        │
+ │/C dicchain   Цепочка словарей [cbu] │ /L-      Выкл. транслитерацию      │
+ │/R number     Длина вых. строки      │ /B-      Выкл. сигнал окончания    │
+ │/T            Переводить             │ /FL      Аварийное сохран.перевода │
+ │/BW           Черно-белый дисплей    │ /@       Отобр./писать слов статьи │
+ │/F-           Выкл. формат.вых.файла │ /ES #    Управление оглавлением    │
+ │/HR           Рус. текст помощи      │ /EW #    Управл. автом. предлож.   │
+ │/LS #         Число знаков в строке  │ /LH #    Число слов в предложении  │
+ │/U            Сбор незнакомых слов   │ /AR      Вкл. автоматич. значений  │
+ └─────────────────────────────────────┴────────────────────────────────────┘
+@.
+Page 4 of 4 (Русский)
+
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │/W(IOM)   Писать Исходн. - Входн. /WI - Выходн. /WO - Множ. значения /WM  │
+ │/S(IOM)   Отобр. Исходн. - Входн. /SI - Выходн. /SO - Статистика /S       │
+ │/S(IOM)   Отобр. Исходн. - Множ. значения /SM                             │
+ │/P /(EE)  Ред. каждое предлож. - Пред-редакт. /P - Пост-редакт. /E        │
+ │/P /(EE)  Ред. каждон предлож. - Пост-редакт. каждое предлож. /EE         │
+ │/FI MAC   Входной файл в формате Эппл Макинтош                            │
+ │/FO MAC   Выходной файл должен быть в формате Эппл Макинтош               │
+ │/M        Русские символы допустимы в Исходном файле                      │
+ ├──────────────────────────────────────────────────────────────────────────┤
+ │ /? or /H    Отобразить сообщение  -  Вместо '/' можно использовать '-'   │
+ └──────────────────────────────────────────────────────────────────────────┘
+
+            Специальные ключи для использования во входном файле
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │{~        ВЫКЛ. трансляцию (отметить часть текста)                        │
+ │~}        ВКЛ. трансляцию  (отключение режима {~)                         │
+ │{~=       ВКЛ. транслитерацию (транслитерировать часть текста)            │
+ │~}        ВЫКЛ. транслитерацию (отключение режима {~=)                    │
+ │{~\#      Число слов в строке списка (# = 1-10)                           │
+ │{~\.      Отключение режима списка                                        │
+ └──────────────────────────────────────────────────────────────────────────┘
+@.
+

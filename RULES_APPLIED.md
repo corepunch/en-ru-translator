@@ -79,6 +79,14 @@ The pattern matching syntax (`<>`, `[]`, `*`, `~`, `` ` ``) is **NOT documented*
 
 This is a proprietary format that was never exposed to end users.
 
+### Priority Values — UNCONFIRMED
+
+The first byte in each rule (e.g., `0x14`, `0x3F`, `0x04`) is **NOT used** in the current Lua implementation (line 238 discards it). These are likely:
+- Rule indices/IDs within each table
+- Or priority values that control ordering
+
+**Cannot confirm** without running the original LTGOLD/SARMA binary, which requires a TUI environment.
+
 ### How Pattern Matching Works
 
 **File:** `parser.lua:125-227`

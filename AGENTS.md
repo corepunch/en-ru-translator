@@ -20,7 +20,7 @@ Requires **Lua 5.3+** (uses bitwise operators). Test sentences are hardcoded in
 | File | Role |
 |------|------|
 | `init.lua` | Entry point. Loads dictionaries, tokenizes input, runs parser + compiler |
-| `rules.lua` | ~200 pattern-matching rules extracted from LTGOLD.EXE (669 lines, 5 rule sets) |
+| `rules.lua` | ~644 pattern-matching rules extracted from LTGOLD.EXE (669 lines, 7 rule sets) |
 | `parser.lua` | Applies rules to tokenized English stream, transforms grammatical tags |
 | `compiler.lua` | Generates Russian output using morphological paradigms for proper inflection |
 | `paradigms.lua` | Russian noun/adjective/verb declension and conjugation tables |

@@ -17,11 +17,11 @@ This file is a summary. Detailed documentation is split into focused files:
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │  Input Text  │───▶│  Tokenize   │───▶│    Parse     │───▶│   Compile   │
-│  (English)   │    │  + Lookup   │    │ (apply rules)│    │ (inflect)   │
+│  (English)   │    │  + Lookup   │    │ (7 passes)  │    │ (inflect)   │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
                          │                  │                  │
                     BASE.DIC          rules.lua          paradigms.lua
-                    BASE.RUS         (5 rule sets)      (noun/adj/verb)
+                    BASE.RUS         (644 rules)        (noun/adj/verb)
 ```
 
 ## Key Files
@@ -29,7 +29,7 @@ This file is a summary. Detailed documentation is split into focused files:
 | File | Role |
 |------|------|
 | `init.lua` | Entry point. Loads dictionaries, tokenizes input, runs parser + compiler |
-| `rules.lua` | ~200 pattern-matching rules extracted from LTGOLD.EXE (669 lines, 5 rule sets) |
+| `rules.lua` | ~644 pattern-matching rules extracted from LTGOLD.EXE (669 lines, 7 rule sets) |
 | `parser.lua` | Applies rules to tokenized English stream, transforms grammatical tags |
 | `compiler.lua` | Generates Russian output using morphological paradigms for proper inflection |
 | `paradigms.lua` | Russian noun/adjective/verb declension and conjugation tables |

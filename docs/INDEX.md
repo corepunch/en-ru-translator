@@ -1,0 +1,38 @@
+# Documentation Index
+
+## Architecture
+
+| Document | Description |
+|----------|-------------|
+| [Pipeline](pipeline.md) | Translation pipeline: tokenize → parse → compile. Stage-by-stage walkthrough with debugging tips. |
+| [Paradigms](paradigms.md) | Morphological tables: noun declension, adjective agreement, verb conjugation, pronoun forms. |
+| [Dictionary](dictionary.md) | Binary format of BASE.DIC / BASE.RUS. Byte layout, grammatical tags, paradigm ID encoding. |
+| [Rules](rules.md) | Pattern matching syntax: character classes, any-match, negation, literals, replacement tokens. |
+| [Tools](tools.md) | Python extraction tools: hex viewers, binary analyzers, string finders, rule extractors. |
+
+## Quick Reference
+
+### Grammatical Tags
+
+```
+Z=verb  N=noun  V/A=adjective  D=adverb  E=past participle  G=gerund
+S=adjective(alt)  P=preposition  C=conjunction  X=infinitive  U=unique verb
+F=passive participle  R=pronoun  Q=question word  J=subordinating conj
+T=empty  #=number  ?=unknown  n=noun(plural)  w=lowercase modifier
+```
+
+### Pattern Syntax
+
+```
+[ZV]     = match one of Z or V
+<VXY>    = match zero or more of V, X, or Y
+~Z       = match anything except Z
+*        = match anything
+`word`   = match literal English word
+```
+
+### Pipeline
+
+```
+Input → tokenize (load.lua) → parse (parser.lua + rules.lua) → compile (compiler.lua + paradigms.lua) → Russian output
+```

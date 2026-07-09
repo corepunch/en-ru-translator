@@ -4,8 +4,16 @@ Document of all findings from reverse-engineering LTGOLD.EXE. Updated as we disc
 
 ## Rule Tables in LTGOLD.dat
 
-Rules are stored in `LTGOLD.dat` (extracted from EXE), not as compiled code.
-The data section starts at file offset `0x6900`.
+`LTGOLD.dat` is the data section extracted from `LTGOLD.EXE` at offset `0x50960`
+(330080 bytes). The extraction was done with:
+
+```sh
+# Extract data section from EXE (offset 0x50960, size 61376 bytes)
+dd if=LTGOLD.EXE of=LTGOLD.dat bs=1 skip=330080 count=61376
+```
+
+The EXE was decompressed with `UNLZEXE.EXE` before extraction. Rules are stored
+in `LTGOLD.dat`, not as compiled code in the EXE.
 
 ### Table Locations
 

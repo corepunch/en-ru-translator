@@ -213,9 +213,9 @@ Disassembled `LTGOLD.EXE` with radare2 to understand rule processing:
 
 ### Rule Table Locations
 
-Rules are stored in `LTGOLD.dat` (embedded in EXE), not as compiled code.
-The data section starts at file offset `0x6900`. Key rule table offsets
-(discovered via `extract2.py` and hex analysis):
+Rules are stored in `LTGOLD.dat` — the data section extracted from `LTGOLD.EXE`
+at offset `0x50960` (330080 bytes). The EXE was decompressed with `UNLZEXE.EXE`
+before extraction. Key rule table offsets (discovered via `extract2.py` and hex analysis):
 
 ```
 0x0D2E (3374)  - Table 1: 47 entries, 10-byte records

@@ -124,3 +124,39 @@ Multi-word entries use spaces. The dictionary lookup builds a nested table where
 1. Edit test sentences in `init.lua:81-97`
 2. Run `lua init.lua`
 3. Check output for correct Russian translation and grammatical inflection
+
+## Debug and Diagnostics
+
+### Debug levels (stdout detail)
+
+```sh
+lua init.lua --debug          # level 1: rule + compiler output
+lua init.lua --debug=2        # level 2: +match attempts, context
+lua init.lua --debug=3        # level 3: +hex dumps, all internals
+```
+
+### Diagnostic categories (named channels)
+
+Toggle specific diagnostic channels independently of debug level:
+
+```sh
+lua init.lua --diag=multi,tag,word    # enable named categories (comma-sep)
+lua init.lua --diag-file=DIAG.OUT     # redirect diagnostics to file
+lua init.lua --config=DEBUG.CNF       # load config file
+```
+
+| Category | What it shows |
+|----------|---------------|
+| `multi`  | Multi-form nouns/verbs leaking all dictionary variants |
+| `tag`    | Tag-resolution decisions (e.g. Z→V, Q→L) |
+| `word`   | Unknown/unrecognized words and tags |
+
+### Config file (DEBUG.CNF)
+
+```
+diag = multi, tag, word
+diag_file = DIAG.OUT
+debug = 0
+```
+
+Boolean flags (`--diag`) override config file values.

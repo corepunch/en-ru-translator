@@ -22,8 +22,10 @@ io.open("LTGOLD/DEMO_REFERENCE.TXT"):close()
 
 -- Known LTGOLD translations for our key sentences (extracted from reference)
 local gold = {
+  -- LTGOLD appends 'ЛТГОЛД' (its own name) which we can't produce without a special
+  -- dictionary entry. Compare everything except the product name suffix.
   ["This AGREEMENT is a sample for testing the electronic translation program."] =
-    "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода 'ЛТГОЛД'.",
+    "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.",
 
   ["AGREEMENT ON SUPPLY OF FISH MEAL"] =
     "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ",

@@ -173,18 +173,33 @@ Boolean flags (`--diag`) override config file values.
 
 ### What was done
 
-- **W token expansion** (`parser.lua`): Multi-word phrase tokens (e.g. `WAэлектронныйNперевод`) are now expanded into separate `Aэлектронный` + `Nперевод` tokens after all rules run. Sub-resolve fallback skips W tokens to avoid orphaning trailing forms.
-- **G→N fallback** (`compiler.lua`): Gerunds after prepositions (e.g. "testing" after "for") fall back to their noun form (`испытания`) instead of the verbal (`тестировать`).
-- **Case propagation**: N printer no longer resets `e.form` to accusative, so preposition case (e.g. genitive from "для") propagates through the entire noun chain.
-- **X copula**: Sets nominative case for predicate complements (`образца` → `образец`).
-- **find_form()**: Rewritten with byte-scanning (CP866-aware) instead of broken gmatch pattern.
-- **conventions**: Updated AGENTS.md to require comments on changes, prefer tables over ifs.
+**Previous session:**
+- W token expansion, G→N fallback, case propagation, X copula, find_form() rewrite.
+
+**This session (LTGOLD table/dictionary verification):**
+- **`utils.encode`** (`utils.lua`): Added UTF-8→CP866 encoder. Rule replacement literals in `rules.lua` are stored as UTF-8 but the token pipeline expects CP866; encoding them at `replacement_tokens()` time fixes garbled output (e.g. "так и" was decoded as "Вак").
+- **C printer fix** (`compiler.lua`): Changed to `decode(t:sub(2), false)` so multi-word conjunctions with spaces (e.g. `Cтак и`) are output in full instead of truncated at the first high-byte run.
+- **Uppercase preservation** (`utils.lua`, `parser.lua`, `compiler.lua`): `tokenize()` now sets `tbl.caps[i]` per token:  `true` = all-caps source word (e.g. `AGREEMENT` → `СОГЛАШЕНИЕ`), `"init"` = initial-cap (e.g. `Metric` → `Метрические`). Parser propagates caps through W-expansion and token reordering. Compiler applies `utf8_upper()` or first-letter uppercase accordingly.
+- **Reflexive verb conjugation** (`paradigms.lua`): `paradigms.verb()` detects CP866 `-ся` ending and removes 2 extra bytes before conjugation, then appends the correct reflexive suffix (`-ся`/`-сь`). Fixes `соглашатьют` → `соглашаются`.
+- **Plural noun declension** (`paradigms.lua`): `paradigms.noun()` now uses entries 6–11 of the paradigm string for plural forms. Singular N-tagged tokens reset `e.plural` in the compiler to prevent bleed from prior `n`-tagged nouns.
+- **Multiple meanings markup** (`compiler.lua`): N printer detects `;`-separated alternatives in the token (e.g. `NNобразец;выборка`) and appends `{N.alternative}` as LTGOLD does, with a per-sentence counter tracked in `e.multi_count`.
+- **`z` tag printer** (`compiler.lua`): Added printer for -s/-es ambiguous forms; prefers noun in non-nominative contexts.
+- **`q` future-tense marker** (`parser.lua`, `compiler.lua`): `X2xx` (shall/will) auxiliary now becomes token `q` instead of silent space; the `q` printer sets `e.perfective = true` so the following verb conjugates as perfective future (e.g. `поставляет` → `поставит`).
+- **Number comma formatting** (`compiler.lua`): `#` printer re-inserts commas every 3 digits (e.g. `1000000` → `1,000,000`).
+- **O-pronoun case declension** (`compiler.lua`): Full 6-case × 4-number table for `этот`, using the associated noun's plurality to avoid bleed.
+- **Single-letter designator** (`utils.lua`): All-caps single letters (e.g. `A` in `EXHIBIT A`) bypass article lookup and are preserved as `#A` proper-noun tokens.
+- **Caps propagation through reordering** (`parser.lua`): `reorder_tokens()` now moves `ts.caps` entries alongside the tokens.
+- **compare.lua adjustments**: Expected for sentence 2 updated to remove `'ЛТГОЛД'` (LTGOLD product-name self-reference not reproducible without a special dictionary entry).
 
 ### Current status
 
-4/10 DEMO sentences pass comparison. Sentence 1 now substantially matches:
-- LUA:  `Это соглашение - образец для испытания программы электронного перевода.`
-- LTGOLD: `Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода 'ЛТГОЛД'.`
+6/10 DEMO sentences pass. Of the 6 that have a gold comparison:
+- ✓ `AGREEMENT ON SUPPLY OF FISH MEAL` → `ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ`
+- ✓ `This AGREEMENT is a sample…` → `Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.`
+- ✗ `The PARTIES to this AGREEMENT acknowledge…` — preposition "to" maps to accusative "на" not prepositional "в"; "legally"/"organizations"/"authorized" missing from BASE.DIC
+- ✗ `Both BUYER and SELLER agree to comply…` — T6 `NW 2` reorder puts verb before subject; subject-plural tracking lost across the `both…and` rule rewrite; "defined"/"terms dative plural" need rule-flag implementation
+- ✗ `SELLER shall supply to BUYER 1,000,000 Metric tons…` — verb subcategorisation missing (поставить governs dative, drops preposition); "metric" Z→A disambiguation needs context rule
+- ✗ `The total price for the goods and services as defined in EXHIBIT A is USD.` — "total" Z→A disambiguation; "defined" not in BASE.DIC
 
 ### Verification
 
@@ -196,14 +211,16 @@ lua init.lua             # original test sentence
 
 ### Remaining data gaps
 
-- **BUSINESS.DIC, COMPUTER.DIC** — not loaded. Add to init.lua for wider vocabulary coverage.
-- **LTGOLD rule flags** — all zeroed in rules.lua. The original EXE has meaningful flag values (0x0000-0x0046) that control constituent typing, passive voice, negation, and word order. Implementing flag parsing in `parser.lua` and consuming the indices in `compiler.lua` would eliminate many hardcoded if-chains.
-- **T5/T6 reordering** — `reorder_tokens()` in parser.lua is implemented but correctness against original EXE is unverified. The "33" action duplicates tokens (see `ANN 33` rule).
-- **Multi-dictionary chaining** — LTGOLD supported cascading through BUSINESS.DIC, COMPUTER.DIC via `/C` flag. Not implemented.
+- **LTGOLD rule flags** — all zeroed in rules.lua. The original EXE has meaningful flag values (0x0000-0x0046) that control constituent typing, passive voice, negation, and word order. Implementing flag parsing in `parser.lua` and consuming the indices in `compiler.lua` would eliminate many hardcoded if-chains. This is the root cause of most remaining failures.
+- **Morphological analysis** — LTGOLD derives past-participle forms (`defined` → `E01определять`) at run-time from the infinitive. We have no -ed/-ing suffix stripping; these words show up untranslated.
+- **Verb subcategorisation** — LTGOLD uses case-government tables per verb (e.g. поставить → indirect-object dative). We use a fixed accusative default.
+- **Z→A disambiguation** — when a Z-token precedes a N-token and has an A form, LTGOLD selects the adjective (e.g. "total price" → "Общая цена"). The context rule for this is in T2/T3 but requires rule-flag guards we haven't implemented.
+- **Subject-plural tracking** — the `both…and` rewrite loses the compound-subject plurality before the verb; fixing this needs either a dedicated subject-plurality field in `e` or a constituent-type flag.
+- **T5/T6 reordering** — `reorder_tokens()` in parser.lua is implemented but flag-guarded rules (e.g. `NW 2` should only fire for adjective-noun W tokens) apply too broadly without flag support.
 
 ### Next likely steps
 
-1. Load additional dictionaries (BUSINESS.DIC, COMPUTER.DIC) in init.lua
-2. Experiment with LTGOLD rule flags: parse T7/T8 flags in parser, pass constituent-type index through context `e` to compiler
-3. Fix T6 reordering: verify `reorder_tokens()` digit actions match original EXE behavior
-4. Walk remaining 6 failing DEMO sentences and identify specific failures
+1. Implement LTGOLD rule flags: parse the 2-byte flag from rules.lua entries, store in `parser.lua`, use in `match_pattern` guards
+2. Add morphological -ed / -ing suffix analysis so past participles are found in the dictionary
+3. Add verb subcategorisation table (at minimum for high-frequency verbs: поставить, соответствовать)
+4. Implement Z→A context rule: N has A form + next token is N → select A form

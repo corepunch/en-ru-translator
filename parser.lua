@@ -183,7 +183,9 @@ local function replacement_tokens(r)
       if not close then error("Unclosed `") end
       local content = r:sub(i + 1, close - 1)
       i = close + 1
-      return 'literal', content
+      -- Rule replacement literals are UTF-8 in rules.lua; convert to CP866 so
+      -- the compiler decode pipeline (which expects CP866 tokens) works correctly.
+      return 'literal', utils.encode(content)
     else
       i = i + 1
       return 'char', c
@@ -192,7 +194,20 @@ local function replacement_tokens(r)
 end
 
 local function replace(ts, j, m, t, s)
-	if s == ' ' then ts[j] = ' '
+	if s == ' ' then
+		-- X2xx (shall/will = future auxiliary) → use 'q' perfective-marker instead of
+		-- a silent space so the compiler knows to conjugate the next verb as perfective.
+		-- LTGOLD encodes this via T7/T8 constituent-type flags; 'q' is our approximation.
+		if ts[j] and ts[j]:sub(1,1) == 'X' then
+			local xdigit = ts[j]:match('%d+')
+			if xdigit and xdigit:sub(1,1) == '2' then
+				ts[j] = 'q'
+			else
+				ts[j] = ' '
+			end
+		else
+			ts[j] = ' '
+		end
 	elseif m:find'*' and (j >= #ts or j == 1) then
 	elseif t == 'literal' then ts[j] = s
 	elseif s == '.' or s == '$' then
@@ -258,6 +273,11 @@ local function reorder_tokens(ts, positions, digits)
 	-- snapshot the matched tokens
 	local snap = {}
 	for k, pos in ipairs(positions) do snap[k] = ts[pos] end
+	-- snapshot caps flags alongside tokens so they travel together
+	local snap_caps = {}
+	if ts.caps then
+		for k, pos in ipairs(positions) do snap_caps[k] = ts.caps[pos] end
+	end
 	dbg.log(2, "    reorder: positions=", table.concat(positions,","),
 	  "digits=", digits,
 	  "snap=", table.concat(utils.map(snap, function(t)
@@ -270,6 +290,7 @@ local function reorder_tokens(ts, positions, digits)
 		local d = tonumber(digits:sub(k, k))
 		if d and d >= 1 and d <= #snap and positions[k] then
 			ts[positions[k]] = snap[d]
+			if ts.caps then ts.caps[positions[k]] = snap_caps[d] end
 			used[d] = true
 		end
 	end
@@ -279,6 +300,7 @@ local function reorder_tokens(ts, positions, digits)
 		while used[next_snap] do next_snap = next_snap + 1 end
 		if next_snap <= #snap and positions[k] then
 			ts[positions[k]] = snap[next_snap]
+			if ts.caps then ts.caps[positions[k]] = snap_caps[next_snap] end
 			used[next_snap] = true
 			next_snap = next_snap + 1
 		end
@@ -351,9 +373,12 @@ local function match_pattern(ts, m, r)
 end
 
 local function loop(ts)
-	-- strip space tokens that survive from tokenization
+	-- strip space tokens that survive from tokenization; keep caps table in sync
 	for i = #ts, 1, -1 do
-		if ts[i] == ' ' then table.remove(ts, i) end
+		if ts[i] == ' ' then
+			table.remove(ts, i)
+			if ts.caps then table.remove(ts.caps, i) end
+		end
 	end
 	-- convert h tag (historical/irregular past) to E for proper rule matching
 	for i = 1, #ts do
@@ -389,9 +414,12 @@ local function loop(ts)
 			end
 		end
 	end
-	-- strip any remaining space tokens (injected by rules)
+	-- strip any remaining space tokens (injected by rules); keep caps in sync
 	for i = #ts, 1, -1 do
-		if ts[i] == ' ' then table.remove(ts, i) end
+		if ts[i] == ' ' then
+			table.remove(ts, i)
+			if ts.caps then table.remove(ts.caps, i) end
+		end
 	end
 end
 
@@ -404,14 +432,20 @@ function parser.collect(dic, ts)
 	-- by CP866 bytes, so the tag reverts to the first real tag letter after W.
 	for i = #ts, 1, -1 do
 		if ts[i]:sub(1,1) == 'W' then
+			local was_caps = ts.caps and ts.caps[i]
 			local expanded = {}
 			for word in ts[i]:gmatch("([%a ][0-9]*[\127-\255]+)") do
 				table.insert(expanded, word)
 			end
 			if #expanded > 0 then
+				-- Remove the W token (and its caps entry), then insert expanded tokens.
+				-- Expanded tokens inherit the W token's all-caps flag so that
+				-- e.g. "AGREEMENT ON" (all-caps W phrase) → each sub-token is uppercase.
 				table.remove(ts, i)
+				if ts.caps then table.remove(ts.caps, i) end
 				for j = #expanded, 1, -1 do
 					table.insert(ts, i, expanded[j])
+					if ts.caps then table.insert(ts.caps, i, was_caps) end
 				end
 			end
 		end

@@ -3,6 +3,21 @@ local paradigms = require "paradigms"
 local dbg = require "dbg"
 local compiler = {}
 
+-- utf8_upper: uppercase Cyrillic letters in a UTF-8 string.
+-- Only affects Russian а-п (D0 B0-D0 BF) → А-П (D0 90-D0 9F)
+-- and р-я (D1 80-D1 8F) → Р-Я (D0 A0-D0 AF). ASCII unchanged.
+local function utf8_upper(s)
+  return (s:gsub("[\xD0\xD1][\x80-\xBF]", function(c)
+    local b1, b2 = c:byte(1), c:byte(2)
+    if b1 == 0xD0 and b2 >= 0xB0 and b2 <= 0xBF then
+      return string.char(0xD0, b2 - 0x20)  -- а-п → А-П
+    elseif b1 == 0xD1 and b2 >= 0x80 and b2 <= 0x8F then
+      return string.char(0xD0, b2 + 0x20)  -- р-я → Р-Я
+    end
+    return c
+  end))
+end
+
 local uniques = {
   ["должен"] = {"но","ен","на","ны"},
 }
@@ -84,10 +99,11 @@ local printers = {
     return utils.decode(t, true)
   end,
   N = function(t, e, s, i)
+    -- Uppercase N = singular noun. Reset the plural flag to prevent bleed from
+    -- previous n (plural) tokens. LTGOLD tracks plurality per-constituent via
+    -- T7/T8 rule flag constituent-type indices; this is a simpler approximation.
+    if t:sub(1,1) == 'N' then e.plural = false end
     local d = utils.decode(t, true)
-    if t:find(";") then
-      dbg.diag("multi", "multi-form noun:", utils.decode(t, false))
-    end
     local b = compiler.base[d]
     if not b then
       dbg.diag("multi", "noun no base:", d)
@@ -105,9 +121,20 @@ local printers = {
     local result = paradigms.noun(t, paradigm, e)
     dbg.log(2, string.format("    N: word=%-12s paradigm=%-3d gender=%d form=%d => %s",
       d, paradigm, e.gender, e.form, utils.decode(result)))
+    -- Multiple meanings: when the token contains a semicolon-separated alternative
+    -- (e.g. NNобразец;выборка), append {N.alternative} just as LTGOLD does.
+    -- LTGOLD tracks a per-sentence counter in its output formatter.
+    local semi = t:find(';', 1, true)
+    if semi then
+      e.multi_count = (e.multi_count or 0) + 1
+      local alt = utils.decode(t:sub(semi+1), true)
+      if alt and #alt > 0 then
+        result = result .. '{' .. e.multi_count .. '.' .. alt .. '}'
+      end
+      dbg.diag("multi", "multi-form noun:", utils.decode(t, false))
+    end
     -- Don't reset e.form to accusative here — let the preposition's case (set by P printer)
-    -- propagate through the entire noun chain. Otherwise "для испытания программы" would
-    -- lose genitive after the first noun and become "для испытания программа".
+    -- propagate through the entire noun chain.
     return result
   end,
   P = function(t, e)
@@ -200,7 +227,8 @@ local printers = {
   end,
   T = function() return "" end,
   [" "] = function (t) return utils.decode(t, true) end,
-  C = function (t) return utils.decode(t, true) end,
+  -- C: conjunction — decode full text after tag byte (no strip, preserves spaces)
+  C = function (t) return utils.decode(t:sub(2), false) end,
   D = function (t) return utils.decode(t:sub(2), false) end,
   -- E/e: past participle / -ed form → produce past tense
   E = function(t, e, s, i)
@@ -274,6 +302,23 @@ printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction), L (relative pronoun), j (clause-end marker), O (demonstrative)
 -- These are structural/functional words — output their Russian text directly
 printers.J = function(t) return utils.decode(t, true) end
+-- z: -s/-es form (verb/noun ambiguity). After prepositions prefer noun form.
+-- LTGOLD resolves z via T2/T3 constituent-type rules; this is a fallback.
+printers.z = function(t, e, s, i)
+  if e.form ~= 1 and t:find('n', 1, true) then
+    local nform = find_form(t, 'n')
+    if nform then return printers.n('n' .. nform, e) end
+  end
+  return printers.V(t, e)
+end
+-- q: future/perfective aspect marker injected by the X2xx auxiliary handler.
+-- Sets e.perfective so the following verb conjugates as perfective (future in Russian).
+-- LTGOLD encodes this in T7/T8 guard-rule constituent-type flags.
+printers.q = function(t, e)
+  e.perfective = true
+  dbg.log(2, "    q: perfective=true (future auxiliary)")
+  return ""
+end
 printers.L = function(t, e, s, i)
   -- strip the leading tag byte, keep leading comma+space
   local result = utils.decode(t:sub(2), false)
@@ -299,20 +344,35 @@ printers.O = function(t, e, s, i)
   -- tables (BASE.RUS) indexed by paradigm number. A table lookup over this if-chain
   -- would match LTGOLD's approach and generalize to other demonstratives.
   if d == "этот" then
+    local noun_gender, noun_plural = e.gender, false
     if s then
       for j = i and (i+1) or 1, #s do
-        if s[j] and s[j]:sub(1,1) == 'N' and
-           (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
-          e.gender = get_gender(s[j])
+        local tag = s[j] and s[j]:sub(1,1)
+        if tag == 'N' then
+          noun_gender = get_gender(s[j])
+          -- uppercase N = singular; lowercase n = plural
+          noun_plural = false
+          break
+        elseif tag == 'n' then
+          noun_gender = get_gender(s[j])
+          noun_plural = true
           break
         end
       end
     end
-    if e.plural then return "эти"
-    elseif e.gender == 2 then return "эта"
-    elseif e.gender == 0 then return "это"
-    else return "этот"
-    end
+    -- Full case declension for "этот". LTGOLD uses a paradigm table; this approximates it.
+    -- Indices: [form][1=masc, 2=fem, 3=neut, 4=plural]
+    local forms = {
+      [1] = {"этот","эта","это","эти"},       -- nominative
+      [2] = {"этого","этой","этого","этих"},  -- genitive
+      [3] = {"этому","этой","этому","этим"},  -- dative
+      [4] = {"этот","эту","это","эти"},       -- accusative (inanimate)
+      [5] = {"этим","этой","этим","этими"},   -- instrumental
+      [6] = {"этом","этой","этом","этих"},    -- prepositional
+    }
+    local f = forms[e.form or 1] or forms[1]
+    local idx = noun_plural and 4 or (noun_gender == 2 and 2 or noun_gender == 0 and 3 or 1)
+    return f[idx]
   end
   local ok, res = pcall(printers.A, t, e)
   if ok and res then return res end
@@ -356,8 +416,15 @@ printers.B = function(t) return "" end
 printers.b = function(t) return "" end
 -- W (multi-word phrase) — output decoded
 printers.W = function(t) return utils.decode(t, true) end
--- # (proper noun / untranslatable)
-printers["#"] = function(t) return t:sub(2) end  -- output raw (ASCII proper noun)
+-- # (proper noun / untranslatable): output raw string, reformat digit-only sequences
+-- back to comma-formatted numbers (e.g. 1000000 → 1,000,000) since tokenize strips commas.
+printers["#"] = function(t)
+  local s = t:sub(2)
+  if s:match("^%d+$") and #s > 3 then
+    return s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+  end
+  return s
+end
 printers.F = function(t, e)
   e.past = true
   e.passive = true
@@ -389,7 +456,8 @@ function compiler.compile(s)
     form = 1,
     perfective = false,
     imperative = false,
-    word = 1
+    word = 1,
+    multi_count = 0,  -- counter for multiple-meanings markup {N.alternative}
   }
   local c = {}
 
@@ -416,6 +484,23 @@ function compiler.compile(s)
       if out and out:match("^[,%!%.;:]") and #c > 0 then
         c[#c] = c[#c] .. out:sub(1,1)
         out = out:sub(2):match("^%s*(.*)") or ""
+      end
+      -- uppercase output when the source word was all-caps (e.g. AGREEMENT → СОГЛАШЕНИЕ).
+      -- Only the main Russian word is uppercased; the {N.alt} alternatives part is left as-is.
+      -- caps == true  → ALL-CAPS output  (source word was e.g. "AGREEMENT")
+      -- caps == "init"→ Initial-cap only (source word was e.g. "Metric" or "Fish")
+      -- LTGOLD tracks this via its input word capitalisation flags.
+      if out and #out > 0 and s.caps and s.caps[i] then
+        local main, rest = out:match("^([^{]*)(.*)")
+        main = main or out; rest = rest or ""
+        if s.caps[i] == true then
+          out = utf8_upper(main) .. rest
+        else
+          -- "init": uppercase only the first Cyrillic letter of the output
+          out = main:gsub("^([\xD0\xD1][\x80-\xBF])", function(c)
+            return utf8_upper(c)
+          end, 1) .. rest
+        end
       end
       dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
         i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),

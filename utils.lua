@@ -23,6 +23,41 @@ local cp866_to_utf8 = {
   [0xF0]="ё", --[0xF1]="Ё",
 }
 
+-- Reverse map: UTF-8 char → CP866 byte (built from cp866_to_utf8)
+local utf8_to_cp866 = {}
+for code, char in pairs(cp866_to_utf8) do utf8_to_cp866[char] = code end
+
+-- encode: convert UTF-8 string to CP866
+-- Used to normalise rule replacement literals (stored UTF-8 in rules.lua) back
+-- into CP866 so the compiler decode pipeline works correctly.
+function utils.encode(s)
+  local t = {}
+  local i = 1
+  while i <= #s do
+    local b = s:byte(i)
+    if b < 0x80 then
+      t[#t+1] = string.char(b)
+      i = i + 1
+    else
+      local b2 = s:byte(i+1)
+      if b2 then
+        local cp866b = utf8_to_cp866[s:sub(i, i+1)]
+        if cp866b then
+          t[#t+1] = string.char(cp866b)
+          i = i + 2
+        else
+          t[#t+1] = string.char(b)
+          i = i + 1
+        end
+      else
+        t[#t+1] = string.char(b)
+        i = i + 1
+      end
+    end
+  end
+  return table.concat(t)
+end
+
 function utils.extract(s)
   return s:match("[\127-\255]+")
 end
@@ -139,31 +174,68 @@ function utils.tokenize(s, en_ru)
   -- strip commas from within digit sequences (e.g. 1,000,000 → 1000000)
   while s:find("(%d+),(%d+)") do s = s:gsub("(%d+),(%d+)", "%1%2") end
   local prev, tbl, words, last, i = nil, {}, {}, 0, 1
+  -- caps[i] = true when token i was produced from an all-caps English source word.
+  -- Used by the compiler to uppercase Russian output (e.g. AGREEMENT → СОГЛАШЕНИЕ).
+  tbl.caps = {}
+  local phrase_all_caps = false  -- track caps across multi-word phrase lookups
   for w in s:gmatch("%w+[,%!%.;:]?") do table.insert(words, w) end
   dbg.log(2, "  Words:", table.concat(words, " | "))
   while i <= #words do
     local word, punct = words[i]:match("(%w+)([,%!%.;:]?)")
+    local word_orig = word  -- original case before lowercasing
     word = word:lower()
+    -- caps flag encodes original word capitalisation for the compiler:
+    --   true   = all-caps (e.g. AGREEMENT) → ALL-CAPS Russian output
+    --   "init" = initial-cap (e.g. Metric) → first-letter uppercase Russian output
+    --   false  = lowercase → no capitalisation change
+    local is_all_caps = word_orig:match("^%u+$") ~= nil  -- every letter uppercase
+    local is_init_cap = (not is_all_caps) and word_orig:sub(1,1):match("%u") ~= nil
+    local is_caps = is_all_caps and true or (is_init_cap and "init" or false)
     if not prev then
-      if en_ru[word] then
+      -- Single all-caps letters (e.g. "A" in "EXHIBIT A") are document designators,
+      -- not articles. Bypass dictionary lookup and preserve as proper-noun token.
+      local is_designator = is_all_caps and #word == 1 and word:match("%a")
+      if (not is_designator) and en_ru[word] then
         dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word].__lex))
         table.insert(tbl, en_ru[word].__lex)
       else
         dbg.log(2, "  Lookup:", word, "→ (not found)")
-        table.insert(tbl, '#'..word)
+        -- preserve original case in # token so uppercase tracking works for proper nouns
+        table.insert(tbl, '#'..word_orig)
       end
+      tbl.caps[#tbl] = is_caps
+      phrase_all_caps = is_caps  -- reset phrase tracking to current word's caps
       prev, last = en_ru[word], i
-      if punct ~= "" then table.insert(tbl, punct) end
+      if punct ~= "" then
+        table.insert(tbl, punct)
+        tbl.caps[#tbl] = false
+      end
     elseif not prev[word] then
       dbg.log(2, "  Phrase break:", word, "→ backtracking to last")
       i, prev = last, nil
     elseif prev[word].__lex then
       dbg.log(2, "  Phrase complete:", word, "→",
         utils.decode(prev[word].__lex))
+      -- phrase is all-caps only when every word in the phrase was all-caps
+      -- downgrade to "init" if any word was only initial-cap
+      if phrase_all_caps == true and is_caps ~= true then
+        phrase_all_caps = is_caps  -- downgrade: true→init or true→false
+      elseif phrase_all_caps == "init" and is_caps == false then
+        phrase_all_caps = false
+      end
       tbl[#tbl], last = prev[word].__lex, i
-      if punct ~= "" then table.insert(tbl, punct) end
+      tbl.caps[#tbl] = phrase_all_caps
+      if punct ~= "" then
+        table.insert(tbl, punct)
+        tbl.caps[#tbl] = false
+      end
     else
       dbg.log(2, "  Phrase continue:", word)
+      if phrase_all_caps == true and is_caps ~= true then
+        phrase_all_caps = is_caps
+      elseif phrase_all_caps == "init" and is_caps == false then
+        phrase_all_caps = false
+      end
       prev = prev[word]
     end
     i = i + 1

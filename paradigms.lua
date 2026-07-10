@@ -385,9 +385,21 @@ end
 function paradigms.noun(base, table_id, e)
   local ext = utils.extract(base)
   local len, str = table.unpack(paradigms.nouns[e.gender+1][table_id+1])
-  local suffix = word_at(str, e.form-1)
-  if e.form == 1 or suffix == '=' then return utils.decode(base, true) end
-  return utils.decode(ext:sub(1, #ext-len), true)..suffix
+  if e.plural then
+    -- Plural forms occupy positions 6-11 in the paradigm string.
+    -- Position 6 = nominative plural, 7 = genitive plural, … 11 = prepositional plural.
+    -- LTGOLD stores these directly in the same paradigm entry; we index them here.
+    local pl_idx = (e.form == 1) and 6 or (e.form + 5)
+    local suffix = word_at(str, pl_idx)
+    if suffix == '' then return utils.decode(base, true) end
+    -- '=' means "bare stem" (no suffix appended) — e.g. gen.pl "сторон" from "сторона"
+    if suffix == '=' then return utils.decode(ext:sub(1, #ext-len), true) end
+    return utils.decode(ext:sub(1, #ext-len), true) .. suffix
+  else
+    local suffix = word_at(str, e.form-1)
+    if e.form == 1 or suffix == '=' then return utils.decode(base, true) end
+    return utils.decode(ext:sub(1, #ext-len), true)..suffix
+  end
 end
 
 function paradigms.adjective(base, table_id, e, utf8)
@@ -397,23 +409,45 @@ function paradigms.adjective(base, table_id, e, utf8)
   return utils.decode(ext:sub(1, math.max(2, #ext-(utf8 and 4 or 2))), true)..suffix
 end
 
+-- reflexive_suffix: determine whether -сь or -ся follows a verb ending.
+-- Russian rule: -сь after vowels and soft sign (ь), -ся after consonants.
+local function reflexive_suffix(ending)
+  if #ending == 0 then return "ся" end
+  -- check last 2 bytes (one UTF-8 Cyrillic char) against vowel list
+  local last2 = ending:sub(-2)
+  local vowels = {["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                  ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь"}
+  return vowels[last2] or "ся"
+end
+
 function paradigms.verb(base, table_id, e)
   local extracted = utils.extract(base)
   local len, str = table.unpack(paradigms.verbs[table_id+1])
+  -- Reflexive verbs (CP866 stem ends in с=0xE1 + я=0xEF = "-ся").
+  -- LTGOLD stores these under the same paradigm as non-reflexive counterparts;
+  -- conjugation needs 2 extra bytes removed and the reflexive suffix appended.
+  local reflexive = #extracted >= 2 and
+    extracted:byte(#extracted-1) == 0xE1 and  -- с
+    extracted:byte(#extracted) == 0xEF         -- я
+  local stem_cut = reflexive and (len + 2) or len
+  local stem = cut(extracted, stem_cut)
   local index = (e.plural and 3 or 0) + e.person
   if e.imperative then
-    return utils.decode(cut(extracted, len), true)..word_at(str, 7)
+    local suf = word_at(str, 7)
+    return utils.decode(stem, true) .. suf .. (reflexive and reflexive_suffix(suf) or "")
   elseif not e.past then
-    return utils.decode(cut(extracted, len), true)..word_at(str, index)
+    local suf = word_at(str, index)
+    return utils.decode(stem, true) .. suf .. (reflexive and reflexive_suffix(suf) or "")
   elseif e.passive then
     local part = word_at(str, 13)
     local short = utf8.len(part) > 3 and string.sub(part, 1, utf8.offset(part, -3) - 1) or ""
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
-    return utils.decode(cut(extracted, len), true)..short..past_verb[past_idx]
+    return utils.decode(stem, true)..short..past_verb[past_idx]
   else
     -- past tense: gender-based agreement (masc="", fem="а", neut="о", pl="и")
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
-    return utils.decode(cut(extracted, len), true)..word_at(str, 8)..past_verb[past_idx]
+    local past_full = word_at(str, 8) .. past_verb[past_idx]
+    return utils.decode(stem, true) .. past_full .. (reflexive and reflexive_suffix(past_full) or "")
   end
 end
 

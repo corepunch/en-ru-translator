@@ -166,3 +166,44 @@ debug = 0
 ```
 
 Boolean flags (`--diag`) override config file values.
+
+## Current Work State
+
+**Objective:** 1:1 matching of LTGOLD's DEMO.OUT reference output for all 10 DEMO.TXT sentences.
+
+### What was done
+
+- **W token expansion** (`parser.lua`): Multi-word phrase tokens (e.g. `WAэлектронныйNперевод`) are now expanded into separate `Aэлектронный` + `Nперевод` tokens after all rules run. Sub-resolve fallback skips W tokens to avoid orphaning trailing forms.
+- **G→N fallback** (`compiler.lua`): Gerunds after prepositions (e.g. "testing" after "for") fall back to their noun form (`испытания`) instead of the verbal (`тестировать`).
+- **Case propagation**: N printer no longer resets `e.form` to accusative, so preposition case (e.g. genitive from "для") propagates through the entire noun chain.
+- **X copula**: Sets nominative case for predicate complements (`образца` → `образец`).
+- **find_form()**: Rewritten with byte-scanning (CP866-aware) instead of broken gmatch pattern.
+- **conventions**: Updated AGENTS.md to require comments on changes, prefer tables over ifs.
+
+### Current status
+
+4/10 DEMO sentences pass comparison. Sentence 1 now substantially matches:
+- LUA:  `Это соглашение - образец для испытания программы электронного перевода.`
+- LTGOLD: `Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода 'ЛТГОЛД'.`
+
+### Verification
+
+```sh
+lua compare.lua          # sentence-level comparison against DEMO_REFERENCE.TXT
+lua demo_walk.lua        # word-by-word N/M progress through DEMO.TXT
+lua init.lua             # original test sentence
+```
+
+### Remaining data gaps
+
+- **BUSINESS.DIC, COMPUTER.DIC** — not loaded. Add to init.lua for wider vocabulary coverage.
+- **LTGOLD rule flags** — all zeroed in rules.lua. The original EXE has meaningful flag values (0x0000-0x0046) that control constituent typing, passive voice, negation, and word order. Implementing flag parsing in `parser.lua` and consuming the indices in `compiler.lua` would eliminate many hardcoded if-chains.
+- **T5/T6 reordering** — `reorder_tokens()` in parser.lua is implemented but correctness against original EXE is unverified. The "33" action duplicates tokens (see `ANN 33` rule).
+- **Multi-dictionary chaining** — LTGOLD supported cascading through BUSINESS.DIC, COMPUTER.DIC via `/C` flag. Not implemented.
+
+### Next likely steps
+
+1. Load additional dictionaries (BUSINESS.DIC, COMPUTER.DIC) in init.lua
+2. Experiment with LTGOLD rule flags: parse T7/T8 flags in parser, pass constituent-type index through context `e` to compiler
+3. Fix T6 reordering: verify `reorder_tokens()` digit actions match original EXE behavior
+4. Walk remaining 6 failing DEMO sentences and identify specific failures

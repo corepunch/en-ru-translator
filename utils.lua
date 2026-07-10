@@ -36,7 +36,15 @@ end
 function utils.decode(s, strip)
   local t = {}
   for i = 1, #s do table.insert(t, cp866_to_utf8[s:byte(i)] or string.char(s:byte(i))) end
-  return strip and utils.extract(table.concat(t)) or table.concat(t)
+  if not strip then return table.concat(t) end
+  local utf = table.concat(t)
+  -- find first Russian/CP866 byte (>=128 in UTF-8 = start of Cyrillic)
+  local start = utf:find("[\128-\255]")
+  if not start then return "" end
+  -- stop at next ASCII letter (start of next tag)
+  local stop = utf:find("[\065-\090\097-\122]", start + 1)
+  if stop then return utf:sub(start, stop - 1) end
+  return utf:sub(start)
 end
 
 function utils.debug(w, t, i)

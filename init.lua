@@ -77,18 +77,50 @@ file2:close()
 local dbg = require "dbg"
 
 -- CLI flags:
---   lua init.lua "Sentence."             → translate, quiet mode
---   lua init.lua "Sentence." --debug     → translate, level 1 (rule+compiler)
---   lua init.lua "Sentence." --debug=2   → level 2 (+match attempts, context)
---   lua init.lua "Sentence." --debug=3   → level 3 (+hex dumps, all internals)
+--   lua init.lua "Sentence."             → translate, quiet
+--   lua init.lua "Sentence." --debug     → debug level 1
+--   lua init.lua --debug=3               → debug level 3
+--   lua init.lua --diag=multi,tag        → enable named diagnostic categories
+--   lua init.lua --diag-file=DIAG.OUT    → redirect diagnostics to file
+--   lua init.lua --config=DEBUG.CNF      → load config file
 local input_sentence = "You are standing in an open field west of a white house, with a boarded front door."
+
+local function load_config(path)
+  local f = io.open(path, "r")
+  if not f then return end
+  for line in f:lines() do
+    line = line:match("^%s*(.-)%s*$") or ""
+    if line ~= "" and line:sub(1,1) ~= "#" and line:sub(1,1) ~= ";" then
+      local key, val = line:match("^(%w+)%s*=%s*(.+)$")
+      if key == "diag" then
+        for cat in val:gmatch("[^,%s]+") do dbg.enable(cat) end
+      elseif key == "diag_file" then
+        dbg.set_file(val)
+      elseif key == "debug" then
+        dbg.set_level(tonumber(val) or 1)
+      end
+    end
+  end
+  f:close()
+end
+
 if arg then
   for _, a in ipairs(arg) do
     if a == "--debug" then
       dbg.set_level(1)
     elseif a:match("^--debug=(%d+)$") then
       dbg.set_level(tonumber(a:match("^--debug=(%d+)$")))
-    elseif a:sub(1,2) ~= "--" then input_sentence = a end
+    elseif a:match("^--diag=(.+)$") then
+      for cat in a:match("^--diag=(.+)$"):gmatch("[^,%s]+") do
+        dbg.enable(cat)
+      end
+    elseif a:match("^--diag%-file=(.+)$") then
+      dbg.set_file(a:match("^--diag%-file=(.+)$"))
+    elseif a:match("^--config=(.+)$") then
+      load_config(a:match("^--config=(.+)$"))
+    elseif a:sub(1,2) ~= "--" then
+      input_sentence = a
+    end
   end
 end
 

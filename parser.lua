@@ -77,14 +77,21 @@ local function find_and_replace(ts, j, s)
 	local z = find(ts[j], 'Z')
 	if z and string.find('VNA', s) then
 		local tmp = z:gsub('^.','V')
-		if find(tmp, s) then ts[j] = find(tmp, s); return end
+		if find(tmp, s) then
+		  dbg.diag("tag", "Z→V:", utils.decode(ts[j], true), "→", utils.decode(find(tmp, s), true))
+		  ts[j] = find(tmp, s); return
+		end
 	end
 	local f = find(ts[j], s)
 	if f then
+		dbg.diag("tag", "resolve:", utils.decode(ts[j], true), "→", utils.decode(f, true))
 		ts[j] = f
 	elseif #s == 1 then
 		local _, e = ts[j]:find(s, 1, true)
-		if e then ts[j] = ts[j]:sub(e) end
+		if e then
+		  dbg.diag("tag", "sub-resolve:", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(e), true))
+		  ts[j] = ts[j]:sub(e)
+		end
 	end
 end
 

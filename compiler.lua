@@ -78,7 +78,14 @@ local printers = {
   end,
   N = function(t, e, s, i)
     local d = utils.decode(t, true)
+    if t:find(";") then
+      dbg.diag("multi", "multi-form noun:", utils.decode(t, false))
+    end
     local b = compiler.base[d]
+    if not b then
+      dbg.diag("multi", "noun no base:", d)
+      return d
+    end
     e.gender = get_gender(t)
     e.plural = e.plural and (b:byte(3)&0x4) == 0
     if i and i > 1 and s and s[i-1] and s[i-1]:sub(1,1) == 'N' then
@@ -367,6 +374,9 @@ function compiler.compile(s)
       local func = printers[tag]
       local ok, res = pcall(func, w, e, s, i)
       local out = ok and res or utils.decode(w, true)
+      if not ok then
+        dbg.diag("word", "unknown tag:", tag, "in token:", utils.decode(w, false))
+      end
       -- handle leading punctuation in output (e.g. relative pronoun ", которую")
       if out and out:match("^[,%!%.;:]") and #c > 0 then
         c[#c] = c[#c] .. out:sub(1,1)

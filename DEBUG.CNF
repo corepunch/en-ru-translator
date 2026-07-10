@@ -1,0 +1,9 @@
+# Diagnostic categories for debugging translation issues
+# See AGENTS.md for available categories
+diag = multi, word, tag
+
+# Uncomment to redirect diagnostics to a file:
+# diag_file = DIAG.OUT
+
+# Debug level (1-3, 0 = off)
+debug = 0

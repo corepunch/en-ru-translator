@@ -191,16 +191,6 @@ Boolean flags (`--diag`) override config file values.
 - **Caps propagation through reordering** (`parser.lua`): `reorder_tokens()` now moves `ts.caps` entries alongside the tokens.
 - **compare.lua adjustments**: Expected for sentence 2 updated to remove `'ЛТГОЛД'` (LTGOLD product-name self-reference not reproducible without a special dictionary entry).
 
-### Current status
-
-6/10 DEMO sentences pass. Of the 6 that have a gold comparison:
-- ✓ `AGREEMENT ON SUPPLY OF FISH MEAL` → `ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ`
-- ✓ `This AGREEMENT is a sample…` → `Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.`
-- ✗ `The PARTIES to this AGREEMENT acknowledge…` — preposition "to" maps to accusative "на" not prepositional "в"; "legally"/"organizations"/"authorized" missing from BASE.DIC
-- ✗ `Both BUYER and SELLER agree to comply…` — T6 `NW 2` reorder puts verb before subject; subject-plural tracking lost across the `both…and` rule rewrite; "defined"/"terms dative plural" need rule-flag implementation
-- ✗ `SELLER shall supply to BUYER 1,000,000 Metric tons…` — verb subcategorisation missing (поставить governs dative, drops preposition); "metric" Z→A disambiguation needs context rule
-- ✗ `The total price for the goods and services as defined in EXHIBIT A is USD.` — "total" Z→A disambiguation; "defined" not in BASE.DIC
-
 ### Verification
 
 ```sh
@@ -211,16 +201,14 @@ lua init.lua             # original test sentence
 
 ### Remaining data gaps
 
-- **LTGOLD rule flags** — all zeroed in rules.lua. The original EXE has meaningful flag values (0x0000-0x0046) that control constituent typing, passive voice, negation, and word order. Implementing flag parsing in `parser.lua` and consuming the indices in `compiler.lua` would eliminate many hardcoded if-chains. This is the root cause of most remaining failures.
-- **Morphological analysis** — LTGOLD derives past-participle forms (`defined` → `E01определять`) at run-time from the infinitive. We have no -ed/-ing suffix stripping; these words show up untranslated.
-- **Verb subcategorisation** — LTGOLD uses case-government tables per verb (e.g. поставить → indirect-object dative). We use a fixed accusative default.
-- **Z→A disambiguation** — when a Z-token precedes a N-token and has an A form, LTGOLD selects the adjective (e.g. "total price" → "Общая цена"). The context rule for this is in T2/T3 but requires rule-flag guards we haven't implemented.
-- **Subject-plural tracking** — the `both…and` rewrite loses the compound-subject plurality before the verb; fixing this needs either a dedicated subject-plurality field in `e` or a constituent-type flag.
-- **T5/T6 reordering** — `reorder_tokens()` in parser.lua is implemented but flag-guarded rules (e.g. `NW 2` should only fire for adjective-noun W tokens) apply too broadly without flag support.
+- **LTGOLD flag semantics** — flags are extracted in `rules.lua`, but many constituent-type values still lack general runtime semantics.
+- **Verb-frame coverage** — `compiler.lua` has a table-driven frame mechanism, but only frames required by the verified DEMO sentences are populated.
+- **Analyzer stem search** — all 43 suffix records come from `LTGOLD.dat`; the executable's complete spelling-change algorithm is only partially reproduced by generic stem candidates.
+- **T5/T6 constituent indices** — numeric actions still use the legacy reorder implementation except for W verb constituents, whose head class now prevents the invalid `NW` reorder.
 
 ### Next likely steps
 
-1. Implement LTGOLD rule flags: parse the 2-byte flag from rules.lua entries, store in `parser.lua`, use in `match_pattern` guards
-2. Add morphological -ed / -ing suffix analysis so past participles are found in the dictionary
-3. Add verb subcategorisation table (at minimum for high-frequency verbs: поставить, соответствовать)
-4. Implement Z→A context rule: N has A form + next token is N → select A form
+1. Decode the remaining LTGOLD constituent flag values and replace fallback context scans with stored constituent metadata
+2. Extract or decompile the analyzer's complete stem-candidate algorithm around the suffix table at offset 2136
+3. Expand verb-frame coverage from LTGOLD dictionary/table evidence
+4. Add a broader corpus regression suite beyond the ten DEMO sentences

@@ -1,5 +1,6 @@
 local utils = {}
 local dbg = require "dbg"
+local suffixes = require "suffixes"
 
 local cp866_to_utf8 = {
   [0x80]="А", [0x81]="Б", [0x82]="В", [0x83]="Г",
@@ -178,6 +179,49 @@ function utils.tokenize(s, en_ru)
   -- Used by the compiler to uppercase Russian output (e.g. AGREEMENT → СОГЛАШЕНИЕ).
   tbl.caps = {}
   local phrase_all_caps = false  -- track caps across multi-word phrase lookups
+
+  local stem_variants = {
+    G = { "", "e" },
+    E = { "", "e" },
+    Z = { "", "e", "y" },
+  }
+  local adverb_endings = {
+    ["ический"] = "ически",
+    ["ый"] = "о",
+    ["ий"] = "и",
+    ["ой"] = "о",
+  }
+
+  local function derived_translation(family, lex)
+    if family ~= "D" then return lex:sub(2) end
+    local adjective = utils.decode(lex:sub(2), true)
+    for ending, replacement in pairs(adverb_endings) do
+      if adjective:sub(-#ending) == ending then
+        return utils.encode(adjective:sub(1, -#ending - 1) .. replacement)
+      end
+    end
+  end
+
+  local function derived_lexeme(word)
+    for _, analyzer in ipairs(suffixes) do
+      if word:sub(-#analyzer.suffix) == analyzer.suffix then
+        local family = analyzer.tag:sub(1, 1)
+        local base = word:sub(1, -#analyzer.suffix - 1)
+        for _, ending in ipairs(stem_variants[family] or { "" }) do
+          local entry = en_ru[base .. ending]
+          local lex = entry and entry.__lex
+          local source = lex and lex:sub(1, 1)
+          if source == "V" or source == "Z" or source == "N" or
+             (family == "D" and source == "A") then
+            -- Z13 marks English -s ambiguity; an N lemma resolves to plural n.
+            local tag = family == "Z" and source == "N" and "n" or family
+            local translation = derived_translation(family, lex)
+            if translation then return tag .. translation end
+          end
+        end
+      end
+    end
+  end
   for w in s:gmatch("%w+[,%!%.;:]?") do table.insert(words, w) end
   dbg.log(2, "  Words:", table.concat(words, " | "))
   while i <= #words do
@@ -195,9 +239,10 @@ function utils.tokenize(s, en_ru)
       -- Single all-caps letters (e.g. "A" in "EXHIBIT A") are document designators,
       -- not articles. Bypass dictionary lookup and preserve as proper-noun token.
       local is_designator = is_all_caps and #word == 1 and word:match("%a")
-      if (not is_designator) and en_ru[word] then
-        dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word].__lex))
-        table.insert(tbl, en_ru[word].__lex)
+      local derived = (not is_designator) and derived_lexeme(word)
+      if (not is_designator) and (en_ru[word] or derived) then
+        dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word] and en_ru[word].__lex or derived))
+        table.insert(tbl, en_ru[word] and en_ru[word].__lex or derived)
       else
         dbg.log(2, "  Lookup:", word, "→ (not found)")
         -- preserve original case in # token so uppercase tracking works for proper nouns

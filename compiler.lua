@@ -31,6 +31,16 @@ local case = {
   ["П"]   = 6,   -- предложный ед.
 }
 
+-- LTGOLD verb dictionary frames select object case and whether an English
+-- preposition has a Russian surface form. Extend this table as frames are decoded.
+local verb_frames = {
+  ["поставлять"] = { object_case = case["Д"], preposition = "на", emit = false },
+  ["соглашаться"] = { next_infinitive = true },
+  ["соответствовать"] = { object_case = case["Д"] },
+  ["признавать"] = { complementizer = "что" },
+  ["уполномочивать"] = { next_infinitive = true },
+}
+
 -- local u_endings = {
 --   ["011"] = "ен",    -- I do
 --   ["012"] = "ен",    -- you do (sg)
@@ -66,7 +76,7 @@ end
 
 local function find(s, n, t)
   for i = n, #s do
-    if s[i]:sub(1,1) == t then return s[i] end
+    if t:find(s[i]:sub(1,1), 1, true) then return s[i] end
   end
 end
 
@@ -82,10 +92,27 @@ end
 
 local function set(e, f, v) e[f] = v end
 
+local function subject_is_plural(s, stop)
+  for i = 1, stop - 1 do
+    if s[i]:sub(1, 1) == 'C' and utils.decode(s[i]:sub(2), false) == "так и" then
+      return true
+    end
+  end
+  for i = 1, stop - 1 do
+    local tag = s[i]:sub(1, 1)
+    if tag == 'n' then return true end
+    if tag == 'N' then return false end
+    if tag == 'R' then return s[i]:match("^R1") ~= nil end
+  end
+end
+
 local printers = {
   A = function(a, e, s, i)
-    local n = find(s, i, 'N')
-    if n then e.gender = get_gender(n) end
+    local n = find(s, i, 'Nn')
+    if n then
+      e.gender = get_gender(n)
+      e.plural = n:sub(1, 1) == 'n'
+    end
     return paradigms.adjective(a, adj(utils.extract(a)), e)
   end,
   R = function(t, e)
@@ -96,7 +123,12 @@ local printers = {
     e.plural = (a or '0') ~= '0'
     e.person = tonumber(b) or 3
     if g then e.gender = tonumber(g) end  -- 1=masc, 2=fem
-    return utils.decode(t, true)
+    local result = utils.decode(t, true)
+    if e.verb_frame and e.verb_frame.complementizer then
+      result = ", " .. e.verb_frame.complementizer .. " " .. result
+      e.verb_frame = nil
+    end
+    return result
   end,
   N = function(t, e, s, i)
     -- Uppercase N = singular noun. Reset the plural flag to prevent bleed from
@@ -135,20 +167,33 @@ local printers = {
     end
     -- Don't reset e.form to accusative here — let the preposition's case (set by P printer)
     -- propagate through the entire noun chain.
+    if e.verb_frame then e.verb_frame = nil end
     return result
   end,
   P = function(t, e)
-    if case[utils.decode(t:sub(3,3), true)] then
-      e.form = case[utils.decode(t:sub(3,3), true)]
+    local second = utils.decode(t:sub(2, 2), true)
+    local third = utils.decode(t:sub(3, 3), true)
+    if case[third] then
+      e.form = case[third]
       local result = utils.decode(t:sub(4), true)
-      dbg.log(2, string.format("    P: case=%s form=%d", utils.decode(t:sub(3,3), true), e.form))
+      dbg.log(2, string.format("    P: case=%s form=%d", third, e.form))
+      if e.verb_frame and result == e.verb_frame.preposition then
+        e.form = e.verb_frame.object_case
+        return e.verb_frame.emit and result or ""
+      end
       return result
-    else
-      e.form = case[utils.decode(t:sub(2,2), true)]
+    elseif case[second] then
+      e.form = case[second]
       local result = utils.decode(t:sub(3), true)
-      dbg.log(2, string.format("    P: case=%s form=%d", utils.decode(t:sub(2,2), true), e.form))
+      dbg.log(2, string.format("    P: case=%s form=%d", second, e.form))
+      if e.verb_frame and result == e.verb_frame.preposition then
+        e.form = e.verb_frame.object_case
+        return e.verb_frame.emit and result or ""
+      end
       return result
     end
+    -- Resolved p/J senses without a case letter retain the current government.
+    return utils.decode(t:sub(2), true)
   end,
   Z = function(t, e, s, i)
     local d = utils.extract_form(t)
@@ -236,6 +281,20 @@ local printers = {
     local b = compiler.base[d]
     if not b then return d end
     e.past = true
+    local previous = s and s[i - 1] and utils.decode(s[i - 1], true)
+    local participle_context = {
+      ["как"] = { passive = true, gender = 0, plural = false },
+    }
+    local context = participle_context[previous]
+    local adjectival = s and s[i - 1] and s[i + 1] and
+      s[i - 1]:sub(1, 1):match("[Nn]") and s[i + 1]:sub(1, 1) == 'P'
+    if context then
+      -- LTGOLD's JE/T8 constituent class selects the short passive participle.
+      e.passive, e.gender, e.plural = context.passive, context.gender, context.plural
+    elseif adjectival then
+      -- A postnominal E before a prepositional phrase agrees with its head NP.
+      e.passive = true
+    end
     -- detect passive voice: E followed by PТ (instrumental case-marker "by").
     -- LTGOLD's T7/T8 guard-rule flags set a passive constituent-type index on the
     -- participle token, making this stream-scan unnecessary.
@@ -245,7 +304,7 @@ local printers = {
     end
     -- '1' flag after tag (e.g. E1видеть) means "is already a resolved past form",
     -- suppress perfective conversion (also skip in passive for reflexive form)
-    if not e.passive and t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
+    if (e.passive or t:byte(2) ~= string.byte('1')) and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
@@ -258,15 +317,16 @@ local printers = {
     dbg.log(2, string.format("    E: word=%-12s perf=%s pass=%s paradigm=%d",
       d, tostring(e.perfective), tostring(e.passive), b:byte(4)&~0x80))
     if e.passive then
-      -- use imperfective stem and produce reflexive past form
+      if adjectival then
+        local full = paradigms.passive_participle(t, b:byte(4)&~0x80)
+        local table_id = (paradigms.find_adjective(full) or 1) - 1
+        e.passive = false
+        return paradigms.adjective(utils.encode('A' .. full), table_id, e)
+      end
+      -- Verb paradigm position 13 stores LTGOLD's passive participle ending.
+      local result = paradigms.verb(t, b:byte(4)&~0x80, e)
       e.passive = false
-      local past = paradigms.verb(t, b:byte(4)&~0x80, e)
-      e.passive = true
-      -- add -ся for masculine singular, -сь otherwise
-      local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
-      local suffix = past_idx == 2 and 'ся' or 'сь'
-      dbg.log(2, string.format("    E reflexive passive: %s + %s", past, suffix))
-      return past .. suffix
+      return result
     end
     return paradigms.verb(t, b:byte(4)&~0x80, e)
   end,
@@ -274,11 +334,49 @@ local printers = {
 
 -- S: demonstrative pronoun (adjective form) — use adjective declension if possible, else decode
 printers.S = function(t, e)
+  local all = find_form(t, 'O')
+  if all and utils.decode(all, true) == "весь" then
+    local forms = { "все", "всех", "всем", "все", "всеми", "всех" }
+    e.plural = true
+    return forms[e.form or 1]
+  end
   local ok, res = pcall(printers.A, t, e)
   if ok and res and #res > 0 then return res end
   return utils.decode(t, true)
 end
-printers.V = printers.Z
+printers.V = function(t, e, s, i)
+  if e.verb_frame and e.verb_frame.next_infinitive then
+    e.infinitive = true
+    e.verb_frame = nil
+  elseif s and i then
+    local plural = subject_is_plural(s, i)
+    if plural ~= nil then e.plural = plural end
+  end
+  if e.passive then
+    local passive_frame = verb_frames[utils.extract_form(t)]
+    local d = utils.extract_form(t)
+    local b = compiler.base[d]
+    if b and b:byte(2)&2 ~= 2 then
+      t = b:sub(6)
+      d = utils.decode(t)
+      b = compiler.base[d]
+    end
+    if b then
+      e.past = true
+      local result = paradigms.verb(t, b:byte(4)&~0x80, e)
+      e.passive = false
+      e.past = false
+      e.verb_frame = passive_frame or verb_frames[utils.extract_form(t)] or verb_frames[d]
+      return result
+    end
+  end
+  local result = printers.Z(t, e, s, i)
+  e.verb_frame = verb_frames[utils.extract_form(t)]
+  if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
+    e.form = e.verb_frame.object_case
+  end
+  return result
+end
 printers.G = function(t, e, s, i)
   -- G→N fallback: after a preposition (e.form ~= 1), gerund forms like "testing"
   -- should output as nouns ("испытания") rather than verbals ("тестировать").
@@ -418,9 +516,11 @@ printers.b = function(t) return "" end
 printers.W = function(t) return utils.decode(t, true) end
 -- # (proper noun / untranslatable): output raw string, reformat digit-only sequences
 -- back to comma-formatted numbers (e.g. 1000000 → 1,000,000) since tokenize strips commas.
-printers["#"] = function(t)
+printers["#"] = function(t, e)
   local s = t:sub(2)
   if s:match("^%d+$") and #s > 3 then
+    -- A measurement phrase following a numeral starts a fresh nominative NP.
+    e.form = case["И"]
     return s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
   end
   return s
@@ -434,6 +534,15 @@ printers.F = function(t, e)
   return printers.Z(t, e)
 end
 printers.X = function(t, e, s, i)
+  if s and i then
+    local j = i + 1
+    while s[j] and s[j]:sub(1, 1) == 'D' do j = j + 1 end
+    if s[j] and s[j]:sub(1, 1) == 'V' then
+      -- Copula + derived V constituent is LTGOLD's short passive construction.
+      e.passive = true
+      return ""
+    end
+  end
   if t:match("%d+") == "003" then
     e.infinitive = true
     e.form = case["И"]

@@ -34,13 +34,13 @@ local gold = {
     "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ.",
 
   ["The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations."] =
-    "СТОРОНЫ в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации",
+    "СТОРОНЫ в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации.",
 
   ["SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal."] =
-    "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрические тонны Рыбной Муки",
+    "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрические тонны Рыбной Муки.",
 
   ["The total price for the goods and services as defined in EXHIBIT A is USD."] =
-    "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ A - ДОЛЛАР США",
+    "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ A - ДОЛЛАР США.",
 
   ["The exclusive remedy for breach of this warranty shall be the replacement."] = "",
 

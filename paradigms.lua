@@ -405,7 +405,8 @@ end
 function paradigms.adjective(base, table_id, e, utf8)
   local ext = utils.extract(base)
   local selected = paradigms.adjectives[e.gender+1][table_id+1]
-  local suffix = word_at(selected, e.form)
+  -- Positions 7-12 in LTGOLD adjective paradigms are the six plural cases.
+  local suffix = word_at(selected, e.plural and (e.form + 6) or e.form)
   return utils.decode(ext:sub(1, math.max(2, #ext-(utf8 and 4 or 2))), true)..suffix
 end
 
@@ -440,6 +441,10 @@ function paradigms.verb(base, table_id, e)
     return utils.decode(stem, true) .. suf .. (reflexive and reflexive_suffix(suf) or "")
   elseif e.passive then
     local part = word_at(str, 13)
+    if e.plural and part:sub(-8) == "нный" then
+      -- Russian short passive plural uses -ны, not the past-tense -ни pattern.
+      return utils.decode(stem, true) .. part:sub(1, -9) .. "ны"
+    end
     local short = utf8.len(part) > 3 and string.sub(part, 1, utf8.offset(part, -3) - 1) or ""
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
     return utils.decode(stem, true)..short..past_verb[past_idx]
@@ -449,6 +454,13 @@ function paradigms.verb(base, table_id, e)
     local past_full = word_at(str, 8) .. past_verb[past_idx]
     return utils.decode(stem, true) .. past_full .. (reflexive and reflexive_suffix(past_full) or "")
   end
+end
+
+function paradigms.passive_participle(base, table_id)
+  local extracted = utils.extract(base)
+  local len, str = table.unpack(paradigms.verbs[table_id+1])
+  -- Position 13 is LTGOLD's full passive-participle ending.
+  return utils.decode(cut(extracted, len), true) .. word_at(str, 13)
 end
 
 function paradigms.find_adjective(adj)

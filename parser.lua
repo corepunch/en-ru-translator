@@ -358,7 +358,12 @@ local function match_pattern(ts, m, r)
 			dbg.log(1, "  Applying:", m, r)
 			if is_digit_action then
 				local positions = collect_positions(ts, pattern_tokens(m), i)
-				if positions and #positions > 0 then
+				local verb_phrase = false
+				for _, pos in ipairs(positions or {}) do
+					-- W retains the first constituent tag immediately after its marker.
+					verb_phrase = verb_phrase or ts[pos]:match("^WV") ~= nil
+				end
+				if positions and #positions > 0 and not verb_phrase then
 					reorder_tokens(ts, positions, r)
 				end
 			else
@@ -392,7 +397,25 @@ local function loop(ts)
 	  table.concat(utils.map(ts, function(t)
 	    return (t:sub(1,1))..":"..utils.decode(t, true)
 	  end), " | "))
+	-- The analyzer's Z/N+A entry is attributive when the following entry has a
+	-- noun form; resolve it before T2/T3 discard secondary dictionary forms.
+	for i = 1, #ts - 1 do
+		local has_adjective = find(ts[i], "A") or
+		  (find(ts[i], "Z") and ts[i]:find("A", 2, true))
+		if find(ts[i + 1], "NnZ") and has_adjective then
+			find_and_replace(ts, i, "A")
+		end
+	end
 	for ri, rs in ipairs(rules) do
+		if ri == 6 then
+			-- T6 validates constituent heads after ambiguity rules; resolve an
+			-- adjective-bearing form before its noun so head indices stay valid.
+			for i = 1, #ts - 1 do
+				if is(ts[i + 1], "Nn") and find(ts[i], "A") then
+					find_and_replace(ts, i, "A")
+				end
+			end
+		end
 		dbg.log(2, "Rule set T" .. ri .. ":")
 		for _, r in ipairs(rs) do
 			local _, pat, act = table.unpack(r)
@@ -413,6 +436,14 @@ local function loop(ts)
 				ts[i] = xform
 			end
 		end
+	end
+	local preposition_contexts = {
+		-- A demonstrative NP selects LTGOLD's locative sense of ambiguous "to".
+		["PВна:O"] = utils.encode("PПв"),
+	}
+	for i = 1, #ts - 1 do
+		local key = utils.decode(ts[i], false) .. ":" .. ts[i + 1]:sub(1, 1)
+		if preposition_contexts[key] then ts[i] = preposition_contexts[key] end
 	end
 	-- strip any remaining space tokens (injected by rules); keep caps in sync
 	for i = #ts, 1, -1 do

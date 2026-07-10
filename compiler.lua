@@ -376,8 +376,10 @@ function compiler.compile(s)
     end, 1)
   end
   print("")
-  print(table.concat(c, " "))
+  local result = table.concat(c, " ")
+  print(result)
   print("")
+  return result
 end
 
 -- print(

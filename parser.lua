@@ -44,7 +44,7 @@ end
 local function iter(t)
 	local d, c, i = {}, {}, 1
 	t,c = extract_pharses(t)
-	for pos, w in t:gmatch("()(%a+[%d%$/; \127-\255]+)") do
+	for pos, w in t:gmatch("()(%a+[%d%$/;,. \127-\255]+)") do
     table.insert(d, { w, t:sub(pos) })
 	end
   -- for w in t:gmatch("(%a+[%d%$/; \127-\255]+)") do table.insert(d, w) end
@@ -65,7 +65,7 @@ local function iter(t)
     i = i + 1
 		if not p then return
 		elseif p:sub(1,1) == 'Z' then return 'Z', p .. (chomp'N' or '') .. (chomp'A' or '')
-		else return p:sub(1,1), rest end
+		else return p:sub(1,1), p end
   end
 end
 

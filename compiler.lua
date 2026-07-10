@@ -255,10 +255,27 @@ printers.L = function(t, e, s, i)
   return result
 end
 printers.j = function(t) return "" end  -- clause-end marker is silent
-printers.O = function(t, e)
+printers.O = function(t, e, s, i)
+  local d = utils.decode(t, true)
+  if d == "этот" then
+    if s then
+      for j = i and (i+1) or 1, #s do
+        if s[j] and s[j]:sub(1,1) == 'N' and
+           (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+          e.gender = get_gender(s[j])
+          break
+        end
+      end
+    end
+    if e.plural then return "эти"
+    elseif e.gender == 2 then return "эта"
+    elseif e.gender == 0 then return "это"
+    else return "этот"
+    end
+  end
   local ok, res = pcall(printers.A, t, e)
   if ok and res then return res end
-  return utils.decode(t, true)
+  return d
 end
 printers.l = printers.L
 printers.s = printers.S

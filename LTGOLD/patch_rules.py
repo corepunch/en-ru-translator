@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """
-patch_rules.py — Zero out rule tables in decompressed LTPRO.EXE
+patch_rules.py — Patch rule tables in decompressed LTPRO.EXE
 
 Usage:
+    # Zero ALL tables (original behavior):
     python3 patch_rules.py [input.exe] [output.exe]
 
-If no args, defaults to:
-    input:  LTPRO.EXE (decompressed)
-    output: LTPRO.PAT.EXE (patched)
+    # Zero a SINGLE table:
+    python3 patch_rules.py [input.exe] [output.exe] --table T2
 
-The patcher zeros out all 8 rule table records in the data section,
-effectively disabling all grammatical transformation rules.
+    # Zero a SINGLE rule within a table (0-indexed):
+    python3 patch_rules.py [input.exe] [output.exe] --table T2 --rule 5
+
+    # Dry run (no file written):
+    python3 patch_rules.py [input.exe] [output.exe] --table T2 --dry-run
+
+Defaults:
+    input:  LTPRO.EXE (decompressed, 208K)
+    output: LTPRO.PAT.EXE (patched)
 """
 import struct
 import sys
@@ -34,14 +41,12 @@ LTGOLD_TABLE_OFFSETS = {
     'T3': 5434,       # Table 3: 136 rules, 10-byte records
     'T4': 11981,      # Table 4: 178 rules, 9-byte records
     'T5': 16610,      # Table 5: 9 rules, 10-byte records
-    # T6 SKIPPED: different record format, critical for program function
-    # 'T6': 16874,    # Table 6: 56 rules, 10-byte records (UNKNOWN FORMAT)
+    # T6 SKIPPED: zeroing T6 crashes the program
+    # 'T6': 16874,    # Table 6: 56 rules, 10-byte records
     'T7': 17972,      # Table 7: 35 rules, 8-byte records
     'T8': 19158,      # Table 8: 83 rules, 8-byte records
 }
 
-# Override: use exact rule counts from RESEARCH.md instead of auto-detection
-# This prevents zeroing data between tables
 EXACT_RULE_COUNTS = {
     'suffix': 0,  # skip suffix table
     'T1': 47,
@@ -53,7 +58,6 @@ EXACT_RULE_COUNTS = {
     'T8': 83,
 }
 
-# Record sizes for each table
 TABLE_RECORD_SIZES = {
     'suffix': 10,
     'T1': 10,
@@ -61,27 +65,26 @@ TABLE_RECORD_SIZES = {
     'T3': 10,
     'T4': 9,
     'T5': 10,
-    # T6 skipped: unknown record format
+    # T6 skipped
     'T7': 8,
     'T8': 8,
 }
 
-# Max rules per table (from RESEARCH.md)
 TABLE_MAX_RULES = {
-    'suffix': 50,  # approximate
+    'suffix': 50,
     'T1': 47,
     'T2': 157,
     'T3': 136,
     'T4': 178,
     'T5': 9,
-    # T6 skipped: unknown format
     'T7': 35,
     'T8': 83,
 }
 
+ALL_TABLES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T7', 'T8']
+
 
 def read_cstring(data, base, offset):
-    """Read a C-string from data section"""
     if offset == 0:
         return None
     pos = base + offset
@@ -94,124 +97,205 @@ def read_cstring(data, base, offset):
     return bytes(buf).decode('cp866', errors='replace')
 
 
-def find_table_end(data, table_name, start_dat_off):
-    """Find where a table ends by looking for the end-of-table marker"""
+def get_table_exe_range(table_name):
+    """Return (exe_start, exe_end, rule_count, rec_size) for a table."""
+    ltgold_off = LTGOLD_TABLE_OFFSETS[table_name]
+    dat_off = ltgold_off - SHIFT
     rec_size = TABLE_RECORD_SIZES[table_name]
-    max_rules = TABLE_MAX_RULES[table_name]
-    
-    i = start_dat_off
-    rules_found = 0
-    
-    while rules_found < max_rules + 10:  # allow some slack
-        exe_off = DAT_BASE + i
-        
-        if table_name in ('T4',):
-            # 9-byte record: [flags:u8] [pat_off:u16] [const:u16] [act_off:u16] [pad:u8]
-            if exe_off + 9 > len(data):
-                break
+    rule_count = EXACT_RULE_COUNTS[table_name]
+    exe_start = DAT_BASE + dat_off
+    exe_end = exe_start + rule_count * rec_size
+    return exe_start, exe_end, rule_count, rec_size
+
+
+def get_record_string_offsets(data, table_name, rule_index):
+    """
+    Return the file offsets of pattern and action C-strings for one rule record.
+    Records contain far pointers [str_off:u16][seg:u16] per string field.
+    Zeroing the string bytes (not the record) is the safe patch strategy.
+    Returns list of (file_offset, length) for each non-empty string field.
+    """
+    ltgold_off = LTGOLD_TABLE_OFFSETS[table_name]
+    dat_off = ltgold_off - SHIFT
+    rec_size = TABLE_RECORD_SIZES[table_name]
+    exe_rec = DAT_BASE + dat_off + rule_index * rec_size
+
+    results = []
+
+    def add_string(off):
+        if off == 0:
+            return
+        file_off = DAT_BASE + off
+        length = 0
+        while file_off + length < len(data) and data[file_off + length] != 0:
+            length += 1
+        if length > 0:
+            results.append((file_off, length))
+
+    if table_name == 'T4':
+        # 9-byte: [flags:u8][pat_off:u16][pat_seg:u16][act_off:u16][act_seg:u16] — approximate
+        pat_off = struct.unpack_from('<H', data, exe_rec + 1)[0]
+        act_off = struct.unpack_from('<H', data, exe_rec + 5)[0]
+    elif table_name in ('T7', 'T8'):
+        # 8-byte: [pat_off:u16][pat_seg:u16][act_off:u16][act_seg:u16]
+        pat_off = struct.unpack_from('<H', data, exe_rec)[0]
+        act_off = struct.unpack_from('<H', data, exe_rec + 4)[0]
+    else:
+        # 10-byte: [pat_off:u16][pat_seg:u16][act_off:u16][act_seg:u16][flags:u16]
+        pat_off = struct.unpack_from('<H', data, exe_rec)[0]
+        act_off = struct.unpack_from('<H', data, exe_rec + 4)[0]
+
+    add_string(pat_off)
+    add_string(act_off)
+    return results
+
+
+def patch_table(data, table_name, rule_index=None, dry_run=False):
+    """
+    Disable rules by replacing the first pattern byte with 0xFF.
+    0xFF is not a valid tag character so the rule never matches.
+    The record pointers and string lengths are left intact.
+    rule_index: if None, patch all records; if int, patch only that record (0-indexed).
+    Returns (exe_start, exe_end, count_patched).
+    """
+    exe_start, exe_end, rule_count, rec_size = get_table_exe_range(table_name)
+
+    if rule_index is not None and (rule_index < 0 or rule_index >= rule_count):
+        raise ValueError(f"Rule index {rule_index} out of range 0..{rule_count-1} for {table_name}")
+
+    indices = [rule_index] if rule_index is not None else range(rule_count)
+    count = 0
+    for i in indices:
+        pairs = get_record_string_offsets(data, table_name, i)
+        for file_off, length in pairs:
+            # Overwrite only the first byte with 0xFF — an invalid tag that never matches.
+            # This keeps the string non-empty (no empty-pattern infinite loop).
+            if not dry_run:
+                data[file_off] = 0xFF
+            count += 1
+
+    if rule_index is not None:
+        rec_start = exe_start + rule_index * rec_size
+        return rec_start, rec_start + rec_size, 1
+    return exe_start, exe_end, rule_count
+
+
+def dump_table(data, table_name, max_rules=None):
+    """Print all records in a table as human-readable strings."""
+    ltgold_off = LTGOLD_TABLE_OFFSETS[table_name]
+    dat_off = ltgold_off - SHIFT
+    rec_size = TABLE_RECORD_SIZES[table_name]
+    rule_count = EXACT_RULE_COUNTS[table_name]
+    if max_rules:
+        rule_count = min(rule_count, max_rules)
+
+    print(f"\n=== {table_name} ({rule_count} rules, {rec_size}-byte records) ===")
+    for i in range(rule_count):
+        exe_off = DAT_BASE + dat_off + i * rec_size
+
+        if table_name == 'T4':
             flags = data[exe_off]
             pat_off = struct.unpack_from('<H', data, exe_off + 1)[0]
             act_off = struct.unpack_from('<H', data, exe_off + 5)[0]
         elif table_name in ('T7', 'T8'):
-            # 8-byte record: [pat_off:u16] [const:u16] [act_off:u16] [flags:u16]
-            if exe_off + 8 > len(data):
-                break
             pat_off = struct.unpack_from('<H', data, exe_off)[0]
             act_off = struct.unpack_from('<H', data, exe_off + 4)[0]
             flags = struct.unpack_from('<H', data, exe_off + 6)[0]
         else:
-            # 10-byte record: [pat_off:u16] [const:u16] [act_off:u16] [pad:u16] [flags:u16]
-            if exe_off + 10 > len(data):
-                break
             pat_off = struct.unpack_from('<H', data, exe_off)[0]
             act_off = struct.unpack_from('<H', data, exe_off + 4)[0]
             flags = struct.unpack_from('<H', data, exe_off + 8)[0]
-        
-        # End of table: all key fields are zero
-        if pat_off == 0 and act_off == 0:
-            return i
-        
-        rules_found += 1
-        i += rec_size
-    
-    return i  # fallback: max rules * rec_size
 
+        # Strings are relative to the data section base in LTGOLD.dat coordinates
+        # but stored as offsets into the data block; use DAT_BASE as the base
+        pat_str = read_cstring(data, DAT_BASE, pat_off) if pat_off else ''
+        act_str = read_cstring(data, DAT_BASE, act_off) if act_off else ''
 
-def patch_table(data, table_name, dry_run=False):
-    """Zero out all records in a table. Returns (start, end, count)"""
-    ltgold_off = LTGOLD_TABLE_OFFSETS[table_name]
-    dat_off = ltgold_off - SHIFT
-    rec_size = TABLE_RECORD_SIZES[table_name]
-    
-    # Use exact rule count if available, otherwise auto-detect
-    if table_name in EXACT_RULE_COUNTS:
-        rule_count = EXACT_RULE_COUNTS[table_name]
-        table_end = dat_off + rule_count * rec_size
-    else:
-        # Find actual table end
-        table_end = find_table_end(data, table_name, dat_off)
-        rule_count = (table_end - dat_off) // rec_size
-    
-    table_size = table_end - dat_off
-    
-    exe_start = DAT_BASE + dat_off
-    exe_end = DAT_BASE + table_end
-    
-    if not dry_run:
-        # Zero out all records
-        for i in range(exe_start, exe_end):
-            data[i] = 0
-    
-    return dat_off, table_end, rule_count
+        print(f"  {table_name}[{i:03d}]  flags=0x{flags:02X}  "
+              f"pat={repr(pat_str):30s}  act={repr(act_str)}")
 
 
 def main():
-    input_file = sys.argv[1] if len(sys.argv) > 1 else 'LTPRO.EXE'
-    output_file = sys.argv[2] if len(sys.argv) > 2 else 'LTPRO.PAT.EXE'
-    dry_run = '--dry-run' in sys.argv
-    
+    args = sys.argv[1:]
+
+    # Parse flags
+    dry_run = '--dry-run' in args
+    if dry_run:
+        args.remove('--dry-run')
+
+    target_table = None
+    if '--table' in args:
+        idx = args.index('--table')
+        target_table = args[idx + 1]
+        del args[idx:idx+2]
+        if target_table not in LTGOLD_TABLE_OFFSETS:
+            print(f"Error: unknown table '{target_table}'. Valid: {list(LTGOLD_TABLE_OFFSETS.keys())}")
+            sys.exit(1)
+
+    target_rule = None
+    if '--rule' in args:
+        idx = args.index('--rule')
+        target_rule = int(args[idx + 1])
+        del args[idx:idx+2]
+
+    dump_only = '--dump' in args
+    if dump_only:
+        args.remove('--dump')
+
+    input_file = args[0] if len(args) > 0 else 'LTPRO.EXE'
+    output_file = args[1] if len(args) > 1 else 'LTPRO.PAT.EXE'
+
     if not os.path.exists(input_file):
         print(f'Error: {input_file} not found')
         sys.exit(1)
-    
+
     with open(input_file, 'rb') as f:
         data = bytearray(f.read())
-    
+
     print(f'Input:  {input_file} ({len(data)} bytes)')
+
+    if dump_only:
+        tables = [target_table] if target_table else ALL_TABLES
+        for t in tables:
+            dump_table(data, t)
+        return
+
     print(f'Output: {output_file}')
     print(f'Data section base: 0x{DAT_BASE:X}')
     print()
-    
-    total_rules = 0
-    total_bytes = 0
-    
-    for table_name in ['suffix', 'T1', 'T2', 'T3', 'T4', 'T5', 'T7', 'T8']:
-        start, end, count = patch_table(data, table_name, dry_run)
-        size = end - start
-        total_rules += count
-        total_bytes += size
-        exe_start = DAT_BASE + start
-        exe_end = DAT_BASE + end
-        print(f'{table_name:7s}: dat 0x{start:05X}-0x{end:05X} '
-              f'exe 0x{exe_start:05X}-0x{exe_end:05X} '
-              f'{count:4d} rules, {size:5d} bytes')
-    
-    print(f'\nTotal: {total_rules} rules, {total_bytes} bytes zeroed')
-    
+
+    if target_table:
+        # Patch one table (or one rule within it)
+        start, end, count = patch_table(data, target_table, target_rule, dry_run)
+        label = f"rule {target_rule}" if target_rule is not None else "all rules"
+        print(f'{target_table} ({label}): exe 0x{start:05X}-0x{end:05X}, {count} records zeroed')
+    else:
+        # Patch all tables
+        total_rules = 0
+        total_bytes = 0
+        for table_name in ALL_TABLES:
+            start, end, count = patch_table(data, table_name, None, dry_run)
+            size = end - start
+            total_rules += count
+            total_bytes += size
+            print(f'{table_name:7s}: exe 0x{start:05X}-0x{end:05X}  {count:4d} rules, {size:5d} bytes')
+        print(f'\nTotal: {total_rules} rules, {total_bytes} bytes zeroed')
+
     if dry_run:
         print('\n[DRY RUN — no changes written]')
-    else:
-        with open(output_file, 'wb') as f:
-            f.write(data)
-        print(f'\nPatched file written to {output_file}')
-    
-    # Verify: read back and check first record of Table 1
-    if not dry_run:
+        return
+
+    with open(output_file, 'wb') as f:
+        f.write(data)
+    print(f'\nPatched file written to {output_file}')
+
+    # Verify
+    if not target_table:
         with open(output_file, 'rb') as f:
             verify = f.read()
         t1_start = DAT_BASE + (LTGOLD_TABLE_OFFSETS['T1'] - SHIFT)
         v = struct.unpack_from('<H', verify, t1_start)[0]
-        print(f'\nVerification: Table 1 first pat_off = {v} (should be 0)')
+        print(f'Verification: Table 1 first pat_off = {v} (should be 0)')
 
 
 if __name__ == '__main__':

@@ -254,16 +254,14 @@ This makes it easy to cross-reference `rules.lua` entries against binary offsets
 
 ### 3. DOSBox wrapper (run_test.sh)
 
+Located at `LTGOLD/run_test.sh`. Usage:
+
 ```sh
-#!/bin/sh
-echo "$1" > LTGOLD/IN.TXT
-dosbox-x -silent \
-  -c "mount c $(pwd)/LTGOLD" \
-  -c "c:" -c "LTPRO.EXE IN.TXT OUT.TXT -F-" -c "exit" 2>/dev/null
-python3 -c "print(open('LTGOLD/OUT.TXT','rb').read().decode('cp866'))"
+./run_test.sh "Sentence."                  # run against LTPRO.EXE (default)
+./run_test.sh "Sentence." LTPRO_NO_T1.EXE  # run against a specific EXE variant
 ```
 
-One-line test harness. Use `LTPRO.PAT.EXE` to test patched versions.
+Writes the sentence to `IN.TXT`, runs the EXE via DOSBox-X (`-silent` flag — headless, no window, implies `-exit`), then decodes `OUT.TXT` from CP866 to UTF-8 and prints to stdout. Exits with error if the EXE produced no output. All EXE variants must live in `LTGOLD/` alongside `BASE.DIC` and other data files.
 
 ---
 

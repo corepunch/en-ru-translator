@@ -162,33 +162,61 @@ if (command < 0x12) {
 
 ## Decoded Symbols
 
-### Grammatical Tags
+**Source:** `dic.txt` (SARMA 2.0 Russian documentation, authoritative tag legend).
+In-rule meanings may differ from dictionary meanings; see notes.
 
-| Tag | Meaning | Source |
-|-----|---------|--------|
-| `Z` | Verb | `load.lua:24` maps `Z` → `V` internally |
-| `N` | Noun | |
-| `V` | Adjective | Same as `A` |
-| `A` | Adjective | Same as `V` |
-| `P` | Preposition | May have case government info |
-| `D` | Adverb | |
-| `E` | Past participle | |
-| `G` | Gerund / present participle | |
-| `S` | Adjective (alternate) | |
-| `C` | Conjunction | |
-| `X` | Infinitive marker | |
-| `U` | Unique verb form | "must", "can", "shall" |
-| `F` | Passive participle | |
-| `R` | Pronoun | `R013` = person 0, number 1, case 3? |
+### Grammatical Tags — Uppercase
+
+| Tag | dic.txt meaning | Notes |
+|-----|-----------------|-------|
+| `A` | Adjective, ordinal numeral | |
+| `B` | Infinitive particle 'to' (perfective verb) | NOT the copula; `X` is auxiliary 'be' |
+| `C` | Coordinating/disjunctive conjunction | |
+| `D` | Adverb, parenthetical | |
+| `E` | -ed forms and irregular past | Past participle / simple past |
+| `F` | Active present participle — **analyzer-generated** | compiler.lua uses `passive()` — possible mismatch |
+| `G` | -ing verb forms | Gerund / present participle |
+| `H` | Digits and their combinations | Numeric token; NOT possessive |
+| `I` | Cardinal numeral | NOT "bare infinitive" |
+| `J` | Conjunctions, phrase-boundary separators | Subordinating conj / complementizer |
+| `K` | Negative particle 'not' | NOT "modal marker" |
+| `L` | Relative word ', который' | Relative pronoun (resolved) |
+| `M` | Indirect pronoun | Object pronoun ("him", "her", "them") |
+| `N` | Singular noun | |
+| `O` | Demonstrative pronoun | "this", "that" (standalone); NOT "object-case marker" |
+| `P` | Preposition | |
 | `Q` | Question word | |
-| `J` | Subordinating conjunction | |
-| `T` | Empty / separator | |
-| `#` | Number | |
-| `?` | Unknown word | |
-| `n` | Noun (plural) | lowercase = modifier |
-| `w` | Lowercase modifier | |
-| `W` | Phrase marker | Multi-word entry indicator |
-| `I` | Idiom marker | |
+| `R` | Personal pronoun | "I", "you", "he" |
+| `S` | Demonstrative pronoun (second class) | Likely adjectival demonstrative ("this book") |
+| `T` | Determiner (article) | Maps to `separator()` → empty output |
+| `U` | Modal verb | "must", "can", "shall" |
+| `V` | Main (content) verb | Resolved from `Z`; finite predicate |
+| `W` | — (not in dic.txt) | Multi-word phrase marker |
+| `X` | Auxiliary verb 'be' | is/are/was/were |
+| `Y` | Auxiliary verb 'have' (possession) | 'have' as perfect auxiliary |
+| `Z` | Ambiguity V-N-A | Unresolved: verb, noun, or adjective |
+
+### Grammatical Tags — Lowercase ("already processed" or derived)
+
+| Tag | dic.txt meaning | Notes |
+|-----|-----------------|-------|
+| `a` | Adjective-adverb subclass ("more", "less") | |
+| `b` | Infinitive particle 'to' (imperfective verb) | Lowercase of `B` |
+| `d` | Adverb/adjective ambiguity | |
+| `e` | Coincidence of infinitive/participle-II/past tense | Ambiguous verb form |
+| `f` | Determiner-expression (followed by NP) | e.g. "a lot of" |
+| `k` | Negative particle 'no' | Attributive negation; `K` = 'not' |
+| `l` | Movable relative 'whose' — **analyzer-generated** | Genitive relative pronoun |
+| `m` | Compound indirect pronoun | "himself", "themselves" |
+| `n` | Plural noun form | |
+| `r` | Compound personal pronoun | "myself", "yourself" |
+| `t` | Determiner — segment boundary — **analyzer-generated** | |
+| `u` | Modal verb combination | "had better", "ought to" |
+| `v` | Verb form -s/-es (3sg present) | |
+| `w` | — (not in dic.txt) | Compound/multi-word flag (inferred) |
+| `x` | Impersonal verb combination ("there is", etc.) | Existential construction |
+| `y` | Auxiliary 'have' (existential/copular) | 'have' in non-possession sense |
+| `z` | Ambiguity v-n | Unresolved: 3sg-s verb or noun |
 
 ### Pattern Syntax
 

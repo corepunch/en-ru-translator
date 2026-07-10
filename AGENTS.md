@@ -45,30 +45,58 @@ Rules use a pattern-matching language extracted from the original LTGOLD binary:
 
 ## Grammatical Codes
 
-Single-letter tags attached to words after dictionary lookup:
+Single-letter tags attached to words after dictionary lookup.
+Source: dic.txt (SARMA 2.0 documentation). Lowercase = derived/already-resolved form.
 
 | Code | Meaning |
 |------|---------|
-| `Z` | Verb |
-| `N` | Noun |
-| `V` / `A` | Adjective |
-| `D` | Adverb |
-| `E` | Past participle |
-| `G` | Gerund / present participle |
-| `S` | Adjective (alternate) |
+| `Z` | Ambiguity V-N-A (verb/noun/adj unresolved) |
+| `z` | Ambiguity v-n (3sg-s form: verb or noun) |
+| `V` | Main (content) verb (resolved from Z) |
+| `v` | Verb -s/-es form (3rd person singular present) |
+| `N` | Noun (singular) |
+| `n` | Noun (plural form) |
+| `A` | Adjective, ordinal numeral |
+| `a` | Adjective-adverb ("more", "less") |
+| `S` | Demonstrative pronoun (adjectival: "this book") |
+| `O` | Demonstrative pronoun (standalone: "this", "that") |
+| `D` | Adverb, parenthetical word/phrase |
+| `d` | Adverb/adjective ambiguity |
+| `E` | -ed forms and irregular past (past participle / simple past) |
+| `e` | Ambiguous: infinitive / participle-II / past tense |
+| `G` | -ing verb forms (gerund / present participle) |
+| `F` | Active present participle — analyzer-generated |
+| `f` | Determiner-expression (e.g. "a lot of") |
 | `P` | Preposition |
-| `C` | Conjunction |
-| `X` | Infinitive marker |
-| `U` | Unique verb form (e.g. "must", "can") |
-| `F` | Passive participle |
-| `R` | Pronoun |
+| `p` | Preposition (already resolved) |
+| `C` | Conjunction (coordinating/disjunctive) |
+| `J` | Conjunction (subordinating), phrase-boundary separator |
+| `X` | Auxiliary verb 'be' (is/are/was/were) |
+| `x` | Impersonal verb combination ("there is", etc.) |
+| `Y` | Auxiliary verb 'have' (possession / perfect) |
+| `y` | Auxiliary verb 'have' (existential/copular sense) |
+| `B` | Infinitive particle 'to' (before perfective verb) |
+| `b` | Infinitive particle 'to' (before imperfective verb) |
+| `U` | Modal verb ("must", "can", "shall") |
+| `u` | Modal verb combination ("had better", "ought to") |
+| `K` | Negative particle 'not' |
+| `k` | Negative particle 'no' |
+| `R` | Personal pronoun ("I", "you", "he") |
+| `r` | Compound personal pronoun ("myself", "yourself") |
+| `M` | Indirect/object pronoun ("him", "her", "them") |
+| `m` | Compound indirect pronoun ("himself", "themselves") |
 | `Q` | Question word |
-| `J` | Conjunction (subordinating) |
-| `T` | Empty / separator |
-| `#` | Number |
-| `?` | Unknown / unrecognized word |
-| `n` | Noun (plural) |
-| `w` | Lowercase modifier |
+| `L` | Relative word ', который' (which/who — resolved) |
+| `l` | Movable relative 'whose' — analyzer-generated |
+| `T` | Determiner (article); outputs empty string |
+| `t` | Determiner — segment boundary — analyzer-generated |
+| `H` | Digits and numeric combinations |
+| `I` | Cardinal numeral |
+| `W` | Multi-word phrase marker (not in dic.txt; inferred) |
+| `w` | Multi-word/compound modifier flag (inferred) |
+| `#` | Untranslatable unit (proper noun, designation) |
+| `?` | Unknown / unrecognized word (not in dictionary) |
+| `\|` | Fictitious separator (clause boundary in token stream) |
 
 Suffix numbers (e.g. `N001`) encode paradigm indices for inflection lookup.
 

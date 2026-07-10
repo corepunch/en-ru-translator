@@ -58,6 +58,10 @@ See RULES_APPLIED.md Step 3 for the full table. Key corrections vs. earlier docs
 - `Y`/`y` = 'have' (two senses), `X` = 'be'
 - `Z` = V-N-A ambiguity (resolved by rules into `V`, `N`, or `A`)
 
+### Working assumption for unknown symbols
+
+**Default hypothesis:** a symbol means the same in rule patterns/replacements as it does in the dictionary format (dic.txt). Verify this first using binary patching or disassembly. If it doesn't hold — the symbol behaves differently in rules — then determine the rule-specific meaning from the C code or patch experiments.
+
 ### Remaining unknowns (operator/punctuation symbols only)
 
 1. `$` in `<$>` — captures a span, referenced in replacement by `$`; exact span semantics unclear

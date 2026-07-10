@@ -1,4 +1,5 @@
 local utils = {}
+local dbg = require "dbg"
 
 local cp866_to_utf8 = {
   [0x80]="А", [0x81]="Б", [0x82]="В", [0x83]="Г",
@@ -24,6 +25,12 @@ local cp866_to_utf8 = {
 
 function utils.extract(s)
   return s:match("[\127-\255]+")
+end
+
+function utils.map(t, f)
+  local r = {}
+  for i, v in ipairs(t) do r[i] = f(v, i) end
+  return r
 end
 
 function utils.decode(s, strip)
@@ -109,28 +116,43 @@ function utils.decode_base_entry(b, label)
 end
 
 function utils.tokenize(s, en_ru)
-  print("Input: "..s)
+  dbg.log(1, "Input:", s)
+  -- expand contracted forms into separate words for proper dictionary lookup
+  s = s:gsub("cannot", "can not"):gsub("can't", "can not")
   local prev, tbl, words, last, i = nil, {}, {}, 0, 1
   for w in s:gmatch("%w+[,%!%.;:]?") do table.insert(words, w) end
+  dbg.log(2, "  Words:", table.concat(words, " | "))
   while i <= #words do
     local word, punct = words[i]:match("(%w+)([,%!%.;:]?)")
     word = word:lower()
     if not prev then
-      if en_ru[word] then table.insert(tbl, en_ru[word].__lex)
-      else table.insert(tbl, '#'..word) end
+      if en_ru[word] then
+        dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word].__lex))
+        table.insert(tbl, en_ru[word].__lex)
+      else
+        dbg.log(2, "  Lookup:", word, "→ (not found)")
+        table.insert(tbl, '#'..word)
+      end
       prev, last = en_ru[word], i
-      if punct ~= "" then table.insert(tbl, punct)
-      else prev, last = en_ru[word], i end
-    elseif not prev[word] or punct then
+      if punct ~= "" then table.insert(tbl, punct) end
+    elseif not prev[word] then
+      dbg.log(2, "  Phrase break:", word, "→ backtracking to last")
       i, prev = last, nil
     elseif prev[word].__lex then
+      dbg.log(2, "  Phrase complete:", word, "→",
+        utils.decode(prev[word].__lex))
       tbl[#tbl], last = prev[word].__lex, i
+      if punct ~= "" then table.insert(tbl, punct) end
     else
+      dbg.log(2, "  Phrase continue:", word)
       prev = prev[word]
     end
     i = i + 1
   end
-  -- for k, v in pairs(tbl) do print(v) end
+  dbg.log(2, "  Tokens:",
+    table.concat(utils.map(tbl, function(t)
+      return utils.decode(t, true)
+    end), " | "))
   return tbl
 end
 

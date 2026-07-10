@@ -1,5 +1,6 @@
 local utils = require "utils"
 local rules = require "rules"
+local dbg = require "dbg"
 local parser = {}
 
 local function echo(color, s, ...)
@@ -74,12 +75,16 @@ end
 
 local function find_and_replace(ts, j, s)
 	local z = find(ts[j], 'Z')
-	-- print('--', utils.decode(ts[j]), s, z and utils.decode(z))
 	if z and string.find('VNA', s) then
 		local tmp = z:gsub('^.','V')
-		if find(tmp, s) then ts[j] = find(tmp, s) end
-	elseif find(ts[j], s) then
-		ts[j] = find(ts[j], s)
+		if find(tmp, s) then ts[j] = find(tmp, s); return end
+	end
+	local f = find(ts[j], s)
+	if f then
+		ts[j] = f
+	elseif #s == 1 then
+		local _, e = ts[j]:find(s, 1, true)
+		if e then ts[j] = ts[j]:sub(e) end
 	end
 end
 
@@ -211,21 +216,27 @@ local function try_match_pattern(ts, m, j, f, replace)
 	local fallback = nil
 	for t, v, i in m do
 		::restart::
-		if not ts[j] then return false
+		if not ts[j] then
+			dbg.log(3, "    match fail: end of tokens at pos", j)
+			return false
 		elseif t == 'wildcard' and xor(i,j==1 or j>#ts) then eat('@', f())
 		elseif t == 'select' and xor(i, find(ts[j],v)) then j=replace(ts,j,v,f())
 		elseif t == 'any' then
 			local d = eat('$', f())
 			fallback = function(n)
 				if xor(i, find(ts[n], v)) then
+					dbg.log(3, "    any-match consumed token", n, "tag", v)
 					j = nop(ts,n,v,nil,d)
 					return true
 				end
 			end
-		elseif t == 'literal' and xor(i, ts[j] == en_ru[v]) then j=replace(ts,j,v,f())
+		elseif t == 'literal' and xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then j=replace(ts,j,v,f())
 		elseif t == 'char' and xor(i, find(ts[j], v)) then j=replace(ts,j,v,f())
 		elseif fallback and fallback(j) then goto restart
-		else return false end
+		else
+			dbg.log(3, "    match fail: pos", j, "type", t, "val", v, "neg", i)
+			return false
+		end
 	end
 	return j  -- return position after last matched token
 end
@@ -237,17 +248,35 @@ local function reorder_tokens(ts, positions, digits)
 	-- snapshot the matched tokens
 	local snap = {}
 	for k, pos in ipairs(positions) do snap[k] = ts[pos] end
+	dbg.log(2, "    reorder: positions=", table.concat(positions,","),
+	  "digits=", digits,
+	  "snap=", table.concat(utils.map(snap, function(t)
+	    return utils.decode(t, true)
+	  end), ","))
+	-- track which snap indices have been used
+	local used = {}
 	-- write back in digit-specified order
 	for k = 1, #digits do
 		local d = tonumber(digits:sub(k, k))
 		if d and d >= 1 and d <= #snap and positions[k] then
 			ts[positions[k]] = snap[d]
+			used[d] = true
 		end
 	end
-	-- suppress any trailing matched positions not covered by digits
+	-- fill remaining positions with unused snap entries in order
+	local next_snap = 1
 	for k = #digits + 1, #positions do
-		ts[positions[k]] = ' '
+		while used[next_snap] do next_snap = next_snap + 1 end
+		if next_snap <= #snap and positions[k] then
+			ts[positions[k]] = snap[next_snap]
+			used[next_snap] = true
+			next_snap = next_snap + 1
+		end
 	end
+	dbg.log(2, "    reorder result:",
+	  table.concat(utils.map(positions, function(pos)
+	    return utils.decode(ts[pos], true)
+	  end), ","))
 end
 
 -- collect_positions: dry-run that records which ts indices were consumed
@@ -257,7 +286,10 @@ local function collect_positions(ts, m, start)
 	local j = start
 	for t, v, i in m do
 		::restart::
-		if not ts[j] then return nil end
+		if not ts[j] then
+			dbg.log(3, "    collect fail: end of tokens at", j)
+			return nil
+		end
 		if t == 'wildcard' then
 			if not xor(i, j==1 or j>#ts) then return nil end
 			-- wildcard matches boundary, doesn't consume a token
@@ -273,7 +305,7 @@ local function collect_positions(ts, m, start)
 			if not xor(i, find(ts[j], v)) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'literal' then
-			if not xor(i, ts[j] == en_ru[v]) then return nil end
+			if not xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'char' then
 			if not xor(i, find(ts[j], v)) then
@@ -283,6 +315,7 @@ local function collect_positions(ts, m, start)
 			table.insert(positions, j); j = j + 1
 		end
 	end
+	dbg.log(3, "    collected positions:", table.concat(positions, ","))
 	return positions
 end
 
@@ -290,7 +323,7 @@ local function match_pattern(ts, m, r)
 	local is_digit_action = r and r:match("^%d+$")
 	for i = 1, #ts do
 		if try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), nop) then
-			if _G.TRANSLATOR_DEBUG then print("Applying "..m, r) end
+			dbg.log(1, "  Applying:", m, r)
 			if is_digit_action then
 				local positions = collect_positions(ts, pattern_tokens(m), i)
 				if positions and #positions > 0 then
@@ -299,21 +332,47 @@ local function match_pattern(ts, m, r)
 			else
 				try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
 			end
+			dbg.log(3, "    tokens after:",
+			  table.concat(utils.map(ts, function(t)
+			    return type(t) == 'string' and t:sub(1,1)..':'..utils.decode(t, true) or '?'
+			  end), " | "))
 		end
 	end
 end
 
 local function loop(ts)
-	-- if match_pattern(ts, "*<TAO>[NV]`ever`", "@$@`Dкогда-либо`") then
-	-- if match_pattern(ts, "*`no`,RXK*", "@y    ") then
-	-- if match_pattern(ts, "V<TAO>NG", "@$NF") then
-	-- if match_pattern(ts, "*<dD,>`if`~<,>`then`", "@$J$j") then
-	-- 	echo('green', '*cool*') else echo('red', '*not cool*')
-	-- end
-	for _, rs in ipairs(rules) do
+	-- convert h tag (historical/irregular past) to E for proper rule matching
+	for i = 1, #ts do
+		if ts[i]:byte(1) == string.byte('h') then
+			dbg.log(2, "  h→E conversion:",
+			  utils.decode(ts[i], true), "→ E" .. utils.decode(ts[i]:sub(2), true))
+			ts[i] = 'E' .. ts[i]:sub(2)
+		end
+	end
+	dbg.log(3, "Initial tokens:",
+	  table.concat(utils.map(ts, function(t)
+	    return (t:sub(1,1))..":"..utils.decode(t, true)
+	  end), " | "))
+	for ri, rs in ipairs(rules) do
+		dbg.log(2, "Rule set T" .. ri .. ":")
 		for _, r in ipairs(rs) do
 			local _, pat, act = table.unpack(r)
 			match_pattern(ts, pat, act or "")
+		end
+		dbg.log(3, "  After T" .. ri .. ":",
+		  table.concat(utils.map(ts, function(t)
+		    return t:sub(1,1)..":"..utils.decode(t, true)
+		  end), " | "))
+	end
+	-- post-process: prefer X (copula) over U (modal) when followed by A (adjective) form
+	for i = 1, #ts - 1 do
+		if ts[i]:sub(1,1) == 'U' and ts[i+1]:find('A', 1, true) then
+			local xform = find(ts[i], 'X')
+			if xform then
+				dbg.log(2, "  U→X post-process:",
+				  utils.decode(ts[i], true), "→", utils.decode(xform, true))
+				ts[i] = xform
+			end
 		end
 	end
 end
@@ -321,9 +380,11 @@ end
 function parser.collect(dic, ts)
 	en_ru = dic
 	loop(ts)
-	if _G.TRANSLATOR_DEBUG then
-		for _, n in ipairs(ts) do
-			echo('blue', "%s", type(n)=='table' and utils.debug(n) or utils.decode(n))
+	dbg.log(1, "Tokens after rules:")
+	for _, n in ipairs(ts) do
+		if dbg.level >= 1 then
+			echo(dbg.level >= 3 and 'magenta' or 'blue', "%s",
+				type(n)=='table' and utils.debug(n) or utils.decode(n))
 		end
 	end
 	return ts

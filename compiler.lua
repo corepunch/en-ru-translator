@@ -1,5 +1,6 @@
 local utils = require "utils"
 local paradigms = require "paradigms"
+local dbg = require "dbg"
 local compiler = {}
 
 local uniques = {
@@ -38,8 +39,7 @@ local function find_form(token, tag)
   for t, word in token:gmatch("([A-Za-z;,])([^\127-\255]*[\127-\255][^\127-\255\127-\255A-Za-z]*)") do
     if t == tag then return word end
   end
-  -- fallback: extract first high-byte sequence
-  return utils.decode(token, true)
+  return nil
 end
 
 local function find(s, n, t)
@@ -76,26 +76,64 @@ local printers = {
     if g then e.gender = tonumber(g) end  -- 1=masc, 2=fem
     return utils.decode(t, true)
   end,
-  N = function(t, e) 
+  N = function(t, e, s, i)
     local d = utils.decode(t, true)
     local b = compiler.base[d]
     e.gender = get_gender(t)
     e.plural = e.plural and (b:byte(3)&0x4) == 0
-    return paradigms.noun(t, b:byte(4)&~0x80, e), set(e, 'form', case['В'])
+    if i and i > 1 and s and s[i-1] and s[i-1]:sub(1,1) == 'N' then
+      e.form = case["Р"]
+      dbg.log(2, "    N genitive modifier:", d)
+    end
+    local paradigm = b:byte(4)&~0x80
+    local result = paradigms.noun(t, paradigm, e)
+    dbg.log(2, string.format("    N: word=%-12s paradigm=%-3d gender=%d form=%d => %s",
+      d, paradigm, e.gender, e.form, utils.decode(result)))
+    return result, set(e, 'form', case['В'])
   end,
   P = function(t, e)
     if case[utils.decode(t:sub(3,3), true)] then
       e.form = case[utils.decode(t:sub(3,3), true)]
-      return utils.decode(t:sub(4), true)  -- strip trailing ASCII flags (e.g. 'b')
+      local result = utils.decode(t:sub(4), true)
+      dbg.log(2, string.format("    P: case=%s form=%d", utils.decode(t:sub(3,3), true), e.form))
+      return result
     else
       e.form = case[utils.decode(t:sub(2,2), true)]
-      return utils.decode(t:sub(3), true)
+      local result = utils.decode(t:sub(3), true)
+      dbg.log(2, string.format("    P: case=%s form=%d", utils.decode(t:sub(2,2), true), e.form))
+      return result
     end
   end,
-  Z = function(t, e)
+  Z = function(t, e, s, i)
     local d = utils.decode(t, true)
     e.form = case["В"]
-    -- only reset perfective if it wasn't set by a preceding modal/auxiliary
+    dbg.log(2, string.format("    Z start: word=%-12s infinitive=%s perfective=%s",
+      d, tostring(e.infinitive), tostring(e.perfective)))
+    -- After copula (e.infinitive=true), use short adjective form if available
+    if e.infinitive and t:find('A', 1, true) then
+      e.infinitive = false
+      local apost = t:find('A', 1, true)
+      if apost then
+        local raw = t:sub(apost+1)
+        local utf = utils.decode(raw, true)
+        local stem = #utf > 4 and utf:sub(1, #utf-4) or utf
+        -- find head (first) N token for gender agreement, skip genitive modifiers
+        local gender = e.gender
+        if s then
+          for j = i and (i-1) or 0, 1, -1 do
+            if s[j] and s[j]:sub(1,1) == 'N' and
+               (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+              gender = get_gender(s[j])
+              break
+            end
+          end
+        end
+        local idx = e.plural and 4 or ((gender or 1) + 1)
+        dbg.log(2, string.format("    Z copula+adj: stem=%-10s gender=%d idx=%d => %s",
+          stem, gender, idx, stem .. paradigms.past_verb[idx]))
+        return stem .. paradigms.past_verb[idx]
+      end
+    end
     if not e.perfective then
       e.perfective = (e.word == 1)
     end
@@ -103,15 +141,24 @@ local printers = {
     if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2)~=2 then
       t = compiler.base[d]:sub(6)
       d = utils.decode(t)
+      dbg.log(2, string.format("    Z perfective switch: → %s", d))
     end
     if e.infinitive then e.infinitive = false return d end
     if not compiler.base[d] then return d end
     return paradigms.verb(t, compiler.base[d]:byte(4)&~0x80, e)
   end,
-  U = function(t, e)
+  U = function(t, e, s, i)
     local d = utils.decode(t, true)
+    -- suppress modal when it was originally copula (X) followed by adjective
+    if d == "должен" and s and s[i+1] and s[i+1]:find('A', 1, true) then
+      e.infinitive, e.perfective = true, true
+      dbg.log(2, "    U suppressed (copula+adj context):", d)
+      return ""
+    end
     local u = uniques[d]
     e.infinitive, e.perfective = true, true
+    dbg.log(2, string.format("    U: word=%-12s → infinitive=%s perfective=%s",
+      d, tostring(e.infinitive), tostring(e.perfective)))
     if u then
       local _u = utils.extract(t)
       return utils.decode(_u:sub(1,#_u-2))..u[e.plural and 4 or (e.gender+1)]
@@ -132,6 +179,20 @@ local printers = {
     local b = compiler.base[d]
     if not b then return d end
     e.past = true
+    -- '1' flag after tag (e.g. E1видеть) means "is already a resolved past form",
+    -- suppress perfective conversion
+    if t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
+      local pt = b:sub(6)
+      if #pt > 0 and pt:byte(1) >= 128 then
+        dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
+        t = pt
+        d = utils.decode(t)
+      end
+    end
+    b = compiler.base[d]
+    if not b then return d end
+    dbg.log(2, string.format("    E: word=%-12s perf=%s => paradigm=%d",
+      d, tostring(e.perfective), b:byte(4)&~0x80))
     return paradigms.verb(t, b:byte(4)&~0x80, e)
   end,
 }
@@ -154,7 +215,24 @@ printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction), L (relative pronoun), j (clause-end marker), O (demonstrative)
 -- These are structural/functional words — output their Russian text directly
 printers.J = function(t) return utils.decode(t, true) end
-printers.L = function(t) return utils.decode(t, true) end
+printers.L = function(t, e, s, i)
+  -- strip the leading tag byte, keep leading comma+space
+  local result = utils.decode(t:sub(2), false)
+  local gender = nil
+  if s then
+    for j = (i and i-1 or 0), 1, -1 do
+      if s[j] and s[j]:sub(1,1) == 'N' and
+         (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+        gender = get_gender(s[j])
+        break
+      end
+    end
+  end
+  if gender == 2 then
+    result = result:gsub("который", "которую")
+  end
+  return result
+end
 printers.j = function(t) return "" end  -- clause-end marker is silent
 printers.O = function(t, e)
   local ok, res = pcall(printers.A, t, e)
@@ -163,8 +241,24 @@ printers.O = function(t, e)
 end
 printers.l = printers.L
 printers.s = printers.S
--- h (history/alternate form marker) — decode and output
-printers.h = function(t) return utils.decode(t, true) end
+-- h (history/alternate form marker) — treat as past tense like E
+  printers.h = function(t, e)
+    local d = utils.decode(t, true)
+    local b = compiler.base[d]
+    if not b then return d end
+    e.past = true
+    if t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
+      local pt = b:sub(6)
+      if #pt > 0 and pt:byte(1) >= 128 then
+        dbg.log(2, string.format("    h perfective switch: %s → %s", d, utils.decode(pt)))
+        t = pt
+        d = utils.decode(t)
+      end
+    end
+  b = compiler.base[d]
+  if not b then return d end
+  return paradigms.verb(t, b:byte(4)&~0x80, e)
+end
 -- Q (question word), M (indirect pronoun), m (compound pronoun), r (compound personal)
 printers.Q = function(t) return utils.decode(t, true) end
 printers.M = function(t) return utils.decode(t, true) end
@@ -188,15 +282,21 @@ printers["#"] = function(t) return t:sub(2) end  -- output raw (ASCII proper nou
 printers.F = function(t, e)
   e.past = true
   e.passive = true
+  e.perfective = true
+  dbg.log(2, string.format("    F: perfective=%s passive=%s",
+    tostring(e.perfective), tostring(e.passive)))
   return printers.Z(t, e)
 end
-printers.X = function(t, e)
+printers.X = function(t, e, s, i)
   if t:match("%d+") == "003" then
     e.infinitive = true
+    dbg.log(2, "    X (copula 003): infinitive=true")
+    if s and s[i+1] and s[i+1]:match("A[\128-\255]") then return "" end
     return "-"
   else
     local p = printers.V(t, e)
     e.infinitive = true
+    dbg.log(2, "    X (other): infinitive=true")
     return p
   end
 end
@@ -213,6 +313,11 @@ function compiler.compile(s)
   }
   local c = {}
 
+  dbg.log(1, "Compiler output:")
+  dbg.log(2, "Initial context:",
+    string.format("{gender=%d person=%d form=%d perfective=%s}",
+      e.gender, e.person, e.form, tostring(e.perfective)))
+
   -- for i, w in ipairs(s) do print(utils.decode(w)) end
 
   for i, w in ipairs(s) do
@@ -224,12 +329,15 @@ function compiler.compile(s)
       local func = printers[tag]
       local ok, res = pcall(func, w, e, s, i)
       local out = ok and res or utils.decode(w, true)
-      if _G.TRANSLATOR_DEBUG then
-        print(string.format("  [%d] tag=%-2s token=%-30s => %-20s  e={inf=%s perf=%s plur=%s form=%s}",
-          i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),
-          tostring(e.infinitive), tostring(e.perfective), tostring(e.plural), tostring(e.form)))
-        if not ok then print("    ERROR: "..tostring(res)) end
+      -- handle leading punctuation in output (e.g. relative pronoun ", которую")
+      if out and out:match("^[,%!%.;:]") and #c > 0 then
+        c[#c] = c[#c] .. out:sub(1,1)
+        out = out:sub(2):match("^%s*(.*)") or ""
       end
+      dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
+        i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),
+        tostring(e.infinitive), tostring(e.perfective), tostring(e.plural), tostring(e.form)))
+      if not ok then dbg.log(1, "    ERROR: "..tostring(res)) end
       if out and #out > 0 then table.insert(c, out:find('#') and out:sub(2) or out) end
       e.word = e.word + 1
     end

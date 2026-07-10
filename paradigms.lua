@@ -368,6 +368,7 @@ local pronouns = {
 }
 
 local past_verb = { "о", "", "а", "и", "и", "и", }
+paradigms.past_verb = past_verb
 
 paradigms.noun_gender = function(code) return code:byte(3)&3 end
 
@@ -405,8 +406,10 @@ function paradigms.verb(base, table_id, e)
   elseif not e.past then
     return utils.decode(cut(extracted, len), true)..word_at(str, index)
   elseif e.passive then
-    local p = cut(extracted, len)..word_at(str, 13)
-    return paradigms.adjective(p, 0, e, true)
+    local part = word_at(str, 13)
+    local short = utf8.len(part) > 3 and string.sub(part, 1, utf8.offset(part, -3) - 1) or ""
+    local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
+    return utils.decode(cut(extracted, len), true)..short..past_verb[past_idx]
   else
     -- past tense: gender-based agreement (masc="", fem="а", neut="о", pl="и")
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)

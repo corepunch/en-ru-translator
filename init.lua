@@ -74,24 +74,27 @@ file2:close()
 -- print(tohex(base["если"]))
 -- print(utils.decode(base["перспектива"]))
 
+local dbg = require "dbg"
+
 -- CLI flags:
---   lua init.lua "Sentence."          → translate, quiet mode
---   lua init.lua "Sentence." --debug  → translate with full debug trace
+--   lua init.lua "Sentence."             → translate, quiet mode
+--   lua init.lua "Sentence." --debug     → translate, level 1 (rule+compiler)
+--   lua init.lua "Sentence." --debug=2   → level 2 (+match attempts, context)
+--   lua init.lua "Sentence." --debug=3   → level 3 (+hex dumps, all internals)
 local input_sentence = "You are standing in an open field west of a white house, with a boarded front door."
-local debug_mode = false
 if arg then
   for _, a in ipairs(arg) do
-    if a == "--debug" then debug_mode = true
+    if a == "--debug" then
+      dbg.set_level(1)
+    elseif a:match("^--debug=(%d+)$") then
+      dbg.set_level(tonumber(a:match("^--debug=(%d+)$")))
     elseif a:sub(1,2) ~= "--" then input_sentence = a end
   end
 end
 
--- set global debug flag used by parser and compiler
-_G.TRANSLATOR_DEBUG = debug_mode
+_G.TRANSLATOR_DEBUG = dbg.level > 0
 
-if debug_mode then
-  print(utils.decode(en_ru.fine.__lex))
-end
+dbg.log(1, "Debug level:", dbg.level)
 
 local s, e = parser.collect(en_ru, utils.tokenize(input_sentence, en_ru))
 

@@ -136,6 +136,8 @@ function utils.tokenize(s, en_ru)
   dbg.log(1, "Input:", s)
   -- expand contracted forms into separate words for proper dictionary lookup
   s = s:gsub("cannot", "can not"):gsub("can't", "can not")
+  -- strip commas from within digit sequences (e.g. 1,000,000 → 1000000)
+  while s:find("(%d+),(%d+)") do s = s:gsub("(%d+),(%d+)", "%1%2") end
   local prev, tbl, words, last, i = nil, {}, {}, 0, 1
   for w in s:gmatch("%w+[,%!%.;:]?") do table.insert(words, w) end
   dbg.log(2, "  Words:", table.concat(words, " | "))

@@ -34,12 +34,19 @@ end
 
 -- find_form: extract the Russian text for a specific tag letter from a multi-form token
 -- e.g. find_form("SэтоOэтотL, который", "L") → "который"
+-- Uses byte-scanning because tokens are CP866-encoded (single-byte Russian chars).
+-- Stops at the next ASCII letter (next tag), backslash (lemma separator), or punctuation.
 local function find_form(token, tag)
-  -- iterate tag+word pairs: each tag is an uppercase/lowercase letter before CP866 bytes
-  for t, word in token:gmatch("([A-Za-z;,])([^\127-\255]*[\127-\255][^\127-\255\127-\255A-Za-z]*)") do
-    if t == tag then return word end
+  local i = token:find(tag, 1, true)
+  if not i then return nil end
+  local result = {}
+  for j = i + 1, #token do
+    local b = token:byte(j)
+    -- stop at next tag letter, backslash (lemma), semicolon (alternate), or period
+    if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or b == 0x5C or b == 0x3B or b == 0x2E then break end
+    result[#result+1] = token:sub(j, j)
   end
-  return nil
+  return #result > 0 and table.concat(result) or nil
 end
 
 local function find(s, n, t)
@@ -88,6 +95,8 @@ local printers = {
     end
     e.gender = get_gender(t)
     e.plural = e.plural and (b:byte(3)&0x4) == 0
+    -- LTGOLD encodes genitive-modifier propagation in T2/T8 rule flags (constituent-type
+    -- index bits). Without the flag mechanism, we approximate: N+N → second N is genitive.
     if i and i > 1 and s and s[i-1] and s[i-1]:sub(1,1) == 'N' then
       e.form = case["Р"]
       dbg.log(2, "    N genitive modifier:", d)
@@ -96,7 +105,10 @@ local printers = {
     local result = paradigms.noun(t, paradigm, e)
     dbg.log(2, string.format("    N: word=%-12s paradigm=%-3d gender=%d form=%d => %s",
       d, paradigm, e.gender, e.form, utils.decode(result)))
-    return result, set(e, 'form', case['В'])
+    -- Don't reset e.form to accusative here — let the preposition's case (set by P printer)
+    -- propagate through the entire noun chain. Otherwise "для испытания программы" would
+    -- lose genitive after the first noun and become "для испытания программа".
+    return result
   end,
   P = function(t, e)
     if case[utils.decode(t:sub(3,3), true)] then
@@ -121,7 +133,10 @@ local printers = {
     e.form = case["В"]
     dbg.log(2, string.format("    Z start: word=%-12s infinitive=%s perfective=%s",
       d, tostring(e.infinitive), tostring(e.perfective)))
-    -- After copula (e.infinitive=true), use short adjective form if available
+    -- After copula (e.infinitive=true), use short adjective form if available.
+    -- LTGOLD handles this via verb paradigm table: copula 003 sets infinitive flag,
+    -- and the Z printer reads the A-form's short adjective from the paradigm table.
+    -- The if-chain here approximates that lookup without the full paradigm table.
     if e.infinitive and t:find('A', 1, true) then
       e.infinitive = false
       local apost = t:find('A', 1, true)
@@ -161,7 +176,9 @@ local printers = {
   end,
   U = function(t, e, s, i)
     local d = utils.decode(t, true)
-    -- suppress modal when it was originally copula (X) followed by adjective
+    -- suppress modal when it was originally copula (X) followed by adjective.
+    -- LTGOLD encodes this in T8 guard-rule flags: the constituent-type index for
+    -- copula+adjective suppresses the modal output. Without flags, hardcode "должен".
     if d == "должен" and s and s[i+1] and s[i+1]:find('A', 1, true) then
       e.infinitive, e.perfective = true, true
       dbg.log(2, "    U suppressed (copula+adj context):", d)
@@ -191,7 +208,9 @@ local printers = {
     local b = compiler.base[d]
     if not b then return d end
     e.past = true
-    -- detect passive voice: E followed by PТ (instrumental case-marker "by")
+    -- detect passive voice: E followed by PТ (instrumental case-marker "by").
+    -- LTGOLD's T7/T8 guard-rule flags set a passive constituent-type index on the
+    -- participle token, making this stream-scan unnecessary.
     if s and s[i+1] and s[i+1]:sub(1,1) == 'P' and #s[i+1] == 2 and s[i+1]:byte(2) == 0x92 then
       e.passive = true
       dbg.log(2, "    E passive context detected")
@@ -232,7 +251,19 @@ printers.S = function(t, e)
   return utils.decode(t, true)
 end
 printers.V = printers.Z
-printers.G = printers.Z
+printers.G = function(t, e, s, i)
+  -- G→N fallback: after a preposition (e.form ~= 1), gerund forms like "testing"
+  -- should output as nouns ("испытания") rather than verbals ("тестировать").
+  -- Check if the token has an embedded N form; if so, use the noun printer instead.
+  if e.form ~= 1 and t:find('N', 1, true) then
+    local nform = find_form(t, 'N')
+    if nform then
+      dbg.log(2, "    G→N fallback: using noun form for case", e.form)
+      return printers.N('N' .. nform, e)
+    end
+  end
+  return printers.Z(t, e)
+end
 printers.e = printers.E
 -- Lowercase resolved tags — decode first available form
 printers.n = function(t, e) e.plural = true return printers.N(t, e) end
@@ -264,6 +295,9 @@ end
 printers.j = function(t) return "" end  -- clause-end marker is silent
 printers.O = function(t, e, s, i)
   local d = utils.decode(t, true)
+  -- Hardcoded demonstrative pronoun forms. LTGOLD stores these in the Russian paradigm
+  -- tables (BASE.RUS) indexed by paradigm number. A table lookup over this if-chain
+  -- would match LTGOLD's approach and generalize to other demonstratives.
   if d == "этот" then
     if s then
       for j = i and (i+1) or 1, #s do
@@ -335,7 +369,8 @@ end
 printers.X = function(t, e, s, i)
   if t:match("%d+") == "003" then
     e.infinitive = true
-    dbg.log(2, "    X (copula 003): infinitive=true")
+    e.form = case["И"]
+    dbg.log(2, "    X (copula 003): infinitive=true, form=nom")
     if s and s[i+1] and s[i+1]:match("A[\128-\255]") then return "" end
     return "-"
   else

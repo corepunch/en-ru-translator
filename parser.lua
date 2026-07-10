@@ -86,7 +86,10 @@ local function find_and_replace(ts, j, s)
 	if f then
 		dbg.diag("tag", "resolve:", utils.decode(ts[j], true), "→", utils.decode(f, true))
 		ts[j] = f
-	elseif #s == 1 then
+	-- fallback: if no exact form matches, search for the tag letter inside the token.
+	-- For W tokens (multi-word phrases), skip this: sub-resolve would strip the W prefix
+	-- and orphan trailing forms (e.g. WAэлектронныйNперевод → AэлектронныйNперевод, losing Nперевод).
+	elseif #s == 1 and ts[j]:byte(1) ~= string.byte('W') then
 		local _, e = ts[j]:find(s, 1, true)
 		if e then
 		  dbg.diag("tag", "sub-resolve:", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(e), true))
@@ -395,6 +398,24 @@ end
 function parser.collect(dic, ts)
 	en_ru = dic
 	loop(ts)
+	-- W tokens (multi-word phrases like WAэлектронныйNперевод) survive rules but must
+	-- be expanded into their constituent forms (Aэлектронный + Nперевод) before the
+	-- compiler processes them. The gmatch skips the W prefix since 'W' is not followed
+	-- by CP866 bytes, so the tag reverts to the first real tag letter after W.
+	for i = #ts, 1, -1 do
+		if ts[i]:sub(1,1) == 'W' then
+			local expanded = {}
+			for word in ts[i]:gmatch("([%a ][0-9]*[\127-\255]+)") do
+				table.insert(expanded, word)
+			end
+			if #expanded > 0 then
+				table.remove(ts, i)
+				for j = #expanded, 1, -1 do
+					table.insert(ts, i, expanded[j])
+				end
+			end
+		end
+	end
 	dbg.log(1, "Tokens after rules:")
 	for _, n in ipairs(ts) do
 		if dbg.level >= 1 then
@@ -403,25 +424,6 @@ function parser.collect(dic, ts)
 		end
 	end
 	return ts
-  -- local out, prev = {}, nil
-  -- for i = 1, #ts do
-	-- 	local sym = choose(ts, prev, i)
-	-- 	if sym and sym ~= "" then
-	-- 		if sym:sub(1,1) == 'W' then
-	-- 			for word in sym:gmatch("([%a ][0-9]*[\127-\255]+)") do
-	-- 				table.insert(out, word)
-	-- 				prev = word
-	-- 			end
-	-- 		else
-	-- 			table.insert(out, sym)
-	-- 			prev = sym
-	-- 		end
-	-- 		-- print(utils.decode(sym))
-	-- 	else
-	-- 		print('skip', utils.debug(ts[i], nil, 1))
-	-- 	end
-  -- end
-  -- return out
 end
 
 return parser

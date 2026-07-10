@@ -102,7 +102,13 @@ Suffix numbers (e.g. `N001`) encode paradigm indices for inflection lookup.
 
 ## Conventions
 
-- **No comments** in Lua source files — keep code compact
+- **Comment all changes** — when modifying code, add comments explaining what the change does and why
+- **No other comments** — existing code has no comments; keep new comments sparse but informative
+- **Prefer tables over ifs** — LTGOLD encodes grammar in data tables (rule flags, paradigm indices,
+  case tables, constituent-type markers). Avoid hardcoding logic in if-chains when the same
+  behavior can be expressed as a lookup, ideally from LTGOLD-extracted tables, or custom tables
+  as fallback. Each if added to `compiler.lua` or `parser.lua` should have a comment noting
+  which LTGOLD table would replace it.
 - **No new dependencies** — pure Lua only, no luarocks
 - **Match LTGOLD style** — preserve original rule order, pattern format, and code structure
 - **CP866 throughout** — legacy encoding internally, UTF-8 only for display via `utils.decode()`

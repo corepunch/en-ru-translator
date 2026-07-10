@@ -105,7 +105,12 @@ local printers = {
     end
   end,
   Z = function(t, e, s, i)
-    local d = utils.decode(t, true)
+    local d = utils.extract_form(t)
+    if #d == 0 then
+      -- leading tag has no Russian text, but secondary forms might have
+      if #utils.decode(t, true) > 0 then return "" end
+      return ""
+    end
     e.form = case["В"]
     dbg.log(2, string.format("    Z start: word=%-12s infinitive=%s perfective=%s",
       d, tostring(e.infinitive), tostring(e.perfective)))

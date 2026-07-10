@@ -55,21 +55,21 @@ python3 extract2.py  # outputs Lua table syntax
 
 | Tool | Purpose |
 |------|---------|
-| `dump.py` | CLI hex/text dumper with CP866 decoding |
-| `dump2.py` | Interactive curses hex viewer |
+| `hexdump.py` | CLI hex/text dumper with CP866 decoding |
+| `hexview.py` | Interactive curses hex viewer |
 
-### `dump.py`
+### `hexdump.py`
 
 Non-interactive hex dump. Shows offset + hex + decoded text.
 Useful for quick inspection of binary regions.
 
 ```sh
-python3 dump.py LTGOLD.EXE --width 32 --group 4 --enc cp866
-python3 dump.py LTGOLD.EXE --no-text          # hex only
-python3 dump.py LTGOLD.EXE --no-hex           # text only
+python3 hexdump.py LTGOLD.EXE --width 32 --group 4 --enc cp866
+python3 hexdump.py LTGOLD.EXE --no-text          # hex only
+python3 hexdump.py LTGOLD.EXE --no-hex           # text only
 ```
 
-### `dump2.py`
+### `hexview.py`
 
 Full curses-based hex editor/viewer. Supports:
 - Keyboard navigation (arrows, PgUp/PgDn)
@@ -80,9 +80,9 @@ Full curses-based hex editor/viewer. Supports:
 - Column width adjustment (`1`-`9`)
 
 ```sh
-python3 dump2.py LTGOLD.EXE
-python3 dump2.py LTGOLD.EXE --start 0x50000 --end 0x60000
-python3 dump2.py LTGOLD.EXE --find16 0x2A2A  # highlight word 0x2A2A
+python3 hexview.py LTGOLD.EXE
+python3 hexview.py LTGOLD.EXE --start 0x50000 --end 0x60000
+python3 hexview.py LTGOLD.EXE --find16 0x2A2A  # highlight word 0x2A2A
 ```
 
 **Controls:**
@@ -104,7 +104,7 @@ python3 dump2.py LTGOLD.EXE --find16 0x2A2A  # highlight word 0x2A2A
 |------|---------|
 | `dump3.py` | MZ EXE header parser + data region detector |
 | `find2.py` | Find dictionary separator bytes (`*`) near pattern delimiters |
-| `find3.py` | Find long Latin strings in text files |
+| `grep-latin.py` | Find long Latin strings in text files |
 | `findaddr.py` | Brute-force pattern scanner for known offset sequences |
 
 ### `dump3.py`
@@ -127,14 +127,14 @@ entries are stored in the binary.
 python3 find2.py
 ```
 
-### `find3.py`
+### `grep-latin.py`
 
 Finds consecutive Latin characters (default: 10+) in a text file. Helps locate
 English words embedded in otherwise binary or mixed-format files.
 
 ```sh
-python3 find3.py LTGOLD.EXE 10
-python3 find3.py some_output.txt 5
+python3 grep-latin.py LTGOLD.EXE 10
+python3 grep-latin.py some_output.txt 5
 ```
 
 ### `findaddr.py`
@@ -154,7 +154,7 @@ python3 findaddr.py
 | Tool | Purpose |
 |------|---------|
 | `process.py` | Search for CP866-encoded Russian words across all files |
-| `clear.py` | Zero out a byte range in a file (binary patching) |
+| `binzero.py` | Zero out a byte range in a file (binary patching) |
 
 ### `process.py`
 
@@ -168,13 +168,13 @@ Edit the `target` variable at the top of the file to search for different words.
 python3 process.py
 ```
 
-### `clear.py`
+### `binzero.py`
 
 Zeros out bytes in a file. Used for patching the binary when extracting or
 modifying data sections.
 
 ```sh
-python3 clear.py LTGOLD.EXE 0x50000 0x1000  # zero 4KB at offset 0x50000
+python3 binzero.py LTGOLD.EXE 0x50000 0x1000  # zero 4KB at offset 0x50000
 ```
 
 ## Russian Documentation Files

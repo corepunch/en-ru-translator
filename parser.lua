@@ -341,6 +341,10 @@ local function match_pattern(ts, m, r)
 end
 
 local function loop(ts)
+	-- strip space tokens that survive from tokenization
+	for i = #ts, 1, -1 do
+		if ts[i] == ' ' then table.remove(ts, i) end
+	end
 	-- convert h tag (historical/irregular past) to E for proper rule matching
 	for i = 1, #ts do
 		if ts[i]:byte(1) == string.byte('h') then
@@ -374,6 +378,10 @@ local function loop(ts)
 				ts[i] = xform
 			end
 		end
+	end
+	-- strip any remaining space tokens (injected by rules)
+	for i = #ts, 1, -1 do
+		if ts[i] == ' ' then table.remove(ts, i) end
 	end
 end
 

@@ -174,14 +174,19 @@ local printers = {
   C = function (t) return utils.decode(t, true) end,
   D = function (t) return utils.decode(t:sub(2), false) end,
   -- E/e: past participle / -ed form → produce past tense
-  E = function(t, e)
+  E = function(t, e, s, i)
     local d = utils.decode(t, true)
     local b = compiler.base[d]
     if not b then return d end
     e.past = true
+    -- detect passive voice: E followed by PТ (instrumental case-marker "by")
+    if s and s[i+1] and s[i+1]:sub(1,1) == 'P' and #s[i+1] == 2 and s[i+1]:byte(2) == 0x92 then
+      e.passive = true
+      dbg.log(2, "    E passive context detected")
+    end
     -- '1' flag after tag (e.g. E1видеть) means "is already a resolved past form",
-    -- suppress perfective conversion
-    if t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
+    -- suppress perfective conversion (also skip in passive for reflexive form)
+    if not e.passive and t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
@@ -191,8 +196,19 @@ local printers = {
     end
     b = compiler.base[d]
     if not b then return d end
-    dbg.log(2, string.format("    E: word=%-12s perf=%s => paradigm=%d",
-      d, tostring(e.perfective), b:byte(4)&~0x80))
+    dbg.log(2, string.format("    E: word=%-12s perf=%s pass=%s paradigm=%d",
+      d, tostring(e.perfective), tostring(e.passive), b:byte(4)&~0x80))
+    if e.passive then
+      -- use imperfective stem and produce reflexive past form
+      e.passive = false
+      local past = paradigms.verb(t, b:byte(4)&~0x80, e)
+      e.passive = true
+      -- add -ся for masculine singular, -сь otherwise
+      local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
+      local suffix = past_idx == 2 and 'ся' or 'сь'
+      dbg.log(2, string.format("    E reflexive passive: %s + %s", past, suffix))
+      return past .. suffix
+    end
     return paradigms.verb(t, b:byte(4)&~0x80, e)
   end,
 }

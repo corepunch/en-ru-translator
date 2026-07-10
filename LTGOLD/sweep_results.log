@@ -1,0 +1,72 @@
+Baseline: "Она может сказать Русского."
+Test sentence: "She can speak Russian."
+
+=== T8 (83 records) ===
+  [  0.. 82] ( 83 rec) -> TIMEOUT
+  [ 82.. 82] (  1 rec) -> DIFF
+  [ 41.. 82] ( 42 rec) -> DIFF
+  [ 20.. 82] ( 63 rec) -> DIFF
+  [ 10.. 82] ( 73 rec) -> TIMEOUT
+  [ 15.. 82] ( 68 rec) -> DIFF
+  [ 12.. 82] ( 71 rec) -> TIMEOUT
+  [ 13.. 82] ( 70 rec) -> DIFF
+  -> SAFE to clear [13..82] (70 records from end)
+  -> Record [12] is the boundary (clearing it crashes)
+     Boundary T8[12]: flags=0x003F  pat='L[RN]<$>p*'  act=''
+     Preceding T8[11]: flags=0x0038  pat='[UV][kNR][VXY]'  act=''
+  -> 5 suffix(es) changed output (rules fired on test sentence):
+      clear_from=13: "Она не могут сказать не Русский."
+      clear_from=15: "Она не могут сказать не Русский."
+      clear_from=20: "Она не могут сказать не Русский."
+      clear_from=41: "Русского может сказать."
+      clear_from=82: "Русского Она может сказать."
+
+=== T7 (35 records) ===
+  [  0.. 34] ( 35 rec) -> DIFF
+  -> SAFE to clear ALL 35 records
+  -> 1 suffix(es) changed output (rules fired on test sentence):
+      clear_from=0: "Она не мочь сказать Русского."
+
+=== T5 (9 records) ===
+  [  0..  8] (  9 rec) -> TIMEOUT
+  [  8..  8] (  1 rec) -> SAME
+  [  4..  8] (  5 rec) -> TIMEOUT
+  [  6..  8] (  3 rec) -> TIMEOUT
+  [  7..  8] (  2 rec) -> TIMEOUT
+  -> SAFE to clear [8..8] (1 records from end)
+  -> Record [7] is the boundary (clearing it crashes)
+     Boundary T5[7]: flags=0x0000  pat='NNw'  act='23'
+     Preceding T5[6]: flags=0x0000  pat='NANw'  act='234'
+
+=== T4 (178 records) ===
+  [  0..177] (178 rec) -> TIMEOUT
+  [177..177] (  1 rec) -> SAME
+  [ 88..177] ( 90 rec) -> TIMEOUT
+  [132..177] ( 46 rec) -> TIMEOUT
+  [154..177] ( 24 rec) -> TIMEOUT
+  [165..177] ( 13 rec) -> TIMEOUT
+  [171..177] (  7 rec) -> TIMEOUT
+  [174..177] (  4 rec) -> SAME
+  [172..177] (  6 rec) -> TIMEOUT
+  [173..177] (  5 rec) -> TIMEOUT
+  -> SAFE to clear [174..177] (4 records from end)
+  -> Record [173] is the boundary (clearing it crashes)
+     Boundary T4[173]: flags=0x00  pat='[RN#]`used``to`[GVE]'  act='@@ V'
+     Preceding T4[172]: flags=0x00  pat='`her`[,TAODdC&:;P*]'  act='M'
+
+=== T3 (136 records) ===
+  [  0..135] (136 rec) -> TIMEOUT
+  [135..135] (  1 rec) -> TIMEOUT
+  -> NOTHING can be cleared — even last record [135] crashes
+  -> Last record [135]: flags=0x0000  pat='T*'  act='#'
+
+=== T2 (157 records) ===
+  [  0..156] (157 rec) -> TIMEOUT
+  [156..156] (  1 rec) -> TIMEOUT
+  -> NOTHING can be cleared — even last record [156] crashes
+  -> Last record [156]: flags=0x0026  pat='`whether`<TDAOERNw?#\'">[XYUV]'  act='J'
+
+=== T1 (47 records) ===
+  [  0.. 46] ( 47 rec) -> SAME
+  -> SAFE to clear ALL 47 records
+

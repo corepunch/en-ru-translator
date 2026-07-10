@@ -1,11 +1,11 @@
-local parser = require "translator.parser"
-local compiler = require "translator.compiler"
-local utils = require "translator.utils"
-local load = require "translator.load"
-local paradigms = require "translator.paradigms"
+local parser = require "parser"
+local compiler = require "compiler"
+local utils = require "utils"
+local load = require "load"
+local paradigms = require "paradigms"
 
-local file = assert(io.open("translator/LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("translator/LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
+local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
 local en_ru = {}
 local base = {}
 
@@ -74,27 +74,26 @@ file2:close()
 -- print(tohex(base["если"]))
 -- print(utils.decode(base["перспектива"]))
 
--- print(utils.debug(en_ru.during))
-print(utils.decode(en_ru.fine.__lex))
--- print(utils.debug(en_ru.ever))
+-- CLI flags:
+--   lua init.lua "Sentence."          → translate, quiet mode
+--   lua init.lua "Sentence." --debug  → translate with full debug trace
+local input_sentence = "You are standing in an open field west of a white house, with a boarded front door."
+local debug_mode = false
+if arg then
+  for _, a in ipairs(arg) do
+    if a == "--debug" then debug_mode = true
+    elseif a:sub(1,2) ~= "--" then input_sentence = a end
+  end
+end
 
-local s, e = parser.collect(en_ru, --"{subject} {verb} {object}", 
--- utils.tokenize("You restore my bright light", en_ru))
--- utils.tokenize("You need to turn off bright light with the aid of a switch", en_ru))
-  utils.tokenize("You are standing in an open field west of a white house, with a boarded front door.", en_ru))
-  -- utils.tokenize("with a boarded front door", en_ru))
+-- set global debug flag used by parser and compiler
+_G.TRANSLATOR_DEBUG = debug_mode
 
-  -- utils.tokenize("WELCOME TO ZORK!", en_ru))
-  -- utils.tokenize("ZORK is a game of adventure, danger, and low cunning.", en_ru))
-  -- utils.tokenize("and low cunning", en_ru))
-  -- utils.tokenize("fine fine", en_ru))
-  -- utils.tokenize("In it you will explore some of the most amazing territory ever seen by mortals.", en_ru))
-  -- utils.tokenize("No computer should be without one!", en_ru))
-  -- utils.tokenize("A battery-powered brass lantern is on the trophy case.", en_ru))
-  -- utils.tokenize("the most amazing territory ever seen by mortals", en_ru))
-  -- utils.tokenize("No, I am not", en_ru))
-  -- utils.tokenize("Make thing promising", en_ru))
-  -- utils.tokenize("However, if true then", en_ru))
+if debug_mode then
+  print(utils.decode(en_ru.fine.__lex))
+end
+
+local s, e = parser.collect(en_ru, utils.tokenize(input_sentence, en_ru))
 
 if e then print(e) end
 

@@ -44,6 +44,70 @@ function utils.debug(w, t, i)
   return table.concat(t, " ")
 end
 
+-- hex_dump: print a CP866 string as hex + decoded text (for inspecting raw token/base bytes)
+function utils.hex_dump(s, label)
+  local hex, txt = {}, {}
+  for i = 1, #s do
+    hex[#hex+1] = string.format("%02X", s:byte(i))
+    txt[#txt+1] = cp866_to_utf8[s:byte(i)] or string.char(s:byte(i))
+  end
+  if label then io.write(label .. ": ") end
+  print(table.concat(hex, " ") .. "  |  " .. table.concat(txt))
+end
+
+-- decode_token: human-readable breakdown of a BASE.DIC token string
+-- Prints each tag+word pair on its own line
+function utils.decode_token(t, label)
+  if label then print(label .. ":") end
+  local i = 1
+  while i <= #t do
+    local b = t:byte(i)
+    -- tag: ASCII letter (32-127) or known uppercase tag (0x40-0x5A, 0x61-0x7A)
+    if b >= 32 and b < 128 then
+      local tag = string.char(b)
+      i = i + 1
+      -- collect following high bytes as the Russian word
+      local word = {}
+      while i <= #t and t:byte(i) >= 128 do
+        word[#word+1] = cp866_to_utf8[t:byte(i)] or string.format("\\x%02X", t:byte(i))
+        i = i + 1
+      end
+      if #word > 0 then
+        print(string.format("  [%s] %s", tag, table.concat(word)))
+      elseif tag ~= " " then
+        print(string.format("  [%s] (no text)", tag))
+      end
+    else
+      -- high byte without preceding tag (shouldn't happen in well-formed tokens)
+      print(string.format("  \\x%02X (orphan byte)", b))
+      i = i + 1
+    end
+  end
+end
+
+-- decode_base_entry: human-readable breakdown of a BASE.RUS paradigm entry
+function utils.decode_base_entry(b, label)
+  if label then print(label .. ":") end
+  if not b or #b == 0 then print("  (empty)") return end
+  local tag = string.char(b:byte(1))
+  local aspect = b:byte(2)
+  local noun_flags = b:byte(3) or 0
+  local paradigm = (b:byte(4) or 0) & ~0x80
+  local gender = noun_flags & 3
+  local plural_only = (noun_flags & 4) ~= 0
+  local gender_names = {"neutral", "masculine", "feminine"}
+  print(string.format("  tag=%-2s  aspect=0x%02X (perfective=%s)  gender=%s  plural_only=%s  paradigm=%d",
+    tag, aspect, tostring((aspect & 2) ~= 0),
+    gender_names[gender+1] or "?", tostring(plural_only), paradigm))
+  if #b > 5 then
+    local perf_stem = {}
+    for i = 6, #b do
+      perf_stem[#perf_stem+1] = cp866_to_utf8[b:byte(i)] or string.format("\\x%02X", b:byte(i))
+    end
+    print("  perfective_stem=" .. table.concat(perf_stem))
+  end
+end
+
 function utils.tokenize(s, en_ru)
   print("Input: "..s)
   local prev, tbl, words, last, i = nil, {}, {}, 0, 1

@@ -1,0 +1,12 @@
+; Load LTPRO.EXE
+nltpro.exe
+l
+
+; Show registers
+r
+
+; Try to run it - we need to set up command line args
+; LTPRO expects: ltpro.exe in.txt out.txt -f-
+; We need to set up the PSP command tail
+; For now, just quit
+q

@@ -1,0 +1,319 @@
+================================================================================
+EXECUTION ORDER: 4 of 8
+ROLE: Idioms / collocations / final Z cleanup / structural normalisation
+================================================================================
+
+What this table does
+--------------------
+T4 is the IDIOM and COLLOCATION table.  After T1-T3 have resolved the
+grammatical structure, T4 handles:
+
+  1. Fixed English expressions → Russian equivalents (backtick literals)
+     e.g. `need` → xпонадобится, `be sure` → Vубедитесь, `both...and` → как...так и
+  2. Final Z cleanup in positions not handled by T1-T3
+  3. Negation normalisation: `no` → K, K + comma/boundary → нет
+  4. Structural markers: b (imperfective 'to') + context → case prepositions
+  5. Parenthesis / bracket handling: (#) → flattened form
+  6. Guard rules (none-action) for structures already assembled by T1-T3
+     that must not be re-processed (30+ no-action rules)
+  7. Adjectival compounds: A-A-N, A-N, H-N (hyphenated noun phrases)
+  8. Special constructions: "there is/are", "it is", "let us", percentages
+
+Record size is 9 bytes (not 10 like T1-T3) — flags field is 1 byte at offset 0,
+not 2 bytes at offset 8. The compiler likely zero-extends this to 16 bits
+(0x3C in T4 = 0x003C in T7/T8). Dual role: priority/ordering + constituent-type
+index for the compiler (same index space as other tables).
+This is the most structurally heterogeneous table.
+
+Pattern syntax clues
+--------------------
+  `word`    = exact English word match (backtick-quoted)
+  !word!    = inline Russian literal injection (e.g. !мес! = месяц)
+  x         = impersonal/existential verb combination
+  p         = resolved preposition (lowercase P, already processed)
+  W         = multi-word phrase marker (from T3)
+  *         = sentence boundary OR wildcard (context-dependent)
+  %         = modifier flag (e.g. <H%D,> = digits with modifier)
+
+Notable rules
+-------------
+[1]   X`need`         → `xпонадобится`   'need' verb → Russian idiom
+[7-8] B<?>* / *B[:]   → preposition handling around 'to'
+[9]   NI!мес!         → A  Numeric + inline Russian ('мес' = месяц/month) → adj
+[34-35] *`no`,RXK / *S`is`BV  — "no" negation and "should be V" patterns
+[52]  V<TAO>N`so`~,   → `J1так, чтобы`  'so that' purpose clause
+[61]  [*,;("]<D>`see` → `Vсмотри`  "see (ref.)" → Russian imperative
+[69]  K`as`A`as`      → `Dне так`A`Jкак`  'not as X as' comparison
+[70]  `as`much`as`    → `iстолько`$`iсколько`
+[85]  `no`[,C*]       → K    'no' → negation tag K
+[86]  K[,C*]          → `нет`  K at clause end → output "нет"
+[91]  `to`Y~`do`      → J $V  'to have to do' infinitive idiom
+[95]  `either`...`or` → 'или'...'или'
+[97-99] `both`...`and` correlatives → 'как...так и'
+[127] PNCN*           → @@&   prepositional phrase ending → coordination marker
+[128] ACA             → @&    A and A → coordination
+
+T4 has 4 records that CAN be cleared (indices 174-177) — these late records
+are not on the sentinel-scan path for the test sentence.
+
+Concrete examples
+-----------------
+
+**Rule [1]** `X`need`` → `` `xпонадобится` ``
+
+Pattern: `X` (auxiliary 'be') `` `need` `` (literal word)
+
+Example: *"is needed"*
+Token stream: `[Xis] [Eneeded]`
+But the pattern needs the literal word "need", not its past-participle "needed".
+Better example: *"is need"* (archaic/formal):
+Token stream: `[Xis] [Nneed]`
+Match at position 1:
+  `X`       → ts[1]="Xis..." starts with X → match → rep=`` `xпонадобится` `` → replace token 1
+  `` `need` `` → ts[2]==en_ru["need"] → match → rep=(none, but lit replacement already applied)
+Result: the X auxiliary and "need" are replaced by the Russian idiom "понадобится"
+(roughly "will be needed"). This handles constructions like "is need of" → "нуждаться в".
+
+---
+
+**Rule [26]** `N<"'#>N` → `A`
+
+Pattern: `N` (noun) `<"'#>` (optional quotes, apostrophes, numbers) `N` (noun)
+
+Example: *"field west"*
+Token stream: `[Nfield] [Nwest]`
+Match at position 1:
+  `N`     → ts[1]="Nfield..." starts with N → match → rep=`A` → replace with A (adjective)
+  `<"'#>` → no tokens between → zero-wide
+  `N`     → ts[2]="Nwest..." starts with N → match → rep=(none, but already consumed)
+Result: "field" becomes A (adjective). In "field west of a house", "field" modifies
+"west" attributively → Russian reads "полевой запад" (field-west as adjective-noun).
+
+---
+
+**Rule [69]** `K`as`A`as`` → `` `Dне так`A`Jкак` ``
+
+Pattern: `K` (not) `` `as` `` (literal) `A` (adjective) `` `as` `` (literal)
+
+Example: *"not as big as"*
+Token stream: `[Knot] [Das] [Abig] [Das]`
+Match at position 1:
+  `K`       → ts[1]="Knot..." starts with K → match → rep=`` `Dне так` `` → "не так"
+  `` `as` ``  → ts[2]==en_ru["as"] → match → rep=`A` → keep adjective marker
+  `A`       → ts[3]="Abig..." starts with A → match → rep=`` `Jкак` `` → "как"
+  `` `as` ``  → ts[4]==en_ru["as"] → match → rep=(consumed)
+Result: "not as big as" → "не так big как" in Russian output (not so big as).
+
+---
+
+**Rule [85]** `` `no`[,C*] `` → `K`
+
+Pattern: `` `no` `` (literal "no") `[,C*]` (comma, conjunction, or sentence-end)
+
+Example: *"no,"*
+Token stream: `[kno] [, ]`
+Match at position 1:
+  `` `no` `` → ts[1]==en_ru["no"] → match → rep=`K` → replace with negation tag K
+  `[,C*]`  → ts[2]=", " starts with `,` → match
+Result: "no" becomes K (negation particle). Later rules (like T4[86]) will
+turn K at clause-end into the Russian word "нет".
+
+---
+
+**Rule [86]** `K[,C*]` → `` `нет` ``
+
+Pattern: `K` (negation) `[,C*]` (comma/conjunction/boundary)
+
+Example: *"No."*
+Token stream: `[Kno] [..]`
+  (After T4[85] has already converted "no" → K)
+Match at position 1:
+  `K`     → ts[1] starts with K → match → rep=`` `нет` `` → "нет"
+  `[,C*]` → ts[2]="." is `*` boundary → match
+Result: "No." → "нет." The standalone negation particle outputs the Russian word "нет".
+
+================================================================================
+Table T4  |  178 records  |  rec_size=9  |  LTPRO offset=0x2952B
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x00     V~<VXUY>[^BbjJLlQ*]                       (none)
+[  1]  0x3C     X`need`                                    `xпонадобится`
+[  2]  0x0B     `there`X                                   x
+[  3]  0x0B     V`below`T                                 @P
+[  4]  0x00     R<K>x                                     m
+[  5]  0x00     RXKx                                      m 
+[  6]  0x00     p[*)]                                     D
+[  7]  0x0B     B<?>*                                     P
+[  8]  0x0B     *B[:*]                                    @`Dдля`
+[  9]  0x0B     NI!мес!                                   A
+[ 10]  0x00     V<TAO>NG                                  @$NF
+[ 11]  0x2C     [gG]<TAONw>CG                             g$Cg
+[ 12]  0x0B     VGT                                       @g
+[ 13]  0x0B     N[,C]G[,C*]                               @.N
+[ 14]  0x00     GU                                        N
+[ 15]  0x00     CNG*                                      @@N
+[ 16]  0x0B     (G)                                       @N
+[ 17]  0x00     VwG                                       (none)
+[ 18]  0x2E     *G<A>[#N]                                 (none)
+[ 19]  0x2E     N[C/]G                                    (none)
+[ 20]  0x2E     [*jJ]<TAO>N<NwK>E*                        (none)
+[ 21]  0x09     *~<xyUVXYE>G~<xyUVXY>[;*]                 (none)
+[ 22]  0x2D     A`for`G                                   (none)
+[ 23]  0x2F     *G~<xyUVXY>[L;*]                          (none)
+[ 24]  0x2F     [*Jj]<CD>G<dDK>[UVXY]                     (none)
+[ 25]  0x2F     d<A>[N#]                                  A
+[ 26]  0x00     N<"'#>N                                   A
+[ 27]  0x35     DNCA                                      @A
+[ 28]  0x35     TN<"'>[#?]                                @A
+[ 29]  0x35     X<D>N<D>[,&Jj*]                           @$A
+[ 30]  0x35     [,TPV()]N<,>C<D>AN                        .A
+[ 31]  0x36     [TP]N,<adD>A~P                            .A
+[ 32]  0x35     NC[EA][,Jj*]                              A
+[ 33]  0x35     [AOH][,C&("']N<)"'>N                      ..A
+[ 34]  0x35     *`no`,RXK*                                @y    
+[ 35]  0x0B     *S`is`BV                                  @ `Uследует`
+[ 36]  0x0B     BV~<,CRSLJ>XB                             @@$Xb
+[ 37]  0x0B     [VXY]~<Jj|^>`is`BV                        .$ `Uдолжен`
+[ 38]  0x0B     `as`<dD>E[,;PBd*]                         (none)
+[ 39]  0x04     J<dDK>E<D>[,CPBd*]                        (none)
+[ 40]  0x04     JE`as`                                    (none)
+[ 41]  0x04     J<dD>E<D>[,C]AP                           (none)
+[ 42]  0x38     G<dD>`with`                               F
+[ 43]  0x00     ~JE<dD>`by`~H                             (none)
+[ 44]  0x03     ,E<dD>`as`                                (none)
+[ 45]  0x03     E<dD>`with`                               (none)
+[ 46]  0x03     [VXY*]P<TDdAO>N<dDwW,C>E<,CEFdD>[NP(:*]   (none)
+[ 47]  0x30     [UW]~<UVXY>E<,CEdD>[FPJ]                  (none)
+[ 48]  0x30     EU                                        (none)
+[ 49]  0x30     E[,C]<E,C>[FA]                            (none)
+[ 50]  0x30     E                                         (none)
+[ 51]  0x0A     G                                         (none)
+[ 52]  0x08     V<TAONw>`so`~[,C*]                        @$`J1так, чтобы`
+[ 53]  0x06     N`come`P                                  @V
+[ 54]  0x0B     `find`<DMTNO>A                            `Vсчитать`
+[ 55]  0x15     N<w>`of``whom`                            @$`pиз``L, который`
+[ 56]  0x0B     N<D>`in``use`                             @$`Aприменяемый` 
+[ 57]  0x0B     V<A>`copy`                                @$`Nкопия`
+[ 58]  0x00     H`may`                                    @N
+[ 59]  0x00     N`number`                                 @`Nномер`
+[ 60]  0x22     `number``of`<TAO>N                        `Nномер`
+[ 61]  0x05     [*,:;("]<D>`see`                          .$`Vсмотри`
+[ 62]  0x0B     O<ADHI>`letter`                           @$`Nписьмо`
+[ 63]  0x00     [HI]`and``a``half`                        .  `Aс половиной`
+[ 64]  0x00     U<KD>`like`                               @$`Vнравиться`
+[ 65]  0x0B     `it`[,C*]                                 `Rэто`
+[ 66]  0x00     `about``it`[,C*]                          `PПоб``этом`
+[ 67]  0x00     MR                                        (none)
+[ 68]  0x06     V`as`                                     @D
+[ 69]  0x22     K`as`A`as`                                 `Dне так`A`Jкак`
+[ 70]  0x0B     `as``much`<TPAONw?#>`as`                   `iстолько`$`iсколько`
+[ 71]  0x0B     *`as`<$>[UVXY]<$>;                        @`Jпоскольку`
+[ 72]  0x0B     [,*]`provided`<TAO>[N*]                   .J
+[ 73]  0x0B     *`since`                                  @`Jпоскольку`
+[ 74]  0x0B     [j*]<dD,>`be``sure`                       .$ `Vубедитесь`
+[ 75]  0x2A     *P<N>`be``sure`                           @@$ `Vубедитесь`
+[ 76]  0x2A     X`firm`                                   @A
+[ 77]  0x0B     V`most`[,*]                               @D
+[ 78]  0x00     V`second`[*)]                             @D
+[ 79]  0x00     H`percent`N                               @`Aпроцентный`
+[ 80]  0x00     H`times`                                  @`Dраз`
+[ 81]  0x00     *`here`X                                  @`yвот` 
+[ 82]  0x0B     *`let``us`                                @`vдавайте`b
+[ 83]  0x17     `let`M[ZVNG]                              V@V
+[ 84]  0x00     "`no`"                                    @K
+[ 85]  0x0B     `no`[,C*]                                 K
+[ 86]  0x00     K[,C*]                                    `нет`
+[ 87]  0x00     `a``while`                                 D
+[ 88]  0x0B     [C&]K[&*]                                 .D
+[ 89]  0x0B     [TNV]`default`<?#>N                       .A
+[ 90]  0x00     Y`others`V                                `Vпозволять`M
+[ 91]  0x0B     `to`Y~<XYV>`do`                           J $V
+[ 92]  0x1A     j`then`                                   @j
+[ 93]  0x0B     `if`<$>,`then`                            @$,j
+[ 94]  0x0B     `on``whether`<$>`or`                       `Jили`$&
+[ 95]  0x0B     `either`~<,>`or`                          `Cили`$`Cили`
+[ 96]  0x00     `in``either`<$>`or`                       `Pкак в` $`Cтак и`
+[ 97]  0x0B     `both`~<RXYUVB>`and`                      `Dкак`$`Cтак и`
+[ 98]  0x0B     `both`<$>,`and`                           `Dкак`$,`Cтак и`
+[ 99]  0x0B     `under``both`<$>`and`                     `Pкак под` $`C, так и под`
+[100]  0x0B     ~[bB]V[C,]<CKdD>V                         (none)
+[101]  0x07     ~[bB]V~<j>[C,]<KdD>V                      (none)
+[102]  0x07     JR[XYUV]<TAON>R                           (none)
+[103]  0x02     VP<TAO>N<w>A                              (none)
+[104]  0x01     NP<T>NN`of`                               (none)
+[105]  0x02     [#N]<w>[SO]                               (none)
+[106]  0x01     `give`[#N]<w>[AN#?]                       (none)
+[107]  0x01     [#N]<w>T                                  .$t
+[108]  0x25     *<dDJ,>E[A"N]                             @$A
+[109]  0x0B     *ECE[A"N]                                 @ACA
+[110]  0x0B     [GVIH"J]E[AN]                             .A
+[111]  0x00     ~VTNI                                     .TA
+[112]  0x00     S<D>[AOIH]                                O
+[113]  0x00     J~<|J>[VUXY]                              (none)
+[114]  0x0F     Jry                                       @@x
+[115]  0x10     uE                                        @V
+[116]  0x13     [NR]ET                                    .V
+[117]  0x18     [SR]<dDK>v                                M
+[118]  0x1F     IA                                        A
+[119]  0x29     As[X,*]                                   @ 
+[120]  0x0B     S<AO>N                                    O
+[121]  0x0B     FPN~<UVXYR>[UVXY]                         (none)
+[122]  0x3A     *<Dd,>[IAOTPN]~<VXY>[RSJLlj|^(xyGBUXYV*]  (none)
+[123]  0x32     [U()]~<VXY()>[V^()*]                      (none)
+[124]  0x31     [VXYxy^]~<VXY>[^J(*]                      (none)
+[125]  0x31     [fvyGXYV]~<EVXY>[RSJLlj|^xyEBUXYV*]       (none)
+[126]  0x33     &<,CdDE>J                                 (none)
+[127]  0x33     PNCN*                                     @@&
+[128]  0x00     ACA                                       @&
+[129]  0x00     [|j]NC<AO>N                               .@&
+[130]  0x00     `hope`RV                                  (none)
+[131]  0x0D     VRB[VXY]                                  (none)
+[132]  0x2B     V<TAO>N<w>B[VXY]                          (none)
+[133]  0x2B     [VXYE]<TAOdDNw>x                          .$A
+[134]  0x0B     BVMBV                                     (none)
+[135]  0x39     xB                                        @b
+[136]  0x0B     `like`B                                   @b
+[137]  0x0B     H)<K>B                                    @@$b
+[138]  0x00     CB                                        @b
+[139]  0x00     BP                                        b
+[140]  0x00     QB                                        @b
+[141]  0x0B     N<KkdD>B                                  @$b
+[142]  0x21     d<PM>B                                    @$b
+[143]  0x27     *<dD,>[JB]V                               (none)
+[144]  0x0D     VbV                                       (none)
+[145]  0x0E     VR[*b]                                    @M
+[146]  0x0B     a[|*]                                     D
+[147]  0x0B     [(:;j*]<KDd>YT                            .$V
+[148]  0x00     [(:;j*]<KDd,>V                            (none)
+[149]  0x1D     ~VVP[,*]                                  @@p
+[150]  0x0B     N<w>P*                                    @$p
+[151]  0x0B     PL                                        p
+[152]  0x00     NX*                                       @ 
+[153]  0x0B     NF*                                       @W
+[154]  0x0B     PNDE*                                     @@@W
+[155]  0x0B     [TCP]<A>NE[(*]                            .$NW
+[156]  0x0B     [TC]Nd[:;j|UB(*]                          .NW
+[157]  0x23     N<w,>d~[KUVXYEF*]                         @$A
+[158]  0x23     NX`on`*                                   @ `Vвключать`
+[159]  0x1C     (`at`<Dd>)                                @D
+[160]  0x00     (<#PIHA,CdD>)                             {$}
+[161]  0x00     #:                                        @#
+[162]  0x00     "<TAO-?#>N<N-w:>"N[*P,C]                  (none)
+[163]  0x20     b[TAON#]                                  `Pк`
+[164]  0x3E     b[SRM]                                    `Pк`M
+[165]  0x3E     ;~<UVXYR>[J*]                             &
+[166]  0x0C     [*|;j,C]`it`<KdD>V[*J]                    .J
+[167]  0x1E     B<KdD>V                                   (none)
+[168]  0x24     aN                                        i
+[169]  0x00     XRU                                        
+[170]  0x0B     X<K>x                                      
+[171]  0x0B     P`her`[,C&:;P*]                           @M
+[172]  0x00     `her`[,TAODdC&:;P*]                       M
+[173]  0x00     [RN#]`used``to`[GVE]                      @@ V
+[174]  0x42     Xd[Bj]                                    @A
+[175]  0x00     X                                         (none)
+[176]  0x12     n                                         N
+[177]  0x1B     g                                         G
+
+Sentinel at 0x29B6D: 000000000000000000

@@ -1,0 +1,310 @@
+================================================================================
+EXECUTION ORDER: 2 of 8
+ROLE: Core verb-phrase construction / Z-to-V resolution / auxiliary chains
+================================================================================
+
+What this table does
+--------------------
+T2 is the LARGEST and most important table (157 rules).  After T1 has set up
+clause boundaries, T2 processes the verb phrase proper.  It:
+
+  1. Resolves remaining Z ambiguities in verb position (Z → V, N, or E)
+  2. Builds auxiliary-verb chains: modal + have/be + participle sequences
+     like "can speak", "must have been", "was being arrested" → U/X/Y + V/E
+  3. Handles passive construction: X/Y + E → resolved passive verb phrase
+  4. Resolves relative-clause introducers (who/which/that) → L tag
+  5. Handles gerunds, infinitives, and -ed forms (e tag = ambiguous)
+  6. Article disambiguation: `a` → # (indefinite article, no Russian output)
+  7. Some syntactic guards (no-action rules) that protect already-built
+     structures from being re-processed
+
+14 rules have (none) action — pure structural guards (e.g. [16-18] protect
+already-resolved auxiliary sequences from being rewritten again).
+
+Pattern syntax clues
+--------------------
+  e         = ambiguous verb form (infinitive=past-ptcp=past-tense)
+  E         = -ed form / past participle (unambiguous)
+  X         = auxiliary 'be'
+  Y         = auxiliary 'have'
+  U         = modal verb
+  b/B       = 'to' (imperfective/perfective infinitive particle)
+  K         = 'not'
+  k         = 'no' (attributive)
+  d         = adverb/adjective ambiguity
+  `word`    = literal English word match
+  .         = keep current token unchanged in output
+  @         = transform current token (apply inflection function)
+  $         = use captured group from <$>
+
+Flags field
+-----------
+T2 uses a 2-byte flags field (bytes 8-9 of each 10-byte record). The flags likely have
+a DUAL role: (1) rule priority/ordering within T2, and (2) constituent-type index for
+the compiler (same 0-31 index space as T7/T8). T2 values range 0x0000-0x003D.
+See RULES_APPLIED.md "Flag Semantics" for details.
+
+Notable rules
+-------------
+[0-1]  `a`[:*)]  → #   Article 'a' before punctuation/boundary → suppress output
+[2]    "<$>,"    → |$,=  Quoted phrase → clause separator injection
+[3]    -         → ^    Hyphen → word-join operator
+[4]    (#)       → {#}  Parenthesised unknown → braced unknown
+[5]    _Z[_*]    → @N   Underscore placeholder + Z → noun (see LTGOLD/DEMO.TXT for document template context)
+[8]    bG        → BV   'to' + gerund → perfective-to + verb (fixes 'to running')
+[13-15] UR<KdD>[VZ] — pronoun+modal chain reductions
+[49-57] Y-verb chains (have + past-ptcp constructions)
+[82-141] Large block of X/Y/U auxiliary chains → produce final V or E
+[148-153] N<w>B`be`E  — passive voice: noun + 'to be' + -ed → label F (passive)
+[156]  `whether`<...>[XYUV] → J  'whether' clause → subordinator
+
+CRITICAL: T2's last record [156] is a sentinel-boundary record.  Clearing any
+record at or before [156] (by zeroing its pattern string) causes an infinite
+loop because the engine scans by null-pointer sentinel, not by count.
+
+Concrete examples
+-----------------
+
+**Rule [0]** `` `a`[:*)] `` → `#`
+
+Pattern: `` `a` `` (literal "a") `[:*)]` (colon, sentence-end, or close-paren)
+
+Example: *"a."*
+Token stream: `[Ta] [..]`
+Match at position 1:
+  `` `a` `` → ts[1] == en_ru["a"] → match → rep=`#` → replace token 1 with `#`
+  `[:*)]` → ts[2]=".." starts with `.` → match → rep=(none)
+Result: article "a" is replaced by `#` (suppressed output — Russian has no
+indefinite article), punctuation kept.
+
+---
+
+**Rule [3]** `-` → `^`
+
+Pattern: `-` (hyphen character)
+
+Example: *"well-known"*
+Token stream: `[Dwell] [- ] [Aknown]`
+Match at position 2:
+  `-` → ts[2] is a hyphen → match → rep=`^` → replace hyphen with `^`
+Result: hyphen becomes word-join operator `^`. The compiler later treats
+`well^known` as a single compound word for Russian output.
+
+---
+
+**Rule [7]** `aG` → `@A`
+
+Pattern: `a` (determiner) `G` (gerund)
+
+Example: *"a standing"*
+Token stream: `[Ta] [Gstanding]`
+Match at position 1:
+  `a` → ts[1]="Ta..." starts with T → does NOT match → try position 2
+...or at position 1 if the tokenizer strips articles differently.
+Better example: *"standing order"* where 'standing' is tagged G:
+Token stream: `[Gstanding] [Aorder]`
+Pattern `aG` would not match here because we need an 'a' before G.
+
+Actually: *"a standing ovation"*
+Token stream: `[Ta] [Gstanding] [Novation]`
+Match at position 1:
+  `a` → ts[1]="Ta..." starts with T → match → rep=`@` → transform token 1
+  `G` → ts[2]="Gstanding..." starts with G → match → rep=`A` → replace with `A`
+Result: "a" is transformed (via @ = use pattern char 'a' = T → look for T form);
+"standing" becomes A (adjective). Combined with later rules, "standing" → Russian adjective.
+
+---
+
+**Rule [20]** `U<KdD>Z` → `@$V`
+
+Pattern: `U` (modal) `<KdD>` (optional not/adverb) `Z` (ambiguous verb)
+
+Example: *"can speak"*
+Token stream: `[Ucan] [ZspeakVговорить...]`
+Match at position 1:
+  `U`     → ts[1]="Ucan..." starts with U → match → rep=`@` → transform modal
+  `<KdD>` → no K/d/D tokens → zero-wide match (fallback never fires)
+  `Z`     → ts[2] starts with Z → match → rep=`V` → Z resolved to V
+Result: modal "can" is kept; Z-ambiguous "speak" is resolved to V (content verb).
+The `$` in `@$V` passes the captured `<KdD>` group through unchanged.
+
+---
+
+**Rule [131]** `X<KkdD'">G` → `$V`
+
+Pattern: `X` (auxiliary 'be') `<KkdD'">` (optional negation/adverb) `G` (gerund)
+
+Example: *"was speaking"*
+Token stream: `[Xwas] [Gspeaking]`
+Match at position 1:
+  `X`         → ts[1]="Xwas..." starts with X → match → rep=`$` → keep token
+  `<KkdD'">`  → no tokens → zero-wide match, rep captured via `$`
+  `G`         → ts[2]="Gspeaking..." starts with G → match → rep=`V` → gerund→verb
+Result: "was" kept (progressive auxiliary); "speaking" becomes V (finite verb).
+For Russian, progressive aspect doesn't exist as separate form — the verb
+is output as simple present/past.
+
+================================================================================
+Table T2  |  157 records  |  rec_size=10  |  LTPRO offset=0x2756C
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x003A   `a`[:*)]                                  #
+[  1]  0x003A   ["']`a`["']                               .#
+[  2]  0x0000   "<$>,"                                    |$,=
+[  3]  0x002A   -                                         ^
+[  4]  0x0000   (#)                                       {#}
+[  5]  0x0000   _Z[_*]                                    @N
+[  6]  0x0000   `please`[VZ]                              jV
+[  7]  0x0000   aG                                        @A
+[  8]  0x0000   bG                                        BV
+[  9]  0x0000   aZN                                       @A
+[ 10]  0x0000   T<H%D,>Z                                  @$N
+[ 11]  0x0000   Z[bY{]                                    N
+[ 12]  0x0000   Z[AE]`by`                                 N
+[ 13]  0x0032   UR<KdD>[VZ]                               @@$V
+[ 14]  0x0032   UR`do`                                    @
+[ 15]  0x0032   U<TAO>N<Nw>[XY]                           @
+[ 16]  0x0033   [XY]<K>R[eE]                              (none)
+[ 17]  0x0034   [XY]KR                                    (none)
+[ 18]  0x0036   X~<xyUVXYB>`be`                           (none)
+[ 19]  0x0000   [RbKk]<D>Z                                .$V
+[ 20]  0x0000   U<KdD>Z                                   @$V
+[ 21]  0x0000   NZ`how`                                   @V
+[ 22]  0x0000   `others`Z                                 SV
+[ 23]  0x0000   X`busy`G                                  @ G
+[ 24]  0x0000   [=,]`said`                                =V
+[ 25]  0x0039   N[Gx]                                     @N
+[ 26]  0x0000   i[dA]                                     aA
+[ 27]  0x0000   HCa                                       @@i
+[ 28]  0x0000   A`one`                                    @s
+[ 29]  0x0000   `trouble`G                                Ng
+[ 30]  0x0000   `troubles`G                               Ng
+[ 31]  0x0000   ,`say`,                                   @D
+[ 32]  0x0000   P`may`[,*]                                @N
+[ 33]  0x0000   [VE]`as`<DE>G                             .D$F
+[ 34]  0x0000   B[THIE]                                   P
+[ 35]  0x0003   B<DE>G                                    P$N
+[ 36]  0x0002   [^TAOp]<DE>G                              (none)
+[ 37]  0x0003   `if`G                                     PN
+[ 38]  0x0007   BZ                                        PN
+[ 39]  0x0007   IZ                                        @N
+[ 40]  0x0000   [PB]SZ                                    PON
+[ 41]  0x0000   ESZ                                       @@N
+[ 42]  0x0000   B<IH"-/?>[AOSN#]                          P
+[ 43]  0x0001   [bB]Z[TAOEGHI]                            .V
+[ 44]  0x0000   [,C]<KD"'>Z[TAO#M]                        .$V
+[ 45]  0x0000   ~[HI],Z[HI]                               .,V
+[ 46]  0x0000   ~[QJ]ZR                                   .V
+[ 47]  0x003B   [fTAOSN#GJjZ]~<QJLBR>[UVXY]               (none)
+[ 48]  0x003C   [UVXY]~<UVXY>[R|;^*]                      (none)
+[ 49]  0x000A   Y<dDK>`pleasure``in`G                     @$NbV
+[ 50]  0x0017   Y`been`G                                    V
+[ 51]  0x0021   [Rk]<D>e                                  .$V
+[ 52]  0x0000   e`without`                                N
+[ 53]  0x002F   [TPAOV]<dD,C"'>E~*                        .$A
+[ 54]  0x0000   `been`e                                   EE
+[ 55]  0x0000   [fxyTOP|]<dDAOSIH>Z                       .$N
+[ 56]  0x0000   ;<dDAOSIH>Z~<UVXYxy>[J,C*]                @$V
+[ 57]  0x0000   [yVTAOP|;]<dDAOSIH>x                      .$N
+[ 58]  0x001F   N`of`G                                    @bV
+[ 59]  0x0000   Z<->`of`                                  N
+[ 60]  0x0003   G<->`of`                                  N
+[ 61]  0x0002   ~A`of`G                                   (none)
+[ 62]  0x0002   GG                                        (none)
+[ 63]  0x0002   [|;T]<adAE"'>G                            (none)
+[ 64]  0x0003   G-N                                       N N
+[ 65]  0x0003   N-G                                       @ N
+[ 66]  0x0000   G-P                                       N-P
+[ 67]  0x0000   [N#P]-Z                                   .-N
+[ 68]  0x0000   NCZ<K>[(B]                                @@N
+[ 69]  0x0038   N<w>[dD]Z                                 @$.V
+[ 70]  0x0000   Q<AZNw>B[VZ]                              @$bV
+[ 71]  0x0000   [NZ]<(w?#)>`who`<dD>Z                     N$L$V
+[ 72]  0x0000   [TPO]<a>d~[GIH]                           .$A
+[ 73]  0x0000   NXd[*,]                                   @@A
+[ 74]  0x0000   [H?#NZ]-`based`                           A  
+[ 75]  0x0000   A-A-N                                     @ @ 
+[ 76]  0x002C   [dD]-B-[ZV]                               D   A
+[ 77]  0x0000   A-[?#]-Z                                  @ . N
+[ 78]  0x0000   [#?H]-[NIAZ]                              A-A
+[ 79]  0x0009   I-N                                       @-A
+[ 80]  0x0000   [?#N]-A                                   A A
+[ 81]  0x0000   N-e                                       @-N
+[ 82]  0x000F   `it`X<KD>d                                  
+[ 83]  0x0005   `it``being`<KdD>E                           $V
+[ 84]  0x0006   XdZ                                       @DV
+[ 85]  0x0006   X<KdD>e                                   @$V
+[ 86]  0x0000   XAV                                       @D
+[ 87]  0x0000   XK,                                        D
+[ 88]  0x0000   XU                                         
+[ 89]  0x0000   PU                                        D
+[ 90]  0x0000   [XY]AEP                                   .D
+[ 91]  0x0000   [UB]`do`                                  .V
+[ 92]  0x0000   `suggest`R[VZe]                           VMV
+[ 93]  0x0013   `which`[ZEe]T                             SV
+[ 94]  0x0023   `could`Y[Ee]                                V
+[ 95]  0x0000   `may`<KdD>XG                              d
+[ 96]  0x0000   `may`<KdD>[UY]~[AO]                       d
+[ 97]  0x0000   `must`<KdD>Y[Ee]                          d$YE
+[ 98]  0x0000   `must`<KdD>XG                             d
+[ 99]  0x001D   `do`K`be`E                                 K V
+[100]  0x0000   Ry                                        r
+[101]  0x001B   RY[TAOSHI]                                (none)
+[102]  0x000D   XB`be`E                                   U X
+[103]  0x000D   BXEJ                                      U
+[104]  0x0000   U<KdD>X`able`B[ZV]                        @$   V
+[105]  0x000A   U<KAdD,'">[ZV]                            @$V
+[106]  0x000B   U<KAdD?'">X<AdD'">[Ee]                    @$ $V
+[107]  0x000B   U<PINw>X<AdD'">[Ee]                       @$ $V
+[108]  0x000C   BYE                                       @ V
+[109]  0x000C   UYE                                       @ V
+[110]  0x0000   UBX                                       @ X
+[111]  0x0010   YE<D>[Ee]                                   $V
+[112]  0x0019   X<KdDu'">[ZVe]                             $V
+[113]  0x0019   X<KdDu'">`like`                            $V
+[114]  0x0000   Y<KAdD,'">e                               @$E
+[115]  0x002D   U<KAdD?'">e                               @$V
+[116]  0x002D   [bB]e                                     .V
+[117]  0x0012   e[TAON]                                   V
+[118]  0x002D   V<TPAONw>Ce                               @$CV
+[119]  0x0000   e                                         E
+[120]  0x0000   RVBY[ZV]                                  @@@ V
+[121]  0x0000   PV                                        @N
+[122]  0x0000   T<AO?IH/>[VZ]                             @$N
+[123]  0x0000   "NV"                                      "NN
+[124]  0x0014   XYEE                                         V
+[125]  0x0014   Y<KdD?'">EE                                $ V
+[126]  0x0015   XYEG                                         V
+[127]  0x0031   X<KdD'">X<dD'">E                           $ $v
+[128]  0x0015   X<KdD'">X<dD'">[GE]                        $ $V
+[129]  0x001F   NBXE                                      @b V
+[130]  0x0016   XGE                                         V
+[131]  0x0017   X<KkdD'">G                                 $V
+[132]  0x0017   XEC<KkdD'">G                              @@@$V
+[133]  0x0018   X<Kku>YE                                   $ V
+[134]  0x0018   Y<CKkdD,'">E                               $V
+[135]  0x0018   X<CKkdDu'"R>[ZV]                           $V
+[136]  0x0030   X<KkdD?'">E                               (none)
+[137]  0x001A   X<CKkdDI?(,'")>E                           $V
+[138]  0x001C   ^<KkdDI?(,'")>E                           (none)
+[139]  0x0016   KXkDE                                     @ DV
+[140]  0x001E   X<KkD>Y                                   @
+[141]  0x001E   X<KkdD,>X                                 @$ 
+[142]  0x000E   KE                                        (none)
+[143]  0x0008   V`itself`                                 @ 
+[144]  0x0008   V`ourselves`                              @ 
+[145]  0x002B   R<dD?#>E                                  @$V
+[146]  0x0000   ,`then`                                   ,C
+[147]  0x0020   NPTAs                                     @@@@N
+[148]  0x000C   N<wK>B`be`E                               @$LUV
+[149]  0x0000   [NSs#]<,w{}(-HP)"'>B`be`E                 .$  F
+[150]  0x0000   Z<K(){}-HP>B`be`E                         N$  F
+[151]  0x000C   N<w>(<$>)<K>B`be`E                        @$($)$LUV
+[152]  0x0029   N<w>B`be`A                                @$ X
+[153]  0x0000   VB`be`EP                                  @D A
+[154]  0x0000   `make`[MR]Z                               `заставлять`MV
+[155]  0x003D   [fxyXYV]~<VXUY>[BbjJLlQ*]                 (none)
+[156]  0x0026   `whether`<TDAOERNw?#'">[XYUV]             J
+
+Sentinel at 0x27B8E: 00000000000000000000

@@ -1,0 +1,283 @@
+================================================================================
+EXECUTION ORDER: 3 of 8
+ROLE: Relative clauses / gerund phrases / infinitive complements / Z cleanup
+================================================================================
+
+What this table does
+--------------------
+T3 runs after T2 has built the core verb phrase.  Its job is to handle the
+EMBEDDING structures — the subordinate clauses and non-finite phrases that
+wrap around the main clause:
+
+  1. Relative clauses: who/which/that → resolve to L (relative pronoun marker)
+     and attach them to the preceding noun with the right case frame
+  2. 'that'-complementizer clauses: G`that` → GJ (gerund + clause boundary)
+  3. Infinitive complements: various V/B/P patterns → infinitive phrase frames
+  4. Gerund phrases: `having`E → F (active perfect participle)
+  5. Pronoun resolution: R (personal pronoun) + case/preposition context → M
+  6. j-clause continuation (j = end-of-clause from T1) → handles what follows
+  7. Late Z cleanup: Z → N or V in remaining positions
+  8. Hyphenated structures: A-E, N-E → adjective/noun with dash
+
+A notable feature of T3: many rules involve the j (end-of-clause) and J
+(subordinating-conjunction) tags inserted by T1, threading the clause
+structure through the pipeline.
+
+Pattern syntax clues
+--------------------
+  j         = end-of-clause boundary marker (lowercase, set by T1)
+  J         = subordinating conjunction / clause head
+  L         = relative pronoun marker (', который')
+  l         = genitive relative ('whose')
+  M         = object pronoun (already-resolved)
+  W         = multi-word phrase marker
+  =         = case-setting operator (in action: sets agreement case)
+  |         = clause-boundary separator (fictitious separator from dic.txt)
+  &         = coordination marker
+  F         = active present participle (generated)
+
+Flags field
+-----------
+T3 uses a 2-byte flags field (bytes 8-9 of each 10-byte record). Dual role:
+priority/ordering within T3 + constituent-type index for compiler. Values 0x0000-0x0032.
+See RULES_APPLIED.md "Flag Semantics".
+
+Notable rules
+-------------
+[0]   =~<)>,      → @$|    Case-equality + clause → inject separator
+[1]   UP<$>|Z     → @@$|V  Modal + preposition + separator + Z → verb
+[7]   ,J<$>,[XYVUZE] → (J$)  Parenthesise J-clause contents
+[17]  ,Z[MR],     → ,VM   Z between commas with pronoun → verb
+[44]  p<RTP...>[VUXY] → J  Resolved-preposition before verb chain → J
+[55-65] `that`-clause rules: attach J marker to preceding noun/verb
+[62-64] who/which/whose relative pronoun rules → N$L (noun + relative marker)
+[87-92] Hyphenated phrase rules: A-E, N-E, E-[NZ] → adjectival structures
+[116] `having`E   → F     'having done' → active perfect participle
+[117-120] `being` constructions → W (participial phrase marker)
+[126] Z → N       Final fallback: any remaining Z becomes N (noun)
+[127] S<aA>N      → O     Demonstrative + adj + noun → demonstrative pronoun O
+[133] N<Hw>"<TAO>N<P/N>"  → @$+  Quoted NP in numeric context
+[134-135] "T / T* — end-of-sentence article markers → # (suppress)
+
+CRITICAL: Like T2, T3's last record [135] is sentinel-boundary.
+Clearing record [135] (T* → #) alone causes hang.
+
+Concrete examples
+-----------------
+
+**Rule [62]** `[NZ]<w"'(?)>`who`` → `N$L`
+
+Pattern: `[NZ]` (noun or Z) `<w"'(?)>` (optional modifiers) `` `who` `` (literal)
+
+Example: *"the man who"*
+Token stream: `[Nman] [Lwho]`
+Match at position 1:
+  `[NZ]`   → ts[1]="Nman..." starts with N → match → rep=`N` → keep as noun
+  `<w"'(?)>` → no token between N and "who" → zero-wide
+  `` `who` `` → ts[2] == en_ru["who"] → match → rep=`L` → replace with relative marker
+Result: "man" stays N; "who" becomes L (relative pronoun ', который').
+Later compiler outputs "человек, который" (man, who).
+
+---
+
+**Rule [65]** `[,N]<w>`whose`<AO>[NZ]` → `.$l$N`
+
+Pattern: `[,N]` (comma or noun) `<w>` (optional modifier) `` `whose` `` (literal)
+`<AO>` (adjectives) `[NZ]` (noun or Z)
+
+Example: *"the man whose big house"*
+Token stream: `[Nthe] [Nman] [lwhose] [Abig] [Nhouse]`
+Match at position 2:
+  `[,N]`   → ts[2]="Nman..." starts with N → match → rep=`.` → keep unchanged
+  `<w>`    → no modifier → zero-wide
+  `` `whose` `` → ts[3]==en_ru["whose"] → match → rep=`l` → genitive relative marker
+  `<AO>`   → ts[4]="Abig..." starts with A → skip one
+  `[NZ]`   → ts[5]="Nhouse..." starts with N → match → rep=`$N` → keep noun
+Result: "man" unchanged; "whose" → `l` (genitive relative: "чей/которого");
+"big" passed through; "house" kept. Output: "человек, которого большой дом."
+
+---
+
+**Rule [87]** `A-E` → `D A`
+
+Pattern: `A` (adjective) `-` (hyphen) `E` (past participle/ed-form)
+
+Example: *"well-known"*
+Token stream: `[Awell] [- ] [Eknown]`
+Match at position 1:
+  `A` → ts[1]="Awell..." starts with A → match → rep=`D` → adjective → adverb
+  `-` → ts[2] is hyphen → match → rep=` ` (space) → hyphen suppressed
+  `E` → ts[3]="Eknown..." starts with E → match → rep=`A` → participle → adjective
+Result: "well" becomes D (adverb), hyphen removed, "known" becomes A (adjective).
+Russian output: adverb + adjective (adverb typically precedes adjective in Russian).
+
+---
+
+**Rule [116]** `` `having`E `` → `F`
+
+Pattern: `` `having` `` (literal) `E` (past participle)
+
+Example: *"having done"*
+Token stream: `[Ghaving] [Edone]`
+Match at position 1:
+  `` `having` `` → ts[1]==en_ru["having"] → match → rep=` ` → suppress "having"
+  `E` → ts[2]="Edone..." starts with E → match → rep=`F` → replace with F (active perfect participle)
+Result: "having done" → F-tagged token "done". For Russian, "сделав" (perfective gerund).
+
+---
+
+**Rule [126]** `Z` → `N`
+
+Pattern: `Z` (any remaining ambiguous token)
+
+Example: Any Z-token left after T1-T2 processing gets defaulted to N (noun).
+
+Token stream: `[ZfineVштрафоватьNштрафAхороший]`
+Match at position 1:
+  `Z` → ts[1] starts with Z → match → rep=`N`
+Result: the Z token is resolved to its N (noun) form: "штраф" (fine/monetary penalty).
+This is the final fallback — any Z not handled by earlier context rules becomes a noun.
+
+================================================================================
+Table T3  |  136 records  |  rec_size=10  |  LTPRO offset=0x27B98
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x0000   =~<)>,                                    @$|
+[  1]  0x0000   UP<$>|Z                                   @@$|V
+[  2]  0x0000   ,`if`<$>,                                 @J$j
+[  3]  0x0000   JSZj                                      @@V
+[  4]  0x0000   ,=Z                                       @@V
+[  5]  0x0000   JK^                                       @Dj
+[  6]  0x0000   J<$>,`then`V                              @$,j
+[  7]  0x0000   ,J<$>,[XYVUZE]                            (J$)
+[  8]  0x0020   j~<TvxyZEUVXYJf>[,C]~[vUVXY]              &$j
+[  9]  0x0000   jZE                                       @NV
+[ 10]  0x0001   j<dDK,>[VZ]                               @$V
+[ 11]  0x0001   jP<AO#Nw>[VZ]                             @@$V
+[ 12]  0x0001   jV<$>C[VZ]                                @@$jV
+[ 13]  0x0001   jE                                        @V
+[ 14]  0x0000   `how`#Z                                   @@V
+[ 15]  0x0012   ~[VXYxy]Z[TOS]                            .V
+[ 16]  0x0029   E`itself`                                 V 
+[ 17]  0x0000   ,Z[MR],                                   ,VM
+[ 18]  0x0000   [VZ]R<D>P                                 VM
+[ 19]  0x0000   B[VZ]R                                    BVM
+[ 20]  0x001C   B[RM]~V                                   PM
+[ 21]  0x001F   P[MR]                                     PM
+[ 22]  0x0000   PSR                                       PM
+[ 23]  0x0027   V<P>R~[KVXYUB]                            @$M
+[ 24]  0x0000   GR~[UVXY]                                 GM
+[ 25]  0x0000   BS                                         M
+[ 26]  0x0000   [PV]S[bB*]                                .M
+[ 27]  0x0000   [BC]AV                                    .DV
+[ 28]  0x0000   BK<D>Z                                    BK$V
+[ 29]  0x0000   B<VAON>,Z                                 B$,V
+[ 30]  0x0005   V<MTAONw"'K>BXE                           V$b V
+[ 31]  0x0000   v<(#?)>B[VZ]                              @$bV
+[ 32]  0x0007   [VZ]BY                                    Vb
+[ 33]  0x0007   [VZ]<({}#)>B<dD"'>[VZ]                    V$b$V
+[ 34]  0x0007   VBY[VZ]                                   Vb V
+[ 35]  0x0006   V<SRMTAO#Nw"K>B<D">[VXYZ]                 (none)
+[ 36]  0x0008   E<SRMTAO#Nw"K>B<D">[VXYZ]                 @$b
+[ 37]  0x0029   [EV]<TAO>[#N]Z                            .$.V
+[ 38]  0x0008   E[RM][VZ]                                 @MV
+[ 39]  0x0008   G<RMTNw"K>B[VXYZ]                         @$b
+[ 40]  0x0009   V<dD>G                                    @$V
+[ 41]  0x002A   ZG                                        VV
+[ 42]  0x000D   NB[VZ]                                    @bV
+[ 43]  0x000B   X<TAO>N[XV]                                
+[ 44]  0x0018   p<RTPAOdDNGFE?#+,>[VUXY]                  J
+[ 45]  0x0000   IGI                                       IA
+[ 46]  0x0013   I<#>GN                                    I$N
+[ 47]  0x0013   AG                                        @N
+[ 48]  0x0000   SGP                                       ON
+[ 49]  0x001E   PG<TAONw>[C,]G                            (none)
+[ 50]  0x001E   P<KdD#?>G                                 (none)
+[ 51]  0x0013   [jQ]<Nw#>G                                .$N
+[ 52]  0x0012   NGJ                                       NN
+[ 53]  0x0000   G`that`                                   GJ
+[ 54]  0x0000   GR`that`                                  GMJ
+[ 55]  0x000A   [ZV]<MNw>`that`                           V$J
+[ 56]  0x000A   E<Nw>`that`                               V$J
+[ 57]  0x0032   [NZ]`that`<RKdD>[VUXY]                    NL
+[ 58]  0x0032   w`that`<RKdD>[VUXY]                       wL
+[ 59]  0x0032   N`that`<RKdD>[EZ]                         NL$V
+[ 60]  0x0014   N<wAE?#"'(>`that`                         N$L
+[ 61]  0x0015   `that`[RT:O]                              J
+[ 62]  0x0000   [NZ]<w"'(?)>`who`                         N$L
+[ 63]  0x0025   [NZ]<P(w#?H,")>`which`                    N$L
+[ 64]  0x0000   `which`<KdD>[XYUVR]                       L
+[ 65]  0x0000   [,N]<w>`whose`<AO>[NZ]                    .$l$N
+[ 66]  0x0000   L<ANw>BZ                                  L$BV
+[ 67]  0x0000   [lL]<N>G                                  .$N
+[ 68]  0x0000   LT                                        Lt
+[ 69]  0x0000   ~PLZ                                      .LV
+[ 70]  0x001D   ~PL<,TPHAONw?"'#>E                        .L$V
+[ 71]  0x001D   ~PQ<dD?#>E                                .Q$V
+[ 72]  0x0000   [Sk]<dD?#>E                               .$V
+[ 73]  0x0000   J[N#?]E                                   J.V
+[ 74]  0x0024   [RL]`like`                                .V
+[ 75]  0x0000   LV<$>C`that`V                             @@$CL
+[ 76]  0x0000   VSZ                                       @ON
+[ 77]  0x0003   VS<GE>N                                   @O
+[ 78]  0x0022   SZ                                        SV
+[ 79]  0x0000   YNG                                       YNg
+[ 80]  0x0000   `who`<dD>Z                                @$V
+[ 81]  0x0000   Q<#>Z                                     Q$N
+[ 82]  0x0000   [g+]Z                                     .N
+[ 83]  0x0000   N`where`                                  NJ
+[ 84]  0x0000   XA`that`                                  XAJ
+[ 85]  0x0000   T<AO>?~C                                  T$N
+[ 86]  0x0013   [TtOH"]G                                  .N
+[ 87]  0x0011   A-E                                       D A
+[ 88]  0x0011   N-E                                       @@A
+[ 89]  0x0011   E-[NZ]                                    A-N
+[ 90]  0x0011   T<A>E                                     @$A
+[ 91]  0x0011   PLE                                       @@A
+[ 92]  0x0011   A[,C]E                                    @.A
+[ 93]  0x0000   P[#N]BZ                                   @.BV
+[ 94]  0x0000   B<KdD>Z                                   @$V
+[ 95]  0x0000   MCZ                                       @@V
+[ 96]  0x0000   V`open`                                   @A
+[ 97]  0x0000   V`fine`                                   @D
+[ 98]  0x0000   V`free`                                   @D
+[ 99]  0x0000   (Zd                                       @V
+[100]  0x0000   ZdT                                       V
+[101]  0x0000   NZQ                                       @V
+[102]  0x0010   Q<TAOIH?#>N<Nw>Z~<VXYZ>[j*]               @$N$V
+[103]  0x0010   Q<TAOIH?#>N<Nw>Z<dD>[j*]                  @$N$V
+[104]  0x0010   J<TAOIH?#>NZ~<VXYZ>[j*]                   @$NV
+[105]  0x0010   J<TAOIH?#>NZ[BP]                          @$NV
+[106]  0x0023   N<"'>P<AOIHNw?#>Z~<VXYZ>[,j*]             @$P$V
+[107]  0x000E   I<P>NZ                                    @$NV
+[108]  0x0023   TN<PAOIHNw?#>Z[,Cj*]                      @@$V
+[109]  0x000E   [bB]V<PTAOHINw?#>[,C]<dDK>Z               .V$.$V
+[110]  0x001A   V<"'PNw>[,C]<"'KdD>[EG]                   @$.$V
+[111]  0x0020   V<"'>[,C/]<C"'KdD>[EGZ]                   @$.$V
+[112]  0x0000   ,`so`~[,C*]                               @J
+[113]  0x0000   B/P                                       P/P
+[114]  0x0000   A/N                                       A/A
+[115]  0x0013   G/N                                       N
+[116]  0x0000   `having`E                                  F
+[117]  0x0000   N<wD>E[XYUV]                              @$W
+[118]  0x0000   N<w>E,~[EC]                               @$W
+[119]  0x0000   N`being`A[+&,C*]                          @ W
+[120]  0x0000   N<wdD>`being`E                            @$ W
+[121]  0x0011   J`being`E                                   A
+[122]  0x0000   MPR                                       MJR
+[123]  0x0000   V,C~V                                     @^
+[124]  0x003A   N~<BVXUY>[^xyXYV*]                        (none)
+[125]  0x003B   [xyXY]~<BbVXUY>[^jJLlQ*]                  (none)
+[126]  0x0000   Z                                         N
+[127]  0x0000   S<aA"'>N                                  O
+[128]  0x0000   N<w>[C&,]G[C,&L*]                         N$&N
+[129]  0x0013   [,&C]N[,&C]G~M                            .N.N
+[130]  0x0013   [bB]VG                                    .VN
+[131]  0x0030   p~L                                       P
+[132]  0x0000   d<A>[N#]                                  A
+[133]  0x0000   N<Hw>"<TAO>N<P/NAOw>"                     @$+
+[134]  0x0000   "T                                        @^
+[135]  0x0000   T*                                        #
+
+Sentinel at 0x280E8: 00000000000000000000

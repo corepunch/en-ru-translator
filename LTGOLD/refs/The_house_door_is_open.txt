@@ -1,0 +1,6 @@
+Дверь{1.вход} дома открыта.
+
+
+MULTIPLE MEANINGS:
+
+1  door: physical door - Дверь; entrance - вход

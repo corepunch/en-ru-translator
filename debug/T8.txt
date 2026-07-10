@@ -1,0 +1,281 @@
+================================================================================
+EXECUTION ORDER: 8 of 8 (LAST)
+ROLE: Verb-phrase / clause-level structural validation guards
+================================================================================
+
+What this table does
+--------------------
+T8 is the FINAL table, with 83 rules, ALL (none) action.  Like T7, it only
+MATCHES — no rewrites.  Where T7 validated noun/prepositional phrases, T8
+validates larger VERBAL and CLAUSAL structures:
+
+  - Verb chains: J[VUXY], J~<|J>[VUXY] — conjunction + any verb type
+  - Relative clause heads: O[UV], JE, JEC[EA]
+  - Subject-verb agreement: [RN]x, [UV][kNR][VXY]
+  - Passive / participial: L[RN]<$>p*, [VXY]N[N#][UVXY]
+  - Infinitive complements: [BbV]<NI>P, [BbUV]<pP>[NW]
+  - have/be auxiliaries: Y[NW], [XY]PP, [yXYU]<NIA>P, Yk
+  - Verb + object: [BUVY][IOH], [GEF]P, LVN, LV[NP][UVXY]
+  - Coordination: U<A>[,C]<C>V, V<#>[,C]U, V<$>,C[UY], YN[C,]V
+  - Negation frames: X<k>N, X<k>A, [UV]k, Yk
+  - Preposition + verb: [yXYU]<NIA>P, [XY]PP
+  - Participle: [xyf][NW], UXA, X[SO]
+  - Relative pronoun objects: lN, [NR]u, [NR]UV, [NR]Vb
+
+Flags field (CONFIRMED — see RULES_APPLIED.md "Flag Semantics")
+-----------
+T8 uses a 2-byte flags field (bytes 6-7 of each 8-byte record). Values observed:
+0x0001–0x0046. This is a ~5-bit **constituent-type index** (0–31) that the compiler
+uses to select inflection behavior AND output generation strategy. Confirmed by
+binary patching T8[13]:
+  - Original flags=0x0025 → "Он может flob говорит Русского." (finite verb)
+  - flags=0x0000 → "... говорить Русского." (infinitive — no constituent type)
+  - flags=0x000F → "Он не может flob..." (negation inserted)
+  - flags=0x001E → "... говорят Русского." (plural verb)
+  - flags=0x002E → "... flob Русского." (verb dropped)
+  - flags=0x0036 → "... flob, которое говорит..." (relative clause inserted)
+  - flags=0x003D → "Он говорить может flob Русский." (word order + case)
+  - flags=0x003F → "Он flob может говорить Русского." (word order change)
+
+Different flag values produce radically different Russian output, proving T8's
+flags control not just inflection but also negation, word order, clause structure,
+and lexical selection.
+
+BOUNDARY: Records [0-12] are ESSENTIAL (clearing any of them hangs the engine).
+Records [13-82] can be cleared without hang.  Record [12] (L[RN]<$>p*) with
+flags=0x003F is the last essential guard — it validates relative-pronoun +
+noun + preposition phrase heads.
+
+Records that fire on "She can speak Russian." (changing output when cleared):
+  clear_from=13: changes agreement → "не могут сказать не Русский."
+  clear_from=41: major reorder  → "Русского может сказать."
+  clear_from=82: final token    → "Русского Она может сказать."
+
+Notable rules
+-------------
+[0-4]  J[VUXY] / J~<|J>[VUXY] / O[UV] / JE / JEC[EA]
+       flags=0x000C  — Conjunction + verb head (clause start validation)
+[5]    [RN]x        0x0031  — Pronoun/noun + existential verb
+[6]    J<ryV>NR     0x0023  — Clause head + compound-pronoun + noun + pronoun
+[7-8]  ~[LlJQGRBb]N<P>R / UPR  0x0036  — NP subject before pronoun
+[10]   [VXY]N[N#][UVXY]  0x0037 — Verb + noun object + aux chain
+[11]   [UV][kNR][VXY]    0x0038 — Modal + (neg/noun/pronoun) + verb (ESSENTIAL BOUNDARY)
+[12]   L[RN]<$>p*        0x003F — Relative pronoun + NP + preposition (LAST ESSENTIAL)
+[17-26] Subject + VP frames with various negation/complement patterns
+[29-31] Y/X auxiliary + prepositional phrase / double-PP
+[36]   [IW][XY]    0x0045  — Numeral/interrogative + auxiliary (highest flag in T7/T8 range)
+[37]   [NP]<,DC>[EF]  0x0005  — NP + participial phrase
+[58-63] L + VP frames (relative clause body validation)
+[64-73] Coordination frames: U<A>[,C]<C>V, V<#>[,C]U, YN[C,]V etc.
+[79]   NlRV        0x0046  — Noun + relative-genitive + pronoun + verb (HIGHEST FLAG)
+[80-81] [NR]UV / [NR]Vb  0x003B — subject-verb-object final frames
+[82]   MvP         0x003D  — Object-pronoun + verb-3sg + preposition
+
+Concrete examples
+-----------------
+
+**Rule [5]** `[RN]x` — flags=0x0031
+
+Pattern: `[RN]` (pronoun or noun) `x` (existential verb)
+
+Example: *"there is"*
+Token stream: `[Rthere] [xis]`
+Match at position 1:
+  `[RN]` → ts[1]="Rthere..." starts with R → match
+  `x`    → ts[2]="xis..." starts with x → match
+Result: Validates existential "there is/are" construction. The existential
+verb "x" construction (e.g., "there is") is marked as a valid clause-level
+constituent. Without this guard, "there" might be treated as a locative
+adverb and "is" as a copula requiring a complement.
+
+---
+
+**Rule [11]** `[UV][kNR][VXY]` — flags=0x0038
+
+Pattern: `[UV]` (modal or auxiliary) `[kNR]` (not/noun/pronoun) `[VXY]` (verb chain)
+
+Example: *"must not go"*
+Token stream: `[Umust] [Knot] [Vgo]`
+Match at position 1:
+  `[UV]`   → ts[1]="Umust..." starts with U → match
+  `[kNR]`  → ts[2]="Knot..." starts with K → but `k` is lowercase K!
+             Actually pattern is `[kNR]` — k(negative 'no'), N(noun), R(pronoun).
+             K (uppercase = "not") is NOT in this set. So this does NOT match
+             "must not go" at position 1.
+... Let me reconsider.
+
+Actually `[kNR]` matches lowercase k (negative 'no'), N (noun), or R (pronoun).
+"Knot..." starts with K (uppercase) — this would NOT match `[kNR]`.
+
+So this pattern is for: modal + (no/noun/pronoun) + verb.
+Example: *"can he speak"* → `[Ucan] [Rhe] [Vspeak]`
+  `[UV]`   → U → match
+  `[kNR]`  → R → match
+  `[VXY]`  → V → match
+Result: Validates a modal-subject-verb chain. Interrogative or conditional
+structures where modal is followed by pronoun then verb.
+
+---
+
+Let me simplify and just use good examples that work.
+
+**Rule [11]** `[UV][kNR][VXY]` — flags=0x0038
+
+Pattern: `[UV]` (modal/aux) `[kNR]` (negation 'no'/noun/pronoun) `[VXY]` (verb chain)
+
+Example: *"can he speak"*
+Token stream: `[Ucan] [Rhe] [Vspeak]`
+Match at position 1:
+  `[UV]`  → U → match
+  `[kNR]` → R → match
+  `[VXY]` → V → match
+Result: Validates modal + pronoun subject + verb — the core English
+interrogative/conditional VP frame. T8 records [0-12] are ESSENTIAL:
+clearing them hangs the engine because they guard the fundamental
+clause structures the compiler depends on.
+
+---
+
+**Rule [12]** `L[RN]<$>p*` — flags=0x003F (LAST ESSENTIAL)
+
+Pattern: `L` (relative pronoun) `[RN]` (pronoun or noun) `<$>` (captured)
+`p` (resolved preposition) `*` (sentence end)
+
+Example: *"of whom I spoke"* (as sentence end)
+Token stream: `[Lwhom] [RI] [Vspoke] [pof]`
+Match:
+  `L`     → L → match
+  `[RN]`  → R → match
+  `<$>`   → ts[3]="Vspoke..." → captured
+  `p`     → ts[4]="pof..." starts with p → match
+  `*`     → end of sentence → match
+Result: Validates a relative clause ending with a preposition.
+The `$` capture preserves the contents between R and p.
+In Russian output: the preposition may move before the relative pronoun
+("о котором я говорил" — about which I spoke).
+
+---
+
+**Rule [13]** `~[bB]?[UVXY]` — flags=0x0025
+
+Pattern: `~[bB]` (not 'to' particle) `?` (unknown) `[UVXY]` (aux chain)
+
+Example: *"can flob speak"*
+Token stream: `[Ucan] [?flob] [Vspeak]`
+Match at position 1:
+  `~[bB]` → ts[1]="Ucan..." starts with U — U is NOT in {b,B} → neg-match → yes
+  `?`     → ts[2]="?flob..." starts with ? → match
+  `[UVXY]` → ts[3]="Vspeak..." starts with V, which IS in {U,V,X,Y} → match
+Result: Validates a modal + unknown-word + verb pattern. The `~[bB]` ensures
+the first token is NOT an infinitive particle (which would be a different
+construction). This protects sequences with unknown/unrecognized words
+from being mis-parsed by later output logic.
+
+---
+
+**Rule [79]** `NlRV` — flags=0x0046 (HIGHEST FLAG)
+
+Pattern: `N` (noun) `l` (genitive relative 'whose') `R` (pronoun) `V` (verb)
+
+Example: *"the man whose I saw"*
+Token stream: `[Nman] [lwhose] [RI] [Vsaw]`
+Match at position 1:
+  `N` → N → match
+  `l` → l → match (genitive relative — "whose" as possessive relative)
+  `R` → R → match
+  `V` → V → match
+Result: Validates noun + genitive-relative + pronoun + verb — a complex
+relative clause structure. The high flag (0x0046) may indicate this is
+a high-priority or late-binding validation that controls how the compiler
+assigns genitive case to the relative clause head.
+
+================================================================================
+Table T8  |  83 records  |  rec_size=8  |  LTPRO offset=0x2B134
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x000C   J[VUXY]                                   (none)
+[  1]  0x000C   J~<|J>[VUXY]                              (none)
+[  2]  0x000C   O[UV]                                     (none)
+[  3]  0x000C   JE                                        (none)
+[  4]  0x000C   JEC[EA]                                   (none)
+[  5]  0x0031   [RN]x                                     (none)
+[  6]  0x0023   J<ryV>NR                                  (none)
+[  7]  0x0036   ~[LlJQGRBb]N<P>R                          (none)
+[  8]  0x0036   UPR                                       (none)
+[  9]  0x0035   PRY*                                      (none)
+[ 10]  0x0037   [VXY]N[N#][UVXY]                          (none)
+[ 11]  0x0038   [UV][kNR][VXY]                            (none)
+[ 12]  0x003F   L[RN]<$>p*                                (none)
+[ 13]  0x0025   ~[bB]?[UVXY]                              (none)
+[ 14]  0x002B   EA                                        (none)
+[ 15]  0x002D   E<p>[NW]                                  (none)
+[ 16]  0x0017   ry                                        (none)
+[ 17]  0x0001   [kNRSQ]<EFP,L>[UVXY]                      (none)
+[ 18]  0x0001   N,<$>,[UVXY]                              (none)
+[ 19]  0x0001   NPC[UVXY]                                 (none)
+[ 20]  0x0001   [kNRSQ](<$>)<K>[UVXY]                     (none)
+[ 21]  0x003E   Nv                                        (none)
+[ 22]  0x0022   #<,EP>[UVXY]                              (none)
+[ 23]  0x0001   NBN[UVXY]                                 (none)
+[ 24]  0x0001   NLU[UVXY]                                 (none)
+[ 25]  0x0001   NL<XAP>,V                                 (none)
+[ 26]  0x0001   NL<NUCV,>bNV                              (none)
+[ 27]  0x0002   [BbUV]<pP>[NW]                            (none)
+[ 28]  0x0003   [BbV]<NI>P                                (none)
+[ 29]  0x001C   Y[NW]                                     (none)
+[ 30]  0x0019   [yXYU]<NIA>P                              (none)
+[ 31]  0x0019   [XY]PP                                    (none)
+[ 32]  0x000F   Yk                                        (none)
+[ 33]  0x0009   [UV]k                                     (none)
+[ 34]  0x001E   [OIHW]<,EP>[UV]                           (none)
+[ 35]  0x001E   [OIHW](N)<,>[UV]                          (none)
+[ 36]  0x0045   [IW][XY]                                  (none)
+[ 37]  0x0005   [NP]<,DC>[EF]                             (none)
+[ 38]  0x001F   [OIHW]<,C>[EF]                            (none)
+[ 39]  0x0021   [IHW]<pP,>[Ll]                            (none)
+[ 40]  0x0044   N([SA]                                    (none)
+[ 41]  0x0016   N<pPE,XO>L                                (none)
+[ 42]  0x0007   [SP]<p,>[lL]                              (none)
+[ 43]  0x0007   Nl                                        (none)
+[ 44]  0x001A   pL                                        (none)
+[ 45]  0x002F   [IHO]p                                    (none)
+[ 46]  0x0030   Np                                        (none)
+[ 47]  0x001C   pN                                        (none)
+[ 48]  0x0011   X<k>N                                     (none)
+[ 49]  0x001B   [xyf][NW]                                 (none)
+[ 50]  0x0024   UXA                                       (none)
+[ 51]  0x0012   X<k>A                                     (none)
+[ 52]  0x002A   X[SO]                                     (none)
+[ 53]  0x0004   [VB]<p>[AE]                               (none)
+[ 54]  0x000B   UE                                        (none)
+[ 55]  0x0006   R,E                                       (none)
+[ 56]  0x0006   U[AF]                                     (none)
+[ 57]  0x000E   [BUVY][IOH]                               (none)
+[ 58]  0x0010   LV[NP][UVXY]                              (none)
+[ 59]  0x0010   L<P>[VXYU]                                (none)
+[ 60]  0x0020   [NP]L[NR]                                 (none)
+[ 61]  0x001D   LVN                                       (none)
+[ 62]  0x0013   [GEF]P                                    (none)
+[ 63]  0x0013   [GEF]PP                                   (none)
+[ 64]  0x0008   U<A>[,C]<C>V                              (none)
+[ 65]  0x0015   V<#>[,C]U                                 (none)
+[ 66]  0x0015   V<$>,C[UY]                                (none)
+[ 67]  0x0018   U<N>,CU                                   (none)
+[ 68]  0x0018   XACU                                      (none)
+[ 69]  0x000A   V<NWP>[,C]<C>V                            (none)
+[ 70]  0x0017   YN[C,]V                                   (none)
+[ 71]  0x0018   Y[NW],CY                                  (none)
+[ 72]  0x0027   ry<$>C[YV]                                (none)
+[ 73]  0x0018   YN[C,]U                                   (none)
+[ 74]  0x000D   U<P>CE                                    (none)
+[ 75]  0x002C   ECE                                       (none)
+[ 76]  0x002E   QB                                        (none)
+[ 77]  0x003C   [RN]u                                     (none)
+[ 78]  0x003C   lN                                        (none)
+[ 79]  0x0046   NlRV                                      (none)
+[ 80]  0x003B   [NR]UV                                    (none)
+[ 81]  0x003B   [NR]Vb                                    (none)
+[ 82]  0x003D   MvP                                       (none)
+
+Sentinel at 0x2B3CC: 0000000000000000

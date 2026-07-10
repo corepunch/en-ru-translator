@@ -1,0 +1,170 @@
+================================================================================
+EXECUTION ORDER: 7 of 8
+ROLE: Structural validation guards — noun phrase / prepositional phrase / verb phrase
+================================================================================
+
+What this table does
+--------------------
+T7 has 35 rules, ALL with (none) action.  This table does not REWRITE anything
+— it only MATCHES.  A match in T7 signals to the engine that a token sequence
+is a WELL-FORMED CONSTITUENT and should be treated as a unit (protected from
+being broken apart by T8's more aggressive matching).
+
+The patterns cover the main phrase types:
+  - Prepositional phrases: P<$>N, P<AOdD>&<AO>[IH], OP<$>N
+  - Noun phrases: N<AOD(?)w#'">..., i<AOD...>N (numeral-headed NPs)
+  - Adjectival phrases: [AO]<AO#">..., O<A>N
+  - Participial phrases: F<&D>F, E~<P>N, G<$>N
+  - Verbal + object: [GE]M, VM, PM
+  - Coordination: N<Hw>&<&AOD>N, N<Hw>/N (N and/or N)
+  - Verb + modal/negation: U<KD>[VX], V[,C]<C>V
+  - Existential: H-H (digit range), N-N (noun-noun compound)
+
+Flags field (CONFIRMED — see RULES_APPLIED.md "Flag Semantics")
+-----------
+T7 uses a 2-byte flags field (bytes 6-7 of each 8-byte record). Values observed:
+0x0000–0x0017. This is a ~5-bit **constituent-type index** (0–31) that the compiler
+uses to select inflection behavior. Confirmed by binary patching:
+
+  - T7[0] original flags=0x0002 → "в доме" (prepositional case, PP constituent)
+  - flags=0x0001 → "в домах" (plural PP)
+  - flags=0x0010 → "в дом" (nominative, uninflected — no PP case assignment)
+  - flags=0x0014 → "в дом" (same — T7[2] value yields no PP inflection)
+  - flags=0x0000 → "в доме" (same as 0x0002 — default/fallback)
+  - flags ≥ 0x0020 → "в доме" (values ≥ 32 all fall back to default)
+
+Nulling T7[0] pattern (or patching its flags from 0x0002 to 0x0014) changes
+"Он - в доме." → "Он - в дом." and "на стуле" → "в стул" (preposition also
+changes from "на" to "в"), proving these guards directly control the compiler's
+case-assignment logic.
+
+Notable rules
+-------------
+[0]   P<$>N          0x0002  Core prepositional phrase: preposition + NP
+[2]   OP<$>N         0x0014  Demonstrative + PP
+[4]   Q<AO?">N       0x000C  Question-word + NP (interrogative NP)
+[7-8] H-H / N-N      0x0000  Hyphenated ranges and compounds
+[10]  N<AOD(?)w#'">  0x0006  Full NP with all possible modifiers
+[12]  F<&D>F         0x0004  Participial phrase with adverb
+[13-16] FN/EN/F~<P>N/E~<P>N  0x0010/0x0005  Participial + NP
+[17]  G<$>N          0x0016  Gerund phrase + NP
+[22]  N<w{}#HDK&>[EA] 0x0011  NP followed by participial/adjective
+[25]  I<AO?"H{}>N    0x0001  Numeral + NP
+[28]  [GE]M          0x000B  Verb/gerund + object pronoun
+[31]  U<KD>[VX]      0x0003  Modal + (not) + verb/auxiliary
+[33]  V[,C]<C>V      0x0013  Verb + (conj) + verb coordination
+[34]  PM             0x0017  Preposition + object pronoun
+
+Concrete examples
+-----------------
+
+**Rule [0]** `P<$>N` — flags=0x0002 (PP)
+
+Pattern: `P` (preposition) `<$>` (any modifiers captured) `N` (noun)
+
+Example: *"in the house"*
+Token stream: `[Pin] [Tthe] [Nhouse]`
+Match at position 1:
+  `P`   → ts[1]="Pin..." starts with P → match
+  `<$>` → ts[2]="Tthe..." — fallback: try skipping 0, then 1.
+          Skip 1: try next pattern element at position 3.
+  `N`   → ts[3]="Nhouse..." starts with N → match
+Result: Match found! This validates that "in the house" is a well-formed
+PP (prepositional phrase). The (none) action means no token is rewritten —
+the match signals to the compiler that this is a PP constituent for inflection
+purposes (the preposition sets the grammatical case for the NP).
+Clearing this rule causes "может" → "не мочь" (modal loses inflection).
+
+---
+
+**Rule [31]** `U<KD>[VX]` — flags=0x0003 (VP)
+
+Pattern: `U` (modal) `<KD>` (optional not/adverb) `[VX]` (verb or auxiliary)
+
+Example: *"must not go"*
+Token stream: `[Umust] [Knot] [Vgo]`
+Match at position 1:
+  `U`     → ts[1] starts with U → match
+  `<KD>`  → ts[2]="Knot..." starts with K → fallback: skip 1
+  `[VX]`  → ts[3]="Vgo..." starts with V → match
+Result: Validates a modal + negation + verb chain. The compiler knows
+"must not go" is a single VP with modal scope over the negation.
+Without this guard, the compiler might treat "not" as standalone negation
+and "go" as an imperative or infinitive.
+
+---
+
+**Rule [33]** `V[,C]<C>V` — flags=0x0013 (coordination)
+
+Pattern: `V` (verb) `[,C]` (comma or conjunction) `<C>` (optional conj) `V` (verb)
+
+Example: *"ran and jumped"*
+Token stream: `[Vran] [Cand] [Vjumped]`
+Match at position 1:
+  `V`   → match
+  `[,C]` → ts[2]="Cand..." starts with C → match
+  `<C>` → no more conjunction tokens → zero-wide
+  `V`   → ts[3]="Vjumped..." starts with V → match
+Result: Validates "V and V" as coordinated verb phrase. The compiler
+knows both verbs share the same subject and tense. Without this guard,
+the second verb might be treated as a new sentence or infinitive.
+
+---
+
+**Rule [10]** `N<AOD(?)w#'">[NH]` — flags=0x0006 (NP)
+
+Pattern: Full noun phrase: `N` + optional modifiers (adjectives, determiners,
+parentheticals, quotes/hashes) + `[NH]` (noun or numeral head)
+
+Example: *"the big red house"*
+Token stream: `[Nthe] [Abig] [Ared] [Nhouse]`
+Match at position 1:
+  `N`     → ts[1]="Nthe..." starts with N → match
+  `<AOD(?)w#'">` → ts[2]="Abig..." (A), ts[3]="Ared..." (A) → fallback skips both
+  `[NH]`  → ts[4]="Nhouse..." starts with N → match
+Result: The entire NP "the big red house" is validated as a well-formed
+constituent. The compiler uses this to ensure all adjectives agree in
+case/number with the head noun during Russian output.
+
+================================================================================
+Table T7  |  35 records  |  rec_size=8  |  LTPRO offset=0x2AC92
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x0002   P<$>N                                     (none)
+[  1]  0x0000   P<$>[#?O]                                 (none)
+[  2]  0x0014   OP<$>N                                    (none)
+[  3]  0x0015   O<A>N                                     (none)
+[  4]  0x000C   Q<AO?">N                                  (none)
+[  5]  0x0012   P<AOdDwc&>[IH]                            (none)
+[  6]  0x0012   P<AOdDNw>&<AO>[IH]                        (none)
+[  7]  0x0000   H-H                                       (none)
+[  8]  0x0000   N-N                                       (none)
+[  9]  0x0000   PA                                        (none)
+[ 10]  0x0006   N<AOD(?)w#'">[NH]                         (none)
+[ 11]  0x0006   i<AOD?#'">N                               (none)
+[ 12]  0x0004   F<&D>F                                    (none)
+[ 13]  0x0010   FN                                        (none)
+[ 14]  0x0005   EN                                        (none)
+[ 15]  0x0010   F~<P>N                                    (none)
+[ 16]  0x0005   E~<P>N                                    (none)
+[ 17]  0x0016   G<$>N                                     (none)
+[ 18]  0x0007   N<Hw>&<&AOD#?"'>N                         (none)
+[ 19]  0x0000   #&<AOD>N                                  (none)
+[ 20]  0x0007   N<w>(<AOD>N                               (none)
+[ 21]  0x0000   N<Hw>/N                                   (none)
+[ 22]  0x0011   N<w{}#HDK&>[EA]                           (none)
+[ 23]  0x0004   [AO]<AO#">[?#N]                           (none)
+[ 24]  0x0004   [AO]~<PHI>N                               (none)
+[ 25]  0x0001   I<AO?"H{}>N                               (none)
+[ 26]  0x000D   H<AOD(?#)">N                              (none)
+[ 27]  0x0004   [AO]<AO#">[HI]                            (none)
+[ 28]  0x000B   [GE]M                                     (none)
+[ 29]  0x0004   [AOE]<&D>[EA]                             (none)
+[ 30]  0x000E   O[&c]I                                    (none)
+[ 31]  0x0003   U<KD>[VX]                                 (none)
+[ 32]  0x000B   VM                                        (none)
+[ 33]  0x0013   V[,C]<C>V                                 (none)
+[ 34]  0x0017   PM                                        (none)
+
+Sentinel at 0x2ADAA: 0000000000000000

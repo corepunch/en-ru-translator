@@ -1,4 +1,4 @@
-local utils = require "translator.utils"
+local utils = require "utils"
 local load = {}
 
 local function split(self, sep)

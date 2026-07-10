@@ -1,0 +1,187 @@
+================================================================================
+EXECUTION ORDER: 6 of 8
+ROLE: Russian NP/clause word-order reordering (extended) + verbal agreement
+================================================================================
+
+What this table does
+--------------------
+T6 continues where T5 left off.  Where T5 handled simple N/A/w sequences,
+T6 handles:
+
+  1. More complex NP word-order: NCNNN, ACNNN, NANN, etc.
+     Actions are digit strings (same positional-reorder semantics as T5)
+  2. Hyphenated compound noun phrases: N-N, A-N, N-P-N etc.
+     Action "66666" means repeat/duplicate output positions (copy all 5 tokens)
+  3. W-tagged multi-word phrases: ANW, NNW, NW, NDW
+     W = a phrase boundary from T3; digit actions reorder within it
+  4. Verbal agreement structures:
+     [33-46] VK, UK, KNU, KNV, KDE, KDG patterns — these all produce "2"
+     meaning "output the 2nd token of the match" = negation/verb reordering
+     around K (not) in the verbal phrase
+  5. JTNX, pattern [17]: conjunction + determiner + noun + auxiliary → 144
+     (reorder for Russian clause-initial placement)
+  6. Coordination patterns [26-31]: NN,A,  NAN  etc.
+
+Rule [12] (A-N → (none)) is the only no-action rule — a guard.
+
+T6 has 47 real records.  Record [47] is the null-sentinel (all zeros).
+Records beyond [47] in the binary are string-pool data misread as records.
+
+**NOTE: T6 is NOT implemented in the Lua port.** The `rules.lua` table list at
+line 237 skips T6 entirely (`table.insert(rules, {...})` for T5 then T7).
+This means Russian NP word-order reordering, hyphenated compound handling,
+and verbal negation reordering (rules [33-46] like `VK` → `2`) are missing.
+The Lua compiler handles word order indirectly via printer state tracking.
+
+Flags field
+-----------
+T6 uses a 2-byte flags field (bytes 8-9 of each 10-byte record). Values 0x0000-0x000D
+(lowest range of any table). Many rules have flags=0x0000, consistent with the
+digit-action rules relying on positional order rather than constituent typing.
+See RULES_APPLIED.md "Flag Semantics".
+
+Notable rules (by group)
+------------------------
+[0-2]   NCNNN/ACNNN/ACANN  → 555/5555  Multi-noun chains → 5th token forward
+[5-11]  N-N/NN, A-NN etc.  → 66666/43  Hyphenated compound reorder
+[13-16] ANW/NNW/NW/NDW     → 33/2/3    Multi-word phrase reorder
+[17]    JTNX,              → 144       Clause-head reorder
+[18-27] Various NNN/ANN/NAN sequences → digit reorder
+[27]    NN                 → 2         (flags=0x0001) Default 2-noun: second first
+[32]    ry                 → 2         Compound pronoun reorder
+[33-46] Verbal negation reorders (VK, UK, KL, XK, KNU, etc.) → 2 or 13
+
+Concrete examples
+-----------------
+
+**Rule [27]** `NN` → `2`
+
+Pattern: `N` `N` — two consecutive nouns
+
+Example: *"the house door"*
+Token stream: `[Nhouse] [Ndoor]`
+Match at position 1:
+  Position 1 (N) → action digit `2` → will be 2nd in output
+  Position 2 (N) → consumed
+Reordering: Action `2` means "output position 2 first" → "door house"
+Russian word order for possessive nouns: "дверь дома" (door of-the-house),
+where the genitive modifier follows the head noun.
+
+---
+
+**Rule [23]** `N?N` → `3`
+
+Pattern: `N` (noun) `?` (unknown word) `N` (noun)
+
+Example: *"house flob door"* (unknown word "flob" between two nouns)
+Token stream: `[Nhouse] [?flob] [Ndoor]`
+Match at position 1:
+  `N` → match → rep=`3` → will be 3rd in output
+  `?` → match → rep=(none, consumed)
+  `N` → match → rep=(none)
+Reordering: Action `3` means "output position 3 (door) first, then the rest."
+The unknown word "flob" is skipped/placed after the head noun.
+Result: "door house flob" → Russian "дверь дом flob".
+
+---
+
+**Rule [17]** `JTNX,` → `144`
+
+Pattern: `J` (subordinator) `T` (determiner) `N` (noun) `X` (auxiliary) `,` (comma)
+
+Example: *", that the man is"*
+Token stream: `[Jthat] [Tthe] [Nman] [Xis] [, ]`
+Match at position 1:
+  `J` → match → rep=`1` → 1st in output
+  `T` → match → rep=`4` → 4th
+  `N` → match → rep=`4` → also 4th (duplicate position)
+  `X` → match → rep=(consumed)
+  `,` → match → rep=(consumed)
+Reordering: Action `144` puts J first, then T+N both at position 4 (after X).
+This reorders English clause-head "... that the man is" → Russian
+"... что есть мужчина" (that is-the man — J + X + N, dropping T).
+
+---
+
+**Rule [36]** `VK` → `2`
+
+Pattern: `V` (verb) `K` (negation "not")
+
+Example: *"speak not"*
+Token stream: `[Vspeak] [Knot]`
+Match at position 1:
+  `V` → match → rep=`2` → will be 2nd in output
+  `K` → consumed
+Reordering: Action `2` puts K (negation) first, V second → "not speak"
+Russian negation rule: "не" ALWAYS precedes the verb — "не говорить".
+This reordering fixes English verb+not order to Russian not+verb order.
+
+---
+
+**Rule [0]** `NCNNN` → `555`
+
+Pattern: `N` `C` `N` `N` `N` — noun + conjunction + three nouns
+
+Example: *"bread and butter milk sugar"*
+Token stream: `[Nbread] [Cand] [Nbutter] [Nmilk] [Nsugar]`
+Match at position 1:
+  5 pattern tokens, action `555` means output position 5 three times.
+  Or more likely: collapse to the 5th token (last noun) as head.
+Reordering: In a chain "A and B C D", Russian typically takes the last
+noun as the head: "sugar bread and butter milk" → "сахар хлеб и масло молоко"
+(complete restructuring). Action `555` emphasizes position 5 as the head.
+
+================================================================================
+Table T6  |  47 records  |  rec_size=10  |  LTPRO offset=0x2A79A
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x0006   NCNNN                                     555
+[  1]  0x0006   ACNNN                                     555
+[  2]  0x0006   ACANN                                     5555
+[  3]  0x0000   A#ANN                                     354
+[  4]  0x0000   A#AN                                      34
+[  5]  0x0000   N-N/NN                                    66666
+[  6]  0x002D   NN-NN                                     5
+[  7]  0x002D   "A-N"N                                    66666
+[  8]  0x002D   N-P-NN                                    66666
+[  9]  0x002D   A-NN                                      444
+[ 10]  0x002D   N-NN                                      43
+[ 11]  0x002D   N-N                                       3
+[ 12]  0x002D   A-N                                       (none)
+[ 13]  0x0002   ANW                                       33
+[ 14]  0x0002   NNW                                       33
+[ 15]  0x0002   NW                                        2
+[ 16]  0x0002   NDW                                       3
+[ 17]  0x0000   JTNX,                                     144
+[ 18]  0x0000   NANN                                      24
+[ 19]  0x0000   NHNN                                      43
+[ 20]  0x0000   NNNN                                      43
+[ 21]  0x0000   NNNH                                      2
+[ 22]  0x0000   NNN                                       3
+[ 23]  0x0000   N?N                                       3
+[ 24]  0x0000   ANNN                                      14
+[ 25]  0x0003   ANN                                       33
+[ 26]  0x0000   NN,A,                                     444
+[ 27]  0x0001   NN                                        2
+[ 28]  0x000A   ANAN                                      34
+[ 29]  0x0004   NAN                                       23
+[ 30]  0x0008   NH,                                       2
+[ 31]  0x0000   N,A,                                      33
+[ 32]  0x0007   ry                                        2
+[ 33]  0x0000   UKVK                                      2
+[ 34]  0x0000   KL                                        2
+[ 35]  0x0000   XK                                        2
+[ 36]  0x000B   VK                                        2
+[ 37]  0x000C   UNV                                       2
+[ 38]  0x0000   UK                                        2
+[ 39]  0x0000   KNU                                       2
+[ 40]  0x0000   KNV                                       2
+[ 41]  0x0000   KDV                                       2
+[ 42]  0x0000   KdV                                       2
+[ 43]  0x0000   KDE                                       2
+[ 44]  0x0000   KDG                                       13
+[ 45]  0x0000   KNXDA                                     4
+[ 46]  0x0000   KANV                                      23
+
+Sentinel at 0x2A970: 00000000000000000000

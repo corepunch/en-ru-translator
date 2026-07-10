@@ -1,0 +1,182 @@
+================================================================================
+EXECUTION ORDER: 1 of 8
+ROLE: Clause-structure pre-processing / Z-disambiguation
+================================================================================
+
+What this table does
+--------------------
+T1 runs FIRST, before anything else in the pipeline.  Its job is to look at
+the raw token stream (full of Z = unresolved V/N/A ambiguities) and resolve
+or annotate the ones that are determinable from surrounding context at the
+clause level.
+
+Most rules here have action (none), meaning they MATCH but do NOT rewrite —
+they are guards / structural assertions used to block later tables from
+mis-firing on constructions that are already accounted for.
+
+The rules that DO have actions mainly:
+  - Resolve Z → N or V (based on what precedes/follows)
+  - Label clause-boundary structures: if/when/as/since → J (subordinator)
+    and j (end-of-clause mark), building the clause skeleton for T2/T3
+  - Handle edge cases: "no" before adjective/noun → K (negation)
+  - Mark existential "there is" constructions
+  - Handle quoted/parenthesised noun phrases
+
+Pattern syntax clues
+--------------------
+  *         = sentence boundary (start OR end of token stream)
+  <...>     = optional span — zero or more tokens matching the character class
+  [abc]     = one token matching any of a, b, c
+  ~[abc]    = one token NOT matching any of a, b, c
+  Z         = unresolved V/N/A ambiguity token
+  `word`    = literal English word (dictionary lookup)
+  $         = captured group reference (set by <$> in pattern)
+  J / j     = subordinating conjunction / end-of-clause boundary
+  K         = "not" (negation particle)
+  y         = 'have' copular/existential sense (lowercase = already resolved)
+
+Flags field
+-----------
+T1 uses a 2-byte flags field (bytes 8-9 of each 10-byte record). The flags likely have
+a DUAL role: (1) rule priority/ordering within T1, and (2) constituent-type index for
+the compiler (same 0-31 index space used by T7/T8). See RULES_APPLIED.md "Flag Semantics"
+for the confirmed constituent-type hypothesis.
+
+Notable rules
+-------------
+[0]  *Z[?#]*       — a Z token between sentence boundaries with only unknowns:
+                     can't resolve it, mark as (none) / leave alone
+[1]  *`no`<AP>...  — "no + adj/noun" → label 'have' as @y (transforms current)
+[3]  *T"<$>"NZ*    — quoted phrase containing N then Z near sentence boundary
+                     → rewrite: @@"$^NV (caret = word join; resolves Z to V)
+[13] *<DK,>Z[TAO]  — Z followed by article/determiner → Z is a noun: @$V
+[20] *<dD,>B<dD>[VZ]<$>, — "to V ... , " → clause boundary J injection
+[25-36] Clause connective rules (as/if/when/since/during/let) → inject J/j
+[39-40] ?/# before Z → resolve to noun (unknown proper noun context)
+
+All 47 records can be cleared without engine crash (T1 has no rules critical
+for the sentinel-scan path), and clearing all 47 leaves output SAME for the
+test sentence — meaning T1 rules did NOT fire on "She can speak Russian."
+
+Concrete examples
+-----------------
+
+**Rule [7]** `*X`there`` → `@f `
+
+Pattern: `*` (start) `X` (auxiliary 'be') `` `there` `` (literal word)
+
+Example: *"Is there a book?"*
+Token stream: `[Xis] [Xthere] [Ta] [Nbook]`
+Match at position 1:
+  `*`   → j=1 (start of sentence) → ok
+  `X`   → ts[1]="Xis..." starts with X → match → rep=`@` → no-op at boundary
+  `` `there` `` → ts[2] == en_ru["there"] → match → rep=`f` → token 2 suppressed
+Result: "is" kept as X; "there" suppressed to space. The dummy subject is removed
+so later passes see a cleaner clause.
+
+---
+
+**Rule [8]** `*[EeG]*` → `(none)`
+
+Pattern: `*` (start) `[EeG]` (one past/participle/gerund) `*` (end)
+
+Example: *"Frightened."*
+Token stream: `[Efrightened]`
+Match at position 1:
+  `*`   → j=1 → ok
+  `[EeG]` → ts[1] starts with E → match
+  `*`   → j>#ts (end of sentence) → ok
+Result: no tokens changed. This guard prevents later tables from trying to
+re-resolve the E-token as a verb or adjective — it's already "frightened."
+
+---
+
+**Rule [2]** `*~<UVXY>Z*` → `(none)` — flags=0x003F
+
+Pattern: `*` (start) `~<UVXY>` (zero+ tokens NOT U/V/X/Y) `Z` (one Z) `*` (end)
+
+Example: *"The house fell."*
+Token stream: `[Tthe] [Nhouse] [ZfellVпадатьNпадение]`
+Match at position 1:
+  `*`       → j=1 → ok
+  `~<UVXY>` → ts[1]="Tthe..." — starts with T, NOT in {U,V,X,Y} → skip. ts[2]="Nhouse..." — N, NOT in set → skip.
+  `Z`       → ts[3]="Zfell..." starts with Z → match
+  `*`       → end → ok
+Result: This guard marks a sentence where a Z-ambiguous word ("fell" could be
+verb or noun) appears after non-verb material at the end. The `~<UVXY>` ensures
+no verb-chain tokens (U=modal, V=verb, X=aux 'be', Y=aux 'have') precede Z,
+indicating the Z is more likely a noun here (or Z → V if it's a verb in
+final position). No-action: just validates the pattern, leaving Z resolution
+to later tables.
+
+---
+
+**Rule [9]** `*<S>Z<HI:>*` → `(none)`
+
+Pattern: `*` (start) `<S>` (any demonstratives) `Z` (one Z) `<HI:>` (any numbers) `*` (end)
+
+Example: *"That paint 101:"*
+Token stream: `[Sthat] [ZpaintVкраска...] [H101] [::]`
+Match at position 1:
+  `*`   → j=1 → ok
+  `<S>` → ts[1]="Sthat..." starts with S → fallback: skip 1
+  `Z`   → ts[2] starts with Z → match
+  `<HI:>` → ts[3]="H101" (H), ts[4]="::" (:) → fallback skips both
+  `*`   → end → ok
+Result: marks this "demonstrative + Z-word + number" as a known noun-phrase,
+preventing later rules from promoting Z→V (verb) in this context.
+
+================================================================================
+Table T1  |  47 records  |  rec_size=10  |  LTPRO offset=0x2738C
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x0014   *Z[?#]*                                   (none)
+[  1]  0x0000   *`no`<APNw#?"'>[,*]                       @y
+[  2]  0x003F   *~<UVXY>Z*                                (none)
+[  3]  0x0004   *T"<$>"NZ*                                @@"$^NV
+[  4]  0x0000   *VX                                       @N
+[  5]  0x0000   *Z:                                       @N
+[  6]  0x0000   *Ze                                       @NN
+[  7]  0x0000   *X`there`                                 @f 
+[  8]  0x000A   *[EeG]*                                   (none)
+[  9]  0x000A   *<S>Z<HI:>*                               (none)
+[ 10]  0x0002   *SZ                                       (none)
+[ 11]  0x000B   *[TO]~<XYVU>B`be`                         (none)
+[ 12]  0x000B   *#-ZCZEP                                  (none)
+[ 13]  0x0001   *<DK,>Z[TAO]                              @$V
+[ 14]  0x0000   *~<UVXY>ZT                                @$V
+[ 15]  0x000B   *~<RQJUVXYB,C>[yVUXY]                     (none)
+[ 16]  0x0007   *e<"'>[DpbTOSN]                           @V
+[ 17]  0x0001   *<DK,>Z~[,CbUYXVPZ*]                      @$V
+[ 18]  0x0000   *ZZP                                      @V
+[ 19]  0x0000   *Z<,CZ>M                                  @V
+[ 20]  0x0000   *<dD,>B<dD>[VZ]<$>,                       @$J$V$j
+[ 21]  0x0000   *<dD,>B<dD>Y<$>,                          @$J$Y$j
+[ 22]  0x000C   *<dD,>B[VZ]<$>R[UVXY]                     (none)
+[ 23]  0x0000   *<dD,>`assuming`R<$>,~C                   @$JR$j
+[ 24]  0x0000   *<dDC,>`let`                              @$V
+[ 25]  0x0006   *`as`<$>,                                 @J$;
+[ 26]  0x0000   *<dD,>`if`~<,>`then`                      @$J$j
+[ 27]  0x0000   *<dD,>`if`<$>,~C                          @$J$j
+[ 28]  0x0000   *<dD,>j<$>,~C                             @$J$;
+[ 29]  0x0000   *<dD,>`when`<$>,~C                        @$J$j
+[ 30]  0x0000   *<dD,>`during`<$>,                        @$P$j
+[ 31]  0x0000   *<dD,>`since`~<(>,                        @$J$j
+[ 32]  0x000E   *<CdD,>P~<VXYU>,                          @$P$;
+[ 33]  0x0000   *pG,                                      @PNj
+[ 34]  0x0000   *GPH,[TORS]                               @gPHj
+[ 35]  0x0000   *p~<VXY>,                                 @P$j
+[ 36]  0x0000   *p<$>,                                    @J$j
+[ 37]  0x000F   *<dD,>JG~<,>R                             (none)
+[ 38]  0x0000   *y~<VXY>,C                                @@$j
+[ 39]  0x0003   *[?#]<-KdD>Z~[UVXYxy]                     @#$V
+[ 40]  0x0003   *[?#](~<UVXYxy>)Z~[UVXYxy]                @#($)V
+[ 41]  0x0004   *NZN<GFNwPDA>[,(*]                        @@V
+[ 42]  0x0004   *TZZ<dD>[,(J*]                            @@NV
+[ 43]  0x0005   *~<XYVZEe>NZ<dD>[THI*]                    (none)
+[ 44]  0x0005   *<STAOIH>N<wdD>Z~<eEbXYV>[(,QRS*]         (none)
+[ 45]  0x0000   *[NG]XB                                   @NU 
+[ 46]  0x0006   *G[C,JPp]                                 @N
+
+Sentinel at 0x27562: 00000000000000000000

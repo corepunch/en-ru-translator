@@ -1,0 +1,43 @@
+Baseline: "Она может сказать Русского."
+Test: "She can speak Russian."
+
+
+=== T8[13]: Negation, unknown, verb-aux class ===
+Original: '~[bB]?[UVXY]'
+  PATCH ?[UVXY]          -> SAME  # remove ~[bB]: match expr+unknown+verb regardless of b/B
+  PATCH ~[bB][UVXY]      -> SAME  # remove ?: match only ~[bB] then verb (no unknown)
+  PATCH [bB]?[UVXY]      -> SAME  # remove ~: match b/B+unknown+verb (no negation)
+  PATCH ~?[UVXY]         -> SAME  # remove [bB]: negate-then-unknown+verb (master switch)
+  PATCH ~[bB]?           -> SAME  # remove [UVXY]: match ~[bB]? anywhere (no verb guard)
+  PATCH ~[bB]?V          -> SAME  # remove [UXY]: verb-specific only
+  PATCH ~[bB]?U          -> SAME  # remove [VXY]: modal-specific only
+  PATCH [VXY]            -> SAME  # replace with single char class: what does this match?
+
+=== T8[12]: Relative pronoun, capture group, preposition, end-boundary ===
+Original: 'L[RN]<$>p*'
+  PATCH L[RN]p*          -> SAME  # remove <$>: no token-capture, just direct match
+  PATCH L[RN]<N>p*       -> SAME  # replace $ with N: capture only nouns
+  PATCH L[RN]p           -> SAME  # remove <$> and *: no capture, no end-boundary
+  PATCH L[RN]*           -> SAME  # remove <$>p: no preposition, just relative+pronoun at end
+  PATCH Lp*              -> SAME  # remove [RN]: relative directly to preposition at end
+  PATCH L[RN]<$>         -> SAME  # remove p*: no preposition, no end-boundary
+
+=== T8[11]: Modal/verb, neg-no/noun/pronoun, verb-aux class ===
+Original: '[UV][kNR][VXY]'
+  PATCH [UV][NR][VXY]    -> SAME  # remove k: N/R only, no neg-no
+  PATCH [UV]k[VXY]       -> SAME  # remove [NR]: only k between modal and verb
+  PATCH [UV][kNR]        -> SAME  # remove [VXY]: no verb guard at end
+  PATCH V[kNR][VXY]      -> SAME  # change first class to V only
+  PATCH U[kNR][VXY]      -> SAME  # change first class to U only
+  PATCH [UV]N[VXY]       -> SAME  # middle class = N only
+  PATCH [UV]R[VXY]       -> SAME  # middle class = R only
+  PATCH k[VXY]           -> SAME  # just k+verb: what does standalone k match?
+
+=== T8[10]: Verb-aux, noun, noun/unknown, modal/verb/aux ===
+Original: '[VXY]N[N#][UVXY]'
+  PATCH VN[N#][UVXY]     -> SAME  # first class = V only
+  PATCH XN[N#][UVXY]     -> SAME  # first class = X only
+  PATCH YN[N#][UVXY]     -> SAME  # first class = Y only
+  PATCH [VXY]N[N#]       -> SAME  # remove [UVXY] guard at end
+  PATCH [VXY]N[UVXY]     -> SAME  # middle class = N only (no #)
+  PATCH [VXY]N#          -> SAME  # just verb+noun+unknown

@@ -1,5 +1,5 @@
-local utils = require "translator.utils"
-local rules = require "translator.rules"
+local utils = require "utils"
+local rules = require "rules"
 local parser = {}
 
 local function echo(color, s, ...)
@@ -182,8 +182,22 @@ local function replace(ts, j, m, t, s)
 	elseif t == 'literal' then ts[j] = s
 	elseif s == '.' or s == '$' then
 	elseif s == '@' then find_and_replace(ts, j, m)
+	elseif s == '^' then
+		-- word-join: merge token j into the preceding token without a space separator
+		if j > 1 and ts[j-1] ~= ' ' then
+			ts[j-1] = ts[j-1] .. '^' .. ts[j]
+			ts[j] = ' '
+		end
+	elseif s == 'j' then
+		ts[j] = 'j'  -- inject end-of-clause boundary marker
+	elseif s == '|' then
+		ts[j] = '|'  -- inject clause-boundary separator
+	elseif s == '&' then
+		-- coordination marker: look for C-form, else no-op
+		find_and_replace(ts, j, 'C')
+	elseif s == '=' or s == ';' then
+		-- case-setting / clause-continuation: no-op until semantics are confirmed
 	elseif s then find_and_replace(ts, j, s)
-	-- else find_and_replace(ts, j, m) 		
 	end
 	return j+1
 end
@@ -192,6 +206,7 @@ local function nop(ts, j, ...)
 	return j+1
 end
 
+-- try_match_pattern: attempts match starting at position j, returns end position or false
 local function try_match_pattern(ts, m, j, f, replace)
 	local fallback = nil
 	for t, v, i in m do
@@ -203,7 +218,6 @@ local function try_match_pattern(ts, m, j, f, replace)
 			local d = eat('$', f())
 			fallback = function(n)
 				if xor(i, find(ts[n], v)) then
-					-- j = replace(ts,n,v,nil,d)
 					j = nop(ts,n,v,nil,d)
 					return true
 				end
@@ -213,15 +227,78 @@ local function try_match_pattern(ts, m, j, f, replace)
 		elseif fallback and fallback(j) then goto restart
 		else return false end
 	end
-	return true
+	return j  -- return position after last matched token
+end
+
+-- reorder_tokens: apply T5/T6 digit-action reordering to a matched span
+-- positions: list of token indices that were matched (in order)
+-- digits: the action string (e.g. "23", "3455")
+local function reorder_tokens(ts, positions, digits)
+	-- snapshot the matched tokens
+	local snap = {}
+	for k, pos in ipairs(positions) do snap[k] = ts[pos] end
+	-- write back in digit-specified order
+	for k = 1, #digits do
+		local d = tonumber(digits:sub(k, k))
+		if d and d >= 1 and d <= #snap and positions[k] then
+			ts[positions[k]] = snap[d]
+		end
+	end
+	-- suppress any trailing matched positions not covered by digits
+	for k = #digits + 1, #positions do
+		ts[positions[k]] = ' '
+	end
+end
+
+-- collect_positions: dry-run that records which ts indices were consumed
+local function collect_positions(ts, m, start)
+	local positions = {}
+	local fallback = nil
+	local j = start
+	for t, v, i in m do
+		::restart::
+		if not ts[j] then return nil end
+		if t == 'wildcard' then
+			if not xor(i, j==1 or j>#ts) then return nil end
+			-- wildcard matches boundary, doesn't consume a token
+		elseif t == 'any' then
+			fallback = function(n)
+				if xor(i, find(ts[n], v)) then
+					table.insert(positions, n)
+					j = n + 1
+					return true
+				end
+			end
+		elseif t == 'select' then
+			if not xor(i, find(ts[j], v)) then return nil end
+			table.insert(positions, j); j = j + 1
+		elseif t == 'literal' then
+			if not xor(i, ts[j] == en_ru[v]) then return nil end
+			table.insert(positions, j); j = j + 1
+		elseif t == 'char' then
+			if not xor(i, find(ts[j], v)) then
+				if fallback and fallback(j) then goto restart end
+				return nil
+			end
+			table.insert(positions, j); j = j + 1
+		end
+	end
+	return positions
 end
 
 local function match_pattern(ts, m, r)
+	local is_digit_action = r and r:match("^%d+$")
 	for i = 1, #ts do
 		if try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), nop) then
-			print("Applying "..m, r)
-			try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
-			-- return true
+			if _G.TRANSLATOR_DEBUG then print("Applying "..m, r) end
+			if is_digit_action then
+				local positions = collect_positions(ts, pattern_tokens(m), i)
+				if positions and #positions > 0 then
+					reorder_tokens(ts, positions, r)
+				end
+			else
+				try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
+			end
 		end
 	end
 end
@@ -244,8 +321,10 @@ end
 function parser.collect(dic, ts)
 	en_ru = dic
 	loop(ts)
-	for _, n in ipairs(ts) do
-		echo('blue', "%s", type(n)=='table' and utils.debug(n) or utils.decode(n))
+	if _G.TRANSLATOR_DEBUG then
+		for _, n in ipairs(ts) do
+			echo('blue', "%s", type(n)=='table' and utils.debug(n) or utils.decode(n))
+		end
 	end
 	return ts
   -- local out, prev = {}, nil

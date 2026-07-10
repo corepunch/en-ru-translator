@@ -1,0 +1,133 @@
+================================================================================
+EXECUTION ORDER: 5 of 8
+ROLE: Russian word-order reordering within the noun phrase
+================================================================================
+
+What this table does
+--------------------
+T5 is tiny (9 rules) but structurally special.  After T1-T4 have resolved ALL
+grammatical tags, T5 performs WORD-ORDER REORDERING of the output tokens.
+
+Every rule pattern is a pure sequence of N (noun), A (adjective), w (modifier),
+H (numeral/digit) tags — no verb, no clause structure.  The action is a digit
+string like "23", "434", "3455" — these are POSITIONAL INDICES specifying the
+output order of the matched tokens.
+
+Example:
+  Pattern: NwNw   (noun modifier noun modifier)
+  Action:  34     → output tokens at positions 3 and 4 of the match
+                    (i.e. the second N+w pair first, dropping the first pair)
+
+This is the Russian NP word-order fixer: Russian adjectives precede nouns
+(unlike English's post-nominal modifier constructions), and possessives/
+genitives must be reordered.
+
+Termination is DIFFERENT from all other tables: T5 uses a fixed-count
+mechanism (the last record T5[8] has flags=0x0009 = count of 9), not a
+null-pointer sentinel.  The byte immediately after T5 is NOT a null sentinel
+— it's the start of T6's data.
+
+Flags field
+-----------
+T5 uses a 2-byte flags field (bytes 8-9 of each 10-byte record). Most records
+have flags=0x0000 — no constituent typing (digit-action rules don't need it).
+The notable exception: T5[8] flags=0x0009 encodes the table size (9 records),
+not a constituent type. This is the only table where flags clearly serve a
+non-constituent purpose. See RULES_APPLIED.md "Flag Semantics".
+
+Notable rules
+-------------
+[0]  NwNww   → 3455   5-token NP reorder (complex genitive chain)
+[3]  NwNw    → 34     Basic genitive: "the book of the student" → студента книга
+[4]  NwN     → 33     (flags=0x0005)  Simple possessive reorder
+[6]  NANw    → 234    Adjective-noun-modifier reorder
+[7]  NNw     → 23     Two-noun chain reorder
+[8]  ANNAN   → 4545   (flags=0x0009 = TERMINATOR FLAG) Complex NP with two adjectives
+
+Concrete examples
+-----------------
+
+**Rule [3]** `NwNw` → `34`
+
+Pattern: `N` `w` `N` `w` — noun + genitive marker + noun + marker
+
+Example: *"the book of the student"* (after earlier tables resolved to NwNw)
+Token stream: `[Nbook] [wof] [Nstudent] [w]`
+Match at position 1:
+  Position 1 (N) → action digit `3` (will appear 3rd in output)
+  Position 2 (w) → action digit `4` (will appear 4th)
+  Position 3 (N) → consumed as 3rd pattern token
+  Position 4 (w) → consumed as 4th pattern token
+Reordering: Output order is 3→4→1→2 = "student w book w" → stripping `w` markers,
+the Russian output is "студента книга" (genitive modifier first).
+
+---
+
+**Rule [4]** `NwN` → `33`
+
+Pattern: `N` `w` `N` — short possessive chain
+
+Example: *"the book of John"*
+Token stream: `[Nbook] [wof] [NJohn]`
+Match at position 1:
+  Position 1 (N) → action digit `3` (will appear at position 3)
+  Position 2 (w) → action digit `3` (ditto)
+  Position 3 (N) → consumed
+Reordering: Output order 3→3→1→2 = "John John book of" with duplication,
+or more likely the `33` means "promote position 3 to the front, then output
+the rest in order." For Russian: "Джона книга" (John-genitive + book).
+
+---
+
+**Rule [7]** `NNw` → `23`
+
+Pattern: `N` `N` `w` — apposition: category-name pair
+
+Example: *"the city Moscow"*
+Token stream: `[Ncity] [NMoscow] [w]`
+Match at position 1:
+  Position 1 (N) → action digit `2`
+  Position 2 (N) → action digit `3`
+  Position 3 (w) → consumed
+Reordering: Output 2→3→1 = "Moscow w city" → Russian "город Москва"
+(head noun first, specific name second, as in Russian apposition).
+
+---
+
+**Rule [8]** `ANNAN` → `4545`
+
+Pattern: `A` `N` `N` `A` `N` — adjective + noun chain with two adj-noun pairs
+
+Example: *"big red car door"*
+Token stream: `[Abig] [Nred] [Ncar] [Adoor] [N ]`
+Match at position 1:
+  Position 1 (A) → action digit `4`
+  Position 2 (N) → action digit `5`
+  Position 3 (N) → action digit `4`
+  Position 4 (A) → action digit `5`
+  Position 5 (N) → consumed
+Reordering: Output 4→5→4→5→1→2→3 = "door (big) car (door) big red car"
+This is the TERMINATOR rule (flags=0x0009). It reorders multi-adjective NPs
+for Russian where adjectives must agree in case with the head noun.
+
+Note: The digit actions specify OUTPUT POSITION ORDER — each digit refers to
+a match position, and the sequence of digits defines the output permutation.
+The Lua port may handle word order differently via compiler state tracking,
+but these patterns document the original LTGOLD's NP reordering logic.
+
+================================================================================
+Table T5  |  9 records  |  rec_size=10  |  LTPRO offset=0x2A740
+--------------------------------------------------------------------------------
+ IDX  FLAGS    PATTERN                                   ACTION
+--------------------------------------------------------------------------------
+[  0]  0x0000   NwNww                                     3455
+[  1]  0x0000   NwwN                                      444
+[  2]  0x0000   NwNN                                      434
+[  3]  0x0000   NwNw                                      34
+[  4]  0x0005   NwN                                       33
+[  5]  0x0000   NwAN                                      34
+[  6]  0x0000   NANw                                      234
+[  7]  0x0000   NNw                                       23
+[  8]  0x0009   ANNAN                                     4545
+
+Sentinel at 0x2A79A: 7942d5227f42d5220600

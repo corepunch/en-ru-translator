@@ -1,4 +1,4 @@
-local utils = require "translator.utils"
+local utils = require "utils"
 local paradigms = {}
 
 paradigms.nouns = {
@@ -407,9 +407,10 @@ function paradigms.verb(base, table_id, e)
   elseif e.passive then
     local p = cut(extracted, len)..word_at(str, 13)
     return paradigms.adjective(p, 0, e, true)
-    -- return utils.decode(cut(extracted, len), true)..word_at(str, 13)
   else
-    return utils.decode(cut(extracted, len), true)..word_at(str, 8)..past_verb[index+1]
+    -- past tense: gender-based agreement (masc="", fem="а", neut="о", pl="и")
+    local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
+    return utils.decode(cut(extracted, len), true)..word_at(str, 8)..past_verb[past_idx]
   end
 end
 

@@ -66,21 +66,6 @@ a flags value (0–31) that the compiler uses to select the correct inflection s
 - **Match LTGOLD style** — preserve original rule order, pattern format, and code structure
 - **CP866 throughout** — legacy encoding internally, UTF-8 only for display via `utils.decode()`
 
-## Running
-
-```sh
-# Translate a sentence (quiet mode — prints only the Russian output)
-lua init.lua "She can speak Russian."
-
-# Translate with full debug trace (rule firings, token dump, compiler state)
-lua init.lua "She can speak Russian." --debug
-
-# Run the default test sentence
-lua init.lua
-```
-
-Requires Lua 5.3+ (uses bitwise operators `>>`, `&`).
-
 ## Core and shell boundary
 
 The translator follows Functional Core, Imperative Shell. Core modules accept
@@ -165,22 +150,3 @@ print(string.format("aspect=%02X gender=%d paradigm=%d", b:byte(2), b:byte(3)&3,
 if #b > 5 then print("perfective:", utils.decode(b:sub(6))) end
 ```
 
-## Testing
-
-```sh
-cd LTGOLD/
-
-# Capture reference outputs from LTPRO.EXE (run once; requires dosbox-x)
-./test_compare.sh --capture
-
-# Run full 10-sentence test suite (Lua engine vs LTPRO.EXE reference)
-./test_compare.sh --all
-
-# Test a single sentence
-./test_compare.sh "She can speak Russian."
-```
-
-Reference outputs live in `LTGOLD/refs/`. The 10 test sentences exercise:
-modal + verb chains (T2), PP case assignment (T7), past tense (E/F),
-relative clauses (T3/T8), passive voice (T2), NP word-order reordering (T5/T6),
-and verbal negation (T6).

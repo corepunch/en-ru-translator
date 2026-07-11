@@ -7,8 +7,19 @@
 | [Pipeline](pipeline.md) | Translation pipeline: tokenize → parse → compile. Stage-by-stage walkthrough with debugging tips. |
 | [Paradigms](paradigms.md) | Morphological tables: noun declension, adjective agreement, verb conjugation, pronoun forms. |
 | [Dictionary](dictionary.md) | Binary format of BASE.DIC / BASE.RUS. Byte layout, grammatical tags, paradigm ID encoding. |
-| [Rules](rules.md) | Pattern matching syntax: character classes, any-match, negation, literals, replacement tokens. |
+| [Rules](rules.md) | Pattern/replacement syntax, complete tag table, table structure, flag semantics. All confirmed. |
 | [Tools](tools.md) | Python extraction tools: hex viewers, binary analyzers, string finders, rule extractors. |
+
+## Active Research
+
+Work-in-progress notes live in [`work/`](../work/):
+
+| Document | Description |
+|----------|-------------|
+| [PLAN.md](../work/PLAN.md) | Reverse-engineering roadmap: open questions, phased investigation, experimental results. |
+| [REPORT.md](../work/REPORT.md) | Point-in-time status on flags field mechanism and unimplemented Lua features. |
+| [RESEARCH.md](../work/RESEARCH.md) | Running log of discoveries: provenance, tooling decisions, binary layout, open questions. |
+| [RULES_EXPERIMENTS.md](../work/RULES_EXPERIMENTS.md) | Binary patching experiments: sweep results, pattern semantics verification, flag scan data. |
 
 ## Quick Reference
 

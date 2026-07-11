@@ -1,230 +1,255 @@
-# Rule Pattern Syntax
+# Rule Pattern and Replacement Syntax
 
-The patterns in `rules.lua` use a compact notation to match grammatical sequences.
-See [Pipeline](pipeline.md) for how rules are applied.
+The patterns and replacements in `rules.lua` use a compact proprietary notation originally from SARMA 2.0 / LTGOLD. Meanings below are confirmed by the Lua parser implementation (`parser.lua:125-159`) and by surgical binary-patching experiments on `LTPRO.EXE`.
 
-**Source:** Extracted from `LTGOLD.EXE` binary via `extract2.py`. Original format
-documented in `LTGOLD/dic.txt` (SARMA DIC format, CP866 encoded).
+See [Pipeline](pipeline.md) for how rules are applied; see [tools.md](tools.md) for patching tooling.
 
-## Basic Token Matching
+---
 
-| Syntax | Matches | Example |
-|--------|---------|---------|
-| `Z` | A verb token | `Z` matches any verb |
-| `N` | A noun token | `N` matches any noun |
-| `V` | An adjective token | `V` matches any adjective |
-| `P` | A preposition token | `P` matches any preposition |
-| `*` | Sentence boundary | Start or end of token stream (see below) |
+## Table Structure
 
-### Sentence Boundary `*`
+**692 rules total** across 8 tables (verified from `LTPRO.EXE` binary). The Lua port in `rules.lua` contains **644 rules** across 7 passes — T6 (47 rules) is absent.
 
-`*` is **not** a generic wildcard — it matches sentence boundaries:
+Full record dumps with per-rule annotations are in [debug/T1.txt](../debug/T1.txt) through [debug/T8.txt](../debug/T8.txt).
 
-- `*` at **start** of pattern = matches beginning of token stream (`j==1`)
-- `*` at **end** of pattern = matches end of token stream (`j>#ts`)
-- `~*` = negated boundary (matches if NOT at boundary)
+| Table | Rules | Rec size | Tuple Shape | Role |
+|-------|-------|----------|-------------|------|
+| T1 | 47 | 10 B | `{flags16, pat_off, act_off}` | Clause skeleton: Z disambiguation, J/j boundary injection, connectives |
+| T2 | 157 | 10 B | `{flags16, pat_off, act_off}` | Core verb phrase: modal/aux chains, passive voice, article suppression |
+| T3 | 136 | 10 B | `{flags16, pat_off, act_off}` | Embedding structures: relative clauses, that-complements, gerund/inf phrases |
+| T4 | 178 | **9 B** | `{flags8, pat_off, act_off}` | Idioms/collocations, negation normalisation, final Z cleanup |
+| T5 | 9 | 10 B | `{flags16, pat_off, act_off}` | NP word-order reorder (digit actions); fixed-count termination |
+| T6 | 47 | 10 B | `{flags16, pat_off, act_off}` | Extended word-order reorder: longer NPs, hyphenated compounds, verbal negation |
+| T7 | 35 | **8 B** | `{pat_off, act_off, flags16}` | NP/PP/VP structural guards — all (none) action |
+| T8 | 83 | **8 B** | `{pat_off, act_off, flags16}` | Clause/VP structural guards — all (none) action |
 
-**Example:** `*Z[?#]*` matches: **start-of-sentence** → verb → number/unknown → **end-of-sentence**
+**Phase breakdown:**
+- **T1–T4** rewrite tags (grammatical transformation passes)
+- **T5–T6** reorder tokens (Russian word-order correction, digit-index actions)
+- **T7–T8** validate structure (no-action guards; annotate constituent types for the compiler)
 
-This means the pattern only fires when the verb+number sequence spans the entire sentence.
+**Record format:** T4 uses a 9-byte record with a 1-byte flags field; T7/T8 use an 8-byte record with flags stored in bytes 6–7 (after the two pointer fields). T1–T3/T5/T6 use the standard 10-byte layout with flags in bytes 8–9.
 
-From `parser.lua:200`:
+**Termination:** T1–T4, T6, T7, T8 terminate via a null-pointer sentinel record (`pat_off=0, act_off=0`). T5 uses a fixed-count mechanism: the last record (T5[8]) has `flags=0x0009` encoding the table size; there is no null sentinel after T5.
+
+**Key insight:** Tables T7 and T8 have **no replacement field** (`act_off` is always 0). They are "recognize-and-protect" guards — a match annotates constituent boundaries used by the compiler's inflection stage, but nothing is rewritten.
+
+---
+
+## Pattern Syntax
+
+### Token Types (in order of priority)
+
+| Syntax | Name | What it matches |
+|--------|------|-----------------|
+| `` `word` `` | literal | Exact English word match against dictionary entry |
+| `[chars]` | select | A single token whose grammatical tag starts with ANY char in the brackets |
+| `<chars>` | any-match | Zero or more consecutive tokens, each matching one of the chars (lazy) |
+| `*` | boundary | Position at start (`j==1`) or end (`j>#ts`) of token stream |
+| `~` | negate | Prefix: inverts the immediately following pattern token |
+| single char | char | A single token whose grammatical tag starts with that letter |
+
+### Detailed Semantics
+
+**`[chars]` character class** (`parser.lua:132-136`): Matches one token whose tag starts with ANY character in the set. Each bracket pair matches exactly one token.
+
+**`<chars>` any-match** (`parser.lua:137-141`): Matches zero or more consecutive tokens, each matching any char in the set. Lazy (non-greedy): tries zero tokens first. `<$>` matches any token (empty content = wildcard). Tokens matched by `<>` are passed to the replacement via the `$` capture mechanism.
+
+**`*` boundary marker** (`parser.lua:147-149`): Matches a position, not a token. `*` at pattern start → `j==1`; at pattern end → `j > #ts`. Used to anchor patterns to sentence edges.
+
+**`~` negation prefix** (`parser.lua:150-153`): Sets a negation flag for the immediately following token. The match condition is XORed — a token passes if it does NOT satisfy the normal condition.
+
+| Pattern | Negated meaning |
+|---------|-----------------|
+| `~Z` | Tag is NOT Z |
+| `~[bB]` | Tag is NOT b AND NOT B |
+| `~<N>` | Token does NOT match N in any-match |
+| `` ~`be` `` | English word is NOT "be" |
+| `~?` | Tag is NOT `?` (not an unknown word) |
+
+**`?` unknown token** (`parser.lua:154-156`): Matches a token whose tag starts with `?` (word not in dictionary).
+
+**Single-letter chars**: A standalone letter matches a token whose first tag character equals that letter.
+
+### Special Characters in Patterns
+
+| Symbol | Meaning |
+|--------|---------|
+| `#` | Untranslatable unit / proper noun / designation |
+| `\|` | Clause boundary marker in token stream |
+| `*` | Sentence boundary (start or end) |
+| `?` | Unknown word (not in dictionary) |
+| `-` | Hyphen in compound words |
+| `'` | Apostrophe / possessive marker |
+| `"` | Quote mark token |
+| `:` | Colon punctuation token |
+| `,` | Comma punctuation token |
+| `( )` | Optional/alternative substructure |
+| `{ }` | Alternative grouping |
+| `^` | Word-join or boundary marker |
+| `=` | Case-equality operator |
+| `;` | Subordinate clause separator |
+| `&` | Coordination marker |
+| `+` | Rare; possible word-join modifier |
+| `%` | Modifier flag for digit patterns (`<H%D,>`) |
+| `!` | Inline CP866 Russian literal injection (e.g. `!мес!` = "месяц") |
+| `_` | Underscore placeholder field (template fill-in) |
+| `` ` `` | Literal English word match |
+| `$` | Capture marker inside `<$>` — paired with replacement stream |
+
+---
+
+## Replacement Syntax
+
+(`parser.lua:167-225`) — replacement characters map per matched position via `find_and_replace(ts, j, replacement_char)`.
+
+| Char | Effect |
+|------|--------|
+| `' '` (space) | Suppress token output (set to `" "`) |
+| `.` | Keep token unchanged (no-op) |
+| `$` | Keep token unchanged; also consumed from replacement by `<>` spans |
+| `@` | Apply grammatical transform using the PATTERN character at that position |
+| any other char | Transform token to target tag via `find_and_replace` |
+
+### `find_and_replace()` (`parser.lua:205-225`)
+
 ```lua
-elseif t == 'wildcard' and xor(i, j==1 or j>#ts) then eat('@', f())
+function find_and_replace(ts, j, target_tag)
+  local w = ts[j]
+  if w:sub(1,1) == 'Z' and target_tag ~= 'Z' and target_tag:find('[VNA]') then
+    local _,_,prefix = w:find('(.-)'..target_tag)
+    ts[j] = target_tag .. prefix
+  else
+    local _,_,prefix = w:find(target_tag..'(.*)')
+    if prefix then ts[j] = target_tag .. prefix end
+  end
+end
 ```
 
-## Character Classes `[...]`
+String-level transformation: finds the first occurrence of the target tag letter in the token string and splices from there. For Z-ambiguous tokens it specifically resolves to V, N, or A. Actual morphological inflection (declension, conjugation) happens later in `compiler.lua`.
 
-Matches **one** of the listed tags:
+### Replacement Special Characters
 
-| Pattern | Matches |
-|---------|---------|
-| `[VZ]` | Adjective OR verb |
-| `[?#]` | Unknown word OR number |
-| `[TAO]` | Empty/adjective/or |
-| `[UVXY]` | Unique verb/infinitive/adjective/gerund |
-| `[,C]` | Comma OR conjunction |
-
-## Any-Match `<...>`
-
-Matches **zero or more** of any listed tag (like regex `*` but for character classes):
-
-| Pattern | Matches |
-|---------|---------|
-| `<VXY>` | Zero or more adjectives/gerunds |
-| `<dD,>` | Zero or more lowercase/comma |
-| `<KDd>` | Zero or more (unique verb/lowercase/adverb) |
-| `<TAOIH>` | Zero or more (empty/adjective/or/infinitive/subjunctive) |
-
-## Negation `~`
-
-Inverts the next match:
-
-| Pattern | Matches |
-|---------|---------|
-| `~Z` | Anything EXCEPT a verb |
-| `~[UVXY]` | Anything EXCEPT unique/infinitive/adjective/gerund |
-| `~<,>` | Anything EXCEPT commas |
-
-## Literal Words `` ` ``
-
-Matches a specific English word:
-
-| Pattern | Matches |
-|---------|---------|
-| `` `be` `` | The word "be" |
-| `` `no` `` | The word "no" |
-| `` `if` `` | The word "if" |
-| `` `that` `` | The word "that" |
-
-## Special Characters in Patterns
-
-| Char | Meaning | Source |
-|------|---------|--------|
-| `:` | Colon — punctuation token | `utils.lua:50` extracts `[,%!%.;:]?` |
-| `"` | Quote — punctuation token | Same extraction |
-| `(` | Left paren — captured as literal | Used in `(G)` pattern |
-| `)` | Right paren — captured as literal | Used in `(G)` pattern |
-| `!` | Exclamation — punctuation token | `utils.lua:50` |
-| `?` | Unknown word marker | `#word` prefix for unrecognized |
-| `#` | Number marker | Attached to numeric tokens |
-| `/` | Separator in patterns | `N[C/]G` — conjunction or slash |
-
-## Complex Pattern Examples
-
-Decoding actual rules from `rules.lua`:
-
-```lua
--- Rule: "*Z[?#]*"
--- Matches: start-of-sentence, verb, number/unknown, end-of-sentence
--- Purpose: match sentences that are just a verb + number (e.g. "Runs 3")
--- Note: the two * markers mean this only matches if the pattern spans the full sentence
-
--- Rule: "*~<UVXY>Z*"
--- Matches: start-of-sentence, (non-unique/non-verb/non-adjective/non-gerund)*, verb, end-of-sentence
--- Purpose: match verbs not preceded by auxiliary verbs
-
--- Rule: "*<dD,>B<dD>[VZ]<$>,"
--- Matches: (lowercase/comma)*, "be" auxiliary, (lowercase/comma)*, adj/verb, "$" (case marker), comma
--- Purpose: match "be" constructions like "is being done"
-
--- Rule: "`if`~<,>`then`"
--- Matches: "if", (non-comma)*, "then"
--- Purpose: match "if...then" constructions
-
--- Rule: "*G[C,JPp]"
--- Matches: anything, gerund, conjunction/comma/subjunctive/preposition
--- Purpose: match gerund phrases
-
--- Rule: "*NZN<GFNwPDA>[,(*]"
--- Matches: anything, noun, verb, noun, (gerund/passive/noun/lowercase/preposition/adverb/article)*, comma/lparen/anything
--- Purpose: match SVO structures
-
--- Rule: "(G)"
--- Matches: captured gerund in parentheses
--- Purpose: match parenthesized gerund phrases
-
--- Rule: "V<TAO>NG"
--- Matches: verb, (empty/adjective)*, noun, gerund
--- Purpose: match verb phrases with following gerund
-
--- Rule: "p[*)]"
--- Matches: preposition, then one of: *, ), or unknown
--- Purpose: match preposition at boundary
-
--- Rule: "B<?>*"
--- Matches: "be" auxiliary, unknown*, end-of-sentence
--- Purpose: match "be" at end of sentence
-```
-
-## Replacement Tokens
-
-The replacement string uses these conventions:
-
-| Token | Action |
-|-------|--------|
-| `@` | Apply grammatical transformation to current token |
-| `$` | Reference matched `<...>` group or `(` capture |
-| `.` | Keep current token unchanged |
-| `#` | Keep number/unknown token |
-| `` `word` `` | Insert literal Russian word |
-| `N`, `V`, `Z` etc. | Change current token's grammatical tag |
-| `^` | Transform to noun form |
-| `=` | Set case marker |
+| Char | Meaning |
+|------|---------|
+| `@` | Apply transform using pattern char |
+| `$` | Back-reference to `<>` captured span |
+| `` `word` `` | Insert literal Russian word (CP866) |
+| `^` | Word-join operator |
+| `=` | Case-setting operator |
 | `j` | Insert comma |
-| `;` | Insert separator |
-| ` ` (space) | Insert space in output |
+| `;` | Clause continuation marker |
+| `\|` | Insert clause-boundary separator |
+| `&` | Coordination operator |
+| `+` | Compound modifier |
+| `{ }` | Brace-wrap output |
 
-### Example Replacements
+---
 
-```lua
--- "@" = transform current token using the matched pattern
-"@N"   → transform to noun
-"@@"   → transform twice (double transformation)
-"@$V"  → transform current, then next as verb
-"@P"   → transform to preposition
-"@g"   → transform to gerund form
-"@J"   → transform to conjunction
+## Tag Reference
 
--- "." = keep current token unchanged
-".V"   → keep verb as-is
-".N"   → keep noun as-is
-".A"   → keep adjective as-is
-".$V"  → keep verb with case marker
+Source: `dic.txt` (SARMA 2.0 Russian documentation). Note: `#`, `|`, `*` meanings differ between dictionary context and rule-pattern context.
 
--- "$" = reference captured group
-"$V"   → use captured verb
-"$N"   → use captured noun
-"$J$j" → use captured conjunction, comma, captured conjunction again
-"$P$;" → use captured preposition, captured separator
+### Uppercase Tags
 
--- Literal Russian
-"`быть`"    → insert Russian word "быть"
-"`для`"     → insert Russian word "для"
-"`Для`"     → insert capitalized Russian word
+| Tag | Meaning | Notes |
+|-----|---------|-------|
+| `A` | Adjective, ordinal numeral | |
+| `B` | Infinitive particle 'to' (perfective verb) | NOT the copula — `X` is auxiliary 'be' |
+| `C` | Coordinating/disjunctive conjunction ("and", "but", "or") | |
+| `D` | Adverb, parenthetical word/phrase | |
+| `E` | -ed verb forms and irregular variants | Past participle / simple past |
+| `F` | Active present participle — generated by analyzer | Maps to `passive()` printer (possible mismatch) |
+| `G` | -ing verb forms | Gerund / present participle |
+| `H` | Any digits and combinations | Numeric token |
+| `I` | Cardinal numerals | |
+| `J` | Conjunctions, phrase-boundary separators | Subordinating conjunction / complementizer |
+| `K` | Negative particle 'not' | |
+| `L` | Relative word meaning ', который' (which/who) | Resolved relative pronoun |
+| `M` | Indirect pronoun | Object pronoun ("him", "her", "them") |
+| `N` | Singular noun | |
+| `O` | Demonstrative pronoun | ("this", "that", "these") |
+| `P` | Preposition | |
+| `Q` | Question word | Interrogative |
+| `R` | Personal pronoun | ("I", "you", "he") |
+| `S` | Demonstrative pronoun (second class) | See S vs O note below |
+| `T` | Determiner (article) | Maps to `separator()` → empty output |
+| `U` | Modal verb | ("must", "can", "shall") |
+| `V` | Main (content) verb | Finite predicate |
+| `W` | Multi-word phrase boundary marker | Inserted by T3; `is()` matches ANY class letter |
+| `X` | Auxiliary verb 'be' | (is/are/was/were) |
+| `Y` | Auxiliary verb 'have' (possession sense) | Perfect auxiliary |
+| `Z` | Ambiguity V-N-A | Unresolved word: verb, noun, or adjective |
 
--- Combined
-"@$V"   → transform current, use captured verb
-"@$NV"  → transform current, use captured noun then verb
-"@@\"$^NV" → double transform, quote, captured noun as noun, verb
-```
+### Lowercase Tags — "Already Processed" Markers
 
-### Priority Values
+Lowercase counterparts indicate the token's category has been resolved by an earlier rule pass.
 
-Each rule has a priority byte (first element, `0x00`-`0x3F`). These control
-rule ordering within a pass — lower priority fires first. The actual mapping
-of priority values to rule categories is not yet fully understood.
+| Tag | Meaning |
+|-----|---------|
+| `a` | Sub-class of adjective-adverbs ("more", "less") |
+| `b` | Infinitive particle 'to' (imperfective verb) |
+| `d` | Adverb/adjective ambiguity |
+| `e` | Coincidence of infinitive / past participle / past tense forms |
+| `f` | Determiner-expression (followed by a noun phrase) |
+| `k` | Negative particle 'no' (vs `K` = 'not') |
+| `l` | Movable relative word 'whose' — generated by analyzer |
+| `m` | Compound indirect pronoun |
+| `n` | Plural noun |
+| `o` | Likely lowercase of `O` (demonstrative) |
+| `r` | Compound personal pronoun ("myself", "yourself") |
+| `s` | Lowercase of `S` (demonstrative variant) |
+| `t` | Determiner — segment boundary marker, generated by analyzer |
+| `u` | Modal verb combination ("had better", "ought to") |
+| `v` | Verb form in -s/-es (3rd person singular present) |
+| `w` | Genitive chain marker — inserted by T2/T3 for genitive/possessive modifier |
+| `x` | Impersonal verb combination ("there is", etc.) |
+| `y` | Auxiliary verb 'have' (existential/copular sense) |
+| `z` | Ambiguity v-n (3sg-s form could be noun or verb) |
 
-### Multiple Rule Tables
+### Notes on Commonly Confused Tags
 
-LTGOLD stores rules in **multiple separate tables** in `LTGOLD.dat`, not one.
-Each table is processed sequentially. Found via `extract2.py`:
+- **`B` is NOT the copula** — it is the infinitive particle 'to'. The actual auxiliary 'be' is `X`.
+- **`K` = 'not'** (negation), `k` = 'no'. Both appear as negation carriers in patterns.
+- **`H` = any digits**, not possessive/genitive.
+- **`D` = adverb / parenthetical**, not do-support auxiliary.
+- **`M` = indirect object pronoun** ("him", "her", "them"), not adverbial modifier.
+- **`Z` vs `V`**: `Z` = unresolved V-N-A ambiguity; rules promote `Z` → `V`/`N`/`A` by context.
+- **`S` vs `O`**: Both demonstratives; likely `S` = attributive ("this book"), `O` = standalone ("this one").
+- **`B` vs `b`**: `B` = 'to' before perfective verb; `b` = 'to' before imperfective verb.
+- **`W` tag**: Multi-word phrase boundary marker. The `is()` function has a special case — W-tagged tokens match ANY class letter, so `W` won't block any pattern match.
+- **`w` tag** (lowercase): Genitive chain marker. Used in T5/T6 reordering patterns like `NwNw` → Russian genitive-first order.
 
-| Table | Offset | Entries | Record Size | Purpose |
-|-------|--------|---------|-------------|---------|
-| 1 | 3374 | 47 | 10 bytes | Core structural patterns (verb phrases, negation, conditionals) |
-| 2 | 3854 | 157 | 10 bytes | Detailed grammatical transformations (articles, pronouns, tenses) |
-| 3 | 5434 | 136 | 10 bytes | Preposition handling, conjunction processing, special constructions |
-| 4 | 11981 | 178 | 9 bytes | Passive voice, gerunds, complex verb forms |
-| 5 | 16610 | 9 | 10 bytes | Final cleanup rules |
-| 6 | 16874 | 56 | 10 bytes | Noun agreement patterns |
-| 7 | 17972 | 35 | 8 bytes | Preposition/case rules (no actions — pattern-only) |
-| 8 | 19158 | 83 | 8 bytes | Final rules (no actions — pattern-only) |
+---
 
-**Record formats:**
+## Flag Semantics (Constituent-Type Index)
 
-10-byte record: `[pattern_offset:u16] [unknown:u16] [action_offset:u16] [unknown:u16] [flags:u16]`
-9-byte record: `[flags:u8] [pattern_offset:u16] [unknown:u16] [action_offset:u16] [unknown:u8]`
-8-byte record: `[pattern_offset:u16] [unknown:u16] [action_offset:u16] [flags:u16]`
+The flags field in every rule record is a **constituent-type identifier** — it tells the compiler what syntactic phrase was matched, so it knows how to apply Russian morphology (case, agreement, inflection) to the matched span.
 
-Pattern and action are null-terminated C-strings stored in the same data block.
-Offset 0 means "no pattern" or "no action".
+**Confirmed by binary patching:** Patching T7[0] flags `0x0002 → 0x0014` changes "доме" → "дом" (prepositional → nominative). Patching T8[13] flags `0x0025 → 0x0000` changes "говорит" → "говорить" (finite → infinitive). Full experimental results are in [work/REPORT.md](../work/REPORT.md).
 
-**Tables with no actions** (tables 7, 8) likely match patterns but don't modify
-tokens — they may set flags or control subsequent rule processing.
+**`0x003F` (all 6 low bits set)** = full clause / sentence-level wildcard. Both T1[2] `*~<UVXY>Z*` and T8[12] `L[RN]<$>p*` use `*` anchors and carry this flag.
 
-<!-- TODO: Document all replacement token meanings.
-     Understand the `$` capture reference system in detail.
-     Map priority values (0x00-0x3F) to their meaning — do they control rule ordering?
-     Document what `^`, `=`, `;` do exactly in replacements.
-     Determine how tables are referenced from code (function call chain). -->
+**`0x0000`** = no constituent typing. Most T1–T4 rewrite rules carry this; they transform a tag, so the compiler only needs the resulting tag.
+
+**Higher flags = larger/more complex constituents.** T8 exclusively holds flags above `0x001F`.
+
+| Flag | Constituent type (from T7 patterns) |
+|------|--------------------------------------|
+| `0x0000` | No inflection grouping (compounds, bare pairs) |
+| `0x0002` | PP — prepositional phrase |
+| `0x0003` | VP with modal |
+| `0x0004` | AP / participial phrase |
+| `0x0005` | Participial + NP |
+| `0x0006` | Full NP |
+| `0x000B` | Verb + object pronoun |
+| `0x000C` | Interrogative NP |
+| `0x0013` | Coordinated VP |
+| `0x003F` | Full clause / sentence-level |
+
+**Special case:** T5[8] flags=`0x0009` encodes the table size (fixed-count termination), not a constituent type.
+
+<!-- TODO: Document what ^, =, ;, & do exactly in replacements.
+     Confirm whether same flag index means the same constituent type across all tables (T2/T4 vs T7/T8).
+     Determine T5/T6 digit action semantics — are they 1-based position indices?
+     Document T6's 47 rules and which overlap with T5/T7. -->

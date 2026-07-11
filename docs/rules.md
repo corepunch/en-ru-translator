@@ -36,6 +36,28 @@ Full record dumps with per-rule annotations are in [debug/T1.txt](../debug/T1.tx
 
 ---
 
+## Rule Edit Workflow
+
+When changing `core/rules.lua`, use this workflow to keep changes auditable and testable:
+
+1. Add or adjust the smallest possible rule entry in the right table (T1-T4 for rewrites, T5-T6 for reorder behavior).
+2. Add a short inline comment for each modified/new rule with one English trigger example.
+3. Run standard tests from repo root:
+  - `./test/run_all.sh`
+4. If the change intentionally alters output style/wording, update expectations in `demo/compare.lua` in the same commit.
+5. (Optional) If you need LTGOLD parity evidence for a new case, capture once via `LTGOLD/test_compare.sh` and store the resulting expected line.
+
+Note on comment scope:
+
+- `core/rules.lua` has hundreds of extracted rules; adding exhaustive comments to every legacy rule would be very noisy.
+- Keep comments focused on touched rules and include a concrete trigger phrase, for example:
+
+```lua
+{ 0x00, "`make`[MR]Z", "`заставлять`MV" }, -- Example: "make him go" -> causative verb + object pronoun
+```
+
+---
+
 ## Pattern Syntax
 
 ### Token Types (in order of priority)

@@ -135,22 +135,19 @@ in order T1 → T2 → … → T8, so a tag set by T2 is visible to T3.
 
 ## Testing
 
+Read `TESTING.md` for the complete and current test workflow.
+
+Quick run:
+
 ```sh
-cd LTGOLD/
-
-# Run Lua engine vs LTPRO.EXE reference outputs (10 test sentences)
-./test_compare.sh --all
-
-# Test a single sentence
-./test_compare.sh "She can speak Russian."
-
-# Capture fresh reference outputs from the original binary (requires dosbox-x)
-./test_compare.sh --capture
+./test/run_all.sh
 ```
 
-Reference outputs live in `LTGOLD/refs/`. The suite covers: modal chains, PP case
-assignment, past tense, relative clauses, passive voice, NP word-order reordering,
-and verbal negation.
+This runs unit tests in `test/*_test.lua` and the sentence-level regression suite in
+`demo/compare.lua` with no DOSBox/LTPRO dependency.
+
+Compatibility checks against LTGOLD reference outputs are documented in `TESTING.md`
+and use `LTGOLD/test_compare.sh`.
 
 ## Project layout
 

@@ -1,8 +1,8 @@
 -- Compare Lua engine output with LTGOLD reference for DEMO.TXT
-local utils = require "utils"
-local load = require "load"
-local parser = require "parser"
-local compiler = require "compiler"
+local utils = require "core.utils"
+local load = require "core.load"
+local parser = require "core.parser"
+local compiler = require "core.compiler"
 
 local file = assert(io.open("data/BASE.DIC", "r"))
 local file2 = assert(io.open("data/BASE.RUS", "r"))

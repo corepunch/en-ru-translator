@@ -27,7 +27,7 @@
 -- CP866 ↔ UTF-8 conversion (standalone, no external deps)
 -------------------------------------------------------------------------------
 
-local encoding = require "encoding"
+local encoding = require "core.encoding"
 
 local function decode(s)
   local t = {}

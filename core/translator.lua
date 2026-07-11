@@ -1,6 +1,6 @@
-local compiler = require "compiler"
-local parser = require "parser"
-local utils = require "utils"
+local compiler = require "core.compiler"
+local parser = require "core.parser"
+local utils = require "core.utils"
 
 local translator = {}
 

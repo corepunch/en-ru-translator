@@ -1,6 +1,6 @@
-local utils = require "utils"
-local paradigms = require "paradigms"
-local dbg = require "dbg"
+local utils = require "core.utils"
+local paradigms = require "core.paradigms"
+local dbg = require "core.dbg"
 local compiler = {}
 
 -- utf8_upper: uppercase Cyrillic letters in a UTF-8 string.

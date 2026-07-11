@@ -1,7 +1,7 @@
 -- Verify that rules.lua preserves every rule record extracted from LTPRO.EXE.
 -- This is intentionally independent of the parser so matcher bugs cannot hide extraction drift.
-local utils = require "utils"
-local rules = require "rules"
+local utils = require "core.utils"
+local rules = require "core.rules"
 
 local path = arg[1] or "LTGOLD/LTPRO.EXE"  -- NOTE: LTGOLD/ LTPRO.EXE is a binary tool, not a data file
 local file = assert(io.open(path, "rb"))

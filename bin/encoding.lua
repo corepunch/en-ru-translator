@@ -1,4 +1,4 @@
-local encoding = require "encoding"
+local encoding = require "core.encoding"
 
 -- This shell is deliberately limited to transport concerns; conversion logic
 -- remains reusable through require("encoding").

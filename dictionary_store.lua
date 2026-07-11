@@ -1,5 +1,5 @@
-local encoding = require "encoding"
-local load = require "load"
+local encoding = require "core.encoding"
+local load = require "core.load"
 
 local dictionary_store = {}
 

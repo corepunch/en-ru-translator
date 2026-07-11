@@ -80,13 +80,24 @@ end
 --       extract_form("X013- fесть")    → ""
 function utils.extract_form(s)
   if #s <= 1 then return "" end
+  local leading = s:byte(1)
   local i = 2
   while i <= #s and s:byte(i) >= 48 and s:byte(i) <= 57 do i = i + 1 end
+  -- Some dictionary records repeat their tag after numeric metadata
+  -- (V11V.соглашаться); the second tag is structural, not a new form.
+  if s:byte(i) == leading then i = i + 1 end
   local result = {}
   while i <= #s do
     local b = s:byte(i)
-    if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then break end
-    if b >= 127 then result[#result+1] = cp866_to_utf8[b] end
+    if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or
+       b == 0x3B or b == 0x5C or b == 0x2E then break end
+    if b >= 127 then
+      result[#result+1] = cp866_to_utf8[b]
+    elseif b == 0x20 or b == 0x2D then
+      -- LTGOLD lexical forms may be multiword or hyphenated; these ASCII
+      -- separators belong to the surface form rather than marking a new tag.
+      result[#result+1] = string.char(b)
+    end
     i = i + 1
   end
   return table.concat(result)
@@ -178,7 +189,11 @@ function utils.tokenize(s, en_ru)
   -- caps[i] = true when token i was produced from an all-caps English source word.
   -- Used by the compiler to uppercase Russian output (e.g. AGREEMENT → СОГЛАШЕНИЕ).
   tbl.caps = {}
+  tbl.phrases = {}
+  tbl.source = {}
+  tbl.component_caps = {}
   local phrase_all_caps = false  -- track caps across multi-word phrase lookups
+  local phrase_component_caps = {}
 
   local stem_variants = {
     G = { "", "e" },
@@ -222,10 +237,46 @@ function utils.tokenize(s, en_ru)
       end
     end
   end
-  for w in s:gmatch("%w+[,%!%.;:]?") do table.insert(words, w) end
+  local lexical = s:gsub("([\"'])", " %1 ")
+  for raw in lexical:gmatch("%S+") do
+    if raw == '"' or raw == "'" then
+      table.insert(words, raw)
+      goto next_raw
+    elseif raw:match("^[,%!%.;:]$") then
+      table.insert(words, raw)
+      goto next_raw
+    end
+    local compound, punct = raw:match("([%w%-]+)([,%!%.;:]?)")
+    if compound and compound:find('-', 1, true) and not en_ru[compound:lower()] then
+      local start = 1
+      while true do
+        local dash = compound:find('-', start, true)
+        if not dash then
+          table.insert(words, compound:sub(start) .. punct)
+          break
+        end
+        table.insert(words, compound:sub(start, dash - 1))
+        table.insert(words, '-')
+        start = dash + 1
+      end
+    elseif compound then
+      table.insert(words, raw)
+    end
+    ::next_raw::
+  end
   dbg.log(2, "  Words:", table.concat(words, " | "))
   while i <= #words do
-    local word, punct = words[i]:match("(%w+)([,%!%.;:]?)")
+    if words[i] == '-' or words[i] == '"' or words[i] == "'" or
+       words[i]:match("^[,%!%.;:]$") then
+      local structural = words[i]
+      table.insert(tbl, structural)
+      tbl.caps[#tbl], tbl.phrases[#tbl], tbl.source[#tbl] = false, false, structural
+      tbl.component_caps[#tbl] = false
+      prev = nil
+      i = i + 1
+      goto continue
+    end
+    local word, punct = words[i]:match("([%w%-]+)([,%!%.;:]?)")
     local word_orig = word  -- original case before lowercasing
     word = word:lower()
     -- caps flag encodes original word capitalisation for the compiler:
@@ -238,7 +289,10 @@ function utils.tokenize(s, en_ru)
     if not prev then
       -- Single all-caps letters (e.g. "A" in "EXHIBIT A") are document designators,
       -- not articles. Bypass dictionary lookup and preserve as proper-noun token.
-      local is_designator = is_all_caps and #word == 1 and word:match("%a")
+      -- LTGOLD initially treats A as the article except when terminal punctuation
+      -- makes it an explicit document designator (EXHIBIT A.).
+      local is_designator = is_all_caps and #word == 1 and word:match("%a") and
+        word ~= "i" and (word ~= "a" or punct ~= "")
       local derived = (not is_designator) and derived_lexeme(word)
       if (not is_designator) and (en_ru[word] or derived) then
         dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word] and en_ru[word].__lex or derived))
@@ -249,11 +303,18 @@ function utils.tokenize(s, en_ru)
         table.insert(tbl, '#'..word_orig)
       end
       tbl.caps[#tbl] = is_caps
+      tbl.phrases[#tbl] = false
+      tbl.source[#tbl] = word_orig
+      tbl.component_caps[#tbl] = false
       phrase_all_caps = is_caps  -- reset phrase tracking to current word's caps
+      phrase_component_caps = { is_caps }
       prev, last = en_ru[word], i
       if punct ~= "" then
         table.insert(tbl, punct)
         tbl.caps[#tbl] = false
+        tbl.phrases[#tbl] = false
+        tbl.source[#tbl] = punct
+        tbl.component_caps[#tbl] = false
       end
     elseif not prev[word] then
       dbg.log(2, "  Phrase break:", word, "→ backtracking to last")
@@ -261,29 +322,30 @@ function utils.tokenize(s, en_ru)
     elseif prev[word].__lex then
       dbg.log(2, "  Phrase complete:", word, "→",
         utils.decode(prev[word].__lex))
-      -- phrase is all-caps only when every word in the phrase was all-caps
-      -- downgrade to "init" if any word was only initial-cap
-      if phrase_all_caps == true and is_caps ~= true then
-        phrase_all_caps = is_caps  -- downgrade: true→init or true→false
-      elseif phrase_all_caps == "init" and is_caps == false then
-        phrase_all_caps = false
-      end
+      table.insert(phrase_component_caps, is_caps)
       tbl[#tbl], last = prev[word].__lex, i
       tbl.caps[#tbl] = phrase_all_caps
+      tbl.phrases[#tbl] = true
+      tbl.source[#tbl] = tbl.source[#tbl] or word_orig
+      tbl.component_caps[#tbl] = { table.unpack(phrase_component_caps) }
+      -- A terminal dictionary node may also have children ("by all means" and
+      -- "by all means of"); retain it so the longest lexical phrase can win.
+      prev = prev[word]
       if punct ~= "" then
         table.insert(tbl, punct)
         tbl.caps[#tbl] = false
+        tbl.phrases[#tbl] = false
+        tbl.source[#tbl] = punct
+        tbl.component_caps[#tbl] = false
+        prev = nil
       end
     else
       dbg.log(2, "  Phrase continue:", word)
-      if phrase_all_caps == true and is_caps ~= true then
-        phrase_all_caps = is_caps
-      elseif phrase_all_caps == "init" and is_caps == false then
-        phrase_all_caps = false
-      end
+      table.insert(phrase_component_caps, is_caps)
       prev = prev[word]
     end
     i = i + 1
+    ::continue::
   end
   dbg.log(2, "  Tokens:",
     table.concat(utils.map(tbl, function(t)

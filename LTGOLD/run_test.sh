@@ -11,11 +11,19 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SENTENCE="${1:-He was arrested by the police last year.}"
 EXE="${2:-LTPRO.EXE}"
+# Per-process 8.3 names let mutation sweeps run without clobbering another DOSBox job.
+INPUT_NAME="I$$.TXT"
+OUTPUT_NAME="O$$.TXT"
+CFG_NAME="_dosbox_run_$$.conf"
+INPUT="$SCRIPT_DIR/$INPUT_NAME"
+OUTPUT="$SCRIPT_DIR/$OUTPUT_NAME"
+CFG="$SCRIPT_DIR/$CFG_NAME"
 
-printf "%s\r\n" "$SENTENCE" > "$SCRIPT_DIR/IN.TXT"
-rm -f "$SCRIPT_DIR/OUT.TXT"
+# Keep differential tests away from the tracked IN.TXT/OUT.TXT reference artifacts.
+trap 'rm -f "$INPUT" "$OUTPUT" "$CFG"' EXIT
+printf "%s\r\n" "$SENTENCE" > "$INPUT"
+rm -f "$OUTPUT"
 
-CFG="$SCRIPT_DIR/_dosbox_run.conf"
 cat > "$CFG" << EOF
 [cpu]
 core=auto
@@ -33,15 +41,13 @@ joysticktype=none
 [autoexec]
 mount c $SCRIPT_DIR
 c:
-$EXE IN.TXT OUT.TXT -F-
+$EXE $INPUT_NAME $OUTPUT_NAME -F-
 exit
 EOF
 
 dosbox-x -conf "$CFG" -silent 2>/dev/null
-rm -f "$CFG"
-
-if [ -f "$SCRIPT_DIR/OUT.TXT" ] && [ -s "$SCRIPT_DIR/OUT.TXT" ]; then
-  python3 -c "print(open('$SCRIPT_DIR/OUT.TXT','rb').read().decode('cp866','replace').strip())"
+if [ -f "$OUTPUT" ] && [ -s "$OUTPUT" ]; then
+  python3 -c "print(open('$OUTPUT','rb').read().decode('cp866','replace').strip())"
 else
   echo "ERROR: $EXE produced no output" >&2
   exit 1

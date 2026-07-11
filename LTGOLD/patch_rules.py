@@ -41,8 +41,9 @@ LTGOLD_TABLE_OFFSETS = {
     'T3': 5434,       # Table 3: 136 rules, 10-byte records
     'T4': 11981,      # Table 4: 178 rules, 9-byte records
     'T5': 16610,      # Table 5: 9 rules, 10-byte records
-    # T6 SKIPPED: zeroing T6 crashes the program
-    # 'T6': 16874,    # Table 6: 56 rules, 10-byte records
+    # T6 has 47 real records followed by a null sentinel. Earlier tooling counted
+    # string-pool bytes as nine extra records, so whole-table patches corrupted the EXE.
+    'T6': 16700,      # Table 6: 47 rules, EXE offset 0x2A79A
     'T7': 17972,      # Table 7: 35 rules, 8-byte records
     'T8': 19158,      # Table 8: 83 rules, 8-byte records
 }
@@ -54,6 +55,7 @@ EXACT_RULE_COUNTS = {
     'T3': 136,
     'T4': 178,
     'T5': 9,
+    'T6': 47,
     'T7': 35,
     'T8': 83,
 }
@@ -65,7 +67,7 @@ TABLE_RECORD_SIZES = {
     'T3': 10,
     'T4': 9,
     'T5': 10,
-    # T6 skipped
+    'T6': 10,
     'T7': 8,
     'T8': 8,
 }
@@ -77,11 +79,17 @@ TABLE_MAX_RULES = {
     'T3': 136,
     'T4': 178,
     'T5': 9,
+    'T6': 47,
     'T7': 35,
     'T8': 83,
 }
 
-ALL_TABLES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T7', 'T8']
+ALL_TABLES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']
+
+# Unused zero-filled space between the cleanup records and T7. Experimental strings
+# live only in the generated EXE, leaving the original shared string pool untouched.
+EXPERIMENT_STRING_OFFSET = 0x2AC50
+EXPERIMENT_STRING_CAPACITY = 32
 
 
 def read_cstring(data, base, offset):
@@ -106,6 +114,20 @@ def get_table_exe_range(table_name):
     exe_start = DAT_BASE + dat_off
     exe_end = exe_start + rule_count * rec_size
     return exe_start, exe_end, rule_count, rec_size
+
+
+def validate_table_layout(data, table_name):
+    """Reject a bad table coordinate before a patch can modify unrelated EXE data."""
+    exe_start, exe_end, rule_count, rec_size = get_table_exe_range(table_name)
+    if exe_start < 0 or exe_end > len(data):
+        raise ValueError(f'{table_name}: record range is outside the executable')
+    # T1-T4 and T6-T8 have an all-zero record sentinel immediately after the table.
+    # T5 is fixed-count and intentionally has no sentinel at this boundary.
+    if table_name != 'T5' and any(data[exe_end:exe_end + rec_size]):
+        raise ValueError(
+            f'{table_name}: expected zero sentinel at EXE offset 0x{exe_end:X}; '
+            'refusing to use an unverified table offset'
+        )
 
 
 def get_record_string_offsets(data, table_name, rule_index):
@@ -152,12 +174,14 @@ def get_record_string_offsets(data, table_name, rule_index):
 
 def patch_table(data, table_name, rule_index=None, dry_run=False):
     """
-    Disable rules by replacing the first pattern byte with 0xFF.
-    0xFF is not a valid tag character so the rule never matches.
+    Disable rules by replacing the first pattern byte with '@'.
+    '@' is an action operator, not an input tag, so the pattern remains non-empty
+    but cannot match. Both 0x00 and 0xFF crash some LTPRO table scanners.
     The record pointers and string lengths are left intact.
     rule_index: if None, patch all records; if int, patch only that record (0-indexed).
     Returns (exe_start, exe_end, count_patched).
     """
+    validate_table_layout(data, table_name)
     exe_start, exe_end, rule_count, rec_size = get_table_exe_range(table_name)
 
     if rule_index is not None and (rule_index < 0 or rule_index >= rule_count):
@@ -167,11 +191,12 @@ def patch_table(data, table_name, rule_index=None, dry_run=False):
     count = 0
     for i in indices:
         pairs = get_record_string_offsets(data, table_name, i)
-        for file_off, length in pairs:
-            # Overwrite only the first byte with 0xFF — an invalid tag that never matches.
-            # This keeps the string non-empty (no empty-pattern infinite loop).
+        # Only the pattern controls whether a record can fire. Action strings are
+        # pooled and shared, so clearing one can silently alter many other rules.
+        for file_off, length in pairs[:1]:
+            # Keep the C string non-empty because T6 crashes on an empty pattern.
             if not dry_run:
-                data[file_off] = 0xFF
+                data[file_off] = ord('@')
             count += 1
 
     if rule_index is not None:
@@ -180,8 +205,28 @@ def patch_table(data, table_name, rule_index=None, dry_run=False):
     return exe_start, exe_end, rule_count
 
 
+def replace_record_action(data, table_name, rule_index, action, dry_run=False):
+    """Point one rule at an isolated experimental action string."""
+    encoded = action.encode('cp866')
+    if len(encoded) + 1 > EXPERIMENT_STRING_CAPACITY:
+        raise ValueError(f'experimental action is limited to {EXPERIMENT_STRING_CAPACITY - 1} bytes')
+    validate_table_layout(data, table_name)
+    exe_start, exe_end, rule_count, rec_size = get_table_exe_range(table_name)
+    if rule_index < 0 or rule_index >= rule_count:
+        raise ValueError(f"rule index {rule_index} out of range 0..{rule_count-1}")
+    record = exe_start + rule_index * rec_size
+    action_field = record + (5 if table_name == 'T4' else 4)
+    pointer = EXPERIMENT_STRING_OFFSET - DAT_BASE
+    if not dry_run:
+        data[EXPERIMENT_STRING_OFFSET:EXPERIMENT_STRING_OFFSET + EXPERIMENT_STRING_CAPACITY] = \
+            encoded + b'\0' * (EXPERIMENT_STRING_CAPACITY - len(encoded))
+        struct.pack_into('<H', data, action_field, pointer)
+    return record, record + rec_size, 1
+
+
 def dump_table(data, table_name, max_rules=None):
     """Print all records in a table as human-readable strings."""
+    validate_table_layout(data, table_name)
     ltgold_off = LTGOLD_TABLE_OFFSETS[table_name]
     dat_off = ltgold_off - SHIFT
     rec_size = TABLE_RECORD_SIZES[table_name]
@@ -238,6 +283,12 @@ def main():
         target_rule = int(args[idx + 1])
         del args[idx:idx+2]
 
+    replacement_action = None
+    if '--action' in args:
+        idx = args.index('--action')
+        replacement_action = args[idx + 1]
+        del args[idx:idx+2]
+
     dump_only = '--dump' in args
     if dump_only:
         args.remove('--dump')
@@ -266,9 +317,17 @@ def main():
 
     if target_table:
         # Patch one table (or one rule within it)
-        start, end, count = patch_table(data, target_table, target_rule, dry_run)
+        if replacement_action is not None:
+            if target_rule is None:
+                print('Error: --action requires --rule')
+                sys.exit(1)
+            start, end, count = replace_record_action(
+                data, target_table, target_rule, replacement_action, dry_run)
+        else:
+            start, end, count = patch_table(data, target_table, target_rule, dry_run)
         label = f"rule {target_rule}" if target_rule is not None else "all rules"
-        print(f'{target_table} ({label}): exe 0x{start:05X}-0x{end:05X}, {count} records zeroed')
+        operation = f'action={replacement_action!r}' if replacement_action is not None else 'disabled'
+        print(f'{target_table} ({label}): exe 0x{start:05X}-0x{end:05X}, {operation}')
     else:
         # Patch all tables
         total_rules = 0
@@ -279,7 +338,7 @@ def main():
             total_rules += count
             total_bytes += size
             print(f'{table_name:7s}: exe 0x{start:05X}-0x{end:05X}  {count:4d} rules, {size:5d} bytes')
-        print(f'\nTotal: {total_rules} rules, {total_bytes} bytes zeroed')
+        print(f'\nTotal: {total_rules} rules, {total_bytes} record bytes covered')
 
     if dry_run:
         print('\n[DRY RUN — no changes written]')

@@ -1,4 +1,5 @@
 local utils = require "utils"
+local imperfective_verbs = require "imperfective_verbs"
 local paradigms = {}
 
 paradigms.nouns = {
@@ -382,6 +383,21 @@ local function word_at(str, index)
   return words[index]
 end
 
+function paradigms.pronoun(plural, person, gender, form)
+  local row
+  if plural then
+    row = person == 1 and 6 or person == 2 and 7 or 8
+  elseif person == 1 then
+    row = 1
+  elseif person == 2 then
+    row = 2
+  else
+    row = gender == 2 and 5 or gender == 0 and 4 or 3
+  end
+  -- Pronoun rows contain genitive through prepositional, corresponding to cases 2-6.
+  return word_at(pronouns[row], math.max(1, (form or 4) - 1))
+end
+
 function paradigms.noun(base, table_id, e)
   local ext = utils.extract(base)
   local len, str = table.unpack(paradigms.nouns[e.gender+1][table_id+1])
@@ -461,6 +477,15 @@ function paradigms.passive_participle(base, table_id)
   local len, str = table.unpack(paradigms.verbs[table_id+1])
   -- Position 13 is LTGOLD's full passive-participle ending.
   return utils.decode(cut(extracted, len), true) .. word_at(str, 13)
+end
+
+function paradigms.gerund(base, table_id, imperfective)
+  -- LTGOLD verb paradigms store the resolved adverbial-participle ending in slot 9.
+  local extracted = utils.extract(base)
+  local len, str = table.unpack(paradigms.verbs[table_id+1])
+  if imperfective then str = imperfective_verbs[table_id+1] end
+  local ending = word_at(str, 9)
+  return utils.decode(cut(extracted, len), true) .. ending
 end
 
 function paradigms.find_adjective(adj)

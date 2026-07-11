@@ -531,15 +531,16 @@ table.insert(rules, {
 })
 
 table.insert(rules, {
-  { 0x00, "Q`is``the`", "@  " },
-  { 0x0B, "`what`X~<EG>[,*]", "" },
-  { 0x00, "`is`~<RS>`correct`*", " $A" },
-  { 0x00, "`is`[RS]`correct`*", " .D" },
-  { 0x00, "`is`<$>Z*", " $N" },
-  { 0x00, "`is`<$>Z[Bb]", " $Nb" },
-  { 0x01, "X<TAODNPRSw>[eZV]", " $V" },
-  { 0x01, "X<TAONRmSw>x", " " },
-  { 0x08, "[XY]<KTAO>N[eE]", "" },
+  -- LTPRO applies this compact NP reorder table before the extended reorder table.
+  { 0x00, "NwNww", "3455" },
+  { 0x00, "NwwN", "444" },
+  { 0x00, "NwNN", "434" },
+  { 0x00, "NwNw", "34" },
+  { 0x05, "NwN", "33" },
+  { 0x00, "NwAN", "34" },
+  { 0x00, "NANw", "234" },
+  { 0x00, "NNw", "23" },
+  { 0x09, "ANNAN", "4545" },
 })
 
 -- T6: Extended word-order reordering (NP chains, hyphenated compounds, verbal negation)
@@ -592,6 +593,19 @@ table.insert(rules, {
   { 0x00, "KDG", "13" },
   { 0x00, "KNXDA", "4" },
   { 0x00, "KANV", "23" },
+})
+
+table.insert(rules, {
+  -- This separate cleanup block is physically after T6 at LTPRO offset 0x2AB30.
+  { 0x00, "Q`is``the`", "@  " },
+  { 0x0B, "`what`X~<EG>[,*]", "" },
+  { 0x00, "`is`~<RS>`correct`*", " $A" },
+  { 0x00, "`is`[RS]`correct`*", " .D" },
+  { 0x00, "`is`<$>Z*", " $N" },
+  { 0x00, "`is`<$>Z[Bb]", " $Nb" },
+  { 0x01, "X<TAODNPRSw>[eZV]", " $V" },
+  { 0x01, "X<TAONRmSw>x", " " },
+  { 0x08, "[XY]<KTAO>N[eE]", "" },
 })
 
 table.insert(rules, {

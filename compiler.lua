@@ -39,6 +39,8 @@ local verb_frames = {
   ["соответствовать"] = { object_case = case["Д"] },
   ["признавать"] = { complementizer = "что" },
   ["уполномочивать"] = { next_infinitive = true },
+  ["позволять"] = { object_case = case["Д"] },
+  ["делать"] = { causative = "заставлять" },
 }
 
 -- local u_endings = {
@@ -74,6 +76,18 @@ local function find_form(token, tag)
   return #result > 0 and table.concat(result) or nil
 end
 
+local function leading_alternatives(token)
+  local leading, i = token:byte(1), 2
+  while i <= #token and token:byte(i) >= 48 and token:byte(i) <= 57 do i = i + 1 end
+  if token:byte(i) == leading then i = i + 1 end
+  while i <= #token do
+    local b = token:byte(i)
+    if b == 0x3B then return utils.decode(token:sub(i + 1), false) end
+    if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then return nil end
+    i = i + 1
+  end
+end
+
 local function find(s, n, t)
   for i = n, #s do
     if t:find(s[i]:sub(1,1), 1, true) then return s[i] end
@@ -107,8 +121,21 @@ local function subject_is_plural(s, stop)
 end
 
 local printers = {
-  A = function(a, e, s, i)
-    local n = find(s, i, 'Nn')
+	A = function(a, e, s, i)
+		if s and s.phrases and s.phrases[i] then
+			local has_phrase_noun = false
+			local j = i + 1
+			while s[j] and s.phrases[j] do
+				has_phrase_noun = has_phrase_noun or s[j]:match('^[Nn]') ~= nil
+				j = j + 1
+			end
+			if not has_phrase_noun then
+				-- LTGOLD leaves the adjective head of a nounless fixed W phrase in
+				-- dictionary form (утративший законную силу), even in accusative context.
+				return utils.decode(a, true)
+			end
+		end
+		local n = find(s, i, 'Nn')
     if n then
       e.gender = get_gender(n)
       e.plural = n:sub(1, 1) == 'n'
@@ -159,7 +186,9 @@ local printers = {
     local semi = t:find(';', 1, true)
     if semi then
       e.multi_count = (e.multi_count or 0) + 1
-      local alt = utils.decode(t:sub(semi+1), true)
+      -- Alternatives are separated by ASCII semicolons, so stripped decoding would
+      -- stop after the first one; LTGOLD preserves the complete alternative list.
+      local alt = utils.decode(t:sub(semi+1), false)
       if alt and #alt > 0 then
         result = result .. '{' .. e.multi_count .. '.' .. alt .. '}'
       end
@@ -175,7 +204,7 @@ local printers = {
     local third = utils.decode(t:sub(3, 3), true)
     if case[third] then
       e.form = case[third]
-      local result = utils.decode(t:sub(4), true)
+      local result = utils.extract_form("P" .. t:sub(4))
       dbg.log(2, string.format("    P: case=%s form=%d", third, e.form))
       if e.verb_frame and result == e.verb_frame.preposition then
         e.form = e.verb_frame.object_case
@@ -184,7 +213,7 @@ local printers = {
       return result
     elseif case[second] then
       e.form = case[second]
-      local result = utils.decode(t:sub(3), true)
+      local result = utils.extract_form("P" .. t:sub(3))
       dbg.log(2, string.format("    P: case=%s form=%d", second, e.form))
       if e.verb_frame and result == e.verb_frame.preposition then
         e.form = e.verb_frame.object_case
@@ -237,12 +266,17 @@ local printers = {
       e.perfective = (e.word == 1)
     end
     if e.word == 1 then e.imperative = true end
-    if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2)~=2 then
-      t = compiler.base[d]:sub(6)
-      d = utils.decode(t)
-      dbg.log(2, string.format("    Z perfective switch: → %s", d))
-    end
+    -- LTGOLD emits the dictionary infinitive after a modal before consulting the
+    -- aspect-pair slot; that slot may legitimately be empty (гарантировать).
     if e.infinitive then e.infinitive = false return d end
+    if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2)~=2 then
+      local paired = compiler.base[d]:sub(6)
+      if #paired > 0 and paired:byte(1) >= 128 then
+        t = paired
+        d = utils.decode(t)
+        dbg.log(2, string.format("    Z perfective switch: → %s", d))
+      end
+    end
     if not compiler.base[d] then return d end
     return paradigms.verb(t, compiler.base[d]:byte(4)&~0x80, e)
   end,
@@ -378,6 +412,15 @@ printers.V = function(t, e, s, i)
   return result
 end
 printers.G = function(t, e, s, i)
+  local frame = verb_frames[utils.extract_form(t)]
+  if frame and frame.causative and s and i and s[i + 1] and s[i + 1]:match('^[Mm]') then
+    local b = compiler.base[frame.causative]
+    if b then
+      e.form = case["В"]
+      local base = "G" .. utils.encode(frame.causative)
+      return paradigms.gerund(base, b:byte(4)&~0x80, (b:byte(2)&2) == 0)
+    end
+  end
   -- G→N fallback: after a preposition (e.form ~= 1), gerund forms like "testing"
   -- should output as nouns ("испытания") rather than verbals ("тестировать").
   -- Check if the token has an embedded N form; if so, use the noun printer instead.
@@ -393,7 +436,13 @@ end
 printers.e = printers.E
 -- Lowercase resolved tags — decode first available form
 printers.n = function(t, e) e.plural = true return printers.N(t, e) end
-printers.g = function(t, e) e.past = true return printers.G(t, e) end
+printers.g = function(t, e)
+  local d = utils.extract_form(t)
+  local b = compiler.base[d]
+  if not b then return d end
+  e.form = case["В"]
+  return paradigms.gerund(t, b:byte(4)&~0x80, (b:byte(2)&2) == 0)
+end
 printers.v = function(t, e) return printers.V(t, e) end
 printers.p = function(t, e) return printers.P(t, e) end
 printers.f = function(t) return utils.decode(t, true) end
@@ -438,6 +487,7 @@ end
 printers.j = function(t) return "" end  -- clause-end marker is silent
 printers.O = function(t, e, s, i)
   local d = utils.decode(t, true)
+  if d == "весь" then return printers.S(t, e) end
   -- Hardcoded demonstrative pronoun forms. LTGOLD stores these in the Russian paradigm
   -- tables (BASE.RUS) indexed by paradigm number. A table lookup over this if-chain
   -- would match LTGOLD's approach and generalize to other demonstratives.
@@ -498,7 +548,15 @@ printers.s = printers.S
 end
 -- Q (question word), M (indirect pronoun), m (compound pronoun), r (compound personal)
 printers.Q = function(t) return utils.decode(t, true) end
-printers.M = function(t) return utils.decode(t, true) end
+printers.M = function(t, e)
+  local plural, person, gender = t:match("M(%d)(%d)(%d)")
+  if not plural then plural, person = t:match("M(%d)(%d)") end
+  if plural then
+    return paradigms.pronoun(plural ~= '0', tonumber(person) or 3,
+      tonumber(gender) or e.gender, e.form)
+  end
+  return utils.decode(t, true)
+end
 printers.m = function(t) return utils.decode(t, true) end
 printers.r = function(t) return utils.decode(t, true) end
 -- k (negative 'no'), K (negative 'not')
@@ -518,10 +576,15 @@ printers.W = function(t) return utils.decode(t, true) end
 -- back to comma-formatted numbers (e.g. 1000000 → 1,000,000) since tokenize strips commas.
 printers["#"] = function(t, e)
   local s = t:sub(2)
-  if s:match("^%d+$") and #s > 3 then
-    -- A measurement phrase following a numeral starts a fresh nominative NP.
-    e.form = case["И"]
-    return s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+  if s:match("^%d+$") then
+    -- Match LTGOLD's intentionally simplified numeral agreement: 2-4 select
+    -- nominative plural, while 0/5-9 and the teens select genitive plural.
+    local last_two = tonumber(s:sub(-2)) or 0
+    local last = tonumber(s:sub(-1)) or 0
+    e.form = ((last_two >= 11 and last_two <= 20) or last == 0 or last >= 5)
+      and case["Р"] or case["И"]
+    if #s > 3 then return s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "") end
+    return s
   end
   return s
 end
@@ -552,6 +615,13 @@ printers.X = function(t, e, s, i)
   else
     local p = printers.V(t, e)
     e.infinitive = true
+    local j = i and (i + 1) or nil
+    while j and s and s[j] and s[j]:sub(1, 1) == 'T' do j = j + 1 end
+    if j and s[j] and s[j]:sub(1, 1) == 'N' then
+      -- LTGOLD uses instrumental for nominal predicates of overt past/future
+      -- copulas (будет заменой), while its suppressed present copula stays nominative.
+      e.form = case["Т"]
+    end
     dbg.log(2, "    X (other): infinitive=true")
     return p
   end
@@ -569,6 +639,7 @@ function compiler.compile(s)
     multi_count = 0,  -- counter for multiple-meanings markup {N.alternative}
   }
   local c = {}
+  local quote_open = false
 
   dbg.log(1, "Compiler output:")
   dbg.log(2, "Initial context:",
@@ -581,6 +652,11 @@ function compiler.compile(s)
     if #w == 1 and w:match"[,%!%.;:]" then
       if #c > 0 then c[#c] = c[#c]..w
       else table.insert(c, w) end
+      if w == ',' or w == ';' then
+        e.past, e.passive, e.imperative = false, false, false
+        e.perfective, e.infinitive = false, false
+        e.form = case["И"]
+      end
     else
       local tag = w:sub(1,1)
       local func = printers[tag]
@@ -611,16 +687,29 @@ function compiler.compile(s)
           end, 1) .. rest
         end
       end
+      if out and #out > 0 and not out:find('{', 1, true) then
+        local alternatives = leading_alternatives(w)
+        if alternatives and #alternatives > 0 then
+          e.multi_count = (e.multi_count or 0) + 1
+          out = out .. '{' .. e.multi_count .. '.' .. alternatives .. '}'
+        end
+      end
       dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
         i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),
         tostring(e.infinitive), tostring(e.perfective), tostring(e.plural), tostring(e.form)))
       if not ok then dbg.log(1, "    ERROR: "..tostring(res)) end
+      if tag == '-' and out then out = "\1" .. out end
+      if tag == '"' and out then
+        out = (quote_open and "\3" or "\2") .. out
+        quote_open = not quote_open
+      end
       if out and #out > 0 then table.insert(c, out:find('#') and out:sub(2) or out) end
       e.word = e.word + 1
     end
   end
-  -- capitalize first word
-  if #c > 0 then
+  -- LTGOLD follows the first source token's capitalization; lowercase source
+  -- fragments remain lowercase, while a silent initial "The" still capitalizes output.
+  if #c > 0 and s.caps and s.caps[1] then
     local first = c[1]
     -- find first Cyrillic/Latin char and uppercase it
     c[1] = first:gsub("^([\xD0\xD1])([\x80-\xBF])", function(b1, b2)
@@ -637,7 +726,10 @@ function compiler.compile(s)
     end, 1)
   end
   print("")
-  local result = table.concat(c, " ")
+  -- Only unmatched source hyphens are prefix joiners (A-B → -B); generated
+  -- copular dashes retain their surrounding spaces.
+  local result = table.concat(c, " "):gsub("\1%- ", "-"):gsub("\1", "")
+  result = result:gsub("\2\"%s*", '"'):gsub("%s*\3\"", '"'):gsub("[\2\3]", "")
   print(result)
   print("")
   return result

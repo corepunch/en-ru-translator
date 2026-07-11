@@ -4,6 +4,11 @@ local load = require "load"
 local parser = require "parser"
 local compiler = require "compiler"
 
+local verify_dosbox = false
+for _, value in ipairs(arg or {}) do
+  if value == "--dosbox" then verify_dosbox = true end
+end
+
 local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
 local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
 local en_ru = {}
@@ -17,64 +22,75 @@ for line in file2:lines() do
 end
 file:close(); file2:close()
 
-local ref = assert(io.open("LTGOLD/DEMO_REFERENCE.TXT", "r")):read("*all")
-io.open("LTGOLD/DEMO_REFERENCE.TXT"):close()
-
--- Known LTGOLD translations for our key sentences (extracted from reference)
+-- These outputs were captured sentence-by-sentence from the unmodified LTPRO.EXE.
+-- Keep LTGOLD's awkward morphology and dropped words: they are compatibility targets.
 local gold = {
-  -- LTGOLD appends 'ЛТГОЛД' (its own name) which we can't produce without a special
-  -- dictionary entry. Compare everything except the product name suffix.
-  ["This AGREEMENT is a sample for testing the electronic translation program."] =
-    "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.",
-
-  ["AGREEMENT ON SUPPLY OF FISH MEAL"] =
-    "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ",
-
-  ["Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT."] =
-    "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ.",
-
-  ["The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations."] =
-    "СТОРОНЫ в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации.",
-
-  ["SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal."] =
-    "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрические тонны Рыбной Муки.",
-
-  ["The total price for the goods and services as defined in EXHIBIT A is USD."] =
-    "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ A - ДОЛЛАР США.",
-
-  ["The exclusive remedy for breach of this warranty shall be the replacement."] = "",
-
-  ["This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void."] = "",
-
-  ["Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments."] = "",
-
-  ["The Letter of Credit shall allow for partial shipments and partial payment."] = "",
+  { "This AGREEMENT is a sample for testing the electronic translation program.",
+    "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода." },
+  { "AGREEMENT ON SUPPLY OF FISH MEAL",
+    "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ" },
+  { "Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT.",
+    "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ." },
+  { "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations.",
+    "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации." },
+  { "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal.",
+    "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки." },
+  { "The total price for the goods and services as defined in EXHIBIT A is USD.",
+    "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США." },
+  { "The exclusive remedy for breach of this warranty shall be the replacement.",
+    "Единственная Компенсация За Нарушение этой гарантии будет заменой." },
+  { "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void.",
+    "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу." },
+  { "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments.",
+    "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки." },
+  { "The Letter of Credit shall allow for partial shipments and partial payment.",
+    "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу." },
+  -- Focused LTPRO probes captured directly through LTGOLD/run_test.sh.
+  { "EXHIBIT A.", "ПОКАЖИТЕ A." },
+  { "by all means.", "во что бы то ни стало." },
+  { "by all means of transport.", "всеми видами транспорта." },
+  { "He walked including me.", "Он прошел включая меня." },
+  { "5 Metric tons.", "5 Метрических тонн." },
+  { "2 Metric tons.", "2 Метрические тонны." },
+  { "It will be a replacement.", "Это Будет заменой." },
+  { "fish-meal.", "рыбная мука." },
+  { "well-known product.", "известный продукт." },
+  { "buyer-seller agreement.", "соглашение продавца покупателя." },
+  { "A-B.", "-B." },
+  { "state-of-the-art product.", "современный продукт." },
+  { "He said, I agree.", "Он сказал, Я соглашаюсь{1.согласовывать}." },
+  { "He said, \"I agree.\"", "Он сказал, \"Я соглашаюсь{1.согласовывать}.\"" },
+  { "\"Fish meal\", seller said.", "\"Рыбная Мука\", продавец сказал." },
 }
 
 local fail, total = 0, 0
-local function strip(s)
-  return s:gsub("%{.-}", ""):gsub("'", ""):gsub('"', ""):match("^%s*(.-)%s*$") or s
-end
-
-for sent, expected in pairs(gold) do
+for _, case in ipairs(gold) do
+  local sent, expected = table.unpack(case)
   total = total + 1
+  if verify_dosbox then
+    local pipe = assert(io.popen(string.format("./LTGOLD/run_test.sh %q", sent), "r"))
+    local captured = pipe:read("*all"):gsub("\r", "")
+    local ok = pipe:close()
+    local translation = captured:match("^(.-)\n%s*\n") or captured
+    translation = translation:match("^%s*(.-)%s*$") or translation
+    if not ok or translation ~= expected then
+      fail = fail + 1
+      print(string.format("  ✗ DOSBOX:  %s", translation))
+      print(string.format("    STORED:  %s", expected))
+      print()
+    end
+  end
   local ts = utils.tokenize(sent, en_ru)
   parser.collect(en_ru, ts)
   local out = compiler.compile(ts) or ""
   out = out:match("^%s*(.-)%s*$") or out
 
-  if expected == "" then
-    print(string.format("  %s", out))
-    print()
-  else
-    local clean_expected = strip(expected)
-    local clean_out = strip(out)
-    local ok = clean_out == clean_expected and "✓" or "✗"
-    if ok == "✗" then fail = fail + 1 end
-    print(string.format("  %s LUA:     %s", ok, out))
-    print(string.format("    LTGOLD:  %s", expected))
-    print()
-  end
+  local ok = out == expected and "✓" or "✗"
+  if ok == "✗" then fail = fail + 1 end
+  print(string.format("  %s LUA:     %s", ok, out))
+  print(string.format("    LTGOLD:  %s", expected))
+  print()
 end
 
 print(string.format("Passed %d/%d", total - fail, total))
+if fail > 0 then os.exit(1) end

@@ -73,13 +73,25 @@ local function find(t, s)
 	for p, d in iter(t) do if s:find(p) then return d end end
 end
 
+local function matches(t, class)
+	if not t then return nil end
+	if #t == 1 and class:find(t, 1, true) then return t end
+	return find(t, class)
+end
+
 local function find_and_replace(ts, j, s)
 	local z = find(ts[j], 'Z')
 	if z and string.find('VNA', s) then
-		local tmp = z:gsub('^.','V')
-		if find(tmp, s) then
-		  dbg.diag("tag", "Z→V:", utils.decode(ts[j], true), "→", utils.decode(find(tmp, s), true))
-		  ts[j] = find(tmp, s); return
+		-- Ambiguity records are packed as ZV...N...A...; select the requested
+		-- embedded tagged form instead of manufacturing a duplicate VV prefix.
+		local pos = ts[j]:find(s, 2, true)
+		if pos then
+		  dbg.diag("tag", "Z→" .. s .. ":", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(pos), true))
+		  ts[j] = ts[j]:sub(pos); return
+		elseif s == 'V' then
+		  -- Some Z records store the verb directly after Z and tag only secondary
+		  -- noun/adjective forms (ZпоставлятьNпоставка).
+		  ts[j] = 'V' .. ts[j]:sub(2); return
 		end
 	end
 	local f = find(ts[j], s)
@@ -213,11 +225,8 @@ local function replace(ts, j, m, t, s)
 	elseif s == '.' or s == '$' then
 	elseif s == '@' then find_and_replace(ts, j, m)
 	elseif s == '^' then
-		-- word-join: merge token j into the preceding token without a space separator
-		if j > 1 and ts[j-1] ~= ' ' then
-			ts[j-1] = ts[j-1] .. '^' .. ts[j]
-			ts[j] = ' '
-		end
+		-- Preserve the structural separator for T6's N-N/NN patterns. The original
+		-- action marks a join; it does not concatenate lexical token bytes here.
 	elseif s == 'j' then
 		ts[j] = 'j'  -- inject end-of-clause boundary marker
 	elseif s == '|' then
@@ -225,6 +234,10 @@ local function replace(ts, j, m, t, s)
 	elseif s == '&' then
 		-- coordination marker: look for C-form, else no-op
 		find_and_replace(ts, j, 'C')
+	elseif s == '#' then
+		-- Literal `a` is initially an article; LTGOLD's boundary rule restores the
+		-- original designator spelling (A) from the analyzer's source-token field.
+		ts[j] = '#' .. ((ts.source and ts.source[j]) or ts[j]:sub(2))
 	elseif s == '=' or s == ';' then
 		-- case-setting / clause-continuation: no-op until semantics are confirmed
 	elseif s then find_and_replace(ts, j, s)
@@ -241,22 +254,25 @@ local function try_match_pattern(ts, m, j, f, replace)
 	local fallback = nil
 	for t, v, i in m do
 		::restart::
-		if not ts[j] then
+		if t == 'wildcard' then
+			if xor(i, j == 1 or j > #ts) then eat('@', f())
+			else return false end
+		elseif not ts[j] then
 			dbg.log(3, "    match fail: end of tokens at pos", j)
 			return false
-		elseif t == 'wildcard' and xor(i,j==1 or j>#ts) then eat('@', f())
-		elseif t == 'select' and xor(i, find(ts[j],v)) then j=replace(ts,j,v,f())
+		elseif t == 'select' and xor(i, matches(ts[j],v)) then
+			j=replace(ts,j,v,f())
 		elseif t == 'any' then
 			local d = eat('$', f())
 			fallback = function(n)
-				if xor(i, find(ts[n], v)) then
+				if xor(i, matches(ts[n], v)) then
 					dbg.log(3, "    any-match consumed token", n, "tag", v)
 					j = nop(ts,n,v,nil,d)
 					return true
 				end
 			end
 		elseif t == 'literal' and xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then j=replace(ts,j,v,f())
-		elseif t == 'char' and xor(i, find(ts[j], v)) then j=replace(ts,j,v,f())
+		elseif t == 'char' and xor(i, matches(ts[j], v)) then j=replace(ts,j,v,f())
 		elseif fallback and fallback(j) then goto restart
 		else
 			dbg.log(3, "    match fail: pos", j, "type", t, "val", v, "neg", i)
@@ -275,8 +291,20 @@ local function reorder_tokens(ts, positions, digits)
 	for k, pos in ipairs(positions) do snap[k] = ts[pos] end
 	-- snapshot caps flags alongside tokens so they travel together
 	local snap_caps = {}
+	local snap_phrases = {}
+	local snap_source = {}
+	local snap_component_caps = {}
 	if ts.caps then
 		for k, pos in ipairs(positions) do snap_caps[k] = ts.caps[pos] end
+	end
+	if ts.phrases then
+		for k, pos in ipairs(positions) do snap_phrases[k] = ts.phrases[pos] end
+	end
+	if ts.source then
+		for k, pos in ipairs(positions) do snap_source[k] = ts.source[pos] end
+	end
+	if ts.component_caps then
+		for k, pos in ipairs(positions) do snap_component_caps[k] = ts.component_caps[pos] end
 	end
 	dbg.log(2, "    reorder: positions=", table.concat(positions,","),
 	  "digits=", digits,
@@ -291,6 +319,9 @@ local function reorder_tokens(ts, positions, digits)
 		if d and d >= 1 and d <= #snap and positions[k] then
 			ts[positions[k]] = snap[d]
 			if ts.caps then ts.caps[positions[k]] = snap_caps[d] end
+			if ts.phrases then ts.phrases[positions[k]] = snap_phrases[d] end
+			if ts.source then ts.source[positions[k]] = snap_source[d] end
+			if ts.component_caps then ts.component_caps[positions[k]] = snap_component_caps[d] end
 			used[d] = true
 		end
 	end
@@ -301,6 +332,9 @@ local function reorder_tokens(ts, positions, digits)
 		if next_snap <= #snap and positions[k] then
 			ts[positions[k]] = snap[next_snap]
 			if ts.caps then ts.caps[positions[k]] = snap_caps[next_snap] end
+			if ts.phrases then ts.phrases[positions[k]] = snap_phrases[next_snap] end
+			if ts.source then ts.source[positions[k]] = snap_source[next_snap] end
+			if ts.component_caps then ts.component_caps[positions[k]] = snap_component_caps[next_snap] end
 			used[next_snap] = true
 			next_snap = next_snap + 1
 		end
@@ -309,6 +343,11 @@ local function reorder_tokens(ts, positions, digits)
 	  table.concat(utils.map(positions, function(pos)
 	    return utils.decode(ts[pos], true)
 	  end), ","))
+	for _, pos in ipairs(positions) do
+		-- Hyphens consumed by a T5/T6 constituent reorder are structural and do not
+		-- surface in Russian (buyer-seller agreement → соглашение продавца покупателя).
+		if ts[pos] == '-' then ts[pos] = ' ' end
+	end
 end
 
 -- collect_positions: dry-run that records which ts indices were consumed
@@ -318,29 +357,29 @@ local function collect_positions(ts, m, start)
 	local j = start
 	for t, v, i in m do
 		::restart::
-		if not ts[j] then
-			dbg.log(3, "    collect fail: end of tokens at", j)
-			return nil
-		end
 		if t == 'wildcard' then
 			if not xor(i, j==1 or j>#ts) then return nil end
 			-- wildcard matches boundary, doesn't consume a token
+		elseif not ts[j] then
+			dbg.log(3, "    collect fail: end of tokens at", j)
+			return nil
 		elseif t == 'any' then
 			fallback = function(n)
-				if xor(i, find(ts[n], v)) then
+				if xor(i, matches(ts[n], v)) then
 					table.insert(positions, n)
 					j = n + 1
 					return true
 				end
 			end
 		elseif t == 'select' then
-			if not xor(i, find(ts[j], v)) then return nil end
+			local matched = matches(ts[j], v)
+			if not xor(i, matched) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'literal' then
 			if not xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'char' then
-			if not xor(i, find(ts[j], v)) then
+			if not xor(i, matches(ts[j], v)) then
 				if fallback and fallback(j) then goto restart end
 				return nil
 			end
@@ -351,7 +390,7 @@ local function collect_positions(ts, m, start)
 	return positions
 end
 
-local function match_pattern(ts, m, r)
+local function match_pattern(ts, m, r, flags)
 	local is_digit_action = r and r:match("^%d+$")
 	for i = 1, #ts do
 		if try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), nop) then
@@ -363,7 +402,10 @@ local function match_pattern(ts, m, r)
 					-- W retains the first constituent tag immediately after its marker.
 					verb_phrase = verb_phrase or ts[pos]:match("^WV") ~= nil
 				end
-				if positions and #positions > 0 and not verb_phrase then
+				-- T6's 0x02 records annotate W-constituent heads. LTPRO preserves
+				-- their surface order even when their digit action equals a reorder rule.
+				local constituent_head = flags == 0x02
+				if positions and #positions > 0 and not verb_phrase and not constituent_head then
 					reorder_tokens(ts, positions, r)
 				end
 			else
@@ -380,9 +422,12 @@ end
 local function loop(ts)
 	-- strip space tokens that survive from tokenization; keep caps table in sync
 	for i = #ts, 1, -1 do
-		if ts[i] == ' ' then
-			table.remove(ts, i)
-			if ts.caps then table.remove(ts.caps, i) end
+			if ts[i] == ' ' then
+				table.remove(ts, i)
+				if ts.caps then table.remove(ts.caps, i) end
+				if ts.phrases then table.remove(ts.phrases, i) end
+				if ts.source then table.remove(ts.source, i) end
+				if ts.component_caps then table.remove(ts.component_caps, i) end
 		end
 	end
 	-- convert h tag (historical/irregular past) to E for proper rule matching
@@ -407,6 +452,15 @@ local function loop(ts)
 		end
 	end
 	for ri, rs in ipairs(rules) do
+		if ri == 3 then
+			for i = 1, #ts - 1 do
+				if ts[i]:sub(1, 1) == 'q' and ts[i + 1]:sub(1, 1) == 'Z' then
+					-- X2xx (shall/will) structurally selects the following ambiguous Z
+					-- as a verb before T3's default unresolved-Z-to-noun cleanup.
+					find_and_replace(ts, i + 1, 'V')
+				end
+			end
+		end
 		if ri == 6 then
 			-- T6 validates constituent heads after ambiguity rules; resolve an
 			-- adjective-bearing form before its noun so head indices stay valid.
@@ -418,8 +472,8 @@ local function loop(ts)
 		end
 		dbg.log(2, "Rule set T" .. ri .. ":")
 		for _, r in ipairs(rs) do
-			local _, pat, act = table.unpack(r)
-			match_pattern(ts, pat, act or "")
+			local flags, pat, act = table.unpack(r)
+			match_pattern(ts, pat, act or "", flags)
 		end
 		dbg.log(3, "  After T" .. ri .. ":",
 		  table.concat(utils.map(ts, function(t)
@@ -448,8 +502,11 @@ local function loop(ts)
 	-- strip any remaining space tokens (injected by rules); keep caps in sync
 	for i = #ts, 1, -1 do
 		if ts[i] == ' ' then
-			table.remove(ts, i)
-			if ts.caps then table.remove(ts.caps, i) end
+				table.remove(ts, i)
+				if ts.caps then table.remove(ts.caps, i) end
+				if ts.phrases then table.remove(ts.phrases, i) end
+				if ts.source then table.remove(ts.source, i) end
+				if ts.component_caps then table.remove(ts.component_caps, i) end
 		end
 	end
 end
@@ -457,13 +514,52 @@ end
 function parser.collect(dic, ts)
 	en_ru = dic
 	loop(ts)
+	if ts.source then
+		for i = 1, #ts - 1 do
+			if ts.source[i] and ts.source[i]:lower() == 'it' and ts[i]:sub(1, 1) == 'R' then
+				local j, future = i + 1, false
+				if ts[j] and ts[j]:sub(1, 1) == 'q' then future, j = true, j + 1 end
+				if ts[j] and ts[j]:sub(1, 1) == 'X' then
+					-- LTGOLD resolves copular "it" as demonstrative это, not personal он.
+					ts[i] = 'O' .. utils.encode('это')
+					-- Intentional LTGOLD future-copula capitalization bug: "It will" emits Будет.
+					if future and ts.caps then ts.caps[j] = "init" end
+				end
+			end
+		end
+	end
+	if ts.caps then
+		for i = 2, #ts do
+			if ts[i]:sub(1, 1) == 'W' and ts[i - 1] == 'T' and ts.caps[i - 1] then
+				-- Intentional LTGOLD compatibility bug: a silent sentence-initial "The"
+				-- leaks initial-capitalisation across consecutive W constituents and an
+				-- immediately attached future predicate (Компенсация За; Позволит).
+				local j = i
+				while ts[j] and ts[j]:sub(1, 1) == 'W' do
+					ts.caps[j] = "init"
+					j = j + 1
+				end
+				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
+				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
+			end
+		end
+		for i = 2, #ts do
+			if ts[i - 1] == 'T' and ts.phrases and ts.phrases[i] then
+				local j = i + 1
+				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
+				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
+			end
+		end
+	end
 	-- W tokens (multi-word phrases like WAэлектронныйNперевод) survive rules but must
 	-- be expanded into their constituent forms (Aэлектронный + Nперевод) before the
 	-- compiler processes them. The gmatch skips the W prefix since 'W' is not followed
 	-- by CP866 bytes, so the tag reverts to the first real tag letter after W.
 	for i = #ts, 1, -1 do
-		if ts[i]:sub(1,1) == 'W' then
-			local was_caps = ts.caps and ts.caps[i]
+			if ts[i]:sub(1,1) == 'W' then
+				local was_caps = ts.caps and ts.caps[i]
+				local was_source = ts.source and ts.source[i]
+				local component_caps = ts.component_caps and ts.component_caps[i]
 			local expanded = {}
 			for word in ts[i]:gmatch("([%a ][0-9]*[\127-\255]+)") do
 				table.insert(expanded, word)
@@ -473,10 +569,19 @@ function parser.collect(dic, ts)
 				-- Expanded tokens inherit the W token's all-caps flag so that
 				-- e.g. "AGREEMENT ON" (all-caps W phrase) → each sub-token is uppercase.
 				table.remove(ts, i)
-				if ts.caps then table.remove(ts.caps, i) end
+						if ts.caps then table.remove(ts.caps, i) end
+						if ts.phrases then table.remove(ts.phrases, i) end
+						if ts.source then table.remove(ts.source, i) end
+						if ts.component_caps then table.remove(ts.component_caps, i) end
 				for j = #expanded, 1, -1 do
 					table.insert(ts, i, expanded[j])
-					if ts.caps then table.insert(ts.caps, i, was_caps) end
+							if ts.caps then
+								local expanded_caps = type(component_caps) == 'table' and component_caps[j] or was_caps
+								table.insert(ts.caps, i, expanded_caps)
+							end
+							if ts.phrases then table.insert(ts.phrases, i, true) end
+							if ts.source then table.insert(ts.source, i, was_source) end
+							if ts.component_caps then table.insert(ts.component_caps, i, false) end
 				end
 			end
 		end

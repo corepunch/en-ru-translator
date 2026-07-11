@@ -149,6 +149,79 @@ lua dict.lua help <topic>             # help on: overview, format, add, find, li
 translation are concatenated directly after `*` with no separator. Multiple
 meanings use `;`: `word*Nсоглашение;договор`.
 
+## Adding Entries
+
+### Adding new words to BASE.DIC
+
+Use `dict.lua` to add entries that don't exist in the base dictionary:
+
+```sh
+lua demo/dict.lua add "boarded" "A" "обшитый досками"
+lua demo/dict.lua add "orc" "N" "орк"
+lua demo/dict.lua add "west of" "P" "к западу от"  # multi-word phrase
+```
+
+**Multi-word phrases** use spaces in the word part and appropriate tags:
+
+```
+west of*PРк западу от         # preposition phrase (P) with genitive case (Р)
+front door*NNWAпередняяNдверь  # compound noun (W-phrase format)
+```
+
+### Domain-specific dictionaries
+
+For specialized text (adventure games, business, computing), create overlay
+dictionaries that load after BASE.DIC. These can:
+
+1. **Add new words** not in BASE.DIC (preferred)
+2. **Override existing words** for domain-specific meaning (use sparingly)
+
+**Example: `data/DUNGEON.DIC`**
+
+```
+# New entries (not in BASE.DIC):
+orc*Nорк                           # adventure vocabulary
+west of*PРк западу от              # multi-word phrase
+front door*NNWAпередняяNдверь      # compound noun
+
+# Overrides (domain-specific meaning):
+field*Nполе                        # adventure: "open field" not "abstract domain"
+boarded*Aзаколоченный              # adventure: "boarded up" not "covered with boards"
+west*Dна западе                    # tag fix: N+A+D → D to avoid token duplication
+```
+
+**When to override:**
+- BASE.DIC has abstract/general meaning, domain needs concrete/specific
+  - `field`: область (abstract) → поле (physical ground)
+  - `boarded`: обшитый досками (multi-word) → заколоченный (single adj)
+- BASE.DIC has complex tags that cause parser issues
+  - `west`: N+A+D (noun+adj+adverb) → D (adverb only)
+
+**When NOT to override:**
+- BASE.DIC has multiple meanings you want to preserve
+  - `door`: NN.дверь{physical door};вход{entrance} — keep both meanings
+  - `key`: NN.ключ{lock};клавиша{keyboard} — keep both meanings
+- Domain meaning is same as base meaning — no override needed
+
+**Loading order:**
+```sh
+lua init.lua "text" --dict=data/DUNGEON.DIC
+# 1. BASE.DIC loaded first
+# 2. DUNGEON.DIC loaded after, overrides apply
+```
+
+### Checking for conflicts
+
+Before adding overrides, check if BASE.DIC already has the word:
+
+```sh
+lua demo/dict.lua find field           # shows: Nобласть
+lua demo/dict.lua find field --partial  # shows all "field" entries
+```
+
+If the entry exists and you need domain-specific meaning, override with `--force`.
+If the entry doesn't exist, just add it normally.
+
 ## Testing
 
 Primary test instructions are in `TESTING.md`.

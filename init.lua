@@ -49,6 +49,24 @@ _G.TRANSLATOR_DEBUG = dbg.level > 0
 dbg.log(1, "Debug level:", dbg.level)
 
 local english, russian = dictionary_store.load(nil, nil, table.unpack(overlay_dicts))
+
+-- Load overlay .RUS files for domain-specific paradigm data
+-- Convention: for each overlay DIC, check if a matching RUS file exists
+local overlay_rus = {}
+for _, dict_path in ipairs(overlay_dicts) do
+  local rus_path = dict_path:gsub("%.DIC$", ".RUS"):gsub("%.dic$", ".rus")
+  if rus_path ~= dict_path then
+    local f = io.open(rus_path, "r")
+    if f then
+      f:close()
+      overlay_rus[#overlay_rus+1] = rus_path
+    end
+  end
+end
+if #overlay_rus > 0 then
+  dictionary_store.load_overlay_rus(russian, table.unpack(overlay_rus))
+end
+
 local engine = translator.new(english, russian)
 local output, err = engine:translate(input_sentence)
 if not output then

@@ -26,8 +26,11 @@ Requires **Lua 5.3+** (uses bitwise operators). Test sentences are hardcoded in
 | `paradigms.lua` | Russian noun/adjective/verb declension and conjugation tables |
 | `load.lua` | Parses LTGOLD `*.DIC`/`*.RUS` dictionary format (CP866 encoded) |
 | `utils.lua` | CP866↔UTF8 conversion, tokenization, string helpers |
+| `dict.lua` | Dictionary management tool (find/add/list entries) |
 | `lisp.lua` | Unused list utility |
-| `LTGOLD/` | Original DOS EXE, dictionaries, and Python extraction tools |
+| `data/` | Dictionary and config files (BASE.DIC, BASE.RUS, BUSINESS.DIC, COMPUTER.DIC, etc.) |
+| `test/` | Test data (DEMO.TXT, DEMO_REFERENCE.TXT, etc.) |
+| `LTGOLD/` | Original DOS EXE, dictionaries, and Python extraction tools (git-ignored) |
 
 ## Pattern Syntax (rules.lua)
 
@@ -124,6 +127,27 @@ word*GRAMMATICAL_CODES
 
 Multi-word entries use spaces. The dictionary lookup builds a nested table where
 `en_ru[word].__lex` holds the lexical form (packed grammatical tags).
+
+## Dictionary Management (dict.lua)
+
+Standalone tool for searching and adding dictionary entries. No external dependencies.
+
+```sh
+lua dict.lua find <word>              # exact search across all dictionaries
+lua dict.lua find <word> --partial    # substring search
+lua dict.lua find <word> --dict FILE  # search specific dictionary
+lua dict.lua add <word> <tags> [ru]   # add entry to BASE.DIC
+lua dict.lua add <word> <tags> [ru] --dict FILE  # add to specific dict
+lua dict.lua add <word> <tags> [ru] --force      # overwrite if exists
+lua dict.lua list [FILE] [--limit N]  # list dictionary contents
+lua dict.lua paradigms                # grammatical codes reference
+lua dict.lua help                     # full documentation
+lua dict.lua help <topic>             # help on: overview, format, add, find, list, tips
+```
+
+**Entry format:** `word*TAG русский текст` — the grammatical tag and Russian
+translation are concatenated directly after `*` with no separator. Multiple
+meanings use `;`: `word*Nсоглашение;договор`.
 
 ## Testing
 

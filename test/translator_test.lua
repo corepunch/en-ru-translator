@@ -1,5 +1,5 @@
 local dictionary_store = require "dictionary_store"
-local translator = require "translator"
+local translator = require "core.translator"
 
 -- Verify the public core API without invoking the CLI shell or capturing stdout.
 local english, russian = dictionary_store.load()

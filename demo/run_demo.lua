@@ -1,8 +1,8 @@
 -- Run key sentences from DEMO.TXT through our translator
-local utils = require "utils"
-local load = require "load"
-local parser = require "parser"
-local compiler = require "compiler"
+local utils = require "core.utils"
+local load = require "core.load"
+local parser = require "core.parser"
+local compiler = require "core.compiler"
 
 -- load dictionaries
 local file = assert(io.open("data/BASE.DIC", "r"))

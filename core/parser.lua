@@ -1,7 +1,7 @@
-local utils = require "utils"
-local rules = require "rules"
-local dbg = require "dbg"
-local stream = require "token_stream"
+local utils = require "core.utils"
+local rules = require "core.rules"
+local dbg = require "core.dbg"
+local stream = require "core.token_stream"
 local parser = {}
 
 local function echo(color, s, ...)

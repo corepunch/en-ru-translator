@@ -1,6 +1,6 @@
-local dbg = require "dbg"
+local dbg = require "core.dbg"
 local dictionary_store = require "dictionary_store"
-local translator = require "translator"
+local translator = require "core.translator"
 
 -- The entry point is an imperative shell: it owns configuration, files, CLI
 -- arguments, stdout, and exit status while translation remains in modules.

@@ -1,8 +1,8 @@
 local utils = {}
-local dbg = require "dbg"
-local suffixes = require "suffixes"
-local stream = require "token_stream"
-local encoding = require "encoding"
+local dbg = require "core.dbg"
+local suffixes = require "core.suffixes"
+local stream = require "core.token_stream"
+local encoding = require "core.encoding"
 
 -- encode: convert UTF-8 string to CP866
 -- Used to normalise rule replacement literals (stored UTF-8 in rules.lua) back
@@ -240,9 +240,10 @@ function utils.tokenize(s, en_ru)
       local is_designator = is_all_caps and #word == 1 and word:match("%a") and
         word ~= "i" and (word ~= "a" or punct ~= "")
       local derived = (not is_designator) and derived_lexeme(word)
-      if (not is_designator) and (en_ru[word] or derived) then
-        dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word] and en_ru[word].__lex or derived))
-        stream.append(tbl, en_ru[word] and en_ru[word].__lex or derived, {
+      local lex = en_ru[word] and en_ru[word].__lex
+      if (not is_designator) and (lex or derived) then
+        dbg.log(2, "  Lookup:", word, "→", utils.decode(lex or derived))
+        stream.append(tbl, lex or derived, {
           caps = is_caps, phrases = false, source = word_orig, component_caps = false,
         })
       else

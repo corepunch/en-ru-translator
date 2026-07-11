@@ -1,4 +1,4 @@
-local encoding = require "encoding"
+local encoding = require "core.encoding"
 
 -- Exercise the pure boundary directly; CLI behavior is covered separately by
 -- piping the same bytes through bin/encoding.lua.

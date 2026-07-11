@@ -1,7 +1,7 @@
-local parser = require "parser"
-local compiler = require "compiler"
-local utils = require "utils"
-local load = require "load"
+local parser = require "core.parser"
+local compiler = require "core.compiler"
+local utils = require "core.utils"
+local load = require "core.load"
 
 -- load dictionaries
 local file = assert(io.open("data/BASE.DIC", "r"))

@@ -100,7 +100,9 @@ local function adj(a)
     if b then
       return (b:byte(2)==0x80 and b:byte(3) or b:byte(4))&~0x80
     else
-      return paradigms.find_adjective(utils.decode(a))
+      -- find_adjective() returns a 1-based match index; convert to the
+      -- 0-based paradigm table_id expected by paradigms.adjective().
+      return (paradigms.find_adjective(utils.decode(a)) or 1) - 1
     end
 end
 

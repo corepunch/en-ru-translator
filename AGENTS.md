@@ -151,9 +151,15 @@ meanings use `;`: `word*Nсоглашение;договор`.
 
 ## Testing
 
-1. Edit test sentences in `init.lua:81-97`
-2. Run `lua init.lua`
-3. Check output for correct Russian translation and grammatical inflection
+Primary test instructions are in `TESTING.md`.
+
+Quick run:
+
+```sh
+./test/run_all.sh
+```
+
+LTGOLD compatibility checks (DOSBox/LTPRO) are also documented there.
 
 ## Debug and Diagnostics
 

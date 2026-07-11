@@ -606,8 +606,9 @@ end
 function paradigms.find_adjective(adj)
   for i, t in ipairs(paradigms.adjectives[2]) do
     local w = word_at(t, 1)
-    -- Return 0-based table_id to match how paradigms.adjective indexes the tables.
-    if t and adj:sub(-#w) == w then return i - 1 end
+    -- Return a 1-based match index; callers convert to 0-based table_id when
+    -- passing into paradigms.adjective().
+    if t and adj:sub(-#w) == w then return i end
   end
 end
 

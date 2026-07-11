@@ -675,7 +675,8 @@ local function render_token(token, e, stream_tokens, index)
   return tag, ok, ok and result or utils.decode(token, true), result
 end
 
-function compiler.compile(s)
+function compiler.compile(s, options)
+  options = options or {}
   local e = new_context()
   local c = {}
   local quote_open = false
@@ -737,13 +738,15 @@ function compiler.compile(s)
       return b1..b2
     end, 1)
   end
-  print("")
+  if not options.quiet then print("") end
   -- Only unmatched source hyphens are prefix joiners (A-B → -B); generated
   -- copular dashes retain their surrounding spaces.
   local result = table.concat(c, " "):gsub("\1%- ", "-"):gsub("\1", "")
   result = result:gsub("\2\"%s*", '"'):gsub("%s*\3\"", '"'):gsub("[\2\3]", "")
-  print(result)
-  print("")
+  if not options.quiet then
+    print(result)
+    print("")
+  end
   return result
 end
 

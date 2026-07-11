@@ -188,6 +188,7 @@ AGENTS.md                Guide for AI coding assistants working on this project
 
 ## Further reading
 
+- [docs/case-study-zork.md](docs/case-study-zork.md) — worked example: diagnosing errors, adding vocabulary, adding rules
 - [docs/rules.md](docs/rules.md) — complete pattern/replacement syntax, tag table, flag semantics
 - [docs/dictionary.md](docs/dictionary.md) — full BASE.DIC / BASE.RUS binary format
 - [docs/pipeline.md](docs/pipeline.md) — detailed stage-by-stage walkthrough

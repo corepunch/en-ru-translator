@@ -1,0 +1,220 @@
+# DUNGEON.DIC — adventure game vocabulary supplement
+# Format: english_word*GRAMMATICAL_CODE  (same as BASE.DIC, UTF-8 encoded)
+# The loader re-encodes UTF-8 Cyrillic to CP866 automatically.
+# Load after BASE.DIC so these entries override the base dictionary where needed.
+#
+# Compound nouns use the LTGOLD W-phrase format:
+#   NNWAadjNnoun  →  W-phrase with adjective + noun head
+# The loader normalises NNW → W automatically.
+#
+# (override) = replaces a BASE.DIC entry
+# (new)      = word absent from BASE.DIC
+
+# ── Terrain and locations ────────────────────────────────────────────────────
+
+field*Nполе                 # (override) область → поле
+glade*Nполяна
+meadow*Nлуг
+clearing*Nполяна
+forest*Nлес
+woods*Nлес
+grove*Nроща
+path*Nтропа
+trail*Nтропа
+road*Nдорога
+hill*Nхолм
+valley*Nдолина
+cave*Nпещера
+cavern*Nпещера
+dungeon*Nподземелье
+chamber*Nзал
+passage*Nпроход
+corridor*Nкоридор
+tunnel*Nтоннель
+bridge*Nмост
+river*Nрека
+stream*Nручей
+lake*Nозеро
+cliff*Nутёс
+pit*Nяма
+chasm*Nпропасть
+
+# ── Compass directions ───────────────────────────────────────────────────────
+# Override BASE.DIC entries that produce doubled noun tokens (NзападAзападный).
+# Plain adverb form keeps direction as a single non-inflecting token.
+
+north*Dна севере
+south*Dна юге
+east*Dна востоке
+west*Dна западе
+northwest*Dна северо-западе
+northeast*Dна северо-востоке
+southwest*Dна юго-западе
+southeast*Dна юго-востоке
+
+# Directional phrases: "west of X" → "к западу от X".
+# Tagged as P (preposition) with case Р (genitive) so the following NP inflects correctly.
+# Format: P + case-letter + surface-text  (same as BASE.DIC prepositions)
+
+north of*PРк северу от
+south of*PРк югу от
+east of*PРк востоку от
+west of*PРк западу от
+
+# ── Structures and fixtures ──────────────────────────────────────────────────
+
+house*Nдом
+cottage*Nкоттедж
+hut*Nхижина
+cabin*Nкабина
+tower*Nбашня
+castle*Nзамок
+building*Nздание
+ruin*Nруины
+wall*Nстена
+floor*Nпол
+ceiling*Nпотолок
+roof*Nкрыша
+window*Nокно
+door*Nдверь
+gate*Nворота
+doorway*Nпроём
+porch*Nкрыльцо
+steps*nступени
+staircase*Nлестница
+basement*Nподвал
+attic*Nчердак
+# Compound nouns in LTGOLD NNW format (NNW → W after loader normalisation)
+front door*NNWAпередняяNдверь
+back door*NNWAзадняяNдверь
+trap door*Nлюк
+
+# ── Objects ──────────────────────────────────────────────────────────────────
+# mailbox already correct in BASE.DIC as NNWAпочтовыйNящик — not overridden here
+
+lamp*Nлампа
+lantern*Nфонарь
+torch*Nфакел
+candle*Nсвеча
+sword*Nмеч
+knife*Nнож
+dagger*Nкинжал
+axe*Nтопор
+bow*Nлук
+arrow*Nстрела
+shield*Nщит
+armor*Nдоспехи
+helmet*Nшлем
+boots*nсапоги
+cloak*Nплащ
+bag*Nмешок
+sack*Nмешок
+backpack*Nрюкзак
+chest*Nсундук
+key*Nключ
+lock*Nзамок
+rope*Nверёвка
+ladder*Nлестница
+map*Nкарта
+scroll*Nсвиток
+coin*Nмонета
+gold*Nзолото
+silver*Nсеребро
+gem*Nкамень
+jewel*Nдрагоценность
+treasure*Nсокровище
+food*Nеда
+water*Nвода
+bottle*Nбутылка
+flask*Nфляга
+
+# ── Adjectives ───────────────────────────────────────────────────────────────
+
+boarded*Aзаколоченный       # (override) "обшитый досками" → single inflectable adj
+dark*Aтёмный
+bright*Aяркий
+narrow*Aузкий
+wide*Aширокий
+low*Aнизкий
+deep*Aглубокий
+shallow*Aмелкий
+steep*Aкрутой
+ancient*Aдревний
+ruined*Aразрушенный
+crumbling*Aобветшалый
+dusty*Aпыльный
+damp*Aсырой
+cold*Aхолодный
+warm*Aтёплый
+gloomy*Aмрачный
+eerie*Aжуткий
+haunted*Aзаколдованный
+locked*Aзапертый
+closed*Aзакрытый
+heavy*Aтяжёлый
+tiny*Aкрошечный
+large*Aбольшой
+massive*Aмассивный
+wooden*Aдеревянный
+stone*Aкаменный
+iron*Aжелезный
+golden*Aзолотой
+magic*Aмагический
+enchanted*Aзачарованный
+dimly*Dтускло
+
+# ── Creatures ────────────────────────────────────────────────────────────────
+
+troll*Nтролль
+goblin*Nгоблин
+orc*Nорк
+dragon*Nдракон
+giant*Nгигант
+dwarf*Nгном
+elf*Nэльф
+wizard*Nволшебник
+witch*Nведьма
+ghost*Nпризрак
+skeleton*Nскелет
+rat*Nкрыса
+spider*Nпаук
+snake*Nзмея
+wolf*Nволк
+
+# ── Verbs ────────────────────────────────────────────────────────────────────
+
+stand*ZстоятьNстенд
+go*Vидти
+walk*Vходить
+run*Vбежать
+enter*Vвходить
+exit*Vвыходить
+leave*Vуходить
+climb*Vкарабкаться
+descend*Vспускаться
+jump*Vпрыгать
+swim*Vплавать
+close*Vзакрывать
+lock*Vзапирать
+unlock*Vотпирать
+push*Vтолкать
+pull*Vтянуть
+pick*Vбрать
+drop*Vбросать
+put*Vкласть
+take*Vбрать
+give*Vдавать
+throw*Vбросать
+attack*Vнападать
+fight*Vбороться
+kill*Vубивать
+flee*Vбежать
+hide*Vпрятаться
+search*Vискать
+examine*Vосматривать
+read*ZчитатьNчтение
+listen*Vслушать
+wait*Vждать
+rest*Vотдыхать
+light*ZосвещатьNсвет
+extinguish*Vгасить

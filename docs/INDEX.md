@@ -10,6 +10,12 @@
 | [Rules](rules.md) | Pattern/replacement syntax, complete tag table, table structure, flag semantics. All confirmed. |
 | [Tools](tools.md) | Python extraction tools: hex viewers, binary analyzers, string finders, rule extractors. |
 
+## Examples
+
+| Document | Description |
+|----------|-------------|
+| [Case Study: Zork](case-study-zork.md) | Step-by-step walkthrough: diagnosing translation errors, adding DUNGEON.DIC vocabulary, adding rules. |
+
 ## Active Research
 
 Work-in-progress notes live in [`work/`](../work/):

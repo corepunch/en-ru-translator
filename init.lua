@@ -25,6 +25,8 @@ local function load_config(path)
   file:close()
 end
 
+local overlay_dicts = {}
+
 for _, value in ipairs(arg or {}) do
   if value == "--debug" then
     dbg.set_level(1)
@@ -36,6 +38,8 @@ for _, value in ipairs(arg or {}) do
     dbg.set_file(value:match("^%-%-diag%-file=(.+)$"))
   elseif value:match("^%-%-config=(.+)$") then
     load_config(value:match("^%-%-config=(.+)$"))
+  elseif value:match("^%-%-dict=(.+)$") then
+    table.insert(overlay_dicts, value:match("^%-%-dict=(.+)$"))
   elseif value:sub(1, 2) ~= "--" then
     input_sentence = value
   end
@@ -44,7 +48,7 @@ end
 _G.TRANSLATOR_DEBUG = dbg.level > 0
 dbg.log(1, "Debug level:", dbg.level)
 
-local english, russian = dictionary_store.load()
+local english, russian = dictionary_store.load(nil, nil, table.unpack(overlay_dicts))
 local engine = translator.new(english, russian)
 local output, err = engine:translate(input_sentence)
 if not output then

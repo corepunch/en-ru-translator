@@ -597,6 +597,13 @@ table.insert(rules, {
 
 table.insert(rules, {
   -- This separate cleanup block is physically after T6 at LTPRO offset 0x2AB30.
+  -- Existential word-order fix: "There is [NP] here/there" → locative adverb moves first.
+  -- In Russian, "Здесь есть X" is more natural than "Есть X здесь".
+  -- Three rules cover NP with 0, 1, or 2 pre-noun adjectives.
+  -- No * anchors: * boundary + digit action causes an assertion in the action reader.
+  { 0x00, "yTAAND", "612345" },   -- y T A A N D → D y T A A N
+  { 0x00, "yTAND",  "51234"  },   -- y T A N D   → D y T A N
+  { 0x00, "yTND",   "4123"   },   -- y T N D     → D y T N
   { 0x00, "Q`is``the`", "@  " },
   { 0x0B, "`what`X~<EG>[,*]", "" },
   { 0x00, "`is`~<RS>`correct`*", " $A" },

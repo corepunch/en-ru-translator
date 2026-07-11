@@ -218,3 +218,108 @@ wait*Vждать
 rest*Vотдыхать
 light*ZосвещатьNсвет
 extinguish*Vгасить
+inflate*Vнадувать
+wind*Vзаводить
+wave*Vмахать
+ring*Vзвонить
+pray*Vмолиться
+cross*Vпересекать
+dig*Vкопать
+lower*Vопускать
+raise*Vподнимать
+launch*Vзапускать
+tie*Vпривязывать
+rub*Vтереть
+echo*Vповторять
+turn on*Vвключать
+turn off*Vвыключать
+
+# ── Zork-specific nouns ──────────────────────────────────────────────────────
+
+crawlway*Nпроход
+grating*Nрешётка
+lantern*Nфонарь
+matchbook*Nспичечный набор
+scarab*Nскарабей
+sceptre*Nскипетр
+screwdriver*Nотвёртка
+shovel*Nлопата
+stiletto*Nстилет
+trophy*Nтрофей
+wrench*Nгаечный ключ
+granite*Nгранит
+lapis*Nлазурь
+lazuli*Nлазурит
+marble*Nмрамор
+platinum*Nплатина
+sapphire*Nсапфир
+timber*Nбревно
+bauble*Nукрашение
+buoy*Nбуй
+canary*Nканарейка
+coffin*Nгроб
+figurine*Nфигурка
+guidebook*Nпутеводитель
+chalice*Nчаша
+emerald*Nизумруд
+bracelet*Nбраслет
+trident*Nтрезубец
+trunk*Nчемодан
+pump*Nнасос
+basket*Nкорзина
+bolt*Nболт
+panel*Nпанель
+switch*Nвыключатель
+button*Nкнопка
+lid*Nкрышка
+machine*Nмашина
+coffin*Nгроб
+timber*Nбревно
+
+# ── Zork-specific creatures ──────────────────────────────────────────────────
+
+cyclops*Nциклоп
+thief*Nвор
+bat*Nнетопырь
+
+# ── Zork-specific adjectives ─────────────────────────────────────────────────
+
+elvish*Aэльфийский
+
+# ── Zork-specific locations ──────────────────────────────────────────────────
+
+cellar*Nподвал
+attic*Nчердак
+gallery*Nгалерея
+studio*Nстудия
+temple*Nхрам
+altar*Nжертвенник
+chapel*N часовня
+reservoir*Nводохранилище
+waterfall*Nводопад
+clearing*Nполяна
+
+# ── Compound modifiers ──────────────────────────────────────────────────────
+
+nasty-looking*Aпротивный
+seedy-looking*Aподозрительный
+suspicious-looking*Aподозрительный
+sand-filled*Aзасыпанный песком
+non-descript*Aнепримечательный
+battery-powered*Aаккумуляторный
+jewel-encrusted*Aукрашенный драгоценностями
+sapphire-encrusted*Aукрашенный сапфирами
+skull-and-crossbones*Aс черепом и костями
+solid-gold*Aиз чистого золота
+heart-stopping*Aостанавливающий сердце
+long-forgotten*Aдавно забытый
+ear-splitting*Aразрывающий уши
+
+# ── Zork proper nouns (kept as # tokens) ─────────────────────────────────────
+
+zork*#ЗОРК
+aragain*#Арагейн
+flathead*#Флэтхед
+ramses*#Рамзес
+poseidon*#Посейдон
+fcd*#FCD

@@ -44,13 +44,17 @@ a flags value (0–31) that the compiler uses to select the correct inflection s
 
 | File | Role |
 |------|------|
-| `init.lua` | Entry point — loads dictionaries, tokenizes input, runs parser + compiler |
+| `init.lua` | Imperative CLI shell — parses options, writes output, and selects exit status |
+| `translator.lua` | In-process translation API composing tokenizer, parser, and compiler |
+| `dictionary_store.lua` | File adapter that loads LTGOLD dictionary tables for the core |
+| `encoding.lua` | Pure CP866↔UTF-8 conversion module |
+| `bin/encoding.lua` | Unix stdin/stdout adapter for `encoding.lua` |
 | `rules.lua` | 692 pattern-matching rules from LTGOLD.EXE binary (8 tables T1–T8) |
 | `parser.lua` | Applies rules to the token stream; implements pattern/replacement language |
 | `compiler.lua` | Generates Russian output using morphological paradigms for correct inflection |
 | `paradigms.lua` | Russian noun/adjective/verb declension and conjugation tables |
 | `load.lua` | Parses LTGOLD `*.DIC`/`*.RUS` dictionary files (CP866 encoded trie) |
-| `utils.lua` | CP866↔UTF-8 conversion, tokenization, string helpers |
+| `utils.lua` | Tokenization, token inspection, and compatibility encoding exports |
 | `debug/T*.txt` | Annotated binary dumps of all 8 rule tables from LTGOLD.EXE |
 | `LTGOLD/test_compare.sh` | Test harness: Lua output vs LTPRO.EXE reference per sentence |
 | `LTGOLD/refs/` | Captured LTPRO.EXE reference outputs for 10 test sentences |
@@ -76,6 +80,19 @@ lua init.lua
 ```
 
 Requires Lua 5.3+ (uses bitwise operators `>>`, `&`).
+
+## Core and shell boundary
+
+The translator follows Functional Core, Imperative Shell. Core modules accept
+values and return values; command-line and file adapters own external effects.
+Dependencies point from shells toward the core: `init.lua` loads dictionary data
+through `dictionary_store.lua`, constructs `translator.lua`, and prints its return
+value. `encoding.lua` can likewise be called directly or used as a Unix filter:
+
+```sh
+printf 'Привет' | lua bin/encoding.lua encode > greeting.cp866
+lua bin/encoding.lua decode < greeting.cp866
+```
 
 ## Debug mode (`--debug`)
 

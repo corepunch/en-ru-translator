@@ -2,7 +2,7 @@
 -- dict.lua — Dictionary management tool for en-ru-translator
 --
 -- Search, add, and manage entries in LTGOLD .DIC/.RUS dictionary files.
--- Standalone: no dependency on the translator's module chain.
+-- Standalone shell over focused dictionary and encoding operations.
 --
 -- Usage:
 --   lua dict.lua find <word>              Search all dictionaries for a word
@@ -27,30 +27,7 @@
 -- CP866 ↔ UTF-8 conversion (standalone, no external deps)
 -------------------------------------------------------------------------------
 
-local cp866_to_utf8 = {
-  [0x80]="А", [0x81]="Б", [0x82]="В", [0x83]="Г",
-  [0x84]="Д", [0x85]="Е", [0x86]="Ж", [0x87]="З",
-  [0x88]="И", [0x89]="Й", [0x8A]="К", [0x8B]="Л",
-  [0x8C]="М", [0x8D]="Н", [0x8E]="О", [0x8F]="П",
-  [0x90]="Р", [0x91]="С", [0x92]="Т", [0x93]="У",
-  [0x94]="Ф", [0x95]="Х", [0x96]="Ц", [0x97]="Ч",
-  [0x98]="Ш", [0x99]="Щ", [0x9A]="Ъ", [0x9B]="Ы",
-  [0x9C]="Ь", [0x9D]="Э", [0x9E]="Ю", [0x9F]="Я",
-
-  [0xA0]="а", [0xA1]="б", [0xA2]="в", [0xA3]="г",
-  [0xA4]="д", [0xA5]="е", [0xA6]="ж", [0xA7]="з",
-  [0xA8]="и", [0xA9]="й", [0xAA]="к", [0xAB]="л",
-  [0xAC]="м", [0xAD]="н", [0xAE]="о", [0xAF]="п",
-  [0xE0]="р", [0xE1]="с", [0xE2]="т", [0xE3]="у",
-  [0xE4]="ф", [0xE5]="х", [0xE6]="ц", [0xE7]="ч",
-  [0xE8]="ш", [0xE9]="щ", [0xEA]="ъ", [0xEB]="ы",
-  [0xEC]="ь", [0xED]="э", [0xEE]="ю", [0xEF]="я",
-
-  [0xF0]="ё",
-}
-
-local utf8_to_cp866 = {}
-for code, char in pairs(cp866_to_utf8) do utf8_to_cp866[char] = code end
+local encoding = require "encoding"
 
 local function decode(s)
   local t = {}
@@ -61,7 +38,7 @@ local function decode(s)
       t[#t+1] = string.char(b)
       i = i + 1
     else
-      local char = cp866_to_utf8[b]
+      local char = encoding.character(b)
       if char then
         t[#t+1] = char
       else
@@ -74,31 +51,7 @@ local function decode(s)
 end
 
 local function encode(s)
-  local t = {}
-  local i = 1
-  while i <= #s do
-    local b = s:byte(i)
-    if b < 0x80 then
-      t[#t+1] = string.char(b)
-      i = i + 1
-    else
-      -- 2-byte UTF-8: high bits = 110xxxxx, continuation = 10xxxxxx
-      local b2 = s:byte(i+1)
-      if b2 and b2 >= 0x80 and b2 < 0xC0 then
-        local cp = utf8_to_cp866[s:sub(i, i+1)]
-        if cp then
-          t[#t+1] = string.char(cp)
-        else
-          t[#t+1] = string.char(b)
-        end
-        i = i + 2
-      else
-        t[#t+1] = string.char(b)
-        i = i + 1
-      end
-    end
-  end
-  return table.concat(t)
+  return encoding.encode(s)
 end
 
 -------------------------------------------------------------------------------

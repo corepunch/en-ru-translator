@@ -6,8 +6,8 @@ local compiler = require "compiler"
 -- share globals with parser
 _G.LTGOLD_BASE = {}
 
-local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("data/BASE.DIC", "r"))
+local file2 = assert(io.open("data/BASE.RUS", "r"))
 local en_ru = {}
 compiler.base = {}
 for line in file:lines() do

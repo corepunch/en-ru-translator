@@ -4,8 +4,8 @@ local load = require "load"
 local parser = require "parser"
 local compiler = require "compiler"
 
-local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("data/BASE.DIC", "r"))
+local file2 = assert(io.open("data/BASE.RUS", "r"))
 local en_ru, base = {}, {}
 compiler.base = base
 for line in file:lines() do
@@ -18,8 +18,8 @@ end
 file:close(); file2:close()
 
 -- Read reference (skip header)
-local ref = assert(io.open("LTGOLD/DEMO_REFERENCE.TXT", "r")):read("*all")
-io.open("LTGOLD/DEMO_REFERENCE.TXT"):close()
+local ref = assert(io.open("test/DEMO_REFERENCE.TXT", "r")):read("*all")
+io.open("test/DEMO_REFERENCE.TXT"):close()
 -- skip LTGOLD header lines
 local ref_start = ref:find("СОГЛАШЕНИЕ") or 1
 ref = ref:sub(ref_start)

@@ -5,8 +5,8 @@ local parser = require "parser"
 local compiler = require "compiler"
 
 -- load dictionaries
-local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("data/BASE.DIC", "r"))
+local file2 = assert(io.open("data/BASE.RUS", "r"))
 local en_ru, base = {}, {}
 compiler.base = base
 for line in file:lines() do

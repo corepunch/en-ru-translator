@@ -9,8 +9,8 @@ for _, value in ipairs(arg or {}) do
   if value == "--dosbox" then verify_dosbox = true end
 end
 
-local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("data/BASE.DIC", "r"))
+local file2 = assert(io.open("data/BASE.RUS", "r"))
 local en_ru = {}
 compiler.base = {}
 for line in file:lines() do
@@ -68,7 +68,7 @@ for _, case in ipairs(gold) do
   local sent, expected = table.unpack(case)
   total = total + 1
   if verify_dosbox then
-    local pipe = assert(io.popen(string.format("./LTGOLD/run_test.sh %q", sent), "r"))
+    local pipe = assert(io.popen(string.format("./LTGOLD/run_test.sh %q", sent), "r"))  -- NOTE: LTGOLD/run_test.sh kept as-is, not a data file
     local captured = pipe:read("*all"):gsub("\r", "")
     local ok = pipe:close()
     local translation = captured:match("^(.-)\n%s*\n") or captured

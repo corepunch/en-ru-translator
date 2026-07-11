@@ -1,0 +1,455 @@
+
+
+
+
+
+
+
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  NOTE ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³   This  file, "README.ENG", contains important information on   ³
+      ³   LTGOLD and LTPRO.                                             ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+
+
+
+
+
+
+
+                          Welcome to LTGOLD and LTPRO
+                                  Version 2.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    Copyright (c) 1990-1993 LinguaTech Systems, USA - All rights reserved
+   Copyright (c) 1990-1993 LinguaTech Systems, Russia - All rights reserved
+                                   (rev. 9)
+
+                                    - 2 -
+                                  README.ENG
+
+
+
+        Table of Contents                                    Page #
+
+       1.0 SYSTEM HARDWARE AND SOFTWARE REQUIREMENTS                  3
+       2.0 HOW TO GET HELP                                            3
+       3.0 INSTALLATION                                               4
+       4.0 FEATURES AND IMPORTANT INFORMATION                         5
+       5.0 DISTRIBUTION FILES                                         6
+       6.0 OPERATIONAL WARNINGS                                       8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    - 3 -
+                                  README.ENG
+
+       The design of LTGOLD and LTPRO allows the user to  electronically
+       translate written documents from English to Russian.  The program
+       is designed for ease of use and speed. Although the program has a
+       large built in dictionary, it is recommended that you have a good
+       working knowledge of both English and Russian.  LTGOLD,  as  with
+       other translation programs,  is not designed to replace the human
+       translator,  but to  assist  them  in  turning  out  professional
+       translations, several  times faster than ever before.  Even users
+       with a minimum knowledge of Russian or  English  can  communicate
+       effectively with people who know only one of the two languages.
+
+
+                 1.0 SYSTEM HARDWARE AND SOFTWARE REQUIREMENTS
+
+
+         The minimum  software  and  hardware  required  for LTGOLD to
+         function correctly on your computer:
+
+
+                   Computer: IBM XT, or compatible
+                   Operating System: DOS 3.3 or higher
+                   Memory 640 Kb.
+		   EGA, VGA, SVGA card.
+                   Hard Drive: 3 megabytes Free space
+                   Software: Memory resident Cyrillic screen driver
+
+
+                   A mouse is also recommended.
+
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  NOTE ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³    LTGOLD was developed to run on IBM or fully compatible PC's  ³
+      ³    including the XT, AT, 386, 486, PS/2, and laptops.   LTGOLD  ³
+      ³    is compatible with DOS version 3.3 or higher.                ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+                              2.0 HOW TO GET HELP
+
+       First, Please  read  the  Operators  Manual  supplied  with   the
+       program.  If you have any problems, please read all documentation
+       files named *.ENG (*.CYR in Russian) and *.DOC  and  other  files
+       from   the  LTGOLD  distribution  diskette.  If  you  still  have
+       questions or need help, you may:
+
+
+             a. Contact your local software dealer where you purchased
+                LTGOLD.
+
+
+             b. Write or call us at:
+
+
+                                    U.S.A.
+
+                             2590 South 4th Street
+                             Lebanon, Oregon 97355
+                            TeleFAX: (503) 258-5773
+
+
+
+
+                                    - 4 -
+                                  README.ENG
+
+
+                                    RUSSIA
+
+                           18 Belgradskaya St. #227
+                         St. Petersburg, Russia 192212
+                          TeleFAX: (7-812) 109-85-35
+
+
+                                  ELECTRONIC
+
+                              MCI Mail: 494-2227
+                           Telex: 4604942227 MCI UW
+                         INTERNET: ltgold@gltec.spb.su
+                  X.400: G=GTC;S=GM;DDA:ID=4942227;A=MCI;C=US
+
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  NOTE ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³               You must include your serial number.              ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+             c. If  your problem is urgent and if you are a registered
+                user  of  LTGOLD,  please   call   Technical   Support
+                Department  at (7-812) 109-85-35.
+
+             Please have the following information available:
+
+             a. Name of your company, complete name of the Product and
+                serial number on your Registration Card.
+
+             b. Version number of  the  Product.  Version  number  for
+                LTGOLD can be shown in the menu File/About.
+
+             c. Manufacturer, make, and model of your computer, models
+                and names of the other additional hardware.
+
+             d. Operating system and number of  the  version  (Version
+                number may be determined by typing VER in MS-DOS).
+
+             e. Contents of your AUTOEXEC.BAT file.
+
+             f. Contents of your CONFIG.SYS file.
+
+
+                               3.0 INSTALLATION
+
+         3.1 To  install  LTGOLD  you  must  use  the  INSTALL program
+             supplied on your distribution diskette.  The files on the
+             distribution  diskette are archived and must be extracted
+             in the correct sequence.
+
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ <-> WARNING <-> ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³  The program will not operate correctly if the files are not    ³
+      ³  installed by using the supplied INSTALL program!               ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+
+
+                                    - 5 -
+                                  README.ENG
+
+
+
+         3.2 To  start  the installation process,  change your current
+             drive to the one that has the installation program on  it
+             and type INSTALL. For example, if you are installing from
+             drive A:, type:
+
+              A:INSTALL
+                       ÀÄÄ Press Enter
+
+             and follow the installation prompts from the program.
+
+                    4.0 FEATURES AND IMPORTANT INFORMATION
+
+         4.1 To increase the speed of LTGOLD you may use the available
+             utilities  in  MS-DOS for disk cacheing. By including the
+             DOS driver SMARTDRV.SYS into your  CONFIG.SYS  files  you
+             can increase your speed of LTGOLD by more than 200%.  The
+             following is an example of an addition to your CONFIG.SYS
+             file:
+
+              DEVICE=C:\DOS\SMARTDRV.SYS 320
+
+
+         4.2 You  should  also have FILES and BUFFERS set large enough
+             for the program.  The following is an example of how your
+             CONFIG.SYS should look:
+
+             (minimum required)
+
+             BUFFERS=20
+             FILES=30
+
+         4.3 In  order  to  execute LTGOLD from any directory you must
+             add an additional parameter to your drive PATH  which  is
+             usually defined in the AUTOEXEC.BAT.  The following is an
+             example of how your PATH should look:
+
+              PATH C:;C:\DOS;C:\LTGOLD;
+
+             (Please read your MS-DOS manual for  further  details  on
+                the PATH command.)
+
+         4.4 If your system has sufficient memory,  you may  define  a
+             virtual disk (memory which acts like a disk drive) before
+             calling the program using the MS-DOS driver RAMDRIVE.SYS.
+             You  will  then  be  able  to put the LTGOLD dictionaries
+             there for greater speed.  You  would  execute  LTGOLD  by
+             adding the   following  parameter  -D  <V:>,  for example
+             for the E: disk type:
+
+         DEVICE=C:\DOC\HIMEM.SYS
+                            À installs the DOS high memory driver
+
+         DEVICE=C:\DOS\RAMDRIVE.SYS 2048 /E
+                                     ³    À Creates drive "E:" from the
+                                     ³      extended memory
+                                     ³
+                                     ÀÄ amount of free memory
+
+
+                                    - 6 -
+                                  README.ENG
+
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  NOTE ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³The  two  above examples  assume  that  the files "HIMEM.SYS" and³
+      ³"RAMDRIVE.SYS" are located on drive C: in the Subdirectory "DOS".³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+             You may now copy the *.DIC and *.RUS files to drive E:.
+             The command to start LTGOLD should read:
+
+                  ÚÄÄÄÄÄÄ Changes your default subdirectory to LTGOLD
+          CD\LTGOLD
+          LTGOLD -D E:
+                  ÀÄÄÄÄÄÄ Tells the program your dictionaries  are on
+                           your E: drive
+
+             and the  dictionaries  files  will  be  loaded  from  the
+             virtual disk E:
+
+
+         4.5 MS-DOS does not remove files from the  disk  even  though
+             they  have  been  deleted.  This  feature  allows for the
+             recovery of files that are accidentally deleted.  It also
+             creates  a  problem  for  the  speed  of  your  system by
+             fragmenting the drive (putting small fragments of  a  new
+             file  in any available open space).  One program may have
+             several fragments on your  hard  drive.  This  slows  the
+             system down greatly. It is a very good idea to run one of
+             the commercially  available  disk  compression  programs.
+             Either  Mace  or  Norton  Speed  Disk   will  speed  your
+             programs up.
+
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ <-> WARNING <-> ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³ Always back your hard drive up prior to running any compression ³
+      ³ program.                                                        ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    - 7 -
+                                  README.ENG
+
+                            5.0 DISTRIBUTION FILES
+
+          The programs included in the distribution are:
+
+
+   INSTALL .EXE       Installation Program
+   INSTALLE.HLP       Installation English help text
+   INSTALLR.HLP       Installation Russian help text
+   README  .ENG       English Installation document
+   README  .CYR       Russian Installation document
+   QUESTION.ENG       Questions and Answers frequently asked
+   NEWLTGE .DOC       English document with latest update notes
+   NEWLTGR .DOC       Russian document with latest update notes
+   ARD     .COM       Russian Screen Driver (try first)
+   RKVGA   .COM       Russian Screen Driver (try second)
+   RKA     .COM       Russian Screen Driver (try third)
+   LTG     .EXE       Archive program including:
+            LTGOLD  .EXE     Main LTGOLD program
+            LTPRO   .EXE     Main LTPRO program
+            LTPRO   .HLP     Help file for LTPRO (LTPRO/? to activate)
+            LTGCMD  .HLP     Commands for LTGOLD (LTGOLD/? to activate)
+            LTGOLDE .HLP     English help text for LTGOLD
+            LTGOLDR .HLP     Russian help text for LTGOLD
+            BASE    .DIC     Main English/Russian Dictionary
+            BASE    .RUS     Main Russian Dictionary
+            COMPUTER.DIC     Computer Dictionary
+            BUSINESS.DIC     Business Dictionary
+            LTPW5_0 .GLY     Macro for Word 5.0
+            LTPW5_5 .GLY     Macro for Word 5.5
+            LTPRO   .MAC     Macro for Multi-Edit
+	    LTPRO   .SRC     Macro source for Multi-Edit
+	    LTDOC   .DOC     Macro for WinWord 2.0
+	    LTSELECT.DOC     Macro for WinWord 2.0
+	    LTINSERT.DOC     Macro for WinWord 2.0
+	    LT*     .PIF     PIF files for running LTGOLD under Windows 3.1
+	    LT*     .ICO     Icons for running LTGOLD under Windows 3.1
+            LTGOLD  .IDS     Words you do not want to translate
+            DEMO    .TXT     Sample contract for translation
+            LTATGGTA.EXE     Self-extracting communication files
+            911     .EXE     Self-extracting Dictionary program including:
+                     SUPPORT .EXE   Dictionary update program
+                     SUPPORT .ENG   English documentation on SUPPORT.EXE
+                     SUPPORT .CYR   Russian documentation on SUPPORT.EXE
+                     APPENDIX.ENG   English Dictionary documentation
+                     APPENDIX.CYR   Russian Dictionary documentation
+                     USER    .DIC   User Dictionary (no entries)
+
+
+                                    - 8 -
+                                  README.ENG
+
+
+                           6.0 OPERATIONAL WARNINGS
+
+         6.1 When   installing   LTGOLD   be  sure  your  computer  is
+             configured in the same way  as  when  you  will  run  the
+             program.  Changes in the system configuration may require
+             reinstalling the program.
+
+
+         6.2 LTGOLD does not allow for the copying  of  program  files
+             from one computer to another.  An error will be displayed
+             if the files are moved to another  computer  without  the
+             complete installation process.
+
+
+         6.3 Always   back   up   your  distribution  diskette  before
+             installing the program.  You must use DISKCOPY (from your
+             DOS  distribution  diskette)  to back up the distribution
+             diskette.
+
+         6.4 Please honor our Copyright and do not distribute  LTGOLD.
+             The  money  we  receive  is  used  to further develop the
+             product and dictionaries.
+
+
+               WE HOPE YOU HAVE FUN WORKING AND PLAYING WITH LTGOLD

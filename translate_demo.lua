@@ -4,8 +4,8 @@ local utils = require "utils"
 local load = require "load"
 
 -- load dictionaries
-local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("data/BASE.DIC", "r"))
+local file2 = assert(io.open("data/BASE.RUS", "r"))
 local en_ru, base = {}, {}
 compiler.base = base
 for line in file:lines() do
@@ -18,7 +18,7 @@ end
 file:close(); file2:close()
 
 -- read demo text and split into sentences
-local demo = assert(io.open("LTGOLD/DEMO.TXT", "r"))
+local demo = assert(io.open("test/DEMO.TXT", "r"))
 local lines = demo:read("*all")
 demo:close()
 

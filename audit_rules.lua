@@ -3,7 +3,7 @@
 local utils = require "utils"
 local rules = require "rules"
 
-local path = arg[1] or "LTGOLD/LTPRO.EXE"
+local path = arg[1] or "LTGOLD/LTPRO.EXE"  -- NOTE: LTGOLD/ LTPRO.EXE is a binary tool, not a data file
 local file = assert(io.open(path, "rb"))
 local exe = file:read("*all")
 file:close()

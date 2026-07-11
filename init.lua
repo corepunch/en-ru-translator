@@ -4,8 +4,8 @@ local utils = require "utils"
 local load = require "load"
 local paradigms = require "paradigms"
 
-local file = assert(io.open("LTGOLD/BASE.DIC", "r"))
-local file2 = assert(io.open("LTGOLD/BASE.RUS", "r"))
+local file = assert(io.open("data/BASE.DIC", "r"))
+local file2 = assert(io.open("data/BASE.RUS", "r"))
 local en_ru = {}
 local base = {}
 

@@ -1,6 +1,7 @@
 local utils = {}
 local dbg = require "dbg"
 local suffixes = require "suffixes"
+local stream = require "token_stream"
 
 local cp866_to_utf8 = {
   [0x80]="А", [0x81]="Б", [0x82]="В", [0x83]="Г",
@@ -185,13 +186,9 @@ function utils.tokenize(s, en_ru)
   s = s:gsub("cannot", "can not"):gsub("can't", "can not")
   -- strip commas from within digit sequences (e.g. 1,000,000 → 1000000)
   while s:find("(%d+),(%d+)") do s = s:gsub("(%d+),(%d+)", "%1%2") end
-  local prev, tbl, words, last, i = nil, {}, {}, 0, 1
-  -- caps[i] = true when token i was produced from an all-caps English source word.
-  -- Used by the compiler to uppercase Russian output (e.g. AGREEMENT → СОГЛАШЕНИЕ).
-  tbl.caps = {}
-  tbl.phrases = {}
-  tbl.source = {}
-  tbl.component_caps = {}
+  -- Token provenance is mutated atomically with lexical entries so phrase
+  -- backtracking and later parser reorders cannot desynchronise metadata.
+  local prev, tbl, words, last, i = nil, stream.new(), {}, 0, 1
   local phrase_all_caps = false  -- track caps across multi-word phrase lookups
   local phrase_component_caps = {}
 
@@ -269,9 +266,9 @@ function utils.tokenize(s, en_ru)
     if words[i] == '-' or words[i] == '"' or words[i] == "'" or
        words[i]:match("^[,%!%.;:]$") then
       local structural = words[i]
-      table.insert(tbl, structural)
-      tbl.caps[#tbl], tbl.phrases[#tbl], tbl.source[#tbl] = false, false, structural
-      tbl.component_caps[#tbl] = false
+      stream.append(tbl, structural, {
+        caps = false, phrases = false, source = structural, component_caps = false,
+      })
       prev = nil
       i = i + 1
       goto continue
@@ -296,25 +293,23 @@ function utils.tokenize(s, en_ru)
       local derived = (not is_designator) and derived_lexeme(word)
       if (not is_designator) and (en_ru[word] or derived) then
         dbg.log(2, "  Lookup:", word, "→", utils.decode(en_ru[word] and en_ru[word].__lex or derived))
-        table.insert(tbl, en_ru[word] and en_ru[word].__lex or derived)
+        stream.append(tbl, en_ru[word] and en_ru[word].__lex or derived, {
+          caps = is_caps, phrases = false, source = word_orig, component_caps = false,
+        })
       else
         dbg.log(2, "  Lookup:", word, "→ (not found)")
         -- preserve original case in # token so uppercase tracking works for proper nouns
-        table.insert(tbl, '#'..word_orig)
+        stream.append(tbl, '#'..word_orig, {
+          caps = is_caps, phrases = false, source = word_orig, component_caps = false,
+        })
       end
-      tbl.caps[#tbl] = is_caps
-      tbl.phrases[#tbl] = false
-      tbl.source[#tbl] = word_orig
-      tbl.component_caps[#tbl] = false
       phrase_all_caps = is_caps  -- reset phrase tracking to current word's caps
       phrase_component_caps = { is_caps }
       prev, last = en_ru[word], i
       if punct ~= "" then
-        table.insert(tbl, punct)
-        tbl.caps[#tbl] = false
-        tbl.phrases[#tbl] = false
-        tbl.source[#tbl] = punct
-        tbl.component_caps[#tbl] = false
+        stream.append(tbl, punct, {
+          caps = false, phrases = false, source = punct, component_caps = false,
+        })
       end
     elseif not prev[word] then
       dbg.log(2, "  Phrase break:", word, "→ backtracking to last")
@@ -324,19 +319,19 @@ function utils.tokenize(s, en_ru)
         utils.decode(prev[word].__lex))
       table.insert(phrase_component_caps, is_caps)
       tbl[#tbl], last = prev[word].__lex, i
-      tbl.caps[#tbl] = phrase_all_caps
-      tbl.phrases[#tbl] = true
-      tbl.source[#tbl] = tbl.source[#tbl] or word_orig
-      tbl.component_caps[#tbl] = { table.unpack(phrase_component_caps) }
+      stream.set_metadata(tbl, #tbl, {
+        caps = phrase_all_caps,
+        phrases = true,
+        source = tbl.source[#tbl] or word_orig,
+        component_caps = { table.unpack(phrase_component_caps) },
+      })
       -- A terminal dictionary node may also have children ("by all means" and
       -- "by all means of"); retain it so the longest lexical phrase can win.
       prev = prev[word]
       if punct ~= "" then
-        table.insert(tbl, punct)
-        tbl.caps[#tbl] = false
-        tbl.phrases[#tbl] = false
-        tbl.source[#tbl] = punct
-        tbl.component_caps[#tbl] = false
+        stream.append(tbl, punct, {
+          caps = false, phrases = false, source = punct, component_caps = false,
+        })
         prev = nil
       end
     else

@@ -1,6 +1,7 @@
 local utils = require "utils"
 local rules = require "rules"
 local dbg = require "dbg"
+local stream = require "token_stream"
 local parser = {}
 
 local function echo(color, s, ...)
@@ -286,30 +287,12 @@ end
 -- positions: list of token indices that were matched (in order)
 -- digits: the action string (e.g. "23", "3455")
 local function reorder_tokens(ts, positions, digits)
-	-- snapshot the matched tokens
-	local snap = {}
-	for k, pos in ipairs(positions) do snap[k] = ts[pos] end
-	-- snapshot caps flags alongside tokens so they travel together
-	local snap_caps = {}
-	local snap_phrases = {}
-	local snap_source = {}
-	local snap_component_caps = {}
-	if ts.caps then
-		for k, pos in ipairs(positions) do snap_caps[k] = ts.caps[pos] end
-	end
-	if ts.phrases then
-		for k, pos in ipairs(positions) do snap_phrases[k] = ts.phrases[pos] end
-	end
-	if ts.source then
-		for k, pos in ipairs(positions) do snap_source[k] = ts.source[pos] end
-	end
-	if ts.component_caps then
-		for k, pos in ipairs(positions) do snap_component_caps[k] = ts.component_caps[pos] end
-	end
+	-- Snapshot complete entries; LTGOLD T5/T6 moves provenance with constituents.
+	local snap = stream.snapshot(ts, positions)
 	dbg.log(2, "    reorder: positions=", table.concat(positions,","),
 	  "digits=", digits,
-	  "snap=", table.concat(utils.map(snap, function(t)
-	    return utils.decode(t, true)
+	  "snap=", table.concat(utils.map(snap, function(entry)
+	    return utils.decode(entry.token, true)
 	  end), ","))
 	-- track which snap indices have been used
 	local used = {}
@@ -317,11 +300,7 @@ local function reorder_tokens(ts, positions, digits)
 	for k = 1, #digits do
 		local d = tonumber(digits:sub(k, k))
 		if d and d >= 1 and d <= #snap and positions[k] then
-			ts[positions[k]] = snap[d]
-			if ts.caps then ts.caps[positions[k]] = snap_caps[d] end
-			if ts.phrases then ts.phrases[positions[k]] = snap_phrases[d] end
-			if ts.source then ts.source[positions[k]] = snap_source[d] end
-			if ts.component_caps then ts.component_caps[positions[k]] = snap_component_caps[d] end
+			stream.write(ts, positions[k], snap[d])
 			used[d] = true
 		end
 	end
@@ -330,11 +309,7 @@ local function reorder_tokens(ts, positions, digits)
 	for k = #digits + 1, #positions do
 		while used[next_snap] do next_snap = next_snap + 1 end
 		if next_snap <= #snap and positions[k] then
-			ts[positions[k]] = snap[next_snap]
-			if ts.caps then ts.caps[positions[k]] = snap_caps[next_snap] end
-			if ts.phrases then ts.phrases[positions[k]] = snap_phrases[next_snap] end
-			if ts.source then ts.source[positions[k]] = snap_source[next_snap] end
-			if ts.component_caps then ts.component_caps[positions[k]] = snap_component_caps[next_snap] end
+			stream.write(ts, positions[k], snap[next_snap])
 			used[next_snap] = true
 			next_snap = next_snap + 1
 		end
@@ -419,18 +394,16 @@ local function match_pattern(ts, m, r, flags)
 	end
 end
 
-local function loop(ts)
-	-- strip space tokens that survive from tokenization; keep caps table in sync
+local function remove_silent_tokens(ts)
+	-- Rule replacements use a literal space as deletion; removing it through the
+	-- stream API keeps every analyzer metadata field aligned.
 	for i = #ts, 1, -1 do
-			if ts[i] == ' ' then
-				table.remove(ts, i)
-				if ts.caps then table.remove(ts.caps, i) end
-				if ts.phrases then table.remove(ts.phrases, i) end
-				if ts.source then table.remove(ts.source, i) end
-				if ts.component_caps then table.remove(ts.component_caps, i) end
-		end
+		if ts[i] == ' ' then stream.remove(ts, i) end
 	end
-	-- convert h tag (historical/irregular past) to E for proper rule matching
+end
+
+local function normalize_analyzer_tags(ts)
+	-- LTGOLD's historical/irregular-past analyzer tag enters the grammar as E.
 	for i = 1, #ts do
 		if ts[i]:byte(1) == string.byte('h') then
 			dbg.log(2, "  h→E conversion:",
@@ -438,12 +411,10 @@ local function loop(ts)
 			ts[i] = 'E' .. ts[i]:sub(2)
 		end
 	end
-	dbg.log(3, "Initial tokens:",
-	  table.concat(utils.map(ts, function(t)
-	    return (t:sub(1,1))..":"..utils.decode(t, true)
-	  end), " | "))
-	-- The analyzer's Z/N+A entry is attributive when the following entry has a
-	-- noun form; resolve it before T2/T3 discard secondary dictionary forms.
+end
+
+local function resolve_attributive_forms(ts)
+	-- Resolve analyzer Z/N+A records before T2/T3 discard secondary forms.
 	for i = 1, #ts - 1 do
 		local has_adjective = find(ts[i], "A") or
 		  (find(ts[i], "Z") and ts[i]:find("A", 2, true))
@@ -451,25 +422,30 @@ local function loop(ts)
 			find_and_replace(ts, i, "A")
 		end
 	end
+end
+
+local rule_set_preprocessors = {
+	[3] = function(ts)
+		for i = 1, #ts - 1 do
+			if ts[i]:sub(1, 1) == 'q' and ts[i + 1]:sub(1, 1) == 'Z' then
+				-- X2xx selects the following ambiguous Z as a verb before T3 cleanup.
+				find_and_replace(ts, i + 1, 'V')
+			end
+		end
+	end,
+	[6] = function(ts)
+		-- T6 validates heads after ambiguity rules, so expose adjective heads first.
+		for i = 1, #ts - 1 do
+			if is(ts[i + 1], "Nn") and find(ts[i], "A") then
+				find_and_replace(ts, i, "A")
+			end
+		end
+	end,
+}
+
+local function apply_rule_sets(ts)
 	for ri, rs in ipairs(rules) do
-		if ri == 3 then
-			for i = 1, #ts - 1 do
-				if ts[i]:sub(1, 1) == 'q' and ts[i + 1]:sub(1, 1) == 'Z' then
-					-- X2xx (shall/will) structurally selects the following ambiguous Z
-					-- as a verb before T3's default unresolved-Z-to-noun cleanup.
-					find_and_replace(ts, i + 1, 'V')
-				end
-			end
-		end
-		if ri == 6 then
-			-- T6 validates constituent heads after ambiguity rules; resolve an
-			-- adjective-bearing form before its noun so head indices stay valid.
-			for i = 1, #ts - 1 do
-				if is(ts[i + 1], "Nn") and find(ts[i], "A") then
-					find_and_replace(ts, i, "A")
-				end
-			end
-		end
+		if rule_set_preprocessors[ri] then rule_set_preprocessors[ri](ts) end
 		dbg.log(2, "Rule set T" .. ri .. ":")
 		for _, r in ipairs(rs) do
 			local flags, pat, act = table.unpack(r)
@@ -480,7 +456,15 @@ local function loop(ts)
 		    return t:sub(1,1)..":"..utils.decode(t, true)
 		  end), " | "))
 	end
-	-- post-process: prefer X (copula) over U (modal) when followed by A (adjective) form
+end
+
+local preposition_contexts = {
+	-- A demonstrative NP selects LTGOLD's locative sense of ambiguous "to".
+	["PВна:O"] = utils.encode("PПв"),
+}
+
+local function resolve_post_rule_contexts(ts)
+	-- Prefer X (copula) over U (modal) when followed by an adjective form.
 	for i = 1, #ts - 1 do
 		if ts[i]:sub(1,1) == 'U' and ts[i+1]:find('A', 1, true) then
 			local xform = find(ts[i], 'X')
@@ -491,29 +475,26 @@ local function loop(ts)
 			end
 		end
 	end
-	local preposition_contexts = {
-		-- A demonstrative NP selects LTGOLD's locative sense of ambiguous "to".
-		["PВна:O"] = utils.encode("PПв"),
-	}
 	for i = 1, #ts - 1 do
 		local key = utils.decode(ts[i], false) .. ":" .. ts[i + 1]:sub(1, 1)
 		if preposition_contexts[key] then ts[i] = preposition_contexts[key] end
 	end
-	-- strip any remaining space tokens (injected by rules); keep caps in sync
-	for i = #ts, 1, -1 do
-		if ts[i] == ' ' then
-				table.remove(ts, i)
-				if ts.caps then table.remove(ts.caps, i) end
-				if ts.phrases then table.remove(ts.phrases, i) end
-				if ts.source then table.remove(ts.source, i) end
-				if ts.component_caps then table.remove(ts.component_caps, i) end
-		end
-	end
 end
 
-function parser.collect(dic, ts)
-	en_ru = dic
-	loop(ts)
+local function loop(ts)
+	remove_silent_tokens(ts)
+	normalize_analyzer_tags(ts)
+	dbg.log(3, "Initial tokens:",
+	  table.concat(utils.map(ts, function(t)
+	    return (t:sub(1,1))..":"..utils.decode(t, true)
+	  end), " | "))
+	resolve_attributive_forms(ts)
+	apply_rule_sets(ts)
+	resolve_post_rule_contexts(ts)
+	remove_silent_tokens(ts)
+end
+
+local function apply_copular_it_compatibility(ts)
 	if ts.source then
 		for i = 1, #ts - 1 do
 			if ts.source[i] and ts.source[i]:lower() == 'it' and ts[i]:sub(1, 1) == 'R' then
@@ -528,6 +509,9 @@ function parser.collect(dic, ts)
 			end
 		end
 	end
+end
+
+local function apply_capitalization_compatibility(ts)
 	if ts.caps then
 		for i = 2, #ts do
 			if ts[i]:sub(1, 1) == 'W' and ts[i - 1] == 'T' and ts.caps[i - 1] then
@@ -551,15 +535,17 @@ function parser.collect(dic, ts)
 			end
 		end
 	end
+end
+
+local function expand_phrase_tokens(ts)
 	-- W tokens (multi-word phrases like WAэлектронныйNперевод) survive rules but must
 	-- be expanded into their constituent forms (Aэлектронный + Nперевод) before the
 	-- compiler processes them. The gmatch skips the W prefix since 'W' is not followed
 	-- by CP866 bytes, so the tag reverts to the first real tag letter after W.
 	for i = #ts, 1, -1 do
 			if ts[i]:sub(1,1) == 'W' then
-				local was_caps = ts.caps and ts.caps[i]
-				local was_source = ts.source and ts.source[i]
-				local component_caps = ts.component_caps and ts.component_caps[i]
+				local metadata = stream.metadata(ts, i)
+				local component_caps = metadata.component_caps
 			local expanded = {}
 			for word in ts[i]:gmatch("([%a ][0-9]*[\127-\255]+)") do
 				table.insert(expanded, word)
@@ -568,24 +554,29 @@ function parser.collect(dic, ts)
 				-- Remove the W token (and its caps entry), then insert expanded tokens.
 				-- Expanded tokens inherit the W token's all-caps flag so that
 				-- e.g. "AGREEMENT ON" (all-caps W phrase) → each sub-token is uppercase.
-				table.remove(ts, i)
-						if ts.caps then table.remove(ts.caps, i) end
-						if ts.phrases then table.remove(ts.phrases, i) end
-						if ts.source then table.remove(ts.source, i) end
-						if ts.component_caps then table.remove(ts.component_caps, i) end
+				stream.remove(ts, i)
 				for j = #expanded, 1, -1 do
-					table.insert(ts, i, expanded[j])
-							if ts.caps then
-								local expanded_caps = type(component_caps) == 'table' and component_caps[j] or was_caps
-								table.insert(ts.caps, i, expanded_caps)
-							end
-							if ts.phrases then table.insert(ts.phrases, i, true) end
-							if ts.source then table.insert(ts.source, i, was_source) end
-							if ts.component_caps then table.insert(ts.component_caps, i, false) end
+					local expanded_caps = type(component_caps) == 'table' and component_caps[j] or metadata.caps
+					stream.insert(ts, i, expanded[j], {
+						caps = expanded_caps,
+						phrases = true,
+						source = metadata.source,
+						component_caps = false,
+					})
 				end
 			end
 		end
 	end
+end
+
+function parser.collect(dic, ts)
+	en_ru = dic
+	loop(ts)
+	-- These phases intentionally reproduce observable LTPRO output quirks after
+	-- grammatical rules have stabilized, keeping them out of general semantics.
+	apply_copular_it_compatibility(ts)
+	apply_capitalization_compatibility(ts)
+	expand_phrase_tokens(ts)
 	dbg.log(1, "Tokens after rules:")
 	for _, n in ipairs(ts) do
 		if dbg.level >= 1 then

@@ -627,8 +627,8 @@ printers.X = function(t, e, s, i)
   end
 end
 
-function compiler.compile(s)
-  local e = {
+local function new_context()
+  return {
     plural = false,
     gender = 1,
     person = 3,
@@ -638,6 +638,45 @@ function compiler.compile(s)
     word = 1,
     multi_count = 0,  -- counter for multiple-meanings markup {N.alternative}
   }
+end
+
+local function reset_clause_context(e)
+  -- LTPRO punctuation closes transient verb/aspect government but preserves
+  -- subject features until a later constituent replaces them.
+  e.past, e.passive, e.imperative = false, false, false
+  e.perfective, e.infinitive = false, false
+  e.form = case["И"]
+end
+
+local function apply_source_caps(out, caps)
+  if not out or #out == 0 or not caps then return out end
+  local main, rest = out:match("^([^{]*)(.*)")
+  main, rest = main or out, rest or ""
+  if caps == true then return utf8_upper(main) .. rest end
+  return main:gsub("^([\xD0\xD1][\x80-\xBF])", function(c)
+    return utf8_upper(c)
+  end, 1) .. rest
+end
+
+local function append_alternatives(out, token, e)
+  if not out or #out == 0 or out:find('{', 1, true) then return out end
+  local alternatives = leading_alternatives(token)
+  if not alternatives or #alternatives == 0 then return out end
+  e.multi_count = (e.multi_count or 0) + 1
+  return out .. '{' .. e.multi_count .. '.' .. alternatives .. '}'
+end
+
+local function render_token(token, e, stream_tokens, index)
+  local tag = token:sub(1, 1)
+  local ok, result = pcall(printers[tag], token, e, stream_tokens, index)
+  if not ok then
+    dbg.diag("word", "unknown tag:", tag, "in token:", utils.decode(token, false))
+  end
+  return tag, ok, ok and result or utils.decode(token, true), result
+end
+
+function compiler.compile(s)
+  local e = new_context()
   local c = {}
   local quote_open = false
 
@@ -652,19 +691,9 @@ function compiler.compile(s)
     if #w == 1 and w:match"[,%!%.;:]" then
       if #c > 0 then c[#c] = c[#c]..w
       else table.insert(c, w) end
-      if w == ',' or w == ';' then
-        e.past, e.passive, e.imperative = false, false, false
-        e.perfective, e.infinitive = false, false
-        e.form = case["И"]
-      end
+      if w == ',' or w == ';' then reset_clause_context(e) end
     else
-      local tag = w:sub(1,1)
-      local func = printers[tag]
-      local ok, res = pcall(func, w, e, s, i)
-      local out = ok and res or utils.decode(w, true)
-      if not ok then
-        dbg.diag("word", "unknown tag:", tag, "in token:", utils.decode(w, false))
-      end
+      local tag, ok, out, err = render_token(w, e, s, i)
       -- handle leading punctuation in output (e.g. relative pronoun ", которую")
       if out and out:match("^[,%!%.;:]") and #c > 0 then
         c[#c] = c[#c] .. out:sub(1,1)
@@ -675,29 +704,12 @@ function compiler.compile(s)
       -- caps == true  → ALL-CAPS output  (source word was e.g. "AGREEMENT")
       -- caps == "init"→ Initial-cap only (source word was e.g. "Metric" or "Fish")
       -- LTGOLD tracks this via its input word capitalisation flags.
-      if out and #out > 0 and s.caps and s.caps[i] then
-        local main, rest = out:match("^([^{]*)(.*)")
-        main = main or out; rest = rest or ""
-        if s.caps[i] == true then
-          out = utf8_upper(main) .. rest
-        else
-          -- "init": uppercase only the first Cyrillic letter of the output
-          out = main:gsub("^([\xD0\xD1][\x80-\xBF])", function(c)
-            return utf8_upper(c)
-          end, 1) .. rest
-        end
-      end
-      if out and #out > 0 and not out:find('{', 1, true) then
-        local alternatives = leading_alternatives(w)
-        if alternatives and #alternatives > 0 then
-          e.multi_count = (e.multi_count or 0) + 1
-          out = out .. '{' .. e.multi_count .. '.' .. alternatives .. '}'
-        end
-      end
+      out = apply_source_caps(out, s.caps and s.caps[i])
+      out = append_alternatives(out, w, e)
       dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
         i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),
         tostring(e.infinitive), tostring(e.perfective), tostring(e.plural), tostring(e.form)))
-      if not ok then dbg.log(1, "    ERROR: "..tostring(res)) end
+      if not ok then dbg.log(1, "    ERROR: "..tostring(err)) end
       if tag == '-' and out then out = "\1" .. out end
       if tag == '"' and out then
         out = (quote_open and "\3" or "\2") .. out

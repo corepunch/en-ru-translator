@@ -502,6 +502,27 @@ EXAMPLES:
   7. Force overwrite existing entry:
      lua dict.lua add "board" "N" "доска" --force
 
+DOMAIN DICTIONARIES:
+  Create overlay dictionaries for specialized text (adventure games, business).
+  Load after BASE.DIC with --dict flag. Entries override base dictionary.
+
+  Example: data/DUNGEON.DIC
+    # New entries (not in BASE.DIC):
+    orc*Nорк
+    west of*PРк западу от
+
+    # Overrides (domain-specific):
+    field*Nполе              # adventure: "open field" not "abstract domain"
+    boarded*Aзаколоченный    # adventure: "boarded up" not "covered with boards"
+
+  When to override:
+  - BASE.DIC has abstract meaning, domain needs concrete
+  - BASE.DIC has complex tags causing parser issues
+
+  When NOT to override:
+  - BASE.DIC has multiple meanings you want to preserve
+  - Domain meaning is same as base meaning
+
 GRAMMATICAL CODE QUICK REFERENCE:
   N=noun, V=verb, A=adjective, D=adverb, E=past tense
   G=gerund, P=preposition, C=conjunction, I=cardinal numeral

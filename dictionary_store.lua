@@ -59,4 +59,21 @@ function dictionary_store.load(dictionary_path, russian_path, ...)
   return english, russian
 end
 
+-- Load overlay .RUS files to add paradigm data for domain-specific nouns/verbs.
+-- Call after dictionary_store.load() to extend the russian table.
+function dictionary_store.load_overlay_rus(russian, ...)
+  for _, overlay_path in ipairs({...}) do
+    local f = assert(io.open(overlay_path, "r"))
+    for line in f:lines() do
+      local trimmed = line:match("^%s*(.-)%s*$")
+      if trimmed ~= "" and trimmed:sub(1, 1) ~= "#" then
+        local normalized = normalize_line(trimmed)
+        local word, code = normalized:match("^(.-)\x2a(.*)$")
+        if code then russian[encoding.decode(word)] = code end
+      end
+    end
+    f:close()
+  end
+end
+
 return dictionary_store

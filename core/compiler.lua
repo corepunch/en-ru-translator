@@ -33,7 +33,16 @@ local case = {
 
 -- LTGOLD verb dictionary frames select object case and whether an English
 -- preposition has a Russian surface form. Extend this table as frames are decoded.
-local verb_frames = {}
+local verb_frames = {
+  ["поставлять"] = { object_case = case["Д"], preposition = "на", emit = false },
+  ["доставлять"] = { object_case = case["Д"], preposition = "на", emit = false },
+  ["соглашаться"] = { next_infinitive = true },
+  ["соответствовать"] = { object_case = case["Д"] },
+  ["признавать"] = { complementizer = "что" },
+  ["уполномочивать"] = { next_infinitive = true },
+  ["позволять"] = { object_case = case["Д"] },
+  ["делать"] = { causative = "заставлять" },
+}
 
 
 -- local u_endings = {

@@ -56,6 +56,204 @@ Note on comment scope:
 { 0x00, "`make`[MR]Z", "`заставлять`MV" }, -- Example: "make him go" -> causative verb + object pronoun
 ```
 
+## Broken-Sentence Repair Playbook
+
+Use this procedure in order. It deliberately separates lexical data, grammatical rules,
+and Russian morphology so a visible bad word does not lead to a fix in the wrong layer.
+
+1. **Freeze the failure.** Run `lua init.lua "Sentence."` and copy the exact output.
+   Add the intended output to `test/translator_test.lua` before considering the repair done.
+2. **Trace the pipeline.** Run `lua init.lua "Sentence." --debug=2`. Read these sections:
+   `Lookup` shows the packed dictionary entry, `Applying` shows matching rules, `Tokens after
+   rules` shows the tag selected for every word, and `Compiler output` shows paradigm, gender,
+   and case decisions.
+3. **Inspect every suspicious English entry.** Run `lua demo/dict.lua find WORD`. Do not erase
+   valid alternate parts of speech merely because the current sentence needs one sense.
+4. **Inspect the Russian lemma.** Run both `lua rus_tool.lua find LEMMA` and the same command
+   with the corrected spelling. A declinable `N`, `V`, or `A` needs a matching `.RUS` record.
+   For Russian words containing `ё`, use `ё` consistently in both `.DIC` and `.RUS`; otherwise
+   lookup and stem cutting operate on different byte strings.
+5. **Choose the owning layer.** Wrong English meaning or lemma: edit `.DIC`. Correct lemma but
+   wrong gender/paradigm: edit `.RUS`. Wrong tag after parsing: add the smallest rule in T1-T4.
+   Correct tag but wrong generated ending: repair the table-driven paradigm/compiler behavior.
+6. **Add a narrow rule.** Put tag rewrites in the existing table whose neighboring rules solve
+   the same ambiguity. Preserve order, add one comment with the trigger and reason, and avoid
+   English-word literals when a grammatical pattern describes the case. If the rule is not
+   extracted from LTGOLD, label it as a custom fallback and name the missing LTGOLD table or
+   flag semantics that should eventually replace it.
+7. **Edit dictionary data with its tools.** For a packed multi-sense entry, first copy the full
+   value printed by `find`, change only the faulty component, then use `add ... --force`. Add or
+   replace the corresponding `.RUS` entry with `rus_tool.lua`. Run both `find` commands again
+   to verify the stored spelling and binary metadata.
+8. **Verify at three levels.** Re-run the single sentence with `--debug=2`, run the focused test
+   (`lua test/translator_test.lua`), then run `./test/run_all.sh`. The trace must show the intended
+   rule firing, the intended final tag, and the intended `.RUS` lemma/paradigm—not merely a lucky
+   output string.
+
+### Worked example: “The cat sat on the mat.”
+
+This is the exact repair sequence used for this sentence. Follow the phases in order; each
+phase answers a different question and identifies the file that owns the defect.
+
+#### Phase 1 — Reproduce and define the target
+
+Run:
+
+```sh
+lua init.lua "The cat sat on the mat."
+```
+
+Before the repair, the result was:
+
+```text
+Кошка посиденная на ковере{1.матрицаAматовый}.
+```
+
+The target was fixed explicitly as:
+
+```text
+Кошка сидела на ковре.
+```
+
+This immediately identified three observable defects: `sat` was not a finite past verb,
+`ковере` was the wrong inflection, and unrelated meanings leaked into `{...}`.
+
+#### Phase 2 — Trace lookup, rule phases, and compilation
+
+Run:
+
+```sh
+lua init.lua "The cat sat on the mat." --debug=2
+```
+
+The important pre-fix trace was:
+
+```text
+Lookup: cat → Nкошка
+Lookup: sat → Eсидеть\sit
+Lookup: on  → PПнаpРот
+Lookup: mat → ZVспутыватьNковер;матрицаAматовый
+Tokens after rules: T Nкошка Eсидеть\sit PПна T Nковер;матрицаAматовый .
+```
+
+The phase diagnosis was:
+
+- Dictionary lookup correctly found `sat`, but classified its irregular past form as `E`,
+  which is ambiguous between simple past and participle.
+- No rewrite phase resolved this particular `N E P` clause shape to a finite predicate.
+- The compiler's postnominal `E ... P` fallback consequently selected a passive/adjectival
+  reading and changed imperfective `сидеть` to `посидеть`, producing `посиденная`.
+- The generic T2 `Z`-to-`N` rule selected the noun section of `mat`, but retained its following
+  `матрица` and adjective data, which the compiler printed as alternatives.
+- `.RUS` lookup found only `ковер`, masculine paradigm 1. That paradigm appends the locative
+  ending without removing the alternating vowel, producing `ковере`.
+
+#### Phase 3 — Inspect and correct lexical data
+
+The exact inspection commands were:
+
+```sh
+lua demo/dict.lua find mat
+lua rus_tool.lua find ковер
+lua rus_tool.lua find ковёр
+```
+
+The `mat` entry contained legitimate verb, noun, matrix, and adjective senses, so replacing it
+with a noun-only entry would have broken other sentences. Only the rug lemma was corrected:
+
+```text
+before: ZV.спутыватьN.ковер{rug};матрица{matrix}A.матовый
+after:  ZV.спутыватьN.ковёр{rug};матрица{matrix}A.матовый
+```
+
+The packed entry was updated with:
+
+```sh
+lua demo/dict.lua add mat \
+  'ZV.спутыватьN.ковёр{rug};матрица{matrix}A.матовый' --force
+```
+
+Because `ковёр` is declinable, a matching `BASE.RUS` record was required. Masculine paradigm
+30 removes two stem letters and supplies `ра/ру/.../ре`, handling the alternating nominative
+vowel: `ковёр → ковра → ковру → ковре`.
+
+```sh
+lua rus_tool.lua add ковёр N:m:30 --force
+```
+
+The verified metadata is `N`, masculine, paradigm 30, binary code `4E 00 01 1E`.
+
+#### Phase 4 — Select the lexical sense in T2
+
+Sense selection must occur before the generic T2 `T<H%D,>Z → @$N` rule converts `mat` from
+its packed `Z...` entry into an `N...` token. After that conversion, the original English-word
+identity is no longer available to a literal rule.
+
+The following rule was therefore inserted immediately before the generic T2 rule:
+
+```lua
+{ 0x00, "PT`mat`", "..`Nковёр`" },
+```
+
+For `on + the + mat`, `P` and `T` remain unchanged (`.` and `.`), while the third token becomes
+the single literal `Nковёр`. This keeps all dictionary senses available globally but prevents
+`матрицаAматовый` from leaking in this context.
+
+#### Phase 5 — Resolve the predicate in T4
+
+T4 is the final tag-rewrite/ambiguity-cleanup phase, so the finite-past decision belongs there.
+The smallest grammatical shape that describes the failure is subject (`N` or `R`), ambiguous
+past form (`E`), then preposition (`P`):
+
+```lua
+{ 0x00, "[NR]EP", ".1" },
+```
+
+The first replacement `.` preserves the subject. The custom replacement `1` changes the
+matched `Eсидеть\sit` token into `V1сидеть\sit`. `V1` is an internal resolved-simple-past
+marker; it is deliberately separate from the legacy `V` replacement so this repair does not
+silently activate unrelated extracted E-to-V rules.
+
+The parser implements `1` in `replace()` and the compiler's `V` printer removes the marker,
+sets `e.past` while conjugating, then clears it. Subject gender was already set by `Nкошка`, so
+the generated past form is feminine `сидела`.
+
+#### Phase 6 — Correct the verb paradigm data typo
+
+The first generated result was `сидeла`, with a Latin `e`. Inspection of verb paradigm 60
+found the extracted past suffix `дeл`; it was corrected to Cyrillic `дел` in
+`core/paradigms.lua`. This is a paradigm-data correction, not a sentence-specific compiler
+condition, because every verb using that extracted row needs Cyrillic output.
+
+#### Phase 7 — Add and run the regression
+
+The public translator regression in `test/translator_test.lua` is:
+
+```lua
+local cat_output = assert(engine:translate("The cat sat on the mat."))
+assert(cat_output == "Кошка сидела на ковре.", cat_output)
+```
+
+Final verification commands:
+
+```sh
+lua demo/dict.lua find mat
+lua rus_tool.lua find ковёр
+lua init.lua "The cat sat on the mat." --debug=2
+lua test/translator_test.lua
+./test/run_all.sh
+```
+
+The final trace must show these exact milestones:
+
+```text
+T2 Applying: PT`mat`  ..`Nковёр`
+T4 Applying: [NR]EP  .1
+Tokens after rules: T Nкошка V1сидеть\sit PПна T Nковёр .
+N: word=ковёр paradigm=30 gender=1 form=6
+Кошка сидела на ковре.
+```
+
 ---
 
 ## Pattern Syntax

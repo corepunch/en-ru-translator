@@ -61,6 +61,8 @@ table.insert(rules, {
   { 0x00, "aG", "@A" },
   { 0x00, "bG", "BV" },
   { 0x00, "aZN", "@A" },
+  -- Context-specific lexical selection: in "on the mat", choose the rug sense before the following generic Z-to-N rule discards the source-word identity.
+  { 0x00, "PT`mat`", "..`Nковёр`" },
   { 0x00, "T<H%D,>Z", "@$N" },
   { 0x00, "Z[bY{]", "N" },
   { 0x00, "Z[AE]`by`", "N" },
@@ -467,6 +469,8 @@ table.insert(rules, {
   { 0x0F, "Jry", "@@x" },
   { 0x10, "uE", "@V" },
   { 0x13, "[NR]ET", ".V" },
+  -- Custom T4 fallback until LTGOLD constituent flags are decoded: a subject followed by an E-form and a preposition is simple past ("the cat sat on ..."), not a passive participle.
+  { 0x00, "[NR]EP", ".1" },
   { 0x18, "[SR]<dDK>v", "M" },
   { 0x1F, "IA", "A" },
   { 0x29, "As[X,*]", "@ " },

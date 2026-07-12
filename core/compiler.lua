@@ -33,15 +33,8 @@ local case = {
 
 -- LTGOLD verb dictionary frames select object case and whether an English
 -- preposition has a Russian surface form. Extend this table as frames are decoded.
-local verb_frames = {
-  ["поставлять"] = { object_case = case["Д"], preposition = "на", emit = false },
-  ["соглашаться"] = { next_infinitive = true },
-  ["соответствовать"] = { object_case = case["Д"] },
-  ["признавать"] = { complementizer = "что" },
-  ["уполномочивать"] = { next_infinitive = true },
-  ["позволять"] = { object_case = case["Д"] },
-  ["делать"] = { causative = "заставлять" },
-}
+local verb_frames = {}
+
 
 -- local u_endings = {
 --   ["011"] = "ен",    -- I do
@@ -381,6 +374,12 @@ printers.S = function(t, e)
   return utils.decode(t, true)
 end
 printers.V = function(t, e, s, i)
+	-- V1 is the parser's resolved simple-past marker for an E/e dictionary form that has no separately packed V alternative.
+	local resolved_past = t:sub(2, 2) == '1'
+	if resolved_past then
+		t = 'V' .. t:sub(3)
+		e.past = true
+	end
   if e.verb_frame and e.verb_frame.next_infinitive then
     e.infinitive = true
     e.verb_frame = nil
@@ -407,6 +406,7 @@ printers.V = function(t, e, s, i)
     end
   end
   local result = printers.Z(t, e, s, i)
+	if resolved_past then e.past = false end
   e.verb_frame = verb_frames[utils.extract_form(t)]
   if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
     e.form = e.verb_frame.object_case

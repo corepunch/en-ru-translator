@@ -27,6 +27,7 @@ Requires **Lua 5.3+** (uses bitwise operators). Test sentences are hardcoded in
 | `load.lua` | Parses LTGOLD `*.DIC`/`*.RUS` dictionary format (CP866 encoded) |
 | `utils.lua` | CP866↔UTF8 conversion, tokenization, string helpers |
 | `dict.lua` | Dictionary management tool (find/add/list entries) |
+| `rus_tool.lua` | RUS paradigm data tool (find/add/list/list paradigms for .RUS files) |
 | `lisp.lua` | Unused list utility |
 | `data/` | Dictionary and config files (BASE.DIC, BASE.RUS, BUSINESS.DIC, COMPUTER.DIC, etc.) |
 | `test/` | Test data (DEMO.TXT, DEMO_REFERENCE.TXT, etc.) |
@@ -149,6 +150,37 @@ lua dict.lua help <topic>             # help on: overview, format, add, find, li
 translation are concatenated directly after `*` with no separator. Multiple
 meanings use `;`: `word*Nсоглашение;договор`.
 
+## RUS Paradigm Management (rus_tool.lua)
+
+Standalone tool for searching and adding entries in .RUS paradigm files.
+.RUS files provide morphological metadata (gender, paradigm ID, aspect) that
+the compiler uses for proper Russian inflection.
+
+```sh
+lua rus_tool.lua find <word>              # exact search across all .RUS files
+lua rus_tool.lua find <word> --partial    # substring search
+lua rus_tool.lua find <word> --dict FILE  # search specific .RUS file
+lua rus_tool.lua add <word> <spec>        # add entry to BASE.RUS
+lua rus_tool.lua add <word> <spec> --dict FILE  # add to specific .RUS file
+lua rus_tool.lua add <word> <spec> --force      # overwrite if exists
+lua rus_tool.lua list [FILE] [--limit N]  # list .RUS entries
+lua rus_tool.lua paradigms                # paradigm reference tables
+lua rus_tool.lua help                     # full documentation
+lua rus_tool.lua help <topic>             # help on: overview, find, add, list, paradigms
+```
+
+**Add spec shorthand:** `TAG:GENDER:PARADIGM`
+- `N:m:0` — noun, male, paradigm 0 (consonant stem: тролль)
+- `N:f:14` — noun, female, paradigm 14 (-а ending: свеча)
+- `N:n:7` — noun, neutral, paradigm 7 (-о ending: окно)
+- `V:i:3` — verb, imperfective, paradigm 3
+- `V:p:31` — verb, perfective, paradigm 31
+- `A:m:5` — adjective, male, paradigm 5
+
+**Tags:** `N`=noun, `V`=verb, `A`=adjective
+**Genders:** `m`=male, `f`=female, `n`=neutral (nouns/adjectives only)
+**Paradigm:** 0–127, indexes `paradigms.nouns`/`paradigms.verbs`/`paradigms.adjectives`
+
 ## Adding Entries
 
 ### Adding new words to BASE.DIC
@@ -167,6 +199,141 @@ lua demo/dict.lua add "west of" "P" "к западу от"  # multi-word phrase
 west of*PРк западу от         # preposition phrase (P) with genitive case (Р)
 front door*NNWAпередняяNдверь  # compound noun (W-phrase format)
 ```
+
+### Adding nouns and verbs to .RUS files
+
+DIC entries map English words to Russian lemmas with grammatical tags. RUS files
+provide the morphological metadata (gender, paradigm ID, aspect) that the
+compiler uses for proper Russian inflection. Without a matching .RUS entry, the
+compiler cannot decline nouns or conjugate verbs — it falls back to the raw
+lemma string.
+
+**When you need a .RUS entry:**
+- Adding a new noun (tag `N`) — needs gender + declension paradigm
+- Adding a new verb (tag `V`) — needs conjugation paradigm + aspect flag
+- Adding a new adjective (tag `A`) — needs gender + declension paradigm
+
+**When you do NOT need a .RUS entry:**
+- Tags like `D` (adverb), `P` (preposition), `C` (conjunction), `I` (numeral),
+  `R` (pronoun), `#` (proper noun) — these are uninflected or handled by
+  special-case code in the compiler
+
+#### .RUS file format
+
+Each line: `Russian_word*<binary_code>` (CP866 encoded, `*` = 0x2A separator).
+
+The binary code after `*` is a sequence of bytes:
+
+| Byte | Meaning |
+|------|---------|
+| 1 | Tag: `0x4E`=N (noun), `0x56`=V (verb), `0x41`=A (adjective) |
+| 2 | Flags (bit 1 = perfective aspect for verbs) |
+| 3 | Gender (nouns/adjectives): `0`=neutral, `1`=male, `2`=female |
+| 4 | Paradigm ID (0-based, matches `paradigms.nouns`/`paradigms.verbs` index) |
+| 5+ | (verbs only) Imperfective stem — CP866 Russian infinitive of paired aspect |
+
+**Examples from `data/DUNGEON.RUS`:**
+
+```
+тролль = 4E A0 81 81     # tag=N, flags=0xA0, gender=1(male), paradigm=0
+свеча  = 4E C0 82 8E     # tag=N, flags=0xC0, gender=2(female), paradigm=14
+гроб   = 4E 80 80 87     # tag=N, flags=0x80, gender=0(neutral), paradigm=7
+```
+
+#### Noun paradigm lookup
+
+`paradigms.nouns[gender+1][paradigm_id+1]` — each entry is:
+
+```lua
+{cut_length, "nom.gen.dat.acc.ins.loc nom.pl gen.pl dat.pl acc.pl ins.pl loc.pl"}
+```
+
+- `cut_length`: bytes to strip from the stem before appending suffix
+- 11 space-separated suffixes: singular cases 1–6, then plural cases 1–6 (skipping
+  repeated nominative)
+
+**Gender ↔ paradigm mapping (common patterns):**
+
+| Gender | Paradigm 0 | Suffix pattern (sing. nom–loc) |
+|--------|-----------|-------------------------------|
+| Male (1) | consonant stem | `а у = ом е` (e.g. тролль → тролля, троллю, ...) |
+| Female (2) | -а ending | `и е у ей е` (e.g. свеча → свечи, свече, ...) |
+| Neutral (0) | -о ending | `а у о ом е` (e.g. лезвие → лезвия, ...) |
+
+#### Verb paradigm lookup
+
+`paradigms.verbs[paradigm_id+1]` — each entry is:
+
+```lua
+{cut_length, "1sg 2sg 3sg 1pl 2pl 3pl imp past_m past_gerund active_passive past_full past_participle"}
+```
+
+- 13 suffixes: present/future (6 persons), imperative, past (base), gerund,
+  active participle, passive participle, past participle, passive participle (full)
+
+**Binary code byte 2 — aspect flag:**
+- Bit 1 (`byte2 & 2 == 0`): perfective verb
+- Bit 1 (`byte2 & 2 ~= 0`): imperfective verb
+
+The compiler reads this to determine aspect for future-tense conjugation
+(`q` marker in parser output).
+
+#### How to add a noun
+
+**Step 1: Add DIC entry** (English → Russian lemma + tag):
+
+```sh
+lua demo/dict.lua add "orc" "N" "орк"
+# → orc*Nорк in BASE.DIC
+```
+
+**Step 2: Add RUS entry** (Russian lemma → binary paradigm code):
+
+Use `rus_tool.lua` with the shorthand `N:gender:paradigm`:
+
+```sh
+lua rus_tool.lua add "орк" "N:m:0"              # noun, male, paradigm 0
+lua rus_tool.lua add "свечка" "N:f:0"           # noun, female, paradigm 0
+lua rus_tool.lua add "окошко" "N:n:7"           # noun, neutral, paradigm 7
+lua rus_tool.lua add "ларец" "N:m:0" --dict DUNGEON.RUS  # overlay file
+```
+
+**Practical approach:** Find an existing noun with the same gender and ending
+pattern, then use the same paradigm ID:
+
+```sh
+lua rus_tool.lua find свеча          # → paradigm 0, female
+lua rus_tool.lua add "свечка" "N:f:0"  # same paradigm
+```
+
+#### How to add a verb
+
+**Step 1: Add DIC entry** (English → Russian lemma + tag):
+
+```sh
+lua demo/dict.lua add "to fight" "V" "сражаться"
+# → to fight*Vсражаться in BASE.DIC
+```
+
+**Step 2: Add RUS entry** (Russian lemma → binary paradigm code):
+
+Use `rus_tool.lua` with the shorthand `V:aspect:paradigm`:
+
+```sh
+lua rus_tool.lua add "сражаться" "V:i:3"        # imperfective, paradigm 3
+lua rus_tool.lua add "написать" "V:p:3"          # perfective, paradigm 3
+```
+
+**Practical approach:** Find a verb with similar conjugation, then use the
+same paradigm ID:
+
+```sh
+lua rus_tool.lua find писать         # → paradigm 3
+lua rus_tool.lua add "сражаться" "V:i:3"  # same paradigm
+```
+
+For perfective verbs with an imperfective paired stem, the stem bytes must be
+added manually to the .RUS file after the 4-byte header.
 
 ### Domain-specific dictionaries
 

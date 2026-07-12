@@ -235,6 +235,9 @@ local function replace(ts, j, m, t, s)
 	elseif s == '&' then
 		-- coordination marker: look for C-form, else no-op
 		find_and_replace(ts, j, 'C')
+	elseif s == '1' and ts[j] and ts[j]:sub(1, 1):match('[Ee]') then
+		-- Custom fallback action: mark an E/e form as resolved finite past without changing the behavior of LTGOLD's existing E-to-V rules.
+		ts[j] = 'V1' .. ts[j]:sub(2)
 	elseif s == '#' then
 		-- Literal `a` is initially an article; LTGOLD's boundary rule restores the
 		-- original designator spelling (A) from the analyzer's source-token field.

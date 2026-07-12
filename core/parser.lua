@@ -387,7 +387,21 @@ local function match_pattern(ts, m, r, flags)
 					reorder_tokens(ts, positions, r)
 				end
 			else
-				try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
+				-- Guard rules (T7/T8) have no rewrite action but carry constituent-type
+				-- flags. Store the flags on the LAST token of the matched span so the
+				-- compiler can use them for case/agreement decisions.
+				-- LTGOLD encodes PP (0x02), NP (0x06), VP (0x03), etc. in these flags.
+				if flags and flags > 0 and (r == nil or r == "" or r == ".") then
+					local positions = collect_positions(ts, pattern_tokens(m), i)
+					if positions and #positions > 0 then
+						local head_pos = positions[#positions]
+						ts.constituent_flags[head_pos] = flags
+						dbg.log(2, string.format("    T7/T8 flag 0x%02X → token %d (%s)",
+							flags, head_pos, utils.decode(ts[head_pos], true)))
+					end
+				else
+					try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
+				end
 			end
 			dbg.log(3, "    tokens after:",
 			  table.concat(utils.map(ts, function(t)
@@ -574,6 +588,10 @@ end
 
 function parser.collect(dic, ts)
 	en_ru = dic
+	-- Constituent-type flags from T7/T8 guard rules. Indexed by token
+	-- position; stores the flags value so the compiler can use it for
+	-- case/agreement decisions (PP=0x02, NP=0x06, VP=0x03, etc.).
+	ts.constituent_flags = {}
 	loop(ts)
 	-- These phases intentionally reproduce observable LTPRO output quirks after
 	-- grammatical rules have stabilized, keeping them out of general semantics.

@@ -266,8 +266,93 @@ function utils.tokenize(s, en_ru)
         })
       end
     elseif not prev[word] then
-      dbg.log(2, "  Phrase break:", word, "→ backtracking to last")
-      i, prev = last, nil
+      -- LTGOLD back-reference multi-word matching: irregular past forms store
+      -- a \word escape. Follow it to the base form's multi-word children.
+      local backref = prev.__lex and prev.__lex:match('\\(%a+)')
+      if backref and en_ru[backref] and en_ru[backref][word] and
+         en_ru[backref][word].__lex then
+        local base_lex = en_ru[backref][word].__lex
+        dbg.log(2, "  Phrase via backref:", word, "→ base:", backref, "→",
+          utils.decode(base_lex))
+        table.insert(phrase_component_caps, is_caps)
+        -- Preserve the first word's tag (e.g. h→E0 for past tense) while
+        -- using the base multi-word entry's verb text.
+        if base_lex:sub(1,1) == 'W' then
+          -- W-token with packed sub-forms: split into verb + preposition tokens.
+          -- The verb keeps the first word's tag; the preposition gets its own.
+          local prev_tag = tbl[#tbl]:match('^(%a%d*)') or 'V'
+          -- Find the V form within the W-token
+          local vform = nil
+          for j = 2, #base_lex do
+            if base_lex:byte(j) == 0x56 then  -- 'V'
+              vform = base_lex:sub(j + 1)
+              -- Stop at next ASCII tag letter
+              vform = vform:match('^([^\65-\90]*)')  -- non-ASCII chars
+              break
+            end
+          end
+          -- Find the P form within the W-token
+          local pform = nil
+          for j = 2, #base_lex do
+            if base_lex:byte(j) == 0x50 then  -- 'P'
+              pform = base_lex:sub(j)  -- keep the P tag for case info
+              break
+            end
+          end
+          if vform then
+            tbl[#tbl] = prev_tag .. vform
+            stream.set_metadata(tbl, #tbl, {
+              caps = phrase_all_caps,
+              phrases = true,
+              source = tbl.source[#tbl] or word_orig,
+              component_caps = { table.unpack(phrase_component_caps) },
+            })
+          end
+          if pform then
+            stream.insert(tbl, #tbl + 1, pform, {
+              caps = false, phrases = true,
+              source = word_orig,
+              component_caps = false,
+            })
+          end
+        else
+          -- Simple entry (not W-token): use base Russian text but keep original tag.
+          -- Extract raw CP866 bytes (not decoded UTF-8) for the token stream.
+          local prev_tag = tbl[#tbl]:match('^(%a%d*)') or base_lex:sub(1,1)
+          -- Scan past the leading tag and any digits to find the Russian text start.
+          local pos = 2  -- skip first tag byte
+          while pos <= #base_lex and base_lex:byte(pos) >= 48 and base_lex:byte(pos) <= 57 do
+            pos = pos + 1  -- skip digits
+          end
+          local russian = base_lex:sub(pos)  -- raw CP866 bytes
+          -- Stop at the next ASCII tag letter or backslash
+          local stop = #russian + 1
+          for k = 1, #russian do
+            local b = russian:byte(k)
+            if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or b == 0x5C then
+              stop = k; break
+            end
+          end
+          tbl[#tbl] = prev_tag .. russian:sub(1, stop - 1)
+          stream.set_metadata(tbl, #tbl, {
+            caps = phrase_all_caps,
+            phrases = true,
+            source = tbl.source[#tbl] or word_orig,
+            component_caps = { table.unpack(phrase_component_caps) },
+          })
+        end
+        last = i
+        prev = en_ru[backref][word]
+        if punct ~= "" then
+          stream.append(tbl, punct, {
+            caps = false, phrases = false, source = punct, component_caps = false,
+          })
+          prev = nil
+        end
+      else
+        dbg.log(2, "  Phrase break:", word, "→ backtracking to last")
+        i, prev = last, nil
+      end
     elseif prev[word].__lex then
       dbg.log(2, "  Phrase complete:", word, "→",
         utils.decode(prev[word].__lex))

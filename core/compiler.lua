@@ -1025,8 +1025,28 @@ printers.b = function(t, e)
   e.infinitive, e.infinitive_particle, e.perfective = true, true, false
   return ""
 end
--- W (multi-word phrase) — output decoded
-printers.W = function(t) return utils.decode(t, true) end
+-- W (multi-word phrase) — output decoded. For packed W-tokens with sub-forms
+-- (V + P from back-reference matches like "came from" → WVисходитьPРиз),
+-- expand each sub-constituent as a separate output word.
+printers.W = function(t, e, s, i)
+  local vform = find_form(t, 'V')
+  local pform = find_form(t, 'P')
+  local nform = find_form(t, 'N')
+  if vform or pform or nform then
+    local parts = {}
+    if vform then parts[#parts+1] = utils.decode(vform, true) end
+    if pform then
+      local ptext = utils.decode(pform, true)
+      if #parts > 0 then parts[#parts+1] = ptext else parts[#parts+1] = ptext end
+    end
+    if nform then
+      local ntext = utils.decode(nform, true)
+      if #parts > 0 then parts[#parts+1] = ntext else parts[#parts+1] = ntext end
+    end
+    return table.concat(parts, " ")
+  end
+  return utils.decode(t, true)
+end
 -- # (proper noun / untranslatable): output raw string, reformat digit-only sequences
 -- back to comma-formatted numbers (e.g. 1000000 → 1,000,000) since tokenize strips commas.
 printers["#"] = function(t, e)

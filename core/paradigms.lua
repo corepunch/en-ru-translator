@@ -505,11 +505,12 @@ local function cut(word, ending)
   return word:sub(1, #word-ending)
 end
 
-local function word_at(str, index)
+local function word_at(str, index, preserve_zero)
   local words = {}
   for word in str:gmatch("([^\x20]+)") do table.insert(words, word) end
   local w = words[index]
   -- '=' is LTGOLD's zero-suffix placeholder (e.g. paradigm 86 past: "возник" + "" = "возник")
+  if preserve_zero and w == '=' then return '=' end
   return (w == '=' or w == nil) and "" or w
 end
 
@@ -536,13 +537,13 @@ function paradigms.noun(base, table_id, e)
     -- Position 6 = nominative plural, 7 = genitive plural, … 11 = prepositional plural.
     -- LTGOLD stores these directly in the same paradigm entry; we index them here.
     local pl_idx = (e.form == 1) and 6 or (e.form + 5)
-    local suffix = word_at(str, pl_idx)
+    local suffix = word_at(str, pl_idx, true)
     if suffix == '' then return utils.decode(base, true) end
     -- '=' means "bare stem" (no suffix appended) — e.g. gen.pl "сторон" from "сторона"
     if suffix == '=' then return utils.decode(ext:sub(1, #ext-len), true) end
     return utils.decode(ext:sub(1, #ext-len), true) .. suffix
   else
-    local suffix = word_at(str, e.form-1)
+    local suffix = word_at(str, e.form-1, true)
     if e.form == 1 or suffix == '=' then return utils.decode(base, true) end
     return utils.decode(ext:sub(1, #ext-len), true)..suffix
   end

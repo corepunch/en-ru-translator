@@ -177,7 +177,9 @@ function utils.tokenize(s, en_ru)
             -- Z13 marks English -s ambiguity; an N lemma resolves to plural n.
             local tag = family == "Z" and source == "N" and "n" or family
             local translation = derived_translation(family, lex)
-            if translation then return tag .. translation end
+            -- LTPRO keeps the analyzer-selected primary tag at +0x0c and the
+            -- dictionary lemma's original class at +0x66.
+            if translation then return tag .. translation, source end
           end
         end
       end
@@ -239,12 +241,14 @@ function utils.tokenize(s, en_ru)
       -- makes it an explicit document designator (EXHIBIT A.).
       local is_designator = is_all_caps and #word == 1 and word:match("%a") and
         word ~= "i" and (word ~= "a" or punct ~= "")
-      local derived = (not is_designator) and derived_lexeme(word)
+      local derived, derived_tag
+      if not is_designator then derived, derived_tag = derived_lexeme(word) end
       local lex = en_ru[word] and en_ru[word].__lex
       if (not is_designator) and (lex or derived) then
         dbg.log(2, "  Lookup:", word, "→", utils.decode(lex or derived))
         stream.append(tbl, lex or derived, {
           caps = is_caps, phrases = false, source = word_orig, component_caps = false,
+          derived_tag = derived_tag,
         })
       else
         dbg.log(2, "  Lookup:", word, "→ (not found)")

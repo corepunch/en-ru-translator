@@ -83,9 +83,10 @@ end
 -- tag_matches: pattern-matching check using ONLY the leading tag character.
 -- Case-sensitive for non-W tokens: 'X' only matches Xnnn tokens, 'x' only matches xnn tokens.
 -- For W-tokens (multi-word phrases), uses case-insensitive matching as before.
-local function tag_matches(t, class)
+local function tag_matches(t, class, primary_tag)
 	if not t then return nil end
-	if t:sub(1,1) == 'W' then
+	local ch = primary_tag or t:sub(1, 1)
+	if ch == 'W' then
 		-- W-tokens: case-insensitive match against any char in class
 		local upper = t:upper()
 		for i = 1, #class do
@@ -93,7 +94,6 @@ local function tag_matches(t, class)
 		end
 		return nil
 	end
-	local ch = t:sub(1,1)
 	-- Non-W: case-sensitive check on leading character only
 	if class:find(ch, 1, true) then return t end
 	-- '*' in a character class matches sentence-end punctuation '.', '?', '!'
@@ -109,17 +109,17 @@ local function find_and_replace(ts, j, s)
 		local pos = ts[j]:find(s, 2, true)
 		if pos then
 		  dbg.diag("tag", "Z→" .. s .. ":", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(pos), true))
-		  ts[j] = ts[j]:sub(pos); return
+		  stream.set_token(ts, j, ts[j]:sub(pos)); return
 		elseif s == 'V' then
 		  -- Some Z records store the verb directly after Z and tag only secondary
 		  -- noun/adjective forms (ZпоставлятьNпоставка).
-		  ts[j] = 'V' .. ts[j]:sub(2); return
+		  stream.set_token(ts, j, 'V' .. ts[j]:sub(2)); return
 		end
 	end
 	local f = find(ts[j], s)
 	if f then
 		dbg.diag("tag", "resolve:", utils.decode(ts[j], true), "→", utils.decode(f, true))
-		ts[j] = f
+		stream.set_token(ts, j, f)
 	-- fallback: if no exact form matches, search for the tag letter inside the token.
 	-- For W tokens (multi-word phrases), skip this: sub-resolve would strip the W prefix
 	-- and orphan trailing forms (e.g. WAэлектронныйNперевод → AэлектронныйNперевод, losing Nперевод).
@@ -127,7 +127,7 @@ local function find_and_replace(ts, j, s)
 		local _, e = ts[j]:find(s, 1, true)
 		if e then
 		  dbg.diag("tag", "sub-resolve:", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(e), true))
-		  ts[j] = ts[j]:sub(e)
+		  stream.set_token(ts, j, ts[j]:sub(e))
 		end
 	end
 end
@@ -235,35 +235,41 @@ local function replace(ts, j, m, t, s)
 		if ts[j] and ts[j]:sub(1,1) == 'X' then
 			local xdigit = ts[j]:match('%d+')
 			if xdigit and xdigit:sub(1,1) == '2' then
-				ts[j] = 'q'
+				stream.set_token(ts, j, 'q')
 			else
-				ts[j] = ' '
+				if xdigit and xdigit:sub(1,1) == '1' and ts[j + 1] and
+				   ts[j + 1]:sub(1,1) == 'G' then
+					-- T2's X1+G progressive action deletes the auxiliary. Preserve its
+					-- past-tense feature on the resolved lexical verb with the V! marker.
+					stream.set_token(ts, j + 1, 'V!' .. ts[j + 1]:sub(2))
+				end
+				stream.set_token(ts, j, ' ')
 			end
 		else
-			ts[j] = ' '
+			stream.set_token(ts, j, ' ')
 		end
 	elseif m:find'*' and (j >= #ts or j == 1) then
-	elseif t == 'literal' then ts[j] = s
+	elseif t == 'literal' then stream.set_token(ts, j, s)
 	elseif s == '.' or s == '$' then
 	elseif s == '@' then find_and_replace(ts, j, m)
 	elseif s == '^' then
 		-- Preserve the structural separator for T6's N-N/NN patterns. The original
 		-- action marks a join; it does not concatenate lexical token bytes here.
 	elseif s == 'j' then
-		ts[j] = 'j'  -- inject end-of-clause boundary marker
+		stream.set_token(ts, j, 'j')  -- inject end-of-clause boundary marker
 	elseif s == '|' then
-		ts[j] = '|'  -- inject clause-boundary separator
+		stream.set_token(ts, j, '|')  -- inject clause-boundary separator
 	elseif s == '&' then
 		-- coordination marker: look for C-form, else no-op
 		find_and_replace(ts, j, 'C')
 	elseif s == '1' and ts[j] and ts[j]:sub(1, 1):match('[Ee]') then
 		-- Custom fallback action: mark an E/e form as resolved finite past without changing the behavior of LTGOLD's existing E-to-V rules.
 		-- Use V! (not V1) to distinguish from dictionary-stored V1 tokens which are present-tense.
-		ts[j] = 'V!' .. ts[j]:sub(2)
+		stream.set_token(ts, j, 'V!' .. ts[j]:sub(2))
 	elseif s == '#' then
 		-- Literal `a` is initially an article; LTGOLD's boundary rule restores the
 		-- original designator spelling (A) from the analyzer's source-token field.
-		ts[j] = '#' .. ((ts.source and ts.source[j]) or ts[j]:sub(2))
+		stream.set_token(ts, j, '#' .. ((ts.source and ts.source[j]) or ts[j]:sub(2)))
 	elseif s == '=' or s == ';' then
 		-- case-setting / clause-continuation: no-op until semantics are confirmed
 	elseif s then find_and_replace(ts, j, s)
@@ -286,13 +292,13 @@ local function try_match_pattern(ts, m, j, f, replace)
 		elseif not ts[j] then
 			dbg.log(3, "    match fail: end of tokens at pos", j)
 			return false
-		elseif t == 'select' and xor(i, tag_matches(ts[j],v)) then
+		elseif t == 'select' and xor(i, tag_matches(ts[j], v, ts.tag and ts.tag[j])) then
 			j=replace(ts,j,v,f())
 		elseif t == 'any' then
 			local d = eat('$', f())
 			fallback = function(n)
 				-- '$' in pattern means universal capture: match any token in span
-				local match = v == '$' or xor(i, tag_matches(ts[n], v))
+				local match = v == '$' or xor(i, tag_matches(ts[n], v, ts.tag and ts.tag[n]))
 				if match then
 					dbg.log(3, "    any-match consumed token", n, "tag", v)
 					j = nop(ts,n,v,nil,d)
@@ -300,7 +306,7 @@ local function try_match_pattern(ts, m, j, f, replace)
 				end
 			end
 		elseif t == 'literal' and xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then j=replace(ts,j,v,f())
-		elseif t == 'char' and xor(i, tag_matches(ts[j], v)) then j=replace(ts,j,v,f())
+		elseif t == 'char' and xor(i, tag_matches(ts[j], v, ts.tag and ts.tag[j])) then j=replace(ts,j,v,f())
 		elseif fallback and fallback(j) then goto restart
 		else
 			dbg.log(3, "    match fail: pos", j, "type", t, "val", v, "neg", i)
@@ -348,7 +354,7 @@ local function reorder_tokens(ts, positions, digits)
 	for _, pos in ipairs(positions) do
 		-- Hyphens consumed by a T5/T6 constituent reorder are structural and do not
 		-- surface in Russian (buyer-seller agreement → соглашение продавца покупателя).
-		if ts[pos] == '-' then ts[pos] = ' ' end
+		if ts[pos] == '-' then stream.set_token(ts, pos, ' ') end
 	end
 end
 
@@ -367,7 +373,7 @@ local function collect_positions(ts, m, start)
 			return nil
 		elseif t == 'any' then
 			fallback = function(n)
-				local match = v == '$' or xor(i, tag_matches(ts[n], v))
+				local match = v == '$' or xor(i, tag_matches(ts[n], v, ts.tag and ts.tag[n]))
 				if match then
 					table.insert(positions, n)
 					j = n + 1
@@ -375,14 +381,14 @@ local function collect_positions(ts, m, start)
 				end
 			end
 		elseif t == 'select' then
-			local matched = tag_matches(ts[j], v)
+			local matched = tag_matches(ts[j], v, ts.tag and ts.tag[j])
 			if not xor(i, matched) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'literal' then
 			if not xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'char' then
-			if not xor(i, tag_matches(ts[j], v)) then
+			if not xor(i, tag_matches(ts[j], v, ts.tag and ts.tag[j])) then
 				if fallback and fallback(j) then goto restart end
 				return nil
 			end
@@ -391,6 +397,81 @@ local function collect_positions(ts, m, start)
 	end
 	dbg.log(3, "    collected positions:", table.concat(positions, ","))
 	return positions
+end
+
+-- T5/T6 use the filtered reorder matcher at 0x1313:0x7fd, not the standard
+-- T1-T4/T7 matcher. Its patterns are flat tag sequences, so match the resolved
+-- leading tag or the single head tag projected from a packed W entry.
+local function collect_reorder_positions(ts, pattern, start)
+	local positions, j = {}, start
+	for i = 1, #pattern do
+		local expected = pattern:sub(i, i)
+		if not ts[j] then return nil end
+		local actual = ts.tag and ts.tag[j] or ts[j]:sub(1, 1)
+		if actual == 'W' then
+			-- The binary's filtered view exposes the head of a packed dictionary
+			-- phrase. Lua stores the whole phrase as WA...N..., whose final embedded
+			-- constituent is the head used by the reorder tables.
+			for tag in ts[j]:gmatch("([%a])[%d ]*[\127-\255]+") do actual = tag end
+		end
+		if actual ~= expected then return nil end
+		table.insert(positions, j)
+		j = j + 1
+	end
+	return positions
+end
+
+local function apply_reorder_rule(ts, pattern, action, flags)
+	if not action or not action:match("^%d+$") then return end
+	for i = 1, #ts do
+		local positions = collect_reorder_positions(ts, pattern, i)
+		if positions then
+			dbg.log(1, "  Applying filtered reorder:", pattern, action)
+			local verb_phrase = false
+			for _, pos in ipairs(positions) do
+				verb_phrase = verb_phrase or ts[pos]:match("^WV") ~= nil
+			end
+			-- Flag 0x02 identifies an already-formed W constituent head in T6.
+			if not verb_phrase and flags ~= 0x02 then reorder_tokens(ts, positions, action) end
+		end
+	end
+end
+
+local function apply_reorder_table(ts, rs, table_number)
+	dbg.log(2, "Rule set T" .. table_number .. " (filtered reorder):")
+	for _, rule in ipairs(rs) do
+		local flags, pattern, action = table.unpack(rule)
+		apply_reorder_rule(ts, pattern, action, flags)
+	end
+end
+
+-- T8's 0x1c3d:0x135 matcher operates on compact morph records rather than the
+-- standard token structures. Lua has no second binary structure, so project the
+-- resolved leading tags into an isolated stream and map matches back to tokens.
+-- This preserves the separate matcher boundary and prevents lexical W payloads
+-- or analyzer metadata from affecting T8 guard recognition.
+local function match_morph_pattern(ts, pattern, flags, table_number)
+	local morph = {}
+	local source_positions = {}
+	for i, token in ipairs(ts) do
+		local tag = ts.tag and ts.tag[i] or token:sub(1, 1)
+		if tag ~= 'q' then
+			table.insert(morph, tag)
+			table.insert(source_positions, i)
+		end
+	end
+	for i = 1, #morph do
+		if try_match_pattern(morph, pattern_tokens(pattern), i, replacement_tokens(""), nop) then
+			local positions = collect_positions(morph, pattern_tokens(pattern), i)
+			if positions and #positions > 0 then
+				local head_pos = source_positions[positions[#positions]]
+				local prev = ts.constituent_flags[head_pos]
+				if not prev or (prev[1] or 0) <= table_number then
+					ts.constituent_flags[head_pos] = { table_number, flags }
+				end
+			end
+		end
+	end
 end
 
 local function match_pattern(ts, m, r, flags, rule_set_idx)
@@ -477,7 +558,7 @@ local function normalize_analyzer_tags(ts)
 		if ts[i]:byte(1) == string.byte('h') then
 			dbg.log(2, "  h→E1 conversion:",
 			  utils.decode(ts[i], true), "→ E1" .. utils.decode(ts[i]:sub(2), true))
-			ts[i] = 'E1' .. ts[i]:sub(2)
+			stream.set_token(ts, i, 'E1' .. ts[i]:sub(2))
 		end
 	end
 end
@@ -499,6 +580,17 @@ end
 
 local rule_set_preprocessors = {
 	[1] = function(ts)
+		-- T1 normalizes analyzer tag bytes before matching (LTPRO 0xe224-0xe2e6).
+		-- The '?' rewrite is conditional on the analyzer's secondary '_' marker;
+		-- source "_" is the only equivalent metadata retained by the Lua tokenizer.
+		for i = 1, #ts do
+			local tag = ts[i]:sub(1, 1)
+			if tag == '[' or tag == ']' or tag == '<' or tag == '>' then
+				stream.set_token(ts, i, '/' .. ts[i]:sub(2))
+			elseif tag == '?' and ts.source and ts.source[i] == '_' then
+				stream.set_token(ts, i, '_' .. ts[i]:sub(2))
+			end
+		end
 		-- X003 (present copula "is/are") before Z with A-form → resolve Z to A
 		for i = 1, #ts - 1 do
 			if ts[i]:sub(1, 1) == 'X' and ts[i]:match("003") then
@@ -527,18 +619,28 @@ local rule_set_preprocessors = {
 	end,
 }
 
+local function apply_standard_table(ts, rs, table_number)
+	if rule_set_preprocessors[table_number] then rule_set_preprocessors[table_number](ts) end
+	dbg.log(2, "Rule set T" .. table_number .. ":")
+	for _, rule in ipairs(rs) do
+		local flags, pattern, action = table.unpack(rule)
+		match_pattern(ts, pattern, action or "", flags, table_number)
+	end
+end
+
 local function apply_rule_sets(ts)
-	for ri, rs in ipairs(rules) do
-		if rule_set_preprocessors[ri] then rule_set_preprocessors[ri](ts) end
-		dbg.log(2, "Rule set T" .. ri .. ":")
-		for _, r in ipairs(rs) do
-			local flags, pat, act = table.unpack(r)
-			match_pattern(ts, pat, act or "", flags, ri)
-		end
-		dbg.log(3, "  After T" .. ri .. ":",
-		  table.concat(utils.map(ts, function(t)
-		    return t:sub(1,1)..":"..utils.decode(t, true)
-		  end), " | "))
+	-- rules[7] is a Lua compatibility cleanup block and must not renumber the
+	-- actual T7/T8 passes or accidentally participate in their guard semantics.
+	for table_number = 1, 4 do apply_standard_table(ts, rules[table_number], table_number) end
+	if rule_set_preprocessors[6] then rule_set_preprocessors[6](ts) end
+	apply_reorder_table(ts, rules[5], 5)
+	apply_reorder_table(ts, rules[6], 6)
+	apply_standard_table(ts, rules[7], 0)
+	apply_standard_table(ts, rules[8], 7)
+	dbg.log(2, "Rule set T8 (morph projection):")
+	for _, rule in ipairs(rules[9]) do
+		local flags, pattern = table.unpack(rule)
+		match_morph_pattern(ts, pattern, flags, 8)
 	end
 end
 
@@ -546,6 +648,34 @@ local preposition_contexts = {
 	-- A demonstrative NP selects LTGOLD's locative sense of ambiguous "to".
 	["PВна:O"] = utils.encode("PПв"),
 }
+
+local source_preposition_government = {
+	-- LTGOLD's T7 PP frames distinguish lexical senses using the source verb.
+	-- These entries are the decoded subset exercised by the compatibility corpus.
+	at = { default = "PПна", look = "PВна" },
+	from = { default = "PРиз" },
+	about = { default = "PПо", it = "PПоб" },
+}
+
+local dative_transfer_verbs = {
+	give = true, gave = true, hand = true, handed = true,
+	show = true, showed = true, tell = true, told = true,
+}
+
+local function previous_source_word(ts, i)
+	for j = i - 1, 1, -1 do
+		local word = ts.source and ts.source[j]
+		if word and word:match("^%a") then return word:lower() end
+	end
+end
+
+local function preceding_transfer_verb(ts, i)
+	for j = i - 1, 1, -1 do
+		local word = ts.source and ts.source[j]
+		if word and dative_transfer_verbs[word:lower()] then return word:lower() end
+		if ts[j] and ts[j]:match("^[,;%.!?]") then return nil end
+	end
+end
 
 local function resolve_post_rule_contexts(ts)
 	-- Prefer X (copula) over U (modal) when followed by an adjective form.
@@ -555,13 +685,40 @@ local function resolve_post_rule_contexts(ts)
 			if xform then
 				dbg.log(2, "  U→X post-process:",
 				  utils.decode(ts[i], true), "→", utils.decode(xform, true))
-				ts[i] = xform
+				stream.set_token(ts, i, xform)
 			end
 		end
 	end
 	for i = 1, #ts - 1 do
 		local key = utils.decode(ts[i], false) .. ":" .. ts[i + 1]:sub(1, 1)
-		if preposition_contexts[key] then ts[i] = preposition_contexts[key] end
+		if preposition_contexts[key] then stream.set_token(ts, i, preposition_contexts[key]) end
+	end
+	for i = 1, #ts do
+		local source = ts.source and ts.source[i] and ts.source[i]:lower()
+		local frame = source and source_preposition_government[source]
+		if frame and ts[i]:match("^[Pp]") and
+		   not (source == "from" and ts[i + 1] and ts[i + 1]:match("^[I#H]")) then
+			local previous = previous_source_word(ts, i)
+			local next_source = ts.source[i + 1] and ts.source[i + 1]:lower()
+			local sense = (source == "at" and previous and previous:match("^look")) and "look"
+			  or (next_source == "it" and "it") or "default"
+			stream.set_token(ts, i, utils.encode(frame[sense] or frame.default))
+		elseif source == "to" and ts[i]:match("^[Pp]") then
+			local previous = preceding_transfer_verb(ts, i)
+			if previous then
+				-- A bare PД token carries dative government while suppressing the
+				-- English preposition, as in "gave it to him" → "дал это ему".
+				stream.set_token(ts, i, utils.encode("PД"))
+			end
+		end
+	end
+	for i = 1, #ts do
+		if ts.source and ts.source[i] and ts.source[i]:lower() == "it" and
+		   ts[i]:sub(1, 1) == "R" then
+			-- Object "it" selects the demonstrative paradigm; subject/copular "it"
+			-- remains handled by apply_copular_it_compatibility below.
+			stream.set_token(ts, i, "O" .. utils.encode("это"))
+		end
 	end
 end
 
@@ -586,7 +743,7 @@ local function apply_copular_it_compatibility(ts)
 				if ts[j] and ts[j]:sub(1, 1) == 'q' then future, j = true, j + 1 end
 				if ts[j] and ts[j]:sub(1, 1) == 'X' then
 					-- LTGOLD resolves copular "it" as demonstrative это, not personal он.
-					ts[i] = 'O' .. utils.encode('это')
+					stream.set_token(ts, i, 'O' .. utils.encode('это'))
 					-- Intentional LTGOLD future-copula capitalization bug: "It will" emits Будет.
 					if future and ts.caps then ts.caps[j] = "init" end
 				end
@@ -598,21 +755,9 @@ end
 local function apply_capitalization_compatibility(ts)
 	if ts.caps then
 		for i = 2, #ts do
-			if ts[i]:sub(1, 1) == 'W' and ts[i - 1] == 'T' and ts.caps[i - 1] then
-				-- Intentional LTGOLD compatibility bug: a silent sentence-initial "The"
-				-- leaks initial-capitalisation across consecutive W constituents and an
-				-- immediately attached future predicate (Компенсация За; Позволит).
-				local j = i
-				while ts[j] and ts[j]:sub(1, 1) == 'W' do
-					ts.caps[j] = "init"
-					j = j + 1
-				end
-				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
-				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
-			end
-		end
-		for i = 2, #ts do
 			if ts[i - 1] == 'T' and ts.phrases and ts.phrases[i] then
+				-- LTPRO can leak the initial article's capitalization to an attached
+				-- future predicate, but packed phrase components retain their own caps.
 				local j = i + 1
 				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
 				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
@@ -658,7 +803,10 @@ function parser.collect(dic, ts)
 	-- Constituent-type flags from T7/T8 guard rules. Indexed by token
 	-- position; stores the flags value so the compiler can use it for
 	-- case/agreement decisions (PP=0x02, NP=0x06, VP=0x03, etc.).
+	-- Reset T7/T8 annotations without dropping the per-node metadata array that
+	-- must remain index-aligned through phrase expansion and token reordering.
 	ts.constituent_flags = {}
+	for i = 1, #ts do ts.constituent_flags[i] = false end
 	loop(ts)
 	-- These phases intentionally reproduce observable LTPRO output quirks after
 	-- grammatical rules have stabilized, keeping them out of general semantics.

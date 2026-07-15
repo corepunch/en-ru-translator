@@ -81,10 +81,31 @@ end
 local function leading_alternatives(token)
   local leading, i = token:byte(1), 2
   while i <= #token and token:byte(i) >= 48 and token:byte(i) <= 57 do i = i + 1 end
-  if token:byte(i) == leading then i = i + 1 end
+  -- Packed analyzer records may prefix the first surface with several tags
+  -- (EVподписывать, NNписьмо); skip that tag run before scanning its text.
+  while i <= #token and ((token:byte(i) >= 65 and token:byte(i) <= 90) or
+    (token:byte(i) >= 97 and token:byte(i) <= 122)) do i = i + 1 end
   while i <= #token do
     local b = token:byte(i)
-    if b == 0x3B then return utils.decode(token:sub(i + 1), false) end
+    if b == 0x3B then
+      local tail = token:sub(i + 1)
+      local inf_prefix = utils.encode("инф)")
+      if tail:sub(1, #inf_prefix) == inf_prefix then tail = tail:sub(#inf_prefix + 1) end
+      local secondary_inf = tail:find(";" .. inf_prefix, 1, true)
+      if secondary_inf then tail = tail:sub(1, secondary_inf - 1) end
+      local stop = #tail + 1
+      for j = 1, #tail do
+        local c = tail:byte(j)
+        if c == 0x5C or (((c >= 65 and c <= 90) or (c >= 97 and c <= 122)) and
+           tail:byte(j + 1) and tail:byte(j + 1) >= 0x7F) then
+          stop = (j > 1 and tail:byte(j - 1) == 0x3B) and (j - 1) or j
+          break
+        end
+      end
+      -- Alternative text ends before the next packed grammatical form or lemma
+      -- back-reference; semicolon-separated alternatives remain intact.
+      return utils.decode(tail:sub(1, stop - 1), false)
+    end
     if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then return nil end
     i = i + 1
   end
@@ -139,6 +160,17 @@ end
 
 local printers = {
   A = function(a, e, s, i)
+    if e.numeral then
+      -- T7 numeral-NP constituent metadata supplies a separate agreement state
+      -- for modifiers; it must not leak into the following predicate.
+      e.form = e.numeral.adjective_form
+      e.plural = e.numeral.adjective_plural
+      local n = find(s, i, 'Nn')
+      if n then e.gender = get_gender(n) end
+      local adj_id, adj_base, adj_refl = adj(utils.extract(a))
+      local result = paradigms.adjective(adj_base or a, adj_id, e)
+      return adj_refl and (result .. "ся") or result
+    end
     if s and s.phrases and s.phrases[i] then
       local has_phrase_noun = false
       local j = i + 1
@@ -199,6 +231,8 @@ local printers = {
     e.person = tonumber(b) or 3
     if g then e.gender = tonumber(g) end  -- 1=masc, 2=fem
     local result = utils.decode(t, true)
+    -- A new overt subject closes a modal's coordinated-verb scope.
+    e.modal_scope = nil
     if e.verb_frame and e.verb_frame.complementizer then
       result = ", " .. e.verb_frame.complementizer .. " " .. result
       e.verb_frame = nil
@@ -206,10 +240,14 @@ local printers = {
     return result
   end,
   N = function(t, e, s, i)
+    if e.modal_scope and e.modal_scope.consumed then e.modal_scope = nil end
     -- Uppercase N = singular noun. Reset the plural flag to prevent bleed from
     -- previous n (plural) tokens. LTGOLD tracks plurality per-constituent via
     -- T7/T8 rule flag constituent-type indices; this is a simpler approximation.
-    if t:sub(1,1) == 'N' then e.plural = false end
+    if e.numeral then
+      e.form = e.numeral.noun_form
+      e.plural = e.numeral.noun_plural
+    elseif t:sub(1,1) == 'N' then e.plural = false end
     -- Clear copula short-form context: a noun closes the X003+adj construction.
     e.infinitive = false
     local d = utils.decode(t, true)
@@ -219,7 +257,9 @@ local printers = {
       return d
     end
     e.gender = get_gender(t)
-    e.plural = e.plural and (b:byte(3)&0x4) == 0
+    if not (e.numeral and e.numeral.noun_plural) then
+      e.plural = e.plural and (b:byte(3)&0x4) == 0
+    end
     -- LTGOLD encodes genitive-modifier propagation in T2/T8 rule flags (constituent-type
     -- index bits). Without the flag mechanism, we approximate: N+N → second N is genitive.
     if i and i > 1 and s and s[i-1] and s[i-1]:sub(1,1) == 'N' then
@@ -233,12 +273,9 @@ local printers = {
     -- Multiple meanings: when the token contains a semicolon-separated alternative
     -- (e.g. NNобразец;выборка), append {N.alternative} just as LTGOLD does.
     -- LTGOLD tracks a per-sentence counter in its output formatter.
-    local semi = t:find(';', 1, true)
-    if semi then
+    local alt = leading_alternatives(t)
+    if alt then
       e.multi_count = (e.multi_count or 0) + 1
-      -- Alternatives are separated by ASCII semicolons, so stripped decoding would
-      -- stop after the first one; LTGOLD preserves the complete alternative list.
-      local alt = utils.decode(t:sub(semi+1), false)
       if alt and #alt > 0 then
         result = result .. '{' .. e.multi_count .. '.' .. alt .. '}'
       end
@@ -246,6 +283,12 @@ local printers = {
     end
     -- Don't reset e.form to accusative here — let the preposition's case (set by P printer)
     -- propagate through the entire noun chain.
+    if e.numeral then
+      -- A numeral subject is semantically plural even when 2-4 require a
+      -- genitive-singular noun form.
+      e.numeral = nil
+      e.plural, e.form = true, case["И"]
+    end
     if e.verb_frame then e.verb_frame = nil end
     return result
   end,
@@ -360,7 +403,10 @@ local printers = {
       return ""
     end
     local u = uniques[d]
-    e.infinitive, e.perfective = true, true
+    local source_modal = s and s.source and s.source[i] and s.source[i]:lower()
+    local modal_perfective = source_modal ~= "may" and source_modal ~= "might"
+    e.infinitive, e.perfective = true, modal_perfective
+    e.modal_scope = { perfective = modal_perfective }
     dbg.log(2, string.format("    U: word=%-12s → infinitive=%s perfective=%s",
       d, tostring(e.infinitive), tostring(e.perfective)))
     if u then
@@ -386,7 +432,10 @@ local printers = {
   T = function() return "" end,
   [" "] = function (t) return utils.decode(t, true) end,
   -- C: conjunction — decode full text after tag byte (no strip, preserves spaces)
-  C = function (t) return utils.decode(t:sub(2), false) end,
+  C = function (t, e)
+    if e.modal_scope and e.modal_scope.consumed then e.modal_scope.awaiting_coord = true end
+    return utils.decode(t:sub(2), false)
+  end,
   D = function (t)
     -- Skip the leading tag byte(s). Some D tokens have "DD..." (double-D prefix).
     -- Then decode CP866 content stopping at ';' (alternate-meaning separator).
@@ -515,6 +564,10 @@ printers.V = function(t, e, s, i)
 		t = 'V' .. t:sub(3)
 		e.past = true
 	end
+  if e.modal_scope and (not e.modal_scope.consumed or e.modal_scope.awaiting_coord) then
+    -- T7 coordinated VP flags keep every verb under the same modal auxiliary.
+    e.infinitive, e.perfective = true, e.modal_scope.perfective
+  end
   if e.verb_frame and e.verb_frame.next_infinitive then
     e.infinitive = true
     e.verb_frame = nil
@@ -559,6 +612,10 @@ printers.V = function(t, e, s, i)
     end
   end
   local result = printers.Z(t, e, s, i)
+	if e.modal_scope then
+	  e.modal_scope.consumed = true
+	  e.modal_scope.awaiting_coord = false
+	end
 	if resolved_past then e.past = false end
   e.verb_frame = verb_frames[utils.extract_form(t)]
   if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
@@ -718,6 +775,12 @@ printers.j = function(t) return "," end  -- clause-end marker outputs the comma 
 printers.O = function(t, e, s, i)
   local d = utils.decode(t, true)
   if d == "весь" then return printers.S(t, e) end
+  if d == "это" then
+    -- Standalone neuter demonstrative follows the этот paradigm in oblique
+    -- cases (about it → об этом), but remains это in nominative/accusative.
+    local forms = { "это", "этого", "этому", "это", "этим", "этом" }
+    return forms[e.form or 1] or "это"
+  end
   -- Hardcoded demonstrative pronoun forms. LTGOLD stores these in the Russian paradigm
   -- tables (BASE.RUS) indexed by paradigm number. A table lookup over this if-chain
   -- would match LTGOLD's approach and generalize to other demonstratives.
@@ -779,7 +842,9 @@ printers.M = function(t, e, s, i)
       tonumber(gender) or e.gender, e.form)
     -- 3rd-person pronouns preceded by a preposition take н- prefix (ним, нею, ними…).
     local p = tonumber(person) or 3
-    if p == 3 and s and i and s[i-1] and s[i-1]:sub(1,1) == 'P' then
+    local bare_dative = s and i and s[i-1] and #s[i-1] == 2 and
+      utils.decode(s[i-1]:sub(2, 2), true) == "Д"
+    if p == 3 and s and i and s[i-1] and s[i-1]:sub(1,1) == 'P' and not bare_dative then
       result = "н" .. result
     end
     return result
@@ -791,25 +856,29 @@ end
 -- 2-4: nom numeral + gen-pl adj + gen-sg noun
 -- 5+: nom numeral + gen-pl adj + gen-pl noun
 -- 1: nom numeral + nom adj + nom noun
-printers.I = function(t, e)
+printers.I = function(t, e, s, i)
   -- Extract I-form (nominative numeral): output "три", "пять", etc.
   local i_text = utils.extract_form(t)
   if #i_text == 0 then i_text = utils.decode(t, true) end
-  -- Determine numeral agreement class from A-form:
-  -- 5+ (пяти/шести/...) A-form ends in "и" (UTF-8 "и" = D0 B8)
-  -- 2-4 (двух/трёх/четырёх) A-form ends in "х" or "а"
-  -- Find A-form in token:
-  local a_text = find_form(t, 'A')
-  local five_plus = a_text and a_text:sub(-2) == "и"
-  if five_plus then
-    -- 5+: genitive plural for noun and adjectives
-    e.form = case["Р"]
-    e.plural = true  -- noun should stay plural
+  local numeral = i_text:lower()
+  local two_to_four = { ["два"] = true, ["две"] = true, ["три"] = true, ["четыре"] = true }
+  local noun
+  if s and i then noun = find(s, i + 1, 'Nn') end
+  local feminine_two = (numeral == "два" or numeral == "две") and noun and get_gender(noun) == 2
+  if feminine_two then
+    -- LTGOLD's feminine-two constituent uses plural agreement and selects две.
+    i_text = "две"
+    e.numeral = { noun_form = case["И"], noun_plural = true,
+      adjective_form = case["И"], adjective_plural = true }
+  elseif two_to_four[numeral] then
+    e.numeral = { noun_form = case["Р"], noun_plural = false,
+      adjective_form = case["Р"], adjective_plural = true }
   else
-    -- 2-4: genitive singular for noun, adjectives stay nominative plural
-    e.form = case["Р"]
-    e.plural = false  -- force genitive SINGULAR on following noun
+    -- Numerals five and above govern genitive plural for the complete NP.
+    e.numeral = { noun_form = case["Р"], noun_plural = true,
+      adjective_form = case["Р"], adjective_plural = true }
   end
+  e.form, e.plural = e.numeral.noun_form, e.numeral.noun_plural
   return i_text
 end
 printers.m = function(t) return utils.decode(t, true) end
@@ -866,6 +935,25 @@ printers.F = function(t, e, s, i)
   local has_agent = s and i and s[i+1] and s[i+1]:sub(1,1) == 'P' and
     #s[i+1] == 2 and s[i+1]:byte(2) == 0x92
   local vtext = find_form(t, 'V')
+  if is_perfect and not vtext then
+    -- Some F records store the imperfective verb directly after the F tag
+    -- instead of packing a secondary V form (spoken → FговоритьAустный).
+    local direct = utils.extract_form(t)
+    local direct_base = compiler.base[direct]
+    if direct_base then
+      local vt = 'V' .. utils.encode(direct)
+      if direct_base:byte(2)&2 ~= 2 then
+        local paired = direct_base:sub(6)
+        if #paired > 0 and paired:byte(1) >= 128 then
+          vt = paired
+          direct_base = compiler.base[utils.decode(vt)] or direct_base
+        end
+      end
+      local e_perf = { plural = e.plural, gender = e.gender, form = e.form,
+        past = true, passive = false, person = e.person or 3 }
+      return paradigms.verb(vt, direct_base:byte(4)&~0x80, e_perf)
+    end
+  end
   if vtext then
     local d = utils.decode(vtext, true)
     local b = compiler.base[d]
@@ -963,6 +1051,11 @@ printers.X = function(t, e, s, i)
            (k == 1 or not s[k-1] or s[k-1]:sub(1,1) ~= 'N') then
           gender = get_gender(s[k])
           plural = s[k]:sub(1,1) == 'n'
+          for q = k - 1, 1, -1 do
+            local qtag = s[q] and s[q]:sub(1,1)
+            if qtag == 'I' then plural = true break end
+            if qtag and qtag:match('[NnRVEX]') then break end
+          end
           break
         end
       end
@@ -1009,6 +1102,7 @@ local function reset_clause_context(e)
   -- subject features until a later constituent replaces them.
   e.past, e.passive, e.imperative = false, false, false
   e.perfective, e.infinitive = false, false
+  e.modal_scope, e.numeral = nil, nil
   e.form = case["И"]
 end
 

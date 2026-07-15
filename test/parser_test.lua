@@ -20,6 +20,15 @@ end
 
 local enc = require "core.encoding"
 
+-- Analyzer-derived forms are decoded per entry before sentence rules: +0x0c
+-- carries E while +0x66 retains the source dictionary verb class V.
+do
+  local ts = utils.tokenize("walked", english)
+  assert_eq(ts.tag[1], "E", "derived primary tag")
+  assert_eq(ts.derived_tag[1], "V", "dictionary-derived tag")
+  assert_eq(ts.status[1], "w", "dictionary word status")
+end
+
 local function first_cyrillic(sentence)
   local ts = utils.tokenize(sentence, english)
   local result = assert(parser.collect(english, ts))

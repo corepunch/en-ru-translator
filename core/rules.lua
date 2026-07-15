@@ -559,8 +559,8 @@ table.insert(rules, {
 
 -- T6: Extended word-order reordering (NP chains, hyphenated compounds, verbal negation)
 -- 47 rules, 10-byte records, LTPRO offset=0x2A79A
--- NOTE: T6 is NOT fully implemented in the Lua port; the compiler handles word order
--- indirectly via printer state tracking. Only the first few reorder rules are included.
+-- The parser executes these through the filtered reorder matcher, separately from
+-- the standard T1-T4/T7 matcher, and applies their digit actions to whole tokens.
 table.insert(rules, {
   { 0x06, "NCNNN", "555" },
   { 0x06, "ACNNN", "555" },

@@ -102,9 +102,22 @@ local function adj(a)
     if b then
       return (b:byte(2)==0x80 and b:byte(3) or b:byte(4))&~0x80
     else
+      local decoded = utils.decode(a)
+      local idx = paradigms.find_adjective(decoded)
+      -- Reflexive participle adjectives end in CP866 -ся (0xE1 0xEF, e.g. движущийся).
+      -- Strip -ся for paradigm lookup; the caller must append "ся" to the result.
+      local reflexive = false
+      if not idx and #a >= 4 and a:byte(#a-1) == 0xE1 and a:byte(#a) == 0xEF then
+        local stripped = a:sub(1, #a-2)
+        idx = paradigms.find_adjective(utils.decode(stripped))
+        if idx then
+          a = stripped
+          reflexive = true
+        end
+      end
       -- find_adjective() returns a 1-based match index; convert to the
       -- 0-based paradigm table_id expected by paradigms.adjective().
-      return (paradigms.find_adjective(utils.decode(a)) or 1) - 1
+      return (idx or 1) - 1, a, reflexive
     end
 end
 
@@ -125,26 +138,57 @@ local function subject_is_plural(s, stop)
 end
 
 local printers = {
-	A = function(a, e, s, i)
-		if s and s.phrases and s.phrases[i] then
-			local has_phrase_noun = false
-			local j = i + 1
-			while s[j] and s.phrases[j] do
-				has_phrase_noun = has_phrase_noun or s[j]:match('^[Nn]') ~= nil
-				j = j + 1
-			end
-			if not has_phrase_noun then
-				-- LTGOLD leaves the adjective head of a nounless fixed W phrase in
-				-- dictionary form (утративший законную силу), even in accusative context.
-				return utils.decode(a, true)
-			end
-		end
-		local n = find(s, i, 'Nn')
+  A = function(a, e, s, i)
+    if s and s.phrases and s.phrases[i] then
+      local has_phrase_noun = false
+      local j = i + 1
+      while s[j] and s.phrases[j] do
+        has_phrase_noun = has_phrase_noun or s[j]:match('^[Nn]') ~= nil
+        j = j + 1
+      end
+      if not has_phrase_noun then
+        -- LTGOLD leaves the adjective head of a nounless fixed W phrase in
+        -- dictionary form (утративший законную силу), even in accusative context.
+        return utils.decode(a, true)
+      end
+    end
+    -- Predicative short form: after present copula X003 only (e.infinitive=true AND nominative form).
+    -- X1xx/X2xx also set e.infinitive but e.form=Т (instrumental) → use full adj form instead.
+    -- Subject noun precedes the copula, so search backward for it.
+    if e.infinitive and e.form == case["И"] then
+      e.infinitive = false
+      local utf = utils.decode(utils.extract(a), true)
+      local stem = #utf > 4 and utf:sub(1, #utf - 4) or utf
+      local gender = e.gender
+      if s then
+        -- Start search from before the copula (skip X/V/U/Y auxiliaries going backward)
+        local start = (i or 0) - 1
+        while start >= 1 and s[start] and s[start]:sub(1,1):match('[XVUYxy]') do
+          start = start - 1
+        end
+        for j = start, 1, -1 do
+          -- Subject noun: skip N tokens that are genitive modifiers (preceded by another N)
+          if s[j] and s[j]:sub(1,1):match('[Nn]') and
+             (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+            gender = get_gender(s[j])
+            e.plural = s[j]:sub(1,1) == 'n'
+            break
+          end
+        end
+      end
+      local short_endings = { [1]="", [2]="а", [3]="о", [4]="ы" }
+      local idx = e.plural and 4 or ({[0]=3,[1]=1,[2]=2})[gender or 1]
+      return stem .. (short_endings[idx] or "")
+    end
+    local n = find(s, i, 'Nn')
     if n then
       e.gender = get_gender(n)
       e.plural = n:sub(1, 1) == 'n'
     end
-    return paradigms.adjective(a, adj(utils.extract(a)), e)
+    local adj_id, adj_base, adj_refl = adj(utils.extract(a))
+    local result = paradigms.adjective(adj_base or a, adj_id, e)
+    -- Reflexive participle adjectives: append -ся to the fully declined form.
+    return adj_refl and (result .. "ся") or result
   end,
   R = function(t, e)
     -- format: R<plural><person>[<gender>]<word>
@@ -166,6 +210,8 @@ local printers = {
     -- previous n (plural) tokens. LTGOLD tracks plurality per-constituent via
     -- T7/T8 rule flag constituent-type indices; this is a simpler approximation.
     if t:sub(1,1) == 'N' then e.plural = false end
+    -- Clear copula short-form context: a noun closes the X003+adj construction.
+    e.infinitive = false
     local d = utils.decode(t, true)
     local b = compiler.base[d]
     if not b then
@@ -260,19 +306,30 @@ local printers = {
             end
           end
         end
-        local idx = e.plural and 4 or ((gender or 1) + 1)
+        local short_endings = { [1]="", [2]="а", [3]="о", [4]="ы" }
+        local idx = e.plural and 4 or ({[0]=3, [1]=1, [2]=2})[gender or 1]
         dbg.log(2, string.format("    Z copula+adj: stem=%-10s gender=%d idx=%d => %s",
-          stem, gender, idx, stem .. paradigms.past_verb[idx]))
-        return stem .. paradigms.past_verb[idx]
+          stem, gender, idx, stem .. (short_endings[idx] or "")))
+        return stem .. (short_endings[idx] or "")
       end
     end
     if not e.perfective then
       e.perfective = (e.word == 1)
     end
     if e.word == 1 then e.imperative = true end
-    -- LTGOLD emits the dictionary infinitive after a modal before consulting the
-    -- aspect-pair slot; that slot may legitimately be empty (гарантировать).
-    if e.infinitive then e.infinitive = false return d end
+    -- LTGOLD emits the PERFECTIVE infinitive after a modal when available
+    -- (говорить→сказать, идти→придти), otherwise the imperfective infinitive.
+    if e.infinitive then
+      e.infinitive = false
+      if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2) ~= 2 then
+        local paired = compiler.base[d]:sub(6)
+        if #paired > 0 and paired:byte(1) >= 128 then
+          e.perfective = false
+          return utils.decode(paired)
+        end
+      end
+      return d
+    end
     if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2)~=2 then
       local paired = compiler.base[d]:sub(6)
       if #paired > 0 and paired:byte(1) >= 128 then
@@ -282,13 +339,21 @@ local printers = {
       end
     end
     if not compiler.base[d] then return d end
-    return paradigms.verb(t, compiler.base[d]:byte(4)&~0x80, e)
+    local paradigm = compiler.base[d]:byte(4)&~0x80
+    -- v-tagged (3sg present) verbs: LTGOLD uses the infinitive-ending mapping
+    -- (morph.txt lines 548-657) instead of the BASE.RUS paradigm ID.
+    if t:byte(1) == 0x76 then
+      local alt = paradigms.verb_paradigm_for_v(d)
+      if alt then paradigm = alt end
+    end
+    return paradigms.verb(t, paradigm, e)
   end,
   U = function(t, e, s, i)
     local d = utils.decode(t, true)
+    -- U1 = past/conditional modal ("could", "might", "should" past):
+    -- output past tense form of modal + " бы" conditional particle.
+    local is_conditional = t:byte(2) == string.byte('1')
     -- suppress modal when it was originally copula (X) followed by adjective.
-    -- LTGOLD encodes this in T8 guard-rule flags: the constituent-type index for
-    -- copula+adjective suppresses the modal output. Without flags, hardcode "должен".
     if d == "должен" and s and s[i+1] and s[i+1]:find('A', 1, true) then
       e.infinitive, e.perfective = true, true
       dbg.log(2, "    U suppressed (copula+adj context):", d)
@@ -300,11 +365,21 @@ local printers = {
       d, tostring(e.infinitive), tostring(e.perfective)))
     if u then
       local _u = utils.extract(t)
-      return utils.decode(_u:sub(1,#_u-2))..u[e.plural and 4 or (e.gender+1)]
+      local base = utils.decode(_u:sub(1,#_u-2))
+      local form = base .. u[e.plural and 4 or (e.gender+1)]
+      if is_conditional then return form .. " бы" end
+      return form
     else
-      -- fall back to regular verb paradigm (e.g. мочь → может)
       local b = compiler.base[d]
-      if b then return paradigms.verb(t, b:byte(4)&~0x80, e) end
+      if b then
+        if is_conditional then
+          -- Past conditional: use past tense form + " бы"
+          local e_past = { plural = e.plural, gender = e.gender, form = e.form,
+                           past = true, passive = false, person = e.person or 3 }
+          return paradigms.verb(t, b:byte(4)&~0x80, e_past) .. " бы"
+        end
+        return paradigms.verb(t, b:byte(4)&~0x80, e)
+      end
       return utils.decode(t, true)
     end
   end,
@@ -312,37 +387,88 @@ local printers = {
   [" "] = function (t) return utils.decode(t, true) end,
   -- C: conjunction — decode full text after tag byte (no strip, preserves spaces)
   C = function (t) return utils.decode(t:sub(2), false) end,
-  D = function (t) return utils.decode(t:sub(2), false) end,
+  D = function (t)
+    -- Skip the leading tag byte(s). Some D tokens have "DD..." (double-D prefix).
+    -- Then decode CP866 content stopping at ';' (alternate-meaning separator).
+    -- Multi-word phrase D tokens contain spaces which must be preserved.
+    local encoding = require "core.encoding"
+    local i = 2
+    -- Skip any additional ASCII letter prefix bytes (e.g. second 'D' in "DD...")
+    while i <= #t and t:byte(i) >= 65 and t:byte(i) <= 122 do i = i + 1 end
+    -- Decode CP866 content up to ';' separator:
+    local result = {}
+    while i <= #t do
+      local b = t:byte(i)
+      if b == 0x3B then break end  -- stop at ';' (alternate form)
+      local ch = encoding.character(b)
+      if ch then result[#result+1] = ch
+      elseif b == 0x20 or b == 0x2D then result[#result+1] = string.char(b)  -- space/hyphen OK
+      end
+      i = i + 1
+    end
+    return table.concat(result)
+  end,
   -- E/e: past participle / -ed form → produce past tense
   E = function(t, e, s, i)
     local d = utils.decode(t, true)
     local b = compiler.base[d]
     if not b then return d end
     e.past = true
+    -- Clear infinitive flag set by X1xx copula: E output is not an infinitive.
+    e.infinitive = false
     local previous = s and s[i - 1] and utils.decode(s[i - 1], true)
     local participle_context = {
       ["как"] = { passive = true, gender = 0, plural = false },
     }
     local context = participle_context[previous]
-    local adjectival = s and s[i - 1] and s[i + 1] and
-      s[i - 1]:sub(1, 1):match("[Nn]") and s[i + 1]:sub(1, 1) == 'P'
+    -- Detect X1xx (past copula) immediately before E → short passive participle.
+    -- "The agreement was signed" = X103 + E(sign) → "было подписано".
+    -- X1xx is identified by: starts with 'X', has digit code starting with '1'.
+    local prev_token = s and s[i - 1]
+    local is_past_copula = prev_token and prev_token:sub(1,1) == 'X' and
+      (prev_token:match("^X1") ~= nil)
+    if is_past_copula and not has_agent then
+      e.passive = true
+    end
+    -- Detect instrumental agent "by" (PТ = CP866 byte 0x92). This signals
+    -- LTGOLD's reflexive passive: imperfective verb past + -ся suffix.
+    local has_agent = s and s[i+1] and s[i+1]:sub(1,1) == 'P' and
+      #s[i+1] == 2 and s[i+1]:byte(2) == 0x92
+    -- Adjectival passive: E pre-nominal before P (e.g. "the broken window needs repair").
+    -- Only fire when E is preceded by article/adjective (T/A/O), NOT by subject (N/R).
+    -- "N E P" = subject-verb-preposition → NOT adjectival (e.g. "the cat sat on the mat").
+    -- "T E N" or "A E N" → pre-nominal participial E → adjectival passive.
+    local prev_tag = s and s[i - 1] and s[i - 1]:sub(1, 1)
+    local adjectival = (not has_agent) and s and s[i + 1] and
+      s[i + 1]:sub(1, 1) == 'P' and prev_tag and
+      prev_tag:match("[TAOj]") ~= nil
     if context then
-      -- LTGOLD's JE/T8 constituent class selects the short passive participle.
       e.passive, e.gender, e.plural = context.passive, context.gender, context.plural
     elseif adjectival then
-      -- A postnominal E before a prepositional phrase agrees with its head NP.
       e.passive = true
-    end
-    -- detect passive voice: E followed by PТ (instrumental case-marker "by").
-    -- LTGOLD's T7/T8 guard-rule flags set a passive constituent-type index on the
-    -- participle token, making this stream-scan unnecessary.
-    if s and s[i+1] and s[i+1]:sub(1,1) == 'P' and #s[i+1] == 2 and s[i+1]:byte(2) == 0x92 then
+    elseif has_agent then
+      -- Instrumental-agent passive: LTGOLD uses imperfective reflexive past (-ся form).
       e.passive = true
-      dbg.log(2, "    E passive context detected")
+      dbg.log(2, "    E instrumental-agent passive detected")
     end
-    -- '1' flag after tag (e.g. E1видеть) means "is already a resolved past form",
-    -- suppress perfective conversion (also skip in passive for reflexive form)
-    if (e.passive or t:byte(2) ~= string.byte('1')) and b:byte(2)&2 ~= 2 then
+    if has_agent then
+      -- Reflexive passive: stay imperfective (do not switch to perfective pair).
+      -- Use past tense of the imperfective verb + reflexive -ся suffix.
+      b = compiler.base[d]
+      if not b then return d end
+      local e_refl = { plural = e.plural, gender = e.gender, form = e.form,
+                       past = true, passive = false, person = e.person or 3 }
+      local result = paradigms.verb(t, b:byte(4)&~0x80, e_refl)
+      -- Determine the correct reflexive suffix (-сь after vowels, -ся after consonants).
+      local last2 = result:sub(-2)
+      local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                       ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
+      local refl = vowels[last2] or "ся"
+      e.passive = false
+      return result .. refl
+    end
+    -- '1' flag means "already a resolved past form" — suppress perfective switch.
+    if t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
@@ -361,7 +487,6 @@ local printers = {
         e.passive = false
         return paradigms.adjective(utils.encode('A' .. full), table_id, e)
       end
-      -- Verb paradigm position 13 stores LTGOLD's passive participle ending.
       local result = paradigms.verb(t, b:byte(4)&~0x80, e)
       e.passive = false
       return result
@@ -383,8 +508,9 @@ printers.S = function(t, e)
   return utils.decode(t, true)
 end
 printers.V = function(t, e, s, i)
-	-- V1 is the parser's resolved simple-past marker for an E/e dictionary form that has no separately packed V alternative.
-	local resolved_past = t:sub(2, 2) == '1'
+	-- V! is the parser's resolved simple-past marker for an E/e dictionary form that has no separately packed V alternative.
+	-- (Dictionary-stored V1 tokens are present-tense forms, not past.)
+	local resolved_past = t:sub(2, 2) == '!'
 	if resolved_past then
 		t = 'V' .. t:sub(3)
 		e.past = true
@@ -395,6 +521,24 @@ printers.V = function(t, e, s, i)
   elseif s and i then
     local plural = subject_is_plural(s, i)
     if plural ~= nil then e.plural = plural end
+  end
+  -- Detect instrumental agent "by" (PТ). V from a passive X+E conversion gets this context.
+  -- LTGOLD emits imperfective reflexive past (-ся) for these constructions.
+  local has_agent = s and i and s[i+1] and s[i+1]:sub(1,1) == 'P' and
+    #s[i+1] == 2 and s[i+1]:byte(2) == 0x92
+  if has_agent then
+    local d = utils.extract_form(t)
+    local b = compiler.base[d]
+    if b then
+      local e_refl = { plural = e.plural, gender = e.gender, form = e.form,
+                       past = true, passive = false, person = e.person or 3 }
+      local result = paradigms.verb(t, b:byte(4)&~0x80, e_refl)
+      local last2 = result:sub(-2)
+      local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                       ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
+      e.passive = false
+      return result .. (vowels[last2] or "ся")
+    end
   end
   if e.passive then
     local passive_frame = verb_frames[utils.extract_form(t)]
@@ -459,7 +603,8 @@ printers.p = function(t, e) return printers.P(t, e) end
 printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction), L (relative pronoun), j (clause-end marker), O (demonstrative)
 -- These are structural/functional words — output their Russian text directly
-printers.J = function(t) return utils.decode(t, true) end
+-- J (subordinating conjunction): decode preserving leading punctuation like ", что".
+printers.J = function(t) return utils.decode(t:sub(2), false) end
 -- z: -s/-es form (verb/noun ambiguity). After prepositions prefer noun form.
 -- LTGOLD resolves z via T2/T3 constituent-type rules; this is a fallback.
 printers.z = function(t, e, s, i)
@@ -478,24 +623,98 @@ printers.q = function(t, e)
   return ""
 end
 printers.L = function(t, e, s, i)
-  -- strip the leading tag byte, keep leading comma+space
-  local result = utils.decode(t:sub(2), false)
+  -- Relative pronoun "который" declined for gender (antecedent noun) and case (e.form).
+  -- Base L token text is ", который"; lowercase l is genitive feminine "которой".
+  local raw = utils.decode(t:sub(2), false)
+
+  -- Detect antecedent noun gender by scanning backward
   local gender = nil
   if s then
     for j = (i and i-1 or 0), 1, -1 do
-      if s[j] and s[j]:sub(1,1) == 'N' and
-         (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+      local tag = s[j] and s[j]:sub(1,1)
+      if tag == 'N' or tag == 'n' then
         gender = get_gender(s[j])
         break
       end
     end
   end
-  if gender == 2 then
-    result = result:gsub("который", "которую")
+
+  -- Case for rule-created lowercase-p prepositions: infer from preposition text
+  -- These prepositions always take a specific case when followed by a relative pronoun.
+  local prep_case_map = {
+    ["из"] = 2, ["от"] = 2, ["до"] = 2, ["без"] = 2, ["для"] = 2,
+    ["у"] = 2, ["с"] = 2, ["со"] = 2, ["после"] = 2, ["кроме"] = 2,
+    ["к"] = 3, ["ко"] = 3,
+    ["в"] = 6, ["на"] = 6, ["о"] = 6, ["об"] = 6, ["при"] = 6,
+    ["над"] = 5, ["под"] = 5, ["перед"] = 5, ["за"] = 5, ["между"] = 5,
+  }
+
+  -- Detect if immediately preceded by a preposition token (P or p)
+  local preceded_by_prep = false
+  local prep_form = nil
+  if s and i then
+    local prev_tok = s[i-1]
+    local prev_tag = prev_tok and prev_tok:sub(1,1)
+    if prev_tag == 'P' or prev_tag == 'p' then
+      preceded_by_prep = true
+      -- For lowercase p (rule-created), infer case from preposition text
+      if prev_tag == 'p' then
+        local prep_text = utils.decode(prev_tok:sub(2), false)
+        prep_form = prep_case_map[prep_text]
+      end
+    end
   end
-  return result
+
+  -- Full declension table for "который": [form][gender]
+  -- form: 1=nom, 2=gen, 3=dat, 4=acc, 5=ins, 6=prep
+  -- gender index: 1=masc, 2=fem, 3=neut, 4=plural
+  local forms = {
+    [1] = {"который",  "которая",  "которое",  "которые"},   -- nominative
+    [2] = {"которого", "которой",  "которого", "которых"},   -- genitive
+    [3] = {"которому", "которой",  "которому", "которым"},   -- dative
+    [4] = {"который",  "которую",  "которое",  "которые"},   -- accusative (inanimate; masc anim would be которого)
+    [5] = {"которым",  "которой",  "которым",  "которыми"},  -- instrumental
+    [6] = {"котором",  "которой",  "котором",  "которых"},   -- prepositional
+  }
+
+  -- Determine the form (case) to use: prep_form overrides e.form for rule-created p tokens
+  local form_idx = prep_form or (e and e.form) or 1
+  if form_idx < 1 or form_idx > 6 then form_idx = 1 end
+
+  -- For nominative case (form=1), detect whether L is subject or object:
+  -- If the next token is a subject pronoun (R) or noun (N), L is the object → accusative.
+  -- If the next token is directly a verb (E/V/X/Y), L is the subject → nominative.
+  -- This matters only for feminine (masc nom=acc for inanimate, neut nom=acc always).
+  if form_idx == 1 and not preceded_by_prep and s and i then
+    local next_tag = s[i+1] and s[i+1]:sub(1,1)
+    if next_tag == 'R' or next_tag == 'N' or next_tag == 'n' then
+      form_idx = 4  -- accusative (object of relative clause)
+    end
+  end
+
+  -- gender index: masc=1, fem=2, neut=0→3, plural=4
+  local g_idx
+  if gender == 2 then g_idx = 2
+  elseif gender == 0 then g_idx = 3
+  else g_idx = 1  -- masculine default
+  end
+
+  local pronoun = forms[form_idx][g_idx]
+
+  -- When preceded by a preposition: LTGOLD uses 2 spaces between prep and pronoun (no comma).
+  -- The compile loop adds 1 space between tokens, making 3 total ("в   котором").
+  if preceded_by_prep then
+    return "  " .. pronoun
+  end
+
+  -- Otherwise keep the leading ", " that was in the original token text
+  local prefix = raw:match("^([,%s]+)") or ""
+  if prefix ~= "" then
+    return prefix .. pronoun
+  end
+  return pronoun
 end
-printers.j = function(t) return "" end  -- clause-end marker is silent
+printers.j = function(t) return "," end  -- clause-end marker outputs the comma it replaced
 printers.O = function(t, e, s, i)
   local d = utils.decode(t, true)
   if d == "весь" then return printers.S(t, e) end
@@ -541,38 +760,73 @@ printers.l = printers.L
 printers.s = printers.S
 -- h (history/alternate form marker) — treat as past tense like E
   printers.h = function(t, e)
+    -- h-tag: historical/irregular past form. LTGOLD uses imperfective past directly.
+    -- No perfective aspect switch — "came" → приходил (imperfective), not пришел.
     local d = utils.decode(t, true)
     local b = compiler.base[d]
     if not b then return d end
     e.past = true
-    if t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
-      local pt = b:sub(6)
-      if #pt > 0 and pt:byte(1) >= 128 then
-        dbg.log(2, string.format("    h perfective switch: %s → %s", d, utils.decode(pt)))
-        t = pt
-        d = utils.decode(t)
-      end
-    end
-  b = compiler.base[d]
-  if not b then return d end
-  return paradigms.verb(t, b:byte(4)&~0x80, e)
-end
+    -- Use the imperfective verb directly (no aspect switch).
+    return paradigms.verb(t, b:byte(4)&~0x80, e)
+  end
 -- Q (question word), M (indirect pronoun), m (compound pronoun), r (compound personal)
 printers.Q = function(t) return utils.decode(t, true) end
-printers.M = function(t, e)
+printers.M = function(t, e, s, i)
   local plural, person, gender = t:match("M(%d)(%d)(%d)")
   if not plural then plural, person = t:match("M(%d)(%d)") end
   if plural then
-    return paradigms.pronoun(plural ~= '0', tonumber(person) or 3,
+    local result = paradigms.pronoun(plural ~= '0', tonumber(person) or 3,
       tonumber(gender) or e.gender, e.form)
+    -- 3rd-person pronouns preceded by a preposition take н- prefix (ним, нею, ними…).
+    local p = tonumber(person) or 3
+    if p == 3 and s and i and s[i-1] and s[i-1]:sub(1,1) == 'P' then
+      result = "н" .. result
+    end
+    return result
   end
   return utils.decode(t, true)
+end
+-- I: numeral. Output the I-form (nominative). Set e.numeral for noun case control.
+-- LTGOLD numeral agreement (simplified):
+-- 2-4: nom numeral + gen-pl adj + gen-sg noun
+-- 5+: nom numeral + gen-pl adj + gen-pl noun
+-- 1: nom numeral + nom adj + nom noun
+printers.I = function(t, e)
+  -- Extract I-form (nominative numeral): output "три", "пять", etc.
+  local i_text = utils.extract_form(t)
+  if #i_text == 0 then i_text = utils.decode(t, true) end
+  -- Determine numeral agreement class from A-form:
+  -- 5+ (пяти/шести/...) A-form ends in "и" (UTF-8 "и" = D0 B8)
+  -- 2-4 (двух/трёх/четырёх) A-form ends in "х" or "а"
+  -- Find A-form in token:
+  local a_text = find_form(t, 'A')
+  local five_plus = a_text and a_text:sub(-2) == "и"
+  if five_plus then
+    -- 5+: genitive plural for noun and adjectives
+    e.form = case["Р"]
+    e.plural = true  -- noun should stay plural
+  else
+    -- 2-4: genitive singular for noun, adjectives stay nominative plural
+    e.form = case["Р"]
+    e.plural = false  -- force genitive SINGULAR on following noun
+  end
+  return i_text
 end
 printers.m = function(t) return utils.decode(t, true) end
 printers.r = function(t) return utils.decode(t, true) end
 -- k (negative 'no'), K (negative 'not')
 printers.K = function(t) return utils.decode(t, true) end
 printers.k = function(t) return utils.decode(t, true) end
+-- Y: "have/has/had" (perfect auxiliary). Silent; sets perfective past context.
+-- English perfect = "has/had + past participle" → Russian perfective past.
+printers.Y = function(t, e)
+  local code = t:match("%d+") or ""
+  -- Y1xx = past perfect ("had written") vs Y003 = present perfect ("has written")
+  -- Both are silent; the F/E printer produces perfective past.
+  e.perfective = true
+  dbg.log(2, "    Y (perfect aux): perfective=true, silent")
+  return ""
+end
 -- x (impersonal/there-is), y (have existential), i (indefinite article form)
 printers.x = function(t) return utils.decode(t, true) end
 printers.y = function(t) return utils.decode(t, true) end
@@ -599,24 +853,79 @@ printers["#"] = function(t, e)
   end
   return s
 end
-printers.F = function(t, e)
+printers.F = function(t, e, s, i)
+  -- F tag: perfect/passive past-participle construction.
+  -- Y (have) + F → English perfect → Russian perfective active past ("написала").
+  -- X103 (was) + F without agent → short passive participle ("было подписано").
+  -- X103 (was) + F with instrumental agent → reflexive imperfective past ("писалось нею").
+  e.infinitive = false
   e.past = true
-  e.passive = true
-  e.perfective = true
-  dbg.log(2, string.format("    F: perfective=%s passive=%s",
-    tostring(e.perfective), tostring(e.passive)))
-  return printers.Z(t, e)
-end
-printers.X = function(t, e, s, i)
-  if s and i then
-    local j = i + 1
-    while s[j] and s[j]:sub(1, 1) == 'D' do j = j + 1 end
-    if s[j] and s[j]:sub(1, 1) == 'V' then
-      -- Copula + derived V constituent is LTGOLD's short passive construction.
-      e.passive = true
-      return ""
+  -- Check if this is a Y (perfect) context: previous token is Y-tagged.
+  local prev_tag = s and i and s[i-1] and s[i-1]:sub(1,1)
+  local is_perfect = prev_tag == 'Y'
+  local has_agent = s and i and s[i+1] and s[i+1]:sub(1,1) == 'P' and
+    #s[i+1] == 2 and s[i+1]:byte(2) == 0x92
+  local vtext = find_form(t, 'V')
+  if vtext then
+    local d = utils.decode(vtext, true)
+    local b = compiler.base[d]
+    if b then
+      local vt = 'V' .. vtext
+      if is_perfect then
+        -- English perfect: Y + F → perfective active past (написала, обнаружили, etc.)
+        if b:byte(2)&2 ~= 2 then  -- if imperfective, switch to perfective pair
+          local pt = b:sub(6)
+          if #pt > 0 and pt:byte(1) >= 128 then
+            vt = pt; b = compiler.base[utils.decode(vt)] or b
+          end
+        end
+        local e_perf = { plural = e.plural, gender = e.gender, form = e.form,
+                         past = true, passive = false, person = e.person or 3 }
+        return paradigms.verb(vt, b:byte(4)&~0x80, e_perf)
+      elseif has_agent then
+        -- X103 + F + agent: reflexive imperfective past ("писалось нею")
+        local e_refl = { plural = e.plural, gender = e.gender, form = e.form,
+                         past = true, passive = false, person = e.person or 3 }
+        local result = paradigms.verb(vt, b:byte(4)&~0x80, e_refl)
+        local last2 = result:sub(-2)
+        local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                         ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
+        return result .. (vowels[last2] or "ся")
+      else
+        -- X103 + F without agent: short passive participle ("было подписано")
+        if b:byte(2)&2 ~= 2 then
+          local pt = b:sub(6)
+          if #pt > 0 and pt:byte(1) >= 128 then
+            vt = pt; b = compiler.base[utils.decode(vt)] or b
+          end
+        end
+        local e_pass = { plural = e.plural, gender = e.gender, form = e.form,
+                         past = true, passive = true, person = e.person or 3 }
+        return paradigms.verb(vt, b:byte(4)&~0x80, e_pass)
+      end
     end
   end
+  e.passive = true
+  e.perfective = true
+  local result = printers.Z(t, e)
+  -- Append alternative meaning if token has ";инф)verb" pattern (LTGOLD multi-meaning).
+  local inf_prefix = utils.encode("инф)")
+  for si = 1, #t do
+    if t:byte(si) == 0x3B then
+      local after = t:sub(si + 1)
+      if after:sub(1, #inf_prefix) == inf_prefix then
+        local alt_text = utils.decode(after:sub(#inf_prefix + 1), true)
+        if alt_text and #alt_text > 0 then
+          e.multi_count = (e.multi_count or 0) + 1
+          result = result .. '{' .. e.multi_count .. '.' .. alt_text .. '}'
+        end
+        break
+      end
+    end
+  end
+  return result
+end
+printers.X = function(t, e, s, i)
   if t:match("%d+") == "003" then
     e.infinitive = true
     e.form = case["И"]
@@ -624,13 +933,57 @@ printers.X = function(t, e, s, i)
     if s and s[i+1] and s[i+1]:match("A[\128-\255]") then return "" end
     return "-"
   else
+    local code = t:match("%d+") or ""
+    -- X2xx = future auxiliary ("will"): output nothing, mark next verb as perfective future.
+    if code:sub(1,1) == '2' then
+      e.perfective = true
+      dbg.log(2, "    X (future 2xx): perfective=true")
+      return ""
+    end
+    -- X1xx = past copula ("was/were").
+    -- Output: past tense of быть agreeing with subject gender/number.
+    -- быть past: был(m)/была(f)/было(n)/были(pl)
+    if s and i and code:sub(1,1) == '1' then
+      local j = i + 1
+      while s[j] and s[j]:sub(1,1) == 'T' do j = j + 1 end
+      local next_tag = s[j] and s[j]:sub(1,1)
+      if next_tag == 'E' or next_tag == 'F' then
+        -- Check if E/F is followed by instrumental agent PТ
+        local k = j + 1
+        if s[k] and s[k]:sub(1,1) == 'P' and #s[k] == 2 and s[k]:byte(2) == 0x92 then
+          dbg.log(2, "    X (past copula 1xx + E/F + agent): silent")
+          return ""
+        end
+        -- No agent: X1xx outputs its past form before the short passive participle.
+      end
+      -- Determine subject gender from preceding noun
+      local gender, plural = e.gender, e.plural
+      for k = i - 1, 1, -1 do
+        if s[k] and s[k]:sub(1,1):match('[Nn]') and
+           (k == 1 or not s[k-1] or s[k-1]:sub(1,1) ~= 'N') then
+          gender = get_gender(s[k])
+          plural = s[k]:sub(1,1) == 'n'
+          break
+        end
+      end
+      local past_forms = { [1]="был", [2]="была", [0]="было" }
+      local past_out = plural and "были" or (past_forms[gender] or "было")
+      e.infinitive = true
+      -- Set instrumental form for adjective/noun predicates after past copula
+      j = i + 1
+      while j and s and s[j] and s[j]:sub(1,1) == 'T' do j = j + 1 end
+      if j and s[j] and s[j]:sub(1,1):match('[NA]') then
+        e.form = case["Т"]
+      end
+      dbg.log(2, "    X (past copula 1xx): " .. past_out)
+      return past_out
+    end
     local p = printers.V(t, e)
     e.infinitive = true
     local j = i and (i + 1) or nil
     while j and s and s[j] and s[j]:sub(1, 1) == 'T' do j = j + 1 end
     if j and s[j] and s[j]:sub(1, 1) == 'N' then
-      -- LTGOLD uses instrumental for nominal predicates of overt past/future
-      -- copulas (будет заменой), while its suppressed present copula stays nominative.
+      -- LTGOLD uses instrumental for nominal predicates of overt future copulas.
       e.form = case["Т"]
     end
     dbg.log(2, "    X (other): infinitive=true")
@@ -716,13 +1069,11 @@ function compiler.compile(s, options)
       -- caps == true  → ALL-CAPS output  (source word was e.g. "AGREEMENT")
       -- caps == "init"→ Initial-cap only (source word was e.g. "Metric" or "Fish")
       -- LTGOLD tracks this via its input word capitalisation flags.
-      -- "init" caps (initial capitalisation) only encodes sentence-start position in
-      -- the source. The sentence capitalizer below handles that unconditionally for the
-      -- actual first output word, so passing "init" here is always either redundant (first
-      -- word) or wrong (any later word after a reorder). Only ALL-CAPS (caps == true)
-      -- reflects a property of the source word itself and must be preserved everywhere.
+      -- caps == true  → ALL-CAPS (e.g. AGREEMENT → СОГЛАШЕНИЕ)
+      -- caps == "init"→ Initial-cap (e.g. Russian → Русского, Metric → Метрический)
+      -- LTGOLD preserves initial-cap from source words (proper nouns, sentence-start).
       local src_caps = s.caps and s.caps[i]
-      out = apply_source_caps(out, src_caps == true and true or nil)
+      out = apply_source_caps(out, src_caps)
       out = append_alternatives(out, w, e)
       dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
         i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),

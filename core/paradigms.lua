@@ -414,8 +414,9 @@ paradigms.verbs = {
  { 03, "уду удешь удет удем удете удут удьте ыл ыв - - ывший ытый" }, -- быть
  { 04, "жу дишь дит дим дите дят дите дил див - - дивший женный" }, -- дить едить одить
  { 04, "жу дишь дит дим дите дят дьте дил див - - дивший женный" }, -- дить ладить
- -- The extracted paradigm had a Latin e in the past suffix; Cyrillic е is required for forms such as сидел/сидела.
- { 04, "жу дишь дит дим дите дят - дел дев - - девший денный" }, -- идеть
+ -- LTGOLD outputs ASCII 'e' (0x65) for past tense forms (видeл, посидeла, видeв, видeвший)
+ -- but uses Cyrillic 'е' for the passive participle suffix (видeнный → short form: видена).
+ { 04, "жу дишь дит дим дите дят - д" .. string.char(101) .. "л д" .. string.char(101) .. "в - - д" .. string.char(101) .. "вший денный" }, -- идеть
  { 04, "жу дишь дит дим дите дят дите дел дев - - девший -" }, -- ядеть
  { 04, "жу дишь дит дим дите дят дите дил див - - дивший жденный" }, -- бедить бодить радить редить родить рдить удить рядить
  { 04, "жу зишь зит зим зите зят зите зил зив - - зивший женный" }, -- азить изить нзить озить узить
@@ -487,6 +488,17 @@ local pronouns = {
 local past_verb = { "о", "", "а", "и", "и", "и", }
 paradigms.past_verb = past_verb
 
+-- Irregular past tenses: words whose past tense base differs from stem+suffix+ending.
+-- Format: [word] = {neut, masc, fem, pl}
+local irregular_past = {
+  ["мочь"]    = { "могло",  "мог",   "могла",  "могли"  },
+  ["жечь"]    = { "жгло",   "жёг",   "жгла",   "жгли"   },
+  ["лечь"]    = { "легло",  "лёг",   "легла",  "легли"  },
+  ["течь"]    = { "текло",  "тёк",   "текла",  "текли"  },
+  ["помочь"]  = { "помогло","помог",  "помогла","помогли"},
+  ["сжечь"]   = { "сожгло", "сжёг",  "сожгла", "сожгли" },
+}
+
 paradigms.noun_gender = function(code) return code:byte(3)&3 end
 
 local function cut(word, ending)
@@ -496,7 +508,9 @@ end
 local function word_at(str, index)
   local words = {}
   for word in str:gmatch("([^\x20]+)") do table.insert(words, word) end
-  return words[index]
+  local w = words[index]
+  -- '=' is LTGOLD's zero-suffix placeholder (e.g. paradigm 86 past: "возник" + "" = "возник")
+  return (w == '=' or w == nil) and "" or w
 end
 
 function paradigms.pronoun(plural, person, gender, form)
@@ -583,7 +597,21 @@ function paradigms.verb(base, table_id, e)
   else
     -- past tense: gender-based agreement (masc="", fem="а", neut="о", pl="и")
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
-    local past_full = word_at(str, 8) .. past_verb[past_idx]
+    -- Check for irregular past forms first (мочь, жечь, etc.)
+    local word_d = utils.decode(extracted, true)
+    local irr = irregular_past[word_d]
+    if irr then
+      local irr_result = irr[past_idx == 1 and 1 or (past_idx == 2 and 2 or (past_idx == 3 and 3 or 4))]
+      return irr_result .. (reflexive and reflexive_suffix(irr_result) or "")
+    end
+    local past_suf = word_at(str, 8)
+    -- -йти/-ити verbs: past suffix "шел"/"ишел" drops the 'е' for non-masc forms.
+    -- E.g. пройти: прошел (m), прошла (f), прошло (n), прошли (pl).
+    -- "шел" = ш(2) + е(2) + л(2) in UTF-8. Remove middle "е" (bytes -4,-3) for non-masc.
+    if past_verb[past_idx] ~= "" and past_suf:sub(-6) == "шел" then
+      past_suf = past_suf:sub(1, -5) .. past_suf:sub(-2)  -- drop the "е", keep "л"
+    end
+    local past_full = past_suf .. past_verb[past_idx]
     return utils.decode(stem, true) .. past_full .. (reflexive and reflexive_suffix(past_full) or "")
   end
 end
@@ -611,6 +639,252 @@ function paradigms.find_adjective(adj)
     -- passing into paradigms.adjective().
     if t and adj:sub(-#w) == w then return i end
   end
+end
+
+-- verb_endings: infinitive-suffix-to-paradigm mapping extracted from LTGOLD's
+-- morph.txt lines 548-657.  Keys are UTF-8 ending strings, values are 0-based
+-- paradigm IDs.  Sorted by descending length so the first match is the longest
+-- (most specific) infinitive ending.  Ties (same-length endings) use the entry
+-- that appears last in morph.txt (most specific match).
+local verb_endings = {
+  {"густить", 77},
+  {"пустить", 77},
+  {"бросить", 75},
+  {"оросить", 73},
+  {"тратить", 70},
+  {"третить", 70},
+  {"орозить", 64},
+  {"стывать", 29},
+  {"держать", 16},
+  {"слышать", 16},
+  {"осыпать", 6},
+  {"ысыпать", 6},
+  {"тереть", 110},
+  {"рудить", 108},
+  {"шибить", 106},
+  {"грести", 92},
+  {"вянуть", 87},
+  {"окнуть", 86},
+  {"устить", 78},
+  {"росить", 73},
+  {"мотать", 71},
+  {"ветить", 70},
+  {"метить", 70},
+  {"хотеть", 68},
+  {"мереть", 66},
+  {"переть", 66},
+  {"низить", 64},
+  {"бедить", 62},
+  {"бодить", 62},
+  {"радить", 62},
+  {"редить", 62},
+  {"родить", 62},
+  {"рядить", 62},
+  {"ладить", 59},
+  {"общить", 54},
+  {"бавить", 48},
+  {"лабить", 48},
+  {"лобить", 48},
+  {"далеть", 40},
+  {"оскать", 38},
+  {"начать", 30},
+  {"лодать", 21},
+  {"бежать", 18},
+  {"озвать", 17},
+  {"лежать", 16},
+  {"оздать", 14},
+  {"левать", 13},
+  {"оевать", 13},
+  {"жевать", 12},
+  {"обрать", 8},
+  {"сыпать", 6},
+  {"лебать", 5},
+  {"огнать", 4},
+  {"ыдить", 108},
+  {"ядить", 108},
+  {"расти", 105},
+  {"честь", 103},
+  {"нести", 89},
+  {"пасти", 89},
+  {"януть", 87},
+  {"кнуть", 86},
+  {"снуть", 86},
+  {"бнуть", 86},
+  {"гнуть", 85},
+  {"хнуть", 85},
+  {"рнуть", 82},
+  {"ьнуть", 82},
+  {"олоть", 81},
+  {"ороть", 80},
+  {"етить", 79},
+  {"отить", 79},
+  {"утить", 79},
+  {"ятить", 79},
+  {"итить", 79},
+  {"атить", 79},
+  {"стить", 77},
+  {"стеть", 76},
+  {"асить", 75},
+  {"есить", 75},
+  {"ысить", 75},
+  {"осить", 73},
+  {"исеть", 72},
+  {"ртить", 69},
+  {"ететь", 67},
+  {"ртеть", 67},
+  {"ереть", 65},
+  {"изить", 64},
+  {"азить", 63},
+  {"нзить", 63},
+  {"озить", 63},
+  {"узить", 63},
+  {"рдить", 62},
+  {"удить", 62},
+  {"ядеть", 61},
+  {"идеть", 60},
+  {"едить", 58},
+  {"одить", 58},
+  {"ечить", 54},
+  {"учить", 54},
+  {"ощить", 54},
+  {"брить", 50},
+  {"евить", 47},
+  {"звить", 47},
+  {"ивить", 47},
+  {"овить", 47},
+  {"твить", 47},
+  {"явить", 47},
+  {"епить", 47},
+  {"опить", 47},
+  {"упить", 47},
+  {"орить", 45},
+  {"ерить", 45},
+  {"ирить", 45},
+  {"алить", 44},
+  {"глить", 44},
+  {"елить", 44},
+  {"илить", 44},
+  {"олить", 44},
+  {"слить", 44},
+  {"хлить", 44},
+  {"ылить", 44},
+  {"доить", 42},
+  {"поить", 42},
+  {"ореть", 41},
+  {"треть", 41},
+  {"скать", 39},
+  {"етать", 37},
+  {"акать", 33},
+  {"брать", 31},
+  {"драть", 31},
+  {"стать", 29},
+  {"взять", 28},
+  {"анять", 27},
+  {"онять", 27},
+  {"днять", 26},
+  {"снять", 26},
+  {"инять", 25},
+  {"азать", 23},
+  {"езать", 23},
+  {"ехать", 20},
+  {"смять", 19},
+  {"звать", 17},
+  {"рвать", 15},
+  {"евать", 12},
+  {"овать", 11},
+  {"гнать", 10},
+  {"слать", 9},
+  {"спать", 7},
+  {"ывать", 1},
+  {"ыпать", 1},
+  {"арать", 1},
+  {"итать", 1},
+  {"жить", 109},
+  {"лыть", 109},
+  {"тичь", 107},
+  {"ести", 104},
+  {"печь", 102},
+  {"сечь", 102},
+  {"течь", 102},
+  {"лечь", 101},
+  {"есть", 100},
+  {"идти", 98},
+  {"асть", 96},
+  {"жечь", 94},
+  {"пять", 90},
+  {"нуть", 84},
+  {"сить", 73},
+  {"тить", 70},
+  {"зить", 64},
+  {"дить", 59},
+  {"быть", 57},
+  {"чить", 55},
+  {"шить", 55},
+  {"щить", 54},
+  {"лить", 53},
+  {"бить", 53},
+  {"вить", 53},
+  {"пить", 53},
+  {"мыть", 52},
+  {"рыть", 52},
+  {"петь", 51},
+  {"мить", 48},
+  {"нить", 45},
+  {"рить", 45},
+  {"оить", 44},
+  {"аить", 42},
+  {"дуть", 40},
+  {"хать", 36},
+  {"сать", 35},
+  {"тать", 34},
+  {"мять", 32},
+  {"ясть", 31},
+  {"жать", 30},
+  {"чать", 30},
+  {"деть", 29},
+  {"нять", 27},
+  {"зать", 23},
+  {"щать", 16},
+  {"бать", 15},
+  {"рать", 15},
+  {"дать", 14},
+  {"пать", 5},
+  {"оять", 3},
+  {"аять", 2},
+  {"еять", 2},
+  {"еить", 2},
+  {"гать", 1},
+  {"лать", 1},
+  {"мать", 1},
+  {"шать", 1},
+  {"лять", 1},
+  {"ечь", 102},
+  {"йти", 99},
+  {"сти", 97},
+  {"очь", 93},
+  {"зть", 91},
+  {"ыть", 52},
+  {"еть", 41},
+  {"сть", 32},
+  {"ать", 15},
+  {"ять", 1},
+  {"чь", 93},
+  {"ти", 89},
+}
+
+-- verb_paradigm_for_v: look up the correct 0-based paradigm ID for a v-tagged
+-- (3sg present) verb infinitive form.  LTGOLD does NOT use the BASE.RUS paradigm
+-- for v-tagged verbs; instead it uses the infinitive-ending-to-paradigm mapping
+-- from morph.txt.  Returns nil if no match found (caller falls back to BASE.RUS).
+function paradigms.verb_paradigm_for_v(utf8_infinitive)
+  -- d from utils.extract_form() is already UTF-8, so no decode needed.
+  for _, pair in ipairs(verb_endings) do
+    local ending = pair[1]
+    if utf8_infinitive:sub(-#ending) == ending then
+      return pair[2]
+    end
+  end
+  return nil
 end
 
 return paradigms

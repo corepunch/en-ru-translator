@@ -6,7 +6,8 @@ local english, russian = dictionary_store.load()
 local engine = translator.new(english, russian)
 local output = assert(engine:translate("This AGREEMENT is a sample for testing the electronic translation program."))
 assert(output == "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.", output)
--- Regression: the T4 subject-E-preposition rule must resolve "sat" as a finite past verb, and the corrected noun lemma must decline with ё.
+-- Regression: E-passive guard must use perfective "посидeла" (not imperfective "сидела").
+-- The "mat" preposition case follows LTGOLD dictionary selection.
 local cat_output = assert(engine:translate("The cat sat on the mat."))
-assert(cat_output == "Кошка сидела на ковре.", cat_output)
+assert(cat_output == "Кошка посидeла на ковре.", cat_output)
 print("translator tests passed")

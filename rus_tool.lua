@@ -321,6 +321,9 @@ local function parse_spec(spec)
 
   -- Build 4-byte binary code: tag, flags, gender, paradigm
   local flags = 0x00
+  if tag_upper == "V" and gender_s and gender_s:lower() == "i" then
+    flags = 0x02  -- bit 1 = imperfective aspect
+  end
   local gender_byte = gender_val or 0
   local paradigm_byte = paradigm  -- high bit 0, safe for 0-127
 

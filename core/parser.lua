@@ -80,6 +80,27 @@ local function matches(t, class)
 	return find(t, class)
 end
 
+-- tag_matches: pattern-matching check using ONLY the leading tag character.
+-- Case-sensitive for non-W tokens: 'X' only matches Xnnn tokens, 'x' only matches xnn tokens.
+-- For W-tokens (multi-word phrases), uses case-insensitive matching as before.
+local function tag_matches(t, class)
+	if not t then return nil end
+	if t:sub(1,1) == 'W' then
+		-- W-tokens: case-insensitive match against any char in class
+		local upper = t:upper()
+		for i = 1, #class do
+			if upper:find(class:sub(i,i), 1, true) then return t end
+		end
+		return nil
+	end
+	local ch = t:sub(1,1)
+	-- Non-W: case-sensitive check on leading character only
+	if class:find(ch, 1, true) then return t end
+	-- '*' in a character class matches sentence-end punctuation '.', '?', '!'
+	if class:find('*', 1, true) and (ch == '.' or ch == '?' or ch == '!') then return t end
+	return nil
+end
+
 local function find_and_replace(ts, j, s)
 	local z = find(ts[j], 'Z')
 	if z and string.find('VNA', s) then
@@ -237,7 +258,8 @@ local function replace(ts, j, m, t, s)
 		find_and_replace(ts, j, 'C')
 	elseif s == '1' and ts[j] and ts[j]:sub(1, 1):match('[Ee]') then
 		-- Custom fallback action: mark an E/e form as resolved finite past without changing the behavior of LTGOLD's existing E-to-V rules.
-		ts[j] = 'V1' .. ts[j]:sub(2)
+		-- Use V! (not V1) to distinguish from dictionary-stored V1 tokens which are present-tense.
+		ts[j] = 'V!' .. ts[j]:sub(2)
 	elseif s == '#' then
 		-- Literal `a` is initially an article; LTGOLD's boundary rule restores the
 		-- original designator spelling (A) from the analyzer's source-token field.
@@ -264,19 +286,21 @@ local function try_match_pattern(ts, m, j, f, replace)
 		elseif not ts[j] then
 			dbg.log(3, "    match fail: end of tokens at pos", j)
 			return false
-		elseif t == 'select' and xor(i, matches(ts[j],v)) then
+		elseif t == 'select' and xor(i, tag_matches(ts[j],v)) then
 			j=replace(ts,j,v,f())
 		elseif t == 'any' then
 			local d = eat('$', f())
 			fallback = function(n)
-				if xor(i, matches(ts[n], v)) then
+				-- '$' in pattern means universal capture: match any token in span
+				local match = v == '$' or xor(i, tag_matches(ts[n], v))
+				if match then
 					dbg.log(3, "    any-match consumed token", n, "tag", v)
 					j = nop(ts,n,v,nil,d)
 					return true
 				end
 			end
 		elseif t == 'literal' and xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then j=replace(ts,j,v,f())
-		elseif t == 'char' and xor(i, matches(ts[j], v)) then j=replace(ts,j,v,f())
+		elseif t == 'char' and xor(i, tag_matches(ts[j], v)) then j=replace(ts,j,v,f())
 		elseif fallback and fallback(j) then goto restart
 		else
 			dbg.log(3, "    match fail: pos", j, "type", t, "val", v, "neg", i)
@@ -343,21 +367,22 @@ local function collect_positions(ts, m, start)
 			return nil
 		elseif t == 'any' then
 			fallback = function(n)
-				if xor(i, matches(ts[n], v)) then
+				local match = v == '$' or xor(i, tag_matches(ts[n], v))
+				if match then
 					table.insert(positions, n)
 					j = n + 1
 					return true
 				end
 			end
 		elseif t == 'select' then
-			local matched = matches(ts[j], v)
+			local matched = tag_matches(ts[j], v)
 			if not xor(i, matched) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'literal' then
 			if not xor(i, ts[j] == (type(en_ru[v]) == 'table' and en_ru[v].__lex or en_ru[v])) then return nil end
 			table.insert(positions, j); j = j + 1
 		elseif t == 'char' then
-			if not xor(i, matches(ts[j], v)) then
+			if not xor(i, tag_matches(ts[j], v)) then
 				if fallback and fallback(j) then goto restart end
 				return nil
 			end
@@ -368,7 +393,7 @@ local function collect_positions(ts, m, start)
 	return positions
 end
 
-local function match_pattern(ts, m, r, flags)
+local function match_pattern(ts, m, r, flags, rule_set_idx)
 	local is_digit_action = r and r:match("^%d+$")
 	for i = 1, #ts do
 		if try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), nop) then
@@ -387,20 +412,44 @@ local function match_pattern(ts, m, r, flags)
 					reorder_tokens(ts, positions, r)
 				end
 			else
-				-- Guard rules (T7/T8) have no rewrite action but carry constituent-type
-				-- flags. Store the flags on the LAST token of the matched span so the
-				-- compiler can use them for case/agreement decisions.
-				-- LTGOLD encodes PP (0x02), NP (0x06), VP (0x03), etc. in these flags.
+				-- Guard rules have no rewrite action but carry constituent-type flags.
+				-- Store the flags on the LAST token of the matched span so the compiler
+				-- can use them for case/agreement decisions.
 				if flags and flags > 0 and (r == nil or r == "" or r == ".") then
 					local positions = collect_positions(ts, pattern_tokens(m), i)
 					if positions and #positions > 0 then
 						local head_pos = positions[#positions]
-						ts.constituent_flags[head_pos] = flags
-						dbg.log(2, string.format("    T7/T8 flag 0x%02X → token %d (%s)",
-							flags, head_pos, utils.decode(ts[head_pos], true)))
+						-- Store flag along with the rule-set index that set it.
+						-- This lets action rules distinguish same-table guards (blocking)
+						-- from earlier-table guards (non-blocking, different processing pass).
+						local prev = ts.constituent_flags[head_pos]
+						if not prev or (prev[1] or 0) <= (rule_set_idx or 0) then
+							ts.constituent_flags[head_pos] = { rule_set_idx or 0, flags }
+						end
+						dbg.log(2, string.format("    flag 0x%02X (T%d) → token %d (%s)",
+							flags, rule_set_idx or 0, head_pos, utils.decode(ts[head_pos], true)))
 					end
 				else
-					try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
+					-- Action rules: skip if the head was locked by a guard from the SAME table.
+					-- Guards from earlier tables (e.g. T3 guard on a token, T4 action on it)
+					-- should NOT block: each table is a separate rewriting pass.
+					-- T7/T8 flags always block (they finalize constituent types for morphology).
+					local positions = collect_positions(ts, pattern_tokens(m), i)
+					local flag_entry = positions and #positions > 0 and ts.constituent_flags[positions[#positions]]
+					local blocks = false
+					if flag_entry then
+						local setter_table = flag_entry[1] or 0
+						local flag_val = flag_entry[2] or 0
+						-- Same table or T7/T8 (finalization pass): block the action
+						blocks = (setter_table == (rule_set_idx or 0)) or (setter_table >= 7)
+					end
+					if not blocks then
+						try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
+					else
+						local flag_val = flag_entry and flag_entry[2] or 0
+						dbg.log(2, string.format("    Skipped (constituent_flag 0x%02X from T%d on head): %s → %s",
+							flag_val, flag_entry and flag_entry[1] or 0, m, r or ""))
+					end
 				end
 			end
 			dbg.log(3, "    tokens after:",
@@ -420,28 +469,46 @@ local function remove_silent_tokens(ts)
 end
 
 local function normalize_analyzer_tags(ts)
-	-- LTGOLD's historical/irregular-past analyzer tag enters the grammar as E.
+	-- LTGOLD's historical/irregular-past analyzer tag (h) enters the grammar as E.
+	-- We convert to E1 (already-resolved imperfective past) so the E printer skips
+	-- the perfective aspect switch. This matches LTGOLD: "came" → приходил (imperf),
+	-- not пришел (perf).
 	for i = 1, #ts do
 		if ts[i]:byte(1) == string.byte('h') then
-			dbg.log(2, "  h→E conversion:",
-			  utils.decode(ts[i], true), "→ E" .. utils.decode(ts[i]:sub(2), true))
-			ts[i] = 'E' .. ts[i]:sub(2)
+			dbg.log(2, "  h→E1 conversion:",
+			  utils.decode(ts[i], true), "→ E1" .. utils.decode(ts[i]:sub(2), true))
+			ts[i] = 'E1' .. ts[i]:sub(2)
 		end
 	end
 end
 
 local function resolve_attributive_forms(ts)
 	-- Resolve analyzer Z/N+A records before T2/T3 discard secondary forms.
+	-- Skip I-tagged (numeral) tokens: their A-form is a declined case, not an attributive adjective.
+	-- Numerals need to stay as I so printers.I can output the nominative form.
 	for i = 1, #ts - 1 do
+		if ts[i]:sub(1,1) == 'I' then goto continue end
 		local has_adjective = find(ts[i], "A") or
 		  (find(ts[i], "Z") and ts[i]:find("A", 2, true))
 		if find(ts[i + 1], "NnZ") and has_adjective then
 			find_and_replace(ts, i, "A")
 		end
+		::continue::
 	end
 end
 
 local rule_set_preprocessors = {
+	[1] = function(ts)
+		-- X003 (present copula "is/are") before Z with A-form → resolve Z to A
+		for i = 1, #ts - 1 do
+			if ts[i]:sub(1, 1) == 'X' and ts[i]:match("003") then
+				local next_tok = ts[i + 1]
+				if next_tok:byte(1) == string.byte('Z') and next_tok:find(string.char(65), 2, true) then
+					find_and_replace(ts, i + 1, "A")
+				end
+			end
+		end
+	end,
 	[3] = function(ts)
 		for i = 1, #ts - 1 do
 			if ts[i]:sub(1, 1) == 'q' and ts[i + 1]:sub(1, 1) == 'Z' then
@@ -466,7 +533,7 @@ local function apply_rule_sets(ts)
 		dbg.log(2, "Rule set T" .. ri .. ":")
 		for _, r in ipairs(rs) do
 			local flags, pat, act = table.unpack(r)
-			match_pattern(ts, pat, act or "", flags)
+			match_pattern(ts, pat, act or "", flags, ri)
 		end
 		dbg.log(3, "  After T" .. ri .. ":",
 		  table.concat(utils.map(ts, function(t)

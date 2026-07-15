@@ -469,10 +469,10 @@ table.insert(rules, {
   { 0x0F, "Jry", "@@x" },
   { 0x10, "uE", "@V" },
   { 0x13, "[NR]ET", ".V" },
-  -- Custom T4 fallback until LTGOLD constituent flags are decoded: a subject followed by an E-form and a preposition is simple past ("the cat sat on ..."), not a passive participle.
-  { 0x00, "[NR]EP", ".1" },
+  -- [NR]EP removed: the E printer handles both simple-past (N-E-P(non-instr)) and
+  -- passive (N-E-PТ/instrumental) correctly via passive-detection logic.
   { 0x18, "[SR]<dDK>v", "M" },
-  { 0x1F, "IA", "A" },
+  { 0x1F, "IA", "." },  -- numeral+adj: keep I as-is (printers.I outputs nominative form)
   { 0x29, "As[X,*]", "@ " },
   { 0x0B, "S<AO>N", "O" },
   { 0x0B, "FPN~<UVXYR>[UVXY]", "" },

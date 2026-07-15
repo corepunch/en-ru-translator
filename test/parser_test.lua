@@ -38,8 +38,8 @@ assert_eq(tags("She can speak."), "R U V .", "She can speak: R U V .")
 -- Copula sentence: determiner + noun + copula + NP
 assert_eq(tags("He is in the house."), "R X P T N .", "He is in the house: R X P T N .")
 
--- Passive voice collapses was+signed into N V
-assert_eq(tags("The agreement was signed."), "T N V .", "The agreement was signed: T N V .")
+-- Passive voice: X103 (past copula) stays, E (past participle) stays for short passive construction
+assert_eq(tags("The agreement was signed."), "T N X E .", "The agreement was signed: T N X E .")
 
 -- Demonstrative + noun + copula + NP
 assert_eq(tags("This agreement is a sample for testing the electronic translation program."),

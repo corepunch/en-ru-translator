@@ -16,6 +16,12 @@
 |----------|-------------|
 | [Case Study: Zork](case-study-zork.md) | Step-by-step walkthrough: diagnosing translation errors, adding DUNGEON.DIC vocabulary, adding rules. |
 
+## Reverse Engineering
+
+| Document | Description |
+|----------|-------------|
+| [LTGOLD Reverse Engineering](ltgold-reverse-engineering.md) | Complete knowledge base: methodology, all bugs fixed, remaining failures, r2/r2ghidra workflow, flag semantics. |
+
 ## Active Research
 
 Work-in-progress notes live in [`work/`](../work/):

@@ -1030,7 +1030,25 @@ printers.Y = function(t, e)
   return ""
 end
 -- x (impersonal/there-is), y (have existential), i (indefinite article form)
-printers.x = function(t) return utils.decode(t, true) end
+printers.x = function(t, e, s, i)
+  -- x = impersonal verb / existential ("нужно" = it is necessary).
+  -- When followed by a noun, decline as short adjective agreeing with it.
+  local decoded = utils.decode(t, true)
+  if decoded == "нужно" and s and i then
+    -- Find next non-determiner token for gender agreement
+    local j = i + 1
+    while s[j] and s[j]:sub(1,1):match('[Tq]') do j = j + 1 end
+    if s[j] and s[j]:sub(1,1):match('[Nn]') then
+      local gender = get_gender(s[j]) or 1
+      local forms = { [1]="нужен", [2]="нужна", [0]="нужно" }
+      local plural = s[j]:sub(1,1) == 'n'
+      -- Set dative case for preceding subject noun phrase
+      e.form = case["Д"]
+      return plural and "нужны" or (forms[gender] or "нужно")
+    end
+  end
+  return decoded
+end
 printers.y = function(t, e)
   -- y1 = "нет" (existential negative "there is no") requires genitive on the
   -- governed noun (LTGOLD encodes this via constituent-flag case government).

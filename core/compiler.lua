@@ -166,8 +166,14 @@ local printers = {
       -- for modifiers; it must not leak into the following predicate.
       e.form = e.numeral.adjective_form
       e.plural = e.numeral.adjective_plural
-      local n = find(s, i, 'Nn')
-      if n then e.gender = get_gender(n) end
+    local n = find(s, i, 'Nn')
+    -- W-phrase flag propagation: when the adjective is a sub-constituent of an
+    -- expanded W-token, s.context[i] holds the head noun's raw CP866 form
+    -- (mirrors LTPRO morph-engine type-12 +0x72 propagation).
+    if not n and s.context and s.context[i] and s.context[i] ~= false then
+      n = s.context[i]
+    end
+      if n then e.gender = get_gender(n) or e.gender end
       local adj_id, adj_base, adj_refl = adj(utils.extract(a))
       local result = paradigms.adjective(adj_base or a, adj_id, e)
       return adj_refl and (result .. "ся") or result
@@ -201,10 +207,10 @@ local printers = {
         end
         for j = start, 1, -1 do
           -- Subject noun: skip N tokens that are genitive modifiers (preceded by another N)
-          if s[j] and s[j]:sub(1,1):match('[Nn]') and
-             (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
-            gender = get_gender(s[j])
-            e.plural = s[j]:sub(1,1) == 'n'
+           if s[j] and s[j]:sub(1,1):match('[Nn]') and
+              (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+             gender = get_gender(s[j]) or gender  -- fallback if not in RUS
+             e.plural = s[j]:sub(1,1) == 'n'
             break
           end
         end
@@ -214,8 +220,23 @@ local printers = {
       return stem .. (short_endings[idx] or "")
     end
     local n = find(s, i, 'Nn')
+    if not n and s.context and s.context[i] and s.context[i] ~= false then
+      n = s.context[i]
+    end
+    -- Predicative adjective after copula: noun is before X/V, not after.
+    -- Scan backward past auxiliaries to find the subject noun for agreement.
+    if not n then
+      for j = (i or 0) - 1, 1, -1 do
+        if s[j] and s[j]:sub(1,1):match('[Nn]') and
+           (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
+          n = s[j]; break
+        elseif s[j] and s[j]:sub(1,1):match('[XVUYxy]') then
+          -- skip copula/aux verbs, continue scanning
+        else break end
+      end
+    end
     if n then
-      e.gender = get_gender(n)
+      e.gender = get_gender(n) or e.gender  -- fallback to default if not in RUS
       e.plural = n:sub(1, 1) == 'n'
     end
     local adj_id, adj_base, adj_refl = adj(utils.extract(a))
@@ -257,7 +278,7 @@ local printers = {
       dbg.diag("multi", "noun no base:", d)
       return d
     end
-    e.gender = get_gender(t)
+    e.gender = get_gender(t) or e.gender  -- fallback to default if not in RUS
     if not (e.numeral and e.numeral.noun_plural) then
       e.plural = e.plural and (b:byte(3)&0x4) == 0
     end
@@ -268,6 +289,9 @@ local printers = {
       dbg.log(2, "    N genitive modifier:", d)
     end
     local paradigm = b:byte(4)&~0x80
+    -- Store the noun form in token context for downstream gender agreement
+    -- (LTPRO +0x72: copula, adjective, and pronoun printers read this).
+    if s and s.context and i then s.context[i] = t end
     local result = paradigms.noun(t, paradigm, e)
     dbg.log(2, string.format("    N: word=%-12s paradigm=%-3d gender=%d form=%d => %s",
       d, paradigm, e.gender, e.form, utils.decode(result)))
@@ -358,7 +382,7 @@ local printers = {
           for j = i and (i-1) or 0, 1, -1 do
             if s[j] and s[j]:sub(1,1) == 'N' and
                (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
-              gender = get_gender(s[j])
+              gender = get_gender(s[j]) or gender  -- fallback if not in RUS
               break
             end
           end
@@ -755,8 +779,8 @@ printers.L = function(t, e, s, i)
   if s then
     for j = (i and i-1 or 0), 1, -1 do
       local tag = s[j] and s[j]:sub(1,1)
-      if tag == 'N' or tag == 'n' then
-        gender = get_gender(s[j])
+       if tag == 'N' or tag == 'n' then
+         gender = get_gender(s[j]) or gender  -- fallback if not in RUS
         break
       end
     end
@@ -855,13 +879,13 @@ printers.O = function(t, e, s, i)
     if s then
       for j = i and (i+1) or 1, #s do
         local tag = s[j] and s[j]:sub(1,1)
-        if tag == 'N' then
-          noun_gender = get_gender(s[j])
-          -- uppercase N = singular; lowercase n = plural
-          noun_plural = false
-          break
-        elseif tag == 'n' then
-          noun_gender = get_gender(s[j])
+         if tag == 'N' then
+           noun_gender = get_gender(s[j]) or noun_gender  -- fallback if not in RUS
+           -- uppercase N = singular; lowercase n = plural
+           noun_plural = false
+           break
+         elseif tag == 'n' then
+           noun_gender = get_gender(s[j]) or noun_gender  -- fallback if not in RUS
           noun_plural = true
           break
         end
@@ -1200,7 +1224,7 @@ printers.X = function(t, e, s, i)
       for k = i - 1, 1, -1 do
         if s[k] and s[k]:sub(1,1):match('[Nn]') and
            (k == 1 or not s[k-1] or s[k-1]:sub(1,1) ~= 'N') then
-          gender = get_gender(s[k])
+          gender = get_gender(s[k]) or gender  -- fallback to default if not in RUS
           plural = s[k]:sub(1,1) == 'n'
           for q = k - 1, 1, -1 do
             local qtag = s[q] and s[q]:sub(1,1)

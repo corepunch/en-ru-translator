@@ -783,25 +783,30 @@ local function apply_copular_it_compatibility(ts)
 	end
 end
 
-local function apply_capitalization_compatibility(ts)
-	if ts.caps then
-		for i = 2, #ts do
-			if ts[i - 1] == 'T' and ts.phrases and ts.phrases[i] then
-				-- LTPRO can leak the initial article's capitalization to an attached
-				-- future predicate, but packed phrase components retain their own caps.
-				local j = i + 1
-				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
-				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
-			end
-		end
-	end
-end
+ local function apply_capitalization_compatibility(ts)
+ 	if ts.caps then
+ 		for i = 2, #ts do
+ 			if ts[i - 1] == 'T' and ts.phrases and ts.phrases[i] then
+ 				-- LTPRO can leak the initial article's capitalization to an attached
+ 				-- future predicate, but packed phrase components retain their own caps.
+ 				local j = i + 1
+ 				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
+ 				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
+ 			end
+ 		end
+ 	end
+ end
 
 local function expand_phrase_tokens(ts)
 	-- W tokens (multi-word phrases like WAэлектронныйNперевод) survive rules but must
 	-- be expanded into their constituent forms (Aэлектронный + Nперевод) before the
 	-- compiler processes them. The gmatch skips the W prefix since 'W' is not followed
 	-- by CP866 bytes, so the tag reverts to the first real tag letter after W.
+	--
+	-- LTPRO morph engine type-12 propagates morphological flags (token+0x72, +0x77)
+	-- from the head noun to all sibling sub-constituents within the W-phrase. We
+	-- replicate this by storing the N sub-token's raw form in ts.context[i] so the
+	-- compiler's adjective printer can inherit gender/case agreement.
 	for i = #ts, 1, -1 do
 			if ts[i]:sub(1,1) == 'W' then
 				local metadata = stream.metadata(ts, i)
@@ -811,6 +816,11 @@ local function expand_phrase_tokens(ts)
 				table.insert(expanded, word)
 			end
 			if #expanded > 0 then
+				-- Find the head noun (N-tagged sub-token) for context propagation.
+				local head_noun = nil
+				for _, word in ipairs(expanded) do
+					if word:sub(1, 1) == 'N' then head_noun = word; break end
+				end
 				-- Remove the W token (and its caps entry), then insert expanded tokens.
 				-- Expanded tokens inherit the W token's all-caps flag so that
 				-- e.g. "AGREEMENT ON" (all-caps W phrase) → each sub-token is uppercase.
@@ -823,6 +833,12 @@ local function expand_phrase_tokens(ts)
 						source = metadata.source,
 						component_caps = false,
 					})
+				end
+				-- Propagate head-noun context to all sub-tokens (LTPRO +0x72 propagation).
+				if head_noun then
+					for j = 0, #expanded - 1 do
+						ts.context[i + j] = head_noun
+					end
 				end
 			end
 		end

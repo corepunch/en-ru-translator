@@ -579,9 +579,17 @@ local function normalize_analyzer_tags(ts)
 	-- not пришел (perf).
 	for i = 1, #ts do
 		if ts[i]:byte(1) == string.byte('h') then
-			dbg.log(2, "  h→E1 conversion:",
-			  utils.decode(ts[i], true), "→ E1" .. utils.decode(ts[i]:sub(2), true))
-			stream.set_token(ts, i, 'E1' .. ts[i]:sub(2))
+			-- h without digit → E0 (parser-generated imperfective past, suppress switch).
+			-- h1/h2 with digit → keep as E1/E2 (multi-digit, suppress switch, same as before).
+			if ts[i]:match('^h%d') then
+				dbg.log(2, "  h→E1 conversion:",
+				  utils.decode(ts[i], true), "→ E1" .. utils.decode(ts[i]:sub(2), true))
+				stream.set_token(ts, i, 'E1' .. ts[i]:sub(2))
+			else
+				dbg.log(2, "  h→E0 conversion:",
+				  utils.decode(ts[i], true), "→ E0" .. utils.decode(ts[i]:sub(2), true))
+				stream.set_token(ts, i, 'E0' .. ts[i]:sub(2))
+			end
 		end
 	end
 end

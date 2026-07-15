@@ -564,9 +564,15 @@ local printers = {
       e.passive = false
       return result .. refl
     end
-    -- '1' flag means "already a resolved past form" — suppress perfective switch.
+    -- E0 (parser-converted from h-tag, byte3 = CP866 non-digit): suppress switch.
+    -- E0x (dictionary codes E01, E02 etc., byte3 = digit): allow switch.
+    -- E1x (multi-digit E11, E103: analyzer-resolved): suppress switch.
+    -- E1 (single-digit, byte3 = CP866 non-digit, e.g. told→E1говорить): allow switch.
     -- Also suppress for lowercase e (ambiguous) without explicit past context.
-    if t:byte(2) ~= string.byte('1') and e.past and b:byte(2)&2 ~= 2 then
+    local is_digit = function(b) return b and b >= string.byte('0') and b <= string.byte('9') end
+    local suppress = (t:byte(2) == string.byte('0') and not is_digit(t:byte(3))) or
+      (t:byte(2) == string.byte('1') and is_digit(t:byte(3)))
+    if not suppress and e.past and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))

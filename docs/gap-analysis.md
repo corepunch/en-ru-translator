@@ -4,16 +4,21 @@
 
 | Suite | Passed | Failed | Total |
 |-------|--------|--------|-------|
-| ltgold100 | 55 | 45 | 100 |
-| ltgold200 | 31 | 169 | 200 |
-| **Total** | **86** | **214** | **300** |
+| ltgold100 | 65 | 35 | 100 |
+| ltgold200 | 36 | 164 | 200 |
+| **Total** | **101** | **199** | **300** |
 
-The July 2026 grammar pass raised the corpus from 65/300 to 86/300. It added
+The July 2026 grammar pass raised the corpus from 65/300 to 89/300. It added
 source-aware preposition government for the decoded `at`/`from`/`about` frames,
 dative transfer-verb pronouns, scoped modal infinitives, past-progressive propagation,
 numeral NP agreement, and bounded alternative-meaning extraction. The remaining
 failures below are broader undecoded frame and constituent-flag coverage; the five
 features are no longer wholly absent.
+
+The first T3 infinitive pass also restored B/b morphology controls in the
+compiler. This fixes “wants to go,” “began to speak,” and “tried to open”; the
+remaining five T3-INF failures originate in the governing verb's lexical/frame
+selection or unrelated preposition handling rather than loss of the infinitive.
 
 ---
 

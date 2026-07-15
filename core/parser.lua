@@ -21,6 +21,10 @@ end
 
 local en_ru = {}
 
+-- Shared flag: set when X1 (past auxiliary "did/was/had") is consumed by ' ' action,
+-- checked by the V action handler to propagate past tense to the resolved verb.
+local x1_past_context = false
+
 local function eat(value, _, c) assert(not c or c == value) return c end
 local function xor(a, b) return (a and not b) or (b and not a) end
 
@@ -237,15 +241,23 @@ local function replace(ts, j, m, t, s)
 			if xdigit and xdigit:sub(1,1) == '2' then
 				stream.set_token(ts, j, 'q')
 			else
-				if xdigit and xdigit:sub(1,1) == '1' and ts[j + 1] and
-				   ts[j + 1]:sub(1,1) == 'G' then
-					-- T2's X1+G progressive action deletes the auxiliary. Preserve its
-					-- past-tense feature on the resolved lexical verb with the V! marker.
-					stream.set_token(ts, j + 1, 'V!' .. ts[j + 1]:sub(2))
+				if xdigit and xdigit:sub(1,1) == '1' then
+					if ts[j + 1] and ts[j + 1]:sub(1,1) == 'G' then
+						-- T2's X1+G progressive action deletes the auxiliary. Preserve its
+						-- past-tense feature on the resolved lexical verb with the V~ marker.
+						-- V~ (not V!) tells the compiler this is a progressive past (imperfective)
+						-- so the perfective switch should NOT apply (e.g. was reading → читала, not прочитала).
+						stream.set_token(ts, j + 1, 'V~' .. ts[j + 1]:sub(2))
+					else
+						-- X1 past auxiliary (did, was, had) deletes itself but leaves a
+						-- shared flag so the subsequent V action can mark the verb as past.
+						x1_past_context = true
+					end
 				end
 				stream.set_token(ts, j, ' ')
 			end
 		else
+			x1_past_context = false  -- reset on non-X delete
 			stream.set_token(ts, j, ' ')
 		end
 	elseif m:find'*' and (j >= #ts or j == 1) then
@@ -272,7 +284,18 @@ local function replace(ts, j, m, t, s)
 		stream.set_token(ts, j, '#' .. ((ts.source and ts.source[j]) or ts[j]:sub(2)))
 	elseif s == '=' or s == ';' then
 		-- case-setting / clause-continuation: no-op until semantics are confirmed
-	elseif s then find_and_replace(ts, j, s)
+	elseif s then
+		-- When resolving an E/e token to V, preserve past-tense info as V!
+		-- so the compiler conjugates as past tense (e.g. signed→подписал not подписывает).
+		local was_past = ts[j] and ts[j]:sub(1, 1):match('[Ee]')
+		local is_v = (s == 'V')
+		find_and_replace(ts, j, s)
+		if is_v and (was_past or x1_past_context) and ts[j] and ts[j]:sub(1, 1) == 'V' then
+			-- V! for E/e past → perfective switch; V= for X1 simple past → no switch
+			local marker = was_past and '!' or '='
+			stream.set_token(ts, j, 'V' .. marker .. ts[j]:sub(2))
+			x1_past_context = false
+		end
 	end
 	return j+1
 end

@@ -138,6 +138,16 @@ Match at position 1:
 Result: the Z token is resolved to its N (noun) form: "штраф" (fine/monetary penalty).
 This is the final fallback — any Z not handled by earlier context rules becomes a noun.
 
+---
+
+**B/b morphology control**
+
+The B→b rewrites are morphological, not just surface suppression. The separate
+post-T8 morphology table contains type-18 patterns `*BNV` and `*B<b>WV`, so the
+case of the particle reaches output generation: `B` selects a perfective
+infinitive and `b` an imperfective infinitive. The Lua compiler mirrors this by
+arming the next verb when either marker is consumed.
+
 ================================================================================
 Table T3  |  136 records  |  rec_size=10  |  LTPRO offset=0x27B98
 --------------------------------------------------------------------------------

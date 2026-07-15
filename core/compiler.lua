@@ -42,6 +42,7 @@ local verb_frames = {
   ["уполномочивать"] = { next_infinitive = true },
   ["позволять"] = { object_case = case["Д"] },
   ["делать"] = { causative = "заставлять" },
+  ["устанавливать"] = { object_case = case["В"], preposition = "на", emit = true },
 }
 
 
@@ -292,7 +293,20 @@ local printers = {
     if e.verb_frame then e.verb_frame = nil end
     return result
   end,
-  P = function(t, e)
+  P = function(t, e, s, i)
+    -- Absorb the preposition when a P/D token follows a verb and has a D (adverb)
+    -- alternative with no following noun (e.g. "fell down" — particle, not prep).
+    -- LTGOLD encodes this via the analyzer resolving "fell"→"fall" and matching
+    -- "fall down" as a phrasal-verb dictionary entry.
+    if s and i then
+      local prev_tag = s[i-1] and s[i-1]:sub(1, 1)
+      local next_tag = s[i+1] and s[i+1]:sub(1, 1)
+      local has_d_alt = t:find('D', 2, true)  -- token has a D alternative packed
+      if prev_tag and prev_tag:match('[VEZveEG]') and has_d_alt and
+         next_tag and not next_tag:match('[Nn#]') then
+        return ""
+      end
+    end
     local second = utils.decode(t:sub(2, 2), true)
     local third = utils.decode(t:sub(3, 3), true)
     if case[third] then
@@ -331,7 +345,7 @@ local printers = {
     -- LTGOLD handles this via verb paradigm table: copula 003 sets infinitive flag,
     -- and the Z printer reads the A-form's short adjective from the paradigm table.
     -- The if-chain here approximates that lookup without the full paradigm table.
-    if e.infinitive and t:find('A', 1, true) then
+    if e.infinitive and not e.infinitive_particle and t:find('A', 1, true) then
       e.infinitive = false
       local apost = t:find('A', 1, true)
       if apost then
@@ -360,20 +374,30 @@ local printers = {
       e.perfective = (e.word == 1)
     end
     if e.word == 1 then e.imperative = true end
-    -- LTGOLD emits the PERFECTIVE infinitive after a modal when available
-    -- (говорить→сказать, идти→придти), otherwise the imperfective infinitive.
-    if e.infinitive then
-      e.infinitive = false
-      if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2) ~= 2 then
-        local paired = compiler.base[d]:sub(6)
-        if #paired > 0 and paired:byte(1) >= 128 then
-          e.perfective = false
-          return utils.decode(paired)
-        end
-      end
-      return d
-    end
-    if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2)~=2 then
+     -- LTGOLD emits the PERFECTIVE infinitive after a modal when available
+     -- (говорить→сказать, идти→придти), otherwise the imperfective infinitive.
+     -- V1 tokens are dictionary-stored present-tense surface forms and keep
+     -- their original aspect under modals (e.g. can understand → может понимать).
+     if e.infinitive then
+       e.infinitive, e.infinitive_particle = false, false
+       if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2) ~= 2 then
+         if t:match('^V1') then
+           return d  -- V1 present-tense forms keep original aspect
+         end
+         local paired = compiler.base[d]:sub(6)
+         if #paired > 0 and paired:byte(1) >= 128 then
+           e.perfective = false
+           return utils.decode(paired)
+         end
+       end
+       return d
+     end
+    -- Switch from imperfective to perfective paired form when the context demands it:
+    -- e.perfective is set for first-word verbs in future/perfect contexts;
+    -- e.past is set by V! tokens (resolved past tense). Both should trigger the switch,
+    -- UNLESS e.progressive is set (V~ from X1+G: progressive past stays imperfective)
+    -- or e.simple_past is set (V= from X1+K+Z: simple past from "did" stays imperfective).
+    if (e.perfective or e.past) and not e.progressive and not e.simple_past and compiler.base[d] and (compiler.base[d]:byte(2)&2)~=2 then
       local paired = compiler.base[d]:sub(6)
       if #paired > 0 and paired:byte(1) >= 128 then
         t = paired
@@ -462,7 +486,20 @@ local printers = {
     local d = utils.decode(t, true)
     local b = compiler.base[d]
     if not b then return d end
-    e.past = true
+    -- Lowercase 'e' = ambiguous infinitive/past/participle. When preceded by a modal
+    -- (U/X/Y) or infinitive particle (B/b), keep as infinitive (can read → может читать).
+    local prev_tag = s and s[i - 1] and s[i - 1]:sub(1, 1)
+    local is_after_modal = prev_tag and prev_tag:match('[UXYBb]') ~= nil
+    local is_ambiguous = t:sub(1, 1) == 'e'
+    if is_ambiguous and is_after_modal then
+      e.infinitive = true
+      return d
+    end
+    -- Uppercase E = definite past/passive participle; lowercase e = ambiguous
+    -- (infinitive / past / participle). Without a temporal context signal (like
+    -- an X1/Y auxiliary), default unambiguous e to non-past to match LTGOLD's
+    -- present-tense treatment of bare e-tagged verbs (e.g. "He put it on...").
+    e.past = not is_ambiguous
     -- Clear infinitive flag set by X1xx copula: E output is not an infinitive.
     e.infinitive = false
     local previous = s and s[i - 1] and utils.decode(s[i - 1], true)
@@ -517,7 +554,8 @@ local printers = {
       return result .. refl
     end
     -- '1' flag means "already a resolved past form" — suppress perfective switch.
-    if t:byte(2) ~= string.byte('1') and b:byte(2)&2 ~= 2 then
+    -- Also suppress for lowercase e (ambiguous) without explicit past context.
+    if t:byte(2) ~= string.byte('1') and e.past and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
@@ -540,6 +578,7 @@ local printers = {
       e.passive = false
       return result
     end
+    e.verb_frame = verb_frames[utils.extract_form(t)]
     return paradigms.verb(t, b:byte(4)&~0x80, e)
   end,
 }
@@ -558,11 +597,19 @@ printers.S = function(t, e)
 end
 printers.V = function(t, e, s, i)
 	-- V! is the parser's resolved simple-past marker for an E/e dictionary form that has no separately packed V alternative.
+	-- V~ is the progressive-past marker from X1+G: past tense but imperfective (no perfective switch).
+	-- V= is the simple-past marker from X1+K+Z ("did not write"): past tense, no perfective switch.
 	-- (Dictionary-stored V1 tokens are present-tense forms, not past.)
 	local resolved_past = t:sub(2, 2) == '!'
-	if resolved_past then
+	local progressive_past = t:sub(2, 2) == '~'
+	local simple_past = t:sub(2, 2) == '='
+	if resolved_past or progressive_past or simple_past then
 		t = 'V' .. t:sub(3)
 		e.past = true
+		-- V~ and V= verbs must not trigger the perfective switch; they stay imperfective
+		-- (was reading → читала, not прочитала; did write → писал, not написал).
+		if progressive_past then e.progressive = true end
+		if simple_past then e.simple_past = true end
 	end
   if e.modal_scope and (not e.modal_scope.consumed or e.modal_scope.awaiting_coord) then
     -- T7 coordinated VP flags keep every verb under the same modal auxiliary.
@@ -616,7 +663,9 @@ printers.V = function(t, e, s, i)
 	  e.modal_scope.consumed = true
 	  e.modal_scope.awaiting_coord = false
 	end
-	if resolved_past then e.past = false end
+	if resolved_past or simple_past then e.past = false end
+	if simple_past then e.simple_past = false end
+	if progressive_past then e.progressive = false end
   e.verb_frame = verb_frames[utils.extract_form(t)]
   if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
     e.form = e.verb_frame.object_case
@@ -819,7 +868,15 @@ printers.O = function(t, e, s, i)
   if ok and res then return res end
   return d
 end
-printers.l = printers.L
+-- l: genitive relative pronoun (triggered by "whose").  Force genitive case
+-- regardless of e.form, since "whose" inherently means "of which/whose".
+printers.l = function(t, e, s, i)
+  local saved_form = e and e.form
+  if e then e.form = case["Р"] end  -- genitive
+  local result = printers.L(t, e, s, i)
+  if e then e.form = saved_form end
+  return result
+end
 printers.s = printers.S
 -- h (history/alternate form marker) — treat as past tense like E
   printers.h = function(t, e)
@@ -832,8 +889,43 @@ printers.s = printers.S
     -- Use the imperfective verb directly (no aspect switch).
     return paradigms.verb(t, b:byte(4)&~0x80, e)
   end
--- Q (question word), M (indirect pronoun), m (compound pronoun), r (compound personal)
-printers.Q = function(t) return utils.decode(t, true) end
+-- Q (question word): decode and interpret case-government prefix.
+-- LTGOLD stores a leading Russian case letter (И/Р/Д/В/Т/П) that instructs
+-- the compiler which case to decline the pronoun into (e.g. Дкто → dative "кому").
+printers.Q = function(t, e)
+  -- utils.extract_form already strips the tag byte and decodes CP866
+  local raw = utils.extract_form(t)
+  -- LTGOLD case-government codes embedded in the dictionary form.
+  -- A leading Russian case letter (И/Р/Д/В/Т/П) instructs the compiler
+  -- which case to decline the pronoun into (e.g. Дкто → dative "кому").
+  -- Use UTF-8 codepoint comparison since case letters are 2-byte Cyrillic.
+  local prefix_cp = utf8.codepoint(raw, 1)
+  local case_cp_map = {
+    [0x0418] = case["И"], [0x0420] = case["Р"], [0x0414] = case["Д"],
+    [0x0412] = case["В"], [0x0422] = case["Т"], [0x041F] = case["П"],
+  }
+  local case_code = case_cp_map[prefix_cp]
+  if case_code and e then
+    e.form = case_code
+    raw = raw:sub(utf8.offset(raw, 2))  -- strip the case prefix
+  end
+  -- Decline interrogative/relative pronouns for the resolved case
+  local pronoun_forms = {
+    ["кто"]  = { "кто",  "кого",  "кому",  "кого",  "кем",  "ком"  },
+    ["что"]  = { "что",  "чего",  "чему",  "что",  "чем",  "чём"  },
+    ["чей"]  = { "чей",  "чьего", "чьему", "чей",  "чьим", "чьём" },
+  }
+  local forms = pronoun_forms[raw]
+  if forms and e then
+    local result = forms[e.form] or raw
+    -- Reset case after the relative pronoun — it governs the relative clause,
+    -- not the main clause.  Without this, dative from "кому" bleeds into
+    -- subsequent tokens like object pronouns (ему instead of его).
+    e.form = case["И"]
+    return result
+  end
+  return raw
+end
 printers.M = function(t, e, s, i)
   local plural, person, gender = t:match("M(%d)(%d)(%d)")
   if not plural then plural, person = t:match("M(%d)(%d)") end
@@ -898,12 +990,24 @@ printers.Y = function(t, e)
 end
 -- x (impersonal/there-is), y (have existential), i (indefinite article form)
 printers.x = function(t) return utils.decode(t, true) end
-printers.y = function(t) return utils.decode(t, true) end
+printers.y = function(t, e)
+  -- y1 = "нет" (existential negative "there is no") requires genitive on the
+  -- governed noun (LTGOLD encodes this via constituent-flag case government).
+  if t:match('^y1') then e.form = case["Р"] end
+  return utils.decode(t, true)
+end
 printers.i = function(t) return utils.decode(t, true) end
 printers.u = function(t) return utils.decode(t, true) end
--- b/B (infinitive particle 'to') — suppress in output
-printers.B = function(t) return "" end
-printers.b = function(t) return "" end
+-- LTGOLD's B/b tags are silent morphology controls: B selects a perfective
+-- infinitive and b selects an imperfective infinitive for the following verb.
+printers.B = function(t, e)
+  e.infinitive, e.infinitive_particle, e.perfective = true, true, true
+  return ""
+end
+printers.b = function(t, e)
+  e.infinitive, e.infinitive_particle, e.perfective = true, true, false
+  return ""
+end
 -- W (multi-word phrase) — output decoded
 printers.W = function(t) return utils.decode(t, true) end
 -- # (proper noun / untranslatable): output raw string, reformat digit-only sequences
@@ -920,7 +1024,10 @@ printers["#"] = function(t, e)
     if #s > 3 then return s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "") end
     return s
   end
-  return s
+  -- Proper names: decode CP866 and strip LTGOLD metadata prefix (digit+м= pattern).
+  local decoded = utils.decode(s, false)
+  decoded = decoded:gsub("^%d+м=", "")
+  return decoded
 end
 printers.F = function(t, e, s, i)
   -- F tag: perfect/passive past-participle construction.
@@ -929,9 +1036,16 @@ printers.F = function(t, e, s, i)
   -- X103 (was) + F with instrumental agent → reflexive imperfective past ("писалось нею").
   e.infinitive = false
   e.past = true
-  -- Check if this is a Y (perfect) context: previous token is Y-tagged.
-  local prev_tag = s and i and s[i-1] and s[i-1]:sub(1,1)
-  local is_perfect = prev_tag == 'Y'
+  -- Check if this is a Y (perfect) context: scan backward past negation (K/k) tokens
+  -- to find the Y auxiliary (e.g. "has not seen" → Y + K + F).
+  local is_perfect = false
+  if s and i then
+    for j = i - 1, 1, -1 do
+      local prev_tag = s[j]:sub(1, 1)
+      if prev_tag == 'Y' then is_perfect = true; break end
+      if prev_tag ~= 'K' and prev_tag ~= 'k' then break end
+    end
+  end
   local has_agent = s and i and s[i+1] and s[i+1]:sub(1,1) == 'P' and
     #s[i+1] == 2 and s[i+1]:byte(2) == 0x92
   local vtext = find_form(t, 'V')
@@ -1092,16 +1206,17 @@ local function new_context()
     form = 1,
     perfective = false,
     imperative = false,
+    infinitive_particle = false, -- distinguishes B/b control from X copula state
     word = 1,
     multi_count = 0,  -- counter for multiple-meanings markup {N.alternative}
   }
 end
 
-local function reset_clause_context(e)
+ local function reset_clause_context(e)
   -- LTPRO punctuation closes transient verb/aspect government but preserves
   -- subject features until a later constituent replaces them.
   e.past, e.passive, e.imperative = false, false, false
-  e.perfective, e.infinitive = false, false
+  e.simple_past, e.perfective, e.infinitive, e.infinitive_particle = false, false, false, false
   e.modal_scope, e.numeral = nil, nil
   e.form = case["И"]
 end
@@ -1153,6 +1268,12 @@ function compiler.compile(s, options)
       if w == ',' or w == ';' then reset_clause_context(e) end
     else
       local tag, ok, out, err = render_token(w, e, s, i)
+      -- Strip leading comma when this is the first output element (sentence-initial
+      -- clause connective).  LTGOLD stores ",Когда" for "when" so the comma attaches
+      -- to the preceding clause; at sentence start there is nothing to attach to.
+      if out and #c == 0 and out:sub(1, 1) == ',' then
+        out = out:sub(2):match("^%s*(.*)") or ""
+      end
       -- handle leading punctuation in output (e.g. relative pronoun ", которую")
       if out and out:match("^[,%!%.;:]") and #c > 0 then
         c[#c] = c[#c] .. out:sub(1,1)

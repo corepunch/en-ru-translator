@@ -19,4 +19,8 @@ assert(supply_output == "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУК�
 local remedy_output = assert(engine:translate(
   "The exclusive remedy for breach of this warranty shall be the replacement."))
 assert(remedy_output == "Единственная компенсация за нарушение этой гарантии будет заменой.", remedy_output)
+-- T3 rewrites the English infinitive particle to b; the compiler must preserve
+-- its imperfective-infinitive control instead of conjugating the next V token.
+local infinitive_output = assert(engine:translate("She wants to go home now."))
+assert(infinitive_output == "Она хочет идти домой теперь.", infinitive_output)
 print("translator tests passed")

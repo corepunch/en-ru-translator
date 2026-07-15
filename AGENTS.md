@@ -472,20 +472,15 @@ See `LTGOLD/r2_tools.py` for pre-built analysis commands.
 **Previous session:**
 - W token expansion, G→N fallback, case propagation, X copula, find_form() rewrite.
 
-**This session (LTGOLD table/dictionary verification):**
-- **`utils.encode`** (`utils.lua`): Added UTF-8→CP866 encoder. Rule replacement literals in `rules.lua` are stored as UTF-8 but the token pipeline expects CP866; encoding them at `replacement_tokens()` time fixes garbled output (e.g. "так и" was decoded as "Вак").
-- **C printer fix** (`compiler.lua`): Changed to `decode(t:sub(2), false)` so multi-word conjunctions with spaces (e.g. `Cтак и`) are output in full instead of truncated at the first high-byte run.
-- **Uppercase preservation** (`utils.lua`, `parser.lua`, `compiler.lua`): `tokenize()` now sets `tbl.caps[i]` per token:  `true` = all-caps source word (e.g. `AGREEMENT` → `СОГЛАШЕНИЕ`), `"init"` = initial-cap (e.g. `Metric` → `Метрические`). Parser propagates caps through W-expansion and token reordering. Compiler applies `utf8_upper()` or first-letter uppercase accordingly.
-- **Reflexive verb conjugation** (`paradigms.lua`): `paradigms.verb()` detects CP866 `-ся` ending and removes 2 extra bytes before conjugation, then appends the correct reflexive suffix (`-ся`/`-сь`). Fixes `соглашатьют` → `соглашаются`.
-- **Plural noun declension** (`paradigms.lua`): `paradigms.noun()` now uses entries 6–11 of the paradigm string for plural forms. Singular N-tagged tokens reset `e.plural` in the compiler to prevent bleed from prior `n`-tagged nouns.
-- **Multiple meanings markup** (`compiler.lua`): N printer detects `;`-separated alternatives in the token (e.g. `NNобразец;выборка`) and appends `{N.alternative}` as LTGOLD does, with a per-sentence counter tracked in `e.multi_count`.
-- **`z` tag printer** (`compiler.lua`): Added printer for -s/-es ambiguous forms; prefers noun in non-nominative contexts.
-- **`q` future-tense marker** (`parser.lua`, `compiler.lua`): `X2xx` (shall/will) auxiliary now becomes token `q` instead of silent space; the `q` printer sets `e.perfective = true` so the following verb conjugates as perfective future (e.g. `поставляет` → `поставит`).
-- **Number comma formatting** (`compiler.lua`): `#` printer re-inserts commas every 3 digits (e.g. `1000000` → `1,000,000`).
-- **O-pronoun case declension** (`compiler.lua`): Full 6-case × 4-number table for `этот`, using the associated noun's plurality to avoid bleed.
-- **Single-letter designator** (`utils.lua`): All-caps single letters (e.g. `A` in `EXHIBIT A`) bypass article lookup and are preserved as `#A` proper-noun tokens.
-- **Caps propagation through reordering** (`parser.lua`): `reorder_tokens()` now moves `ts.caps` entries alongside the tokens.
-- **compare.lua adjustments**: Expected for sentence 2 updated to remove `'ЛТГОЛД'` (LTGOLD product-name self-reference not reproducible without a special dictionary entry).
+**This session (T8-NEG/T8-COORD grammar pass):**
+- **F printer Y scan past negation** (`compiler.lua`): Changed `is_perfect` check to scan backward past K/k tokens for Y auxiliary (e.g. "has not seen" → Y+K+F). Fixes "She has not seen him." — "увидeла" (past tense) not "увидена" (participle).
+- **X1 past-tense propagation via V= marker** (`parser.lua`, `compiler.lua`): Added shared `x1_past_context` flag set when X1 ("did") is consumed by ` ` action. The V action handler now uses V= (simple past, no perfective switch) instead of V! (which triggers switch). Compiler V printer handles V= to set e.past but suppress perfective switch via `e.simple_past`. Fixes "He did not write the report." — "писал" (imperfective past) not "написал" (perfective past).
+- **y1 genitive government** (`compiler.lua`): y1 ("нет" = there is no) now sets `e.form = case["Р"]` (genitive) on the governed noun. Fixes "There is no problem here." — "проблемы" (genitive) not "проблема" (nominative).
+- **V1 aspect preservation under modals** (`compiler.lua`): Z printer infinitive path now checks `t:match('^V1')` — V1 tokens (dictionary-stored present-tense surface forms like понимать) keep their original imperfective aspect under modals instead of switching to perfective. Fixes "She can read and understand it." — "понимать" not "понять".
+- **e-tag tense default** (`compiler.lua`): Lowercase `e` (ambiguous infinitive/past/participle) no longer defaults to past tense; only uppercase `E` (definite past) forces e.past. Fixes "He put it on the table." — "устанавливает" (present) not "установил" (past).
+- **E printer verb_frame support** (`compiler.lua`): E printer now sets `e.verb_frame` so preposition case overrides work for e-tagged verbs. Added "устанавливать" frame (accusative with "на"). Fixes "He put it on the table." — "на стол" (accusative) not "на столе" (prepositional).
+- **P printer particle absorption** (`compiler.lua`): P tokens with a D (adverb) alternative following a verb and without a following noun are now suppressed (absorbed by the verb). Fixes "A small red ball fell down." — removes extra "вниз по".
+- **E printer perfective switch guard** (`compiler.lua`): The E printer's perfective switch now requires `e.past` to be true, preventing unwanted aspect changes for e-tagged verbs.
 
 ### Verification
 

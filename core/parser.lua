@@ -24,6 +24,8 @@ local en_ru = {}
 -- Shared flag: set when X1 (past auxiliary "did/was/had") is consumed by ' ' action,
 -- checked by the V action handler to propagate past tense to the resolved verb.
 local x1_past_context = false
+-- X1 copula + Z adjective: keep copula visible, resolve Z→A (not V)
+local x1_copula_context = false
 
 local function eat(value, _, c) assert(not c or c == value) return c end
 local function xor(a, b) return (a and not b) or (b and not a) end
@@ -249,12 +251,19 @@ local function replace(ts, j, m, t, s)
 						-- so the perfective switch should NOT apply (e.g. was reading → читала, not прочитала).
 						stream.set_token(ts, j + 1, 'V~' .. ts[j + 1]:sub(2))
 					else
-						-- X1 past auxiliary (did, was, had) deletes itself but leaves a
-						-- shared flag so the subsequent V action can mark the verb as past.
-						x1_past_context = true
+						-- X1 past auxiliary (did, was, had): scan forward to decide action.
+						local k = j + 1
+						while ts[k] and ts[k]:sub(1,1):match('[KkDdu]') do k = k + 1 end
+						if ts[k] and ts[k]:sub(1,1) == 'Z' and ts[k]:find('A', 2, true) then
+							-- X copula + Z adjective: keep X visible for copula output
+							x1_copula_context = true
+						else
+							x1_past_context = true
+						end
 					end
 				end
-				stream.set_token(ts, j, ' ')
+				-- Only remove X when it is truly auxiliary (not copula + adjective)
+				if not x1_copula_context then stream.set_token(ts, j, ' ') end
 			end
 		else
 			x1_past_context = false  -- reset on non-X delete
@@ -289,12 +298,23 @@ local function replace(ts, j, m, t, s)
 		-- so the compiler conjugates as past tense (e.g. signed→подписал not подписывает).
 		local was_past = ts[j] and ts[j]:sub(1, 1):match('[Ee]')
 		local is_v = (s == 'V')
-		find_and_replace(ts, j, s)
-		if is_v and (was_past or x1_past_context) and ts[j] and ts[j]:sub(1, 1) == 'V' then
-			-- V! for E/e past → perfective switch; V= for X1 simple past → no switch
-			local marker = was_past and '!' or '='
-			stream.set_token(ts, j, 'V' .. marker .. ts[j]:sub(2))
+		-- X1 copula (was/were) + Z with A form → resolve to adjective, not verb.
+		-- find() packs Z/N/A into one iter entry; use direct string search instead.
+		if is_v and (x1_past_context or x1_copula_context) and ts[j] and ts[j]:sub(1,1) == 'Z' and
+		   ts[j]:find('A', 2, true) then
+			dbg.log(2, "  X1 copula Z→A:", utils.decode(ts[j], true), "→ A")
+			find_and_replace(ts, j, 'A')
 			x1_past_context = false
+			x1_copula_context = false
+		else
+			dbg.log(3, "  $V handler: was_past=", tostring(was_past), " x1=", tostring(x1_past_context), " is_v=", tostring(is_v), " tag=", ts[j] and ts[j]:sub(1,1))
+			find_and_replace(ts, j, s)
+			if is_v and (was_past or x1_past_context) and ts[j] and ts[j]:sub(1, 1) == 'V' then
+				-- V! for E/e past → perfective switch; V= for X1 simple past → no switch
+				local marker = was_past and '!' or '='
+				stream.set_token(ts, j, 'V' .. marker .. ts[j]:sub(2))
+				x1_past_context = false
+			end
 		end
 	end
 	return j+1
@@ -783,19 +803,22 @@ local function apply_copular_it_compatibility(ts)
 	end
 end
 
- local function apply_capitalization_compatibility(ts)
- 	if ts.caps then
- 		for i = 2, #ts do
- 			if ts[i - 1] == 'T' and ts.phrases and ts.phrases[i] then
- 				-- LTPRO can leak the initial article's capitalization to an attached
- 				-- future predicate, but packed phrase components retain their own caps.
- 				local j = i + 1
- 				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
- 				if ts[j] and ts[j]:match('^[VX]') then ts.caps[j] = "init" end
- 			end
- 		end
- 	end
- end
+  local function apply_capitalization_compatibility(ts)
+  	if ts.caps then
+  		for i = 2, #ts do
+  			if ts[i - 1] == 'T' and ts.phrases and ts.phrases[i] then
+  				-- LTPRO can leak article caps to a future auxiliary that immediately
+  				-- follows the T+phrase, but only when no subject noun intervenes.
+  				local j = i + 1
+  				while ts[j] and ts[j]:sub(1, 1) == 'q' do j = j + 1 end
+  				-- Skip: don't capitalize a copula/verb that follows a subject noun.
+  				if ts[i]:match('^[Nn]') then goto continue end
+  				if ts[j] and ts[j]:match('^[VX]') and not ts.caps[j] then ts.caps[j] = "init" end
+  			end
+  			::continue::
+  		end
+  	end
+  end
 
 local function expand_phrase_tokens(ts)
 	-- W tokens (multi-word phrases like WAэлектронныйNперевод) survive rules but must

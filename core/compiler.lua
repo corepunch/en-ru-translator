@@ -43,6 +43,8 @@ local verb_frames = {
   ["позволять"] = { object_case = case["Д"] },
   ["делать"] = { causative = "заставлять" },
   ["устанавливать"] = { object_case = case["В"], preposition = "на", emit = true },
+  ["читать"] = { object_case = case["В"] },
+  ["возвращать"] = { object_case = case["В"] },
 }
 
 
@@ -629,6 +631,9 @@ local printers = {
       return result
     end
     e.verb_frame = verb_frames[utils.extract_form(t)]
+    if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
+      e.form = e.verb_frame.object_case
+    end
     return paradigms.verb(t, b:byte(4)&~0x80, e)
   end,
 }

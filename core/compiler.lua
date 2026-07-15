@@ -483,7 +483,18 @@ local printers = {
   end,
   -- E/e: past participle / -ed form → produce past tense
   E = function(t, e, s, i)
-    local d = utils.decode(t, true)
+    -- E-coded tokens (E001, E002, etc.) may have non-text flag bytes (0x80-0x8F)
+    -- between the code and the actual Russian text. Skip them before lookup.
+    local code_len = 1  -- skip the 'E' tag
+    while code_len < #t and t:byte(code_len + 1) and
+          t:byte(code_len + 1) >= string.byte('0') and t:byte(code_len + 1) <= string.byte('9') do
+      code_len = code_len + 1
+    end
+    local text_start = code_len + 1
+    while text_start <= #t and t:byte(text_start) >= 0x80 and t:byte(text_start) <= 0x8F do
+      text_start = text_start + 1  -- skip flag bytes
+    end
+    local d = utils.decode(t:sub(text_start), true)
     local b = compiler.base[d]
     if not b then return d end
     -- Lowercase 'e' = ambiguous infinitive/past/participle. When preceded by a modal

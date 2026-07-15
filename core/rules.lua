@@ -1,5 +1,7 @@
 local rules = {}
 
+-- T1 (0xe1f9): Clause-structure preprocessing, Z-disambiguation
+-- Resolves Z ambiguities, injects clause boundaries (J/j), handles existential "there is"
 table.insert(rules, {
   { 0x14, "*Z[?#]*", "" },
   { 0x00, "*`no`<APNw#?\"'>[,*]", "@y" },
@@ -50,6 +52,8 @@ table.insert(rules, {
   { 0x06, "*G[C,JPp]", "@N" },
 })
 
+-- T2 (0xeb4d): Verb phrase processing, modal/aux chains
+-- Handles modal/auxiliary chains, passive voice, article suppression
 table.insert(rules, {
   { 0x3A, "`a`[:*)]", "#" },
   { 0x3A, "[\"']`a`[\"']", ".#" },
@@ -212,6 +216,8 @@ table.insert(rules, {
   { 0x26, "`whether`<TDAOERNw?#'\">[XYUV]", "J" },
 })
 
+-- T3 (0xfd03): Embedding structures, relative clauses
+-- Handles relative clauses, that-complements, gerund/infinitive phrases
 table.insert(rules, {
   { 0x0000, "=~<)>,", "@$|" },
   { 0x0000, "UP<$>|Z", "@@$|V" },
@@ -351,6 +357,8 @@ table.insert(rules, {
   { 0x0000, "T*", "#" },
 })
 
+-- T4: Idioms/collocations, negation normalization, final Z cleanup
+-- Handles special cases and final grammatical tag resolution
 table.insert(rules, {
   { 0x00, "V~<VXUY>[^BbjJLlQ*]", "" },
   { 0x3C, "X`need`", " `xпонадобится`" },
@@ -534,6 +542,8 @@ table.insert(rules, {
   { 0x1B, "g", "G" },
 })
 
+-- T5 (0x127cb): NP word-order reordering (digit actions)
+-- Handles Russian NP word-order correction (adjective-noun reorder)
 table.insert(rules, {
   -- LTPRO applies this compact NP reorder table before the extended reorder table.
   { 0x00, "NwNww", "3455" },
@@ -549,6 +559,8 @@ table.insert(rules, {
 
 -- T6: Extended word-order reordering (NP chains, hyphenated compounds, verbal negation)
 -- 47 rules, 10-byte records, LTPRO offset=0x2A79A
+-- NOTE: T6 is NOT fully implemented in the Lua port; the compiler handles word order
+-- indirectly via printer state tracking. Only the first few reorder rules are included.
 table.insert(rules, {
   { 0x06, "NCNNN", "555" },
   { 0x06, "ACNNN", "555" },
@@ -599,8 +611,10 @@ table.insert(rules, {
   { 0x00, "KANV", "23" },
 })
 
+-- Post-T6 cleanup block (LTPRO offset 0x2AB30)
+-- Existential word-order fix: "There is [NP] here/there" → locative adverb moves first
+-- This is a separate cleanup block, not part of the standard T1-T8 table sequence
 table.insert(rules, {
-  -- This separate cleanup block is physically after T6 at LTPRO offset 0x2AB30.
   -- Existential word-order fix: "There is [NP] here/there" → locative adverb moves first.
   -- In Russian, "Здесь есть X" is more natural than "Есть X здесь".
   -- Three rules cover NP with 0, 1, or 2 pre-noun adjectives.
@@ -619,6 +633,9 @@ table.insert(rules, {
   { 0x08, "[XY]<KTAO>N[eE]", "" },
 })
 
+-- T7 (0x144d1): Structural guards (no-action)
+-- NP/PP/VP structural validation — matches but does NOT rewrite
+-- Flags values are constituent-type indices for the compiler's inflection stage
 table.insert(rules, {
   { 0x02, "P<$>N" },
   { 0x00, "P<$>[#?O]" },
@@ -657,6 +674,9 @@ table.insert(rules, {
   { 0x17, "PM" },
 })
 
+-- T8 (0x1987f): Clause/VP structural guards (morph segment matcher)
+-- Clause/VP structural validation — more aggressive than T7
+-- Uses morph segment matcher (0x1c3d:0x135) instead of standard token buffer
 table.insert(rules, {
   { 0x0C, "J[VUXY]" },
   { 0x0C, "J~<|J>[VUXY]" },

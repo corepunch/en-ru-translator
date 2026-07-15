@@ -437,6 +437,32 @@ debug = 0
 
 Boolean flags (`--diag`) override config file values.
 
+## Decompilation & Reverse Engineering Artifacts
+
+When decompiling or annotating parts of `LTPRO.EXE`, store results in
+`LTGOLD/decompiled/` for future reference:
+
+```
+LTGOLD/decompiled/
+├── README.md              # Index of decompiled functions and their purposes
+├── dict_load.asm          # Dictionary loading/parsing (WA...N... format)
+├── rule_engine.asm        # T1-T8 pattern matcher (0xb0ff, 7502 bytes)
+├── morph_engine.asm       # Segment-1 morphological output engine
+├── t1_dispatch.asm        # T1 table init and dispatch
+├── t2_dispatch.asm        # T2 table init and dispatch
+├── ...
+```
+
+**Naming convention:** `<function_name>.asm` with annotated disassembly.
+Each file should include:
+- Function address (r2 vaddr and file offset)
+- Known constants and table references
+- Cross-references to other functions
+- Plain-English description of what the code does
+
+**Tools:** Use `r2` disassembly (SLEIGH/r2ghidra not available for 16-bit x86).
+See `LTGOLD/r2_tools.py` for pre-built analysis commands.
+
 ## Current Work State
 
 **Objective:** 1:1 matching of LTGOLD's DEMO.OUT reference output for all 10 DEMO.TXT sentences.

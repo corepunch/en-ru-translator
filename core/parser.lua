@@ -26,6 +26,8 @@ local en_ru = {}
 local x1_past_context = false
 -- X1 copula + Z adjective: keep copula visible, resolve Z→A (not V)
 local x1_copula_context = false
+-- Y1 past perfect (had): propagate past tense (used by Y+been+G rule)
+local y1_perfect_context = false
 
 local function eat(value, _, c) assert(not c or c == value) return c end
 local function xor(a, b) return (a and not b) or (b and not a) end
@@ -129,6 +131,8 @@ local function find_and_replace(ts, j, s)
 	-- fallback: if no exact form matches, search for the tag letter inside the token.
 	-- For W tokens (multi-word phrases), skip this: sub-resolve would strip the W prefix
 	-- and orphan trailing forms (e.g. WAэлектронныйNперевод → AэлектронныйNперевод, losing Nперевод).
+	elseif #s == 1 and ts[j]:byte(1) == string.byte('G') and s == 'V' then
+		stream.set_token(ts, j, 'V' .. ts[j]:sub(2))
 	elseif #s == 1 and ts[j]:byte(1) ~= string.byte('W') then
 		local _, e = ts[j]:find(s, 1, true)
 		if e then
@@ -309,11 +313,12 @@ local function replace(ts, j, m, t, s)
 		else
 			dbg.log(3, "  $V handler: was_past=", tostring(was_past), " x1=", tostring(x1_past_context), " is_v=", tostring(is_v), " tag=", ts[j] and ts[j]:sub(1,1))
 			find_and_replace(ts, j, s)
-			if is_v and (was_past or x1_past_context) and ts[j] and ts[j]:sub(1, 1) == 'V' then
-				-- V! for E/e past → perfective switch; V= for X1 simple past → no switch
+			if is_v and (was_past or x1_past_context or y1_perfect_context) and ts[j] and ts[j]:sub(1, 1) == 'V' then
+				-- V! for E/e past → perfective switch; V= for X1/Y1 simple past → no switch
 				local marker = was_past and '!' or '='
 				stream.set_token(ts, j, 'V' .. marker .. ts[j]:sub(2))
 				x1_past_context = false
+				y1_perfect_context = false
 			end
 		end
 	end
@@ -534,8 +539,12 @@ local function match_pattern(ts, m, r, flags, rule_set_idx)
 				local constituent_head = flags == 0x02
 				if positions and #positions > 0 and not verb_phrase and not constituent_head then
 					reorder_tokens(ts, positions, r)
-				end
-			else
+			end
+		elseif ts[j] and ts[j]:sub(1,1) == 'Y' then
+			local ydigit = ts[j]:match('%d+')
+			if ydigit and ydigit:sub(1,1) == '1' then y1_perfect_context = true end
+			stream.set_token(ts, j, ' ')
+		else
 				-- Guard rules have no rewrite action but carry constituent-type flags.
 				-- Store the flags on the LAST token of the matched span so the compiler
 				-- can use them for case/agreement decisions.

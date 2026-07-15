@@ -866,10 +866,19 @@ local function expand_phrase_tokens(ts)
 						component_caps = false,
 					})
 				end
-				-- Propagate head-noun context to all sub-tokens (LTPRO +0x72 propagation).
+				-- Propagate head-noun context and constituent flags to all sub-tokens.
+				-- LTPRO Type-10 copies +0x72 (context) and +0x77 (flags) from source
+				-- to all destination sub-constituents; Type-12 copies +0x76 (constituent).
 				if head_noun then
 					for j = 0, #expanded - 1 do
 						ts.context[i + j] = head_noun
+					end
+					-- Also propagate the head noun's constituent type from the W-token wrapper
+					local ctype = ts.constituent_type and ts.constituent_type[i]
+					if ctype then
+						for j = 0, #expanded - 1 do
+							ts.constituent_type[i + j] = ctype
+						end
 					end
 				end
 			end

@@ -244,6 +244,10 @@ local printers = {
       local ntext = utils.decode(n, true)
       e.plural = n:sub(1, 1) == 'n' or plural_only[ntext]
     end
+    -- Dative subject: "need" construction (X needs Y → X-dat нужен Y-nom)
+    if s and s.dative_subject and s.dative_subject[i] then
+      e.form = case["Д"]
+    end
     local adj_id, adj_base, adj_refl = adj(utils.extract(a))
     local result = paradigms.adjective(adj_base or a, adj_id, e)
     -- Reflexive participle adjectives: append -ся to the fully declined form.
@@ -266,21 +270,21 @@ local printers = {
     end
     return result
   end,
-  N = function(t, e, s, i)
-    if e.modal_scope and e.modal_scope.consumed then e.modal_scope = nil end
-    -- Uppercase N = singular noun. Reset the plural flag to prevent bleed from
-    -- previous n (plural) tokens. LTGOLD tracks plurality per-constituent via
-    -- T7/T8 rule flag constituent-type indices; this is a simpler approximation.
-    if e.numeral then
-      e.form = e.numeral.noun_form
-      e.plural = e.numeral.noun_plural
-    elseif t:sub(1,1) == 'N' then
-      -- Inherently plural nouns (люди, дети etc.): keep e.plural as true
-      local plural_only = { ["люди"]=true, ["дети"]=true, ["часы"]=true,
-        ["ножницы"]=true, ["брюки"]=true, ["ворота"]=true, ["сани"]=true }
-      local ntext = utils.decode(t, true)
-      if not plural_only[ntext] then e.plural = false end
-    end
+   N = function(t, e, s, i)
+     if e.modal_scope and e.modal_scope.consumed then e.modal_scope = nil end
+     if e.numeral then
+       e.form = e.numeral.noun_form
+       e.plural = e.numeral.noun_plural
+     elseif t:sub(1,1) == 'N' then
+       local plural_only = { ["люди"]=true, ["дети"]=true, ["часы"]=true,
+         ["ножницы"]=true, ["брюки"]=true, ["ворота"]=true, ["сани"]=true }
+       local ntext = utils.decode(t, true)
+       if not plural_only[ntext] then e.plural = false end
+     end
+     -- Dative subject: "need" construction (X needs Y → X-dat нужен Y-nom)
+     if s and s.dative_subject and s.dative_subject[i] then
+       e.form = case["Д"]
+     end
     -- Clear copula short-form context: a noun closes the X003+adj construction.
     e.infinitive = false
     local d = utils.decode(t, true)
@@ -1048,19 +1052,18 @@ printers.x = function(t, e, s, i)
   -- x = impersonal verb / existential ("нужно" = it is necessary).
   -- When followed by a noun, decline as short adjective agreeing with it.
   local decoded = utils.decode(t, true)
-  if decoded == "нужно" and s and i then
-    -- Find next non-determiner token for gender agreement
-    local j = i + 1
-    while s[j] and s[j]:sub(1,1):match('[Tq]') do j = j + 1 end
-    if s[j] and s[j]:sub(1,1):match('[Nn]') then
-      local gender = get_gender(s[j]) or 1
-      local forms = { [1]="нужен", [2]="нужна", [0]="нужно" }
-      local plural = s[j]:sub(1,1) == 'n'
-      -- Set dative case for preceding subject noun phrase
-      e.form = case["Д"]
-      return plural and "нужны" or (forms[gender] or "нужно")
-    end
-  end
+   if decoded == "нужно" and s and i then
+     local j = i + 1
+     while s[j] and s[j]:sub(1,1):match('[Tq]') do j = j + 1 end
+     if s[j] and s[j]:sub(1,1):match('[Nn]') then
+       local gender = get_gender(s[j]) or 1
+       local forms = { [1]="нужен", [2]="нужна", [0]="нужно" }
+       local plural = s[j]:sub(1,1) == 'n'
+       -- Set nominative for the grammatical subject following the x verb
+       e.form = case["И"]
+       return plural and "нужны" or (forms[gender] or "нужно")
+     end
+   end
   return decoded
 end
 printers.y = function(t, e)
@@ -1346,6 +1349,28 @@ function compiler.compile(s, options)
   local e = new_context()
   local c = {}
   local quote_open = false
+
+  -- Pre-scan: mark dative subjects for "need" constructions (N/A... + x + N pattern).
+  -- LTGOLD Type-13 W-token creation reorders these; we approximate by pre-marking.
+  s.dative_subject = {}
+  for i = 1, #s - 2 do
+    if s[i]:sub(1,1):match('[NAn]') then
+      local j = i + 1
+      while s[j] and s[j]:sub(1,1):match('[TAa]') do j = j + 1 end
+      if s[j] and s[j]:sub(1,1) == 'x' then
+        local decoded = utils.decode(s[j], true)
+        if decoded == "нужно" then
+          -- Mark the NP tokens (at position i and any preceding A/a tokens)
+          -- for dative case.
+          for k = i, 1, -1 do
+            if s[k]:sub(1,1):match('[NAn]') or s[k]:sub(1,1):match('[Aa]') then
+              s.dative_subject[k] = true
+            else break end
+          end
+        end
+      end
+    end
+  end
 
   dbg.log(1, "Compiler output:")
   dbg.log(2, "Initial context:",

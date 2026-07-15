@@ -860,6 +860,20 @@ function parser.collect(dic, ts)
 	apply_copular_it_compatibility(ts)
 	apply_capitalization_compatibility(ts)
 	expand_phrase_tokens(ts)
+	-- Propagate T7/T8 constituent flags to token metadata for compiler use.
+	-- LTPRO morph engine types 10-14 read these from token+0x76.
+	for i = 1, #ts do
+		local entry = ts.constituent_flags and ts.constituent_flags[i]
+		if entry and entry ~= false then
+			ts.constituent_type[i] = entry[2]  -- the flags byte
+		end
+	end
+	-- Relink indices after expand_phrase_tokens may have changed positions
+	for i = 1, #ts do
+		if ts.context and ts.context[i] and ts.context[i] ~= false then
+			-- context was propagated by expand_phrase_tokens
+		end
+	end
 	dbg.log(1, "Tokens after rules:")
 	for _, n in ipairs(ts) do
 		if dbg.level >= 1 then

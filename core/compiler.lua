@@ -237,7 +237,10 @@ local printers = {
     end
     if n then
       e.gender = get_gender(n) or e.gender  -- fallback to default if not in RUS
-      e.plural = n:sub(1, 1) == 'n'
+      local plural_only = { ["люди"]=true, ["дети"]=true, ["часы"]=true,
+        ["ножницы"]=true, ["брюки"]=true, ["ворота"]=true, ["сани"]=true }
+      local ntext = utils.decode(n, true)
+      e.plural = n:sub(1, 1) == 'n' or plural_only[ntext]
     end
     local adj_id, adj_base, adj_refl = adj(utils.extract(a))
     local result = paradigms.adjective(adj_base or a, adj_id, e)
@@ -269,7 +272,13 @@ local printers = {
     if e.numeral then
       e.form = e.numeral.noun_form
       e.plural = e.numeral.noun_plural
-    elseif t:sub(1,1) == 'N' then e.plural = false end
+    elseif t:sub(1,1) == 'N' then
+      -- Inherently plural nouns (люди, дети etc.): keep e.plural as true
+      local plural_only = { ["люди"]=true, ["дети"]=true, ["часы"]=true,
+        ["ножницы"]=true, ["брюки"]=true, ["ворота"]=true, ["сани"]=true }
+      local ntext = utils.decode(t, true)
+      if not plural_only[ntext] then e.plural = false end
+    end
     -- Clear copula short-form context: a noun closes the X003+adj construction.
     e.infinitive = false
     local d = utils.decode(t, true)

@@ -795,22 +795,30 @@ local function loop(ts)
 	remove_silent_tokens(ts)
 end
 
-local function apply_copular_it_compatibility(ts)
-	if ts.source then
-		for i = 1, #ts - 1 do
-			if ts.source[i] and ts.source[i]:lower() == 'it' and ts[i]:sub(1, 1) == 'R' then
-				local j, future = i + 1, false
-				if ts[j] and ts[j]:sub(1, 1) == 'q' then future, j = true, j + 1 end
-				if ts[j] and ts[j]:sub(1, 1) == 'X' then
-					-- LTGOLD resolves copular "it" as demonstrative это, not personal он.
-					stream.set_token(ts, i, 'O' .. utils.encode('это'))
-					-- Intentional LTGOLD future-copula capitalization bug: "It will" emits Будет.
-					if future and ts.caps then ts.caps[j] = "init" end
-				end
-			end
-		end
-	end
-end
+ local function apply_copular_it_compatibility(ts)
+ 	if ts.source then
+ 		for i = 1, #ts - 1 do
+ 			if ts.source[i] and ts.source[i]:lower() == 'it' then
+ 				local subord = { ["that"]=true, ["which"]=true, ["who"]=true, ["whom"]=true, ["whose"]=true }
+ 				local prev_source = ts.source[i-1] and ts.source[i-1]:lower()
+ 				if i > 1 and subord[prev_source] then
+ 					-- "he knew that it was done": revert to R "он"
+ 					stream.set_token(ts, i, 'R031' .. utils.encode('он'))
+ 					goto continue
+ 				end
+ 				if ts[i]:sub(1, 1) == 'R' then
+ 					local j, future = i + 1, false
+ 					if ts[j] and ts[j]:sub(1, 1) == 'q' then future, j = true, j + 1 end
+ 					if ts[j] and ts[j]:sub(1, 1) == 'X' then
+ 						stream.set_token(ts, i, 'O' .. utils.encode('это'))
+ 						if future and ts.caps then ts.caps[j] = "init" end
+ 					end
+ 				end
+ 			end
+ 			::continue::
+ 		end
+ 	end
+ end
 
   local function apply_capitalization_compatibility(ts)
   	if ts.caps then

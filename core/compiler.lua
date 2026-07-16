@@ -313,7 +313,10 @@ local printers = {
     -- Multiple meanings: when the token contains a semicolon-separated alternative
     -- (e.g. NNобразец;выборка), append {N.alternative} just as LTGOLD does.
     -- LTGOLD tracks a per-sentence counter in its output formatter.
-    local alt = leading_alternatives(t)
+    -- Suppress alternative annotation when preceded by indefinite article ("a"/"an").
+    local preceded_by_indef = s and i and s[i-1] and s[i-1]:sub(1,1) == 'T' and
+      s.source and (s.source[i-1] == 'a' or s.source[i-1] == 'an' or s.source[i-1] == 'A' or s.source[i-1] == 'An')
+    local alt = (not preceded_by_indef) and leading_alternatives(t)
     if alt then
       e.multi_count = (e.multi_count or 0) + 1
       if alt and #alt > 0 then
@@ -465,6 +468,14 @@ local printers = {
       dbg.log(2, "    U suppressed (copula+adj context):", d)
       return ""
     end
+    -- "could/should/would have done": U1 + Y + F → LTGOLD outputs just the past verb + бы,
+    -- dropping the modal entirely. U1 sets the conditional flag and goes silent.
+    if is_conditional and s and s[i+1] and s[i+1]:sub(1,1) == 'Y' then
+      e.conditional = true
+      e.infinitive, e.perfective = false, false
+      dbg.log(2, "    U1 before Y: conditional=true, silent")
+      return ""
+    end
     local u = uniques[d]
     local source_modal = s and s.source and s.source[i] and s.source[i]:lower()
     local modal_perfective = source_modal ~= "may" and source_modal ~= "might"
@@ -507,14 +518,16 @@ local printers = {
     local i = 2
     -- Skip any additional ASCII letter prefix bytes (e.g. second 'D' in "DD...")
     while i <= #t and t:byte(i) >= 65 and t:byte(i) <= 122 do i = i + 1 end
-    -- Decode CP866 content up to ';' separator:
+    -- Decode CP866 content up to ';' separator or next ASCII tag letter.
     local result = {}
     while i <= #t do
       local b = t:byte(i)
       if b == 0x3B then break end  -- stop at ';' (alternate form)
+      -- Stop at ASCII letter that begins a new packed tag (A, D, W, etc.)
+      if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then break end
       local ch = encoding.character(b)
       if ch then result[#result+1] = ch
-      elseif b == 0x20 or b == 0x2D then result[#result+1] = string.char(b)  -- space/hyphen OK
+      elseif b == 0x20 or b == 0x2D or b == 0x2C then result[#result+1] = string.char(b)  -- space/hyphen/comma OK
       end
       i = i + 1
     end
@@ -638,7 +651,21 @@ local printers = {
     if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
       e.form = e.verb_frame.object_case
     end
-    return paradigms.verb(t, b:byte(4)&~0x80, e)
+    local result = paradigms.verb(t, b:byte(4)&~0x80, e)
+    -- Reflexive verbs: some E-tagged verbs require -ся when used intransitively.
+    -- LTPRO type-11 checks +0x66; we use an explicit table of reflexive-only stems.
+    local reflexive_intrans = { ["жечь"]=true }
+    if e.past and not e.passive and reflexive_intrans[d] then
+      local next_i = i and (i + 1)
+      while s and s[next_i] and s[next_i]:sub(1,1):match('[TtAaDd]') do next_i = next_i + 1 end
+      local next_tag = s and s[next_i] and s[next_i]:sub(1,1)
+      if not next_tag or not next_tag:match('[NnRrMmOo#]') then
+        local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                         ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
+        result = result .. (vowels[result:sub(-2)] or "ся")
+      end
+    end
+    return result
   end,
 }
 
@@ -765,11 +792,29 @@ printers.g = function(t, e)
 end
 printers.v = function(t, e) return printers.V(t, e) end
 printers.p = function(t, e) return printers.P(t, e) end
+printers.d = function(t, e) return printers.D(t, e) end
 printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction), L (relative pronoun), j (clause-end marker), O (demonstrative)
 -- These are structural/functional words — output their Russian text directly
--- J (subordinating conjunction): decode preserving leading punctuation like ", что".
-printers.J = function(t) return utils.decode(t:sub(2), false) end
+-- J (subordinating conjunction): decode only the J-form text, stopping at the next
+-- packed tag letter (P, C, b, B, etc.) that begins a government chain.
+-- e.g. JеслиPПпри → "если"; J, когдаPПпри → ", когда"
+printers.J = function(t)
+  local s = t:sub(2)
+  -- Skip optional digit code (e.g. J01, J21)
+  local i = 1
+  while i <= #s and s:byte(i) >= 48 and s:byte(i) <= 57 do i = i + 1 end
+  local result = {}
+  while i <= #s do
+    local b = s:byte(i)
+    -- Stop at ASCII letter that begins a new tag (next packed form)
+    -- Allow comma (0x2C), space (0x20), hyphen (0x2D) as part of Russian text
+    if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then break end
+    result[#result+1] = s:sub(i, i)
+    i = i + 1
+  end
+  return utils.decode(table.concat(result), false)
+end
 -- z: -s/-es form (verb/noun ambiguity). After prepositions prefer noun form.
 -- LTGOLD resolves z via T2/T3 constituent-type rules; this is a fallback.
 printers.z = function(t, e, s, i)
@@ -992,10 +1037,12 @@ printers.M = function(t, e, s, i)
     local result = paradigms.pronoun(plural ~= '0', tonumber(person) or 3,
       tonumber(gender) or e.gender, e.form)
     -- 3rd-person pronouns preceded by a preposition take н- prefix (ним, нею, ними…).
+    -- Exception: accusative feminine "её/ее" does not take н- (LTGOLD: "на ее", not "нее").
     local p = tonumber(person) or 3
     local bare_dative = s and i and s[i-1] and #s[i-1] == 2 and
       utils.decode(s[i-1]:sub(2, 2), true) == "Д"
-    if p == 3 and s and i and s[i-1] and s[i-1]:sub(1,1) == 'P' and not bare_dative then
+    if p == 3 and s and i and s[i-1] and s[i-1]:sub(1,1) == 'P' and not bare_dative
+       and result ~= "ее" then
       result = "н" .. result
     end
     return result
@@ -1039,11 +1086,19 @@ printers.K = function(t) return utils.decode(t, true) end
 printers.k = function(t) return utils.decode(t, true) end
 -- Y: "have/has/had" (perfect auxiliary). Silent; sets perfective past context.
 -- English perfect = "has/had + past participle" → Russian perfective past.
-printers.Y = function(t, e)
-  local code = t:match("%d+") or ""
-  -- Y1xx = past perfect ("had written") vs Y003 = present perfect ("has written")
-  -- Both are silent; the F/E printer produces perfective past.
+-- Exception: "must/should have <adj>" → LTGOLD outputs "иметь" literally ("должен иметь известный").
+printers.Y = function(t, e, s, i)
   e.perfective = true
+  -- When infinitive context from "должен" is active AND the next token is A/F (adjective/participle),
+  -- output "иметь" literally instead of being silent.
+  if e.infinitive and s and i then
+    local next_tag = s[i+1] and s[i+1]:sub(1,1)
+    if next_tag == 'A' or next_tag == 'F' then
+      e.infinitive = false
+      dbg.log(2, "    Y after должен + adj: output иметь")
+      return utils.extract_form(t)
+    end
+  end
   dbg.log(2, "    Y (perfect aux): perfective=true, silent")
   return ""
 end
@@ -1108,7 +1163,11 @@ printers.W = function(t, e, s, i)
 end
 -- # (proper noun / untranslatable): output raw string, reformat digit-only sequences
 -- back to comma-formatted numbers (e.g. 1000000 → 1,000,000) since tokenize strips commas.
+-- An unknown word between a modal and a verb breaks the modal chain in LTGOLD.
 printers["#"] = function(t, e)
+  e.modal_scope = nil
+  e.infinitive = false
+  e.perfective = false
   local s = t:sub(2)
   if s:match("^%d+$") then
     -- Match LTGOLD's intentionally simplified numeral agreement: 2-4 select
@@ -1128,10 +1187,26 @@ end
 printers.F = function(t, e, s, i)
   -- F tag: perfect/passive past-participle construction.
   -- Y (have) + F → English perfect → Russian perfective active past ("написала").
+  -- U1 + Y + F → conditional past: imperfective past + " бы" (e.g. could have gone → шла бы).
   -- X103 (was) + F without agent → short passive participle ("было подписано").
   -- X103 (was) + F with instrumental agent → reflexive imperfective past ("писалось нею").
   e.infinitive = false
   e.past = true
+  -- U1+Y+F conditional: output imperfective past + " бы", drop perfective switch.
+  local conditional = e.conditional
+  e.conditional = nil
+  if conditional then
+    local direct = utils.extract_form(t)
+    local vtext = find_form(t, 'V')
+    local base_word = (vtext and utils.decode(vtext, true)) or direct
+    local b = compiler.base[base_word]
+    if b then
+      local vt = vtext and ('V' .. vtext) or ('V' .. utils.encode(base_word))
+      local e_past = { plural = e.plural, gender = e.gender, form = e.form,
+        past = true, passive = false, person = e.person or 3 }
+      return paradigms.verb(vt, b:byte(4)&~0x80, e_past) .. " бы"
+    end
+  end
   -- Check if this is a Y (perfect) context: scan backward past negation (K/k) tokens
   -- to find the Y auxiliary (e.g. "has not seen" → Y + K + F).
   local is_perfect = false
@@ -1407,7 +1482,12 @@ function compiler.compile(s, options)
       -- LTGOLD preserves initial-cap from source words (proper nouns, sentence-start).
       local src_caps = s.caps and s.caps[i]
       out = apply_source_caps(out, src_caps)
-      out = append_alternatives(out, w, e)
+      -- Suppress alternative annotation when noun is preceded by indefinite article.
+      local prev_src = s.source and s.source[i-1]
+      local indef_article = prev_src == 'a' or prev_src == 'an' or prev_src == 'A' or prev_src == 'An'
+      if not (tag == 'N' and indef_article) then
+        out = append_alternatives(out, w, e)
+      end
       dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
         i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),
         tostring(e.infinitive), tostring(e.perfective), tostring(e.plural), tostring(e.form)))

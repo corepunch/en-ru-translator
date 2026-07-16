@@ -271,6 +271,11 @@ local function replace(ts, j, m, t, s)
 			end
 		else
 			x1_past_context = false  -- reset on non-X delete
+			-- Y1 (had) deleted by space action: set y1_perfect_context for the downstream G→V.
+			if ts[j] and ts[j]:sub(1,1) == 'Y' then
+				local ydigit = ts[j]:match('%d+')
+				if ydigit and ydigit:sub(1,1) == '1' then y1_perfect_context = true end
+			end
 			stream.set_token(ts, j, ' ')
 		end
 	elseif m:find'*' and (j >= #ts or j == 1) then
@@ -722,6 +727,13 @@ local dative_transfer_verbs = {
 	show = true, showed = true, tell = true, told = true,
 }
 
+-- Motion verbs that use "в+acc" (movement into) rather than "на+acc" for "to" preposition.
+local motion_into_verbs = {
+	go = true, went = true, walk = true, walked = true, run = true, ran = true,
+	come = true, came = true, move = true, moved = true, travel = true, traveled = true,
+	fly = true, flew = true, drive = true, drove = true, ride = true, rode = true,
+}
+
 local function previous_source_word(ts, i)
 	for j = i - 1, 1, -1 do
 		local word = ts.source and ts.source[j]
@@ -769,6 +781,12 @@ local function resolve_post_rule_contexts(ts)
 				-- A bare PД token carries dative government while suppressing the
 				-- English preposition, as in "gave it to him" → "дал это ему".
 				stream.set_token(ts, i, utils.encode("PД"))
+			else
+				-- Motion verb + "to" → "в + acc" (movement into enclosed space).
+				local prev_src = previous_source_word(ts, i)
+				if prev_src and motion_into_verbs[prev_src] then
+					stream.set_token(ts, i, utils.encode("PВв"))
+				end
 			end
 		end
 	end

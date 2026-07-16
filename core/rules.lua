@@ -392,6 +392,7 @@ table.insert(rules, {
   { 0x35, "X<D>N<D>[,&Jj*]", "@$A" },
   { 0x35, "[,TPV()]N<,>C<D>AN", ".A" },
   { 0x36, "[TP]N,<adD>A~P", ".A" },
+  { 0x35, "P<T>NC[EA][,Jj*]", "" },  -- guard: P+N in PP context blocks NC[EA]→A
   { 0x35, "NC[EA][,Jj*]", "A" },
   { 0x35, "[AOH][,C&(\"']N<)\"'>N", "..A" },
   { 0x35, "*`no`,RXK*", "@y    " },

@@ -37,6 +37,9 @@ local verb_frames = {
   ["поставлять"] = { object_case = case["Д"], preposition = "на", emit = false },
   ["доставлять"] = { object_case = case["Д"], preposition = "на", emit = false },
   ["соглашаться"] = { next_infinitive = true },
+  ["согласиться"] = { next_infinitive = true },
+  ["согласовывать"] = { next_infinitive = true },
+  ["согласовать"] = { next_infinitive = true },
   ["соответствовать"] = { object_case = case["Д"] },
   ["признавать"] = { complementizer = "что" },
   ["уполномочивать"] = { next_infinitive = true },
@@ -153,7 +156,12 @@ local function subject_is_plural(s, stop)
       return true
     end
   end
-  for i = 1, stop - 1 do
+  -- Find the last clause boundary (j) before stop, then scan forward from there.
+  local clause_start = 1
+  for i = stop - 1, 1, -1 do
+    if s[i] and s[i]:sub(1,1) == 'j' then clause_start = i + 1; break end
+  end
+  for i = clause_start, stop - 1 do
     local tag = s[i]:sub(1, 1)
     if tag == 'n' then return true end
     if tag == 'N' then return false end
@@ -208,12 +216,22 @@ local printers = {
           start = start - 1
         end
         for j = start, 1, -1 do
-          -- Subject noun: skip N tokens that are genitive modifiers (preceded by another N)
+          -- Subject noun: skip N tokens that are genitive modifiers (preceded by P with optional T/A)
            if s[j] and s[j]:sub(1,1):match('[Nn]') and
               (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
-             gender = get_gender(s[j]) or gender  -- fallback if not in RUS
-             e.plural = s[j]:sub(1,1) == 'n'
-            break
+             local is_gen = false
+             for q2 = j - 1, math.max(1, j - 3), -1 do
+               local qt = s[q2] and s[q2]:sub(1,1)
+               if qt == 'T' or qt == 'A' or qt == 'a' then
+               elseif qt and qt:match('[Pp]') then is_gen = true; break
+               else break end
+             end
+             if is_gen then -- skip genitive modifier
+             else
+               gender = get_gender(s[j]) or gender  -- fallback if not in RUS
+               e.plural = s[j]:sub(1,1) == 'n'
+               break
+             end
           end
         end
       end
@@ -231,7 +249,15 @@ local printers = {
       for j = (i or 0) - 1, 1, -1 do
         if s[j] and s[j]:sub(1,1):match('[Nn]') and
            (j == 1 or not s[j-1] or s[j-1]:sub(1,1) ~= 'N') then
-          n = s[j]; break
+          -- Skip genitive modifier nouns (preceded by P with optional T/A)
+          local is_gen = false
+          for q2 = j - 1, math.max(1, j - 3), -1 do
+            local qt = s[q2] and s[q2]:sub(1,1)
+            if qt == 'T' or qt == 'A' or qt == 'a' then
+            elseif qt and qt:match('[Pp]') then is_gen = true; break
+            else break end
+          end
+          if not is_gen then n = s[j]; break end
         elseif s[j] and s[j]:sub(1,1):match('[XVUYxy]') then
           -- skip copula/aux verbs, continue scanning
         else break end
@@ -253,7 +279,7 @@ local printers = {
     -- Reflexive participle adjectives: append -ся to the fully declined form.
     return adj_refl and (result .. "ся") or result
   end,
-  R = function(t, e)
+  R = function(t, e, s, i)
     -- format: R<plural><person>[<gender>]<word>
     -- e.g. R032она (3 digits), R12Вы (2 digits without gender)
     local a, b, g = t:match("R(%d)(%d)(%d)")
@@ -261,7 +287,17 @@ local printers = {
     e.plural = (a or '0') ~= '0'
     e.person = tonumber(b) or 3
     if g then e.gender = tonumber(g) end  -- 1=masc, 2=fem
-    local result = utils.decode(t, true)
+    -- When preceded by a preposition (P) and e.form is set, use paradigm for
+    -- case-appropriate form (о нем not об он). For other positions, use raw
+    -- decode to avoid stale form leaking from previous clause.
+    local result
+    local prev_tag = s and i and s[i-1] and s[i-1]:sub(1,1)
+    dbg.log(2, string.format("    R: form=%s prev=%s", tostring(e.form), tostring(prev_tag)))
+    if e.form and e.form > 1 and prev_tag == 'P' then
+      result = paradigms.pronoun(e.plural, e.person, e.gender, e.form)
+    else
+      result = utils.decode(t, true)
+    end
     -- A new overt subject closes a modal's coordinated-verb scope.
     e.modal_scope = nil
     if e.verb_frame and e.verb_frame.complementizer then
@@ -279,7 +315,8 @@ local printers = {
        local plural_only = { ["люди"]=true, ["дети"]=true, ["часы"]=true,
          ["ножницы"]=true, ["брюки"]=true, ["ворота"]=true, ["сани"]=true }
        local ntext = utils.decode(t, true)
-       if not plural_only[ntext] then e.plural = false end
+       if plural_only[ntext] then e.plural = true
+       else e.plural = false end
      end
      -- Dative subject: "need" construction (X needs Y → X-dat нужен Y-nom)
      if s and s.dative_subject and s.dative_subject[i] then
@@ -351,6 +388,16 @@ local printers = {
     end
     local second = utils.decode(t:sub(2, 2), true)
     local third = utils.decode(t:sub(3, 3), true)
+    -- LTGOLD inserts extra spaces between a preposition and a following relative pronoun.
+    local function with_rel_spaces(result)
+      if s and i then
+        local next_t = s[i+1]
+        if next_t and (next_t:sub(1,1) == 'L' or next_t:sub(1,1) == 'l') then
+          return result .. "  "
+        end
+      end
+      return result
+    end
     if case[third] then
       e.form = case[third]
       local result = utils.extract_form("P" .. t:sub(4))
@@ -359,7 +406,7 @@ local printers = {
         e.form = e.verb_frame.object_case
         return e.verb_frame.emit and result or ""
       end
-      return result
+      return with_rel_spaces(result)
     elseif case[second] then
       e.form = case[second]
       local result = utils.extract_form("P" .. t:sub(3))
@@ -368,10 +415,18 @@ local printers = {
         e.form = e.verb_frame.object_case
         return e.verb_frame.emit and result or ""
       end
-      return result
+      -- Lookahead: if next token is R (pronoun) with prepositional case,
+      -- the form will start with "н" (consonant), so use "о" not "об".
+      if result == "об" and s and i then
+        local next_t = s[i+1]
+        if next_t and next_t:sub(1,1) == 'R' then
+          result = "о"
+        end
+      end
+      return with_rel_spaces(result)
     end
     -- Resolved p/J senses without a case letter retain the current government.
-    return utils.decode(t:sub(2), true)
+    return with_rel_spaces(utils.decode(t:sub(2), true))
   end,
   Z = function(t, e, s, i)
     local d = utils.extract_form(t)
@@ -423,13 +478,16 @@ local printers = {
      if e.infinitive then
        e.infinitive, e.infinitive_particle = false, false
        if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2) ~= 2 then
-         if t:match('^V1') then
-           return d  -- V1 present-tense forms keep original aspect
-         end
-         local paired = compiler.base[d]:sub(6)
-         if #paired > 0 and paired:byte(1) >= 128 then
-           e.perfective = false
-           return utils.decode(paired)
+         -- For imperfective modals (may/might) or when first verb stayed imperfective (e-tagged),
+         -- coordinated verbs stay imperfective. For perfective modals (can/must), they switch.
+         local in_impf_coord = e.modal_scope and e.modal_scope.awaiting_coord and
+           (not e.modal_scope.perfective or e.modal_scope.first_was_impf)
+         if not in_impf_coord then
+           local paired = compiler.base[d]:sub(6)
+           if #paired > 0 and paired:byte(1) >= 128 then
+             e.perfective = false
+             return utils.decode(paired)
+           end
          end
        end
        return d
@@ -507,7 +565,7 @@ local printers = {
   [" "] = function (t) return utils.decode(t, true) end,
   -- C: conjunction — decode full text after tag byte (no strip, preserves spaces)
   C = function (t, e)
-    if e.modal_scope and e.modal_scope.consumed then e.modal_scope.awaiting_coord = true end
+    if e.modal_scope then e.modal_scope.awaiting_coord = true end
     return utils.decode(t:sub(2), false)
   end,
   D = function (t)
@@ -547,6 +605,8 @@ local printers = {
       text_start = text_start + 1  -- skip flag bytes
     end
     local d = utils.decode(t:sub(text_start), true)
+    local e_form = utils.extract_form(t)  -- E form only (before A/other tags)
+    local orig_t = t  -- save before perfective switch modifies t
     local b = compiler.base[d]
     if not b then return d end
     -- Lowercase 'e' = ambiguous infinitive/past/participle. When preceded by a modal
@@ -556,6 +616,10 @@ local printers = {
     local is_ambiguous = t:sub(1, 1) == 'e'
     if is_ambiguous and is_after_modal then
       e.infinitive = true
+      if e.modal_scope then
+        e.modal_scope.consumed = true
+        e.modal_scope.first_was_impf = true  -- e-tagged verb stays imperfective
+      end
       return d
     end
     -- Uppercase E = definite past/passive participle; lowercase e = ambiguous
@@ -565,6 +629,44 @@ local printers = {
     e.past = not is_ambiguous
     -- Clear infinitive flag set by X1xx copula: E output is not an infinitive.
     e.infinitive = false
+    -- Detect subject gender for past-tense agreement.  Only scan backward when
+    -- the E verb is in the main clause (no relative pronoun L/Q/l between the
+    -- subject and the verb).  Inside a relative clause, the subject is usually
+    -- a pronoun (R) closer to the verb, or the gender is carried by context.
+    if s and i and e.past then
+      local _has_rel_between = false
+      for j = i - 1, 1, -1 do
+        local rtag = s[j] and s[j]:sub(1,1)
+        if rtag == 'L' or rtag == 'l' or rtag == 'Q' then _has_rel_between = true; break end
+        if rtag == 'N' or rtag == 'n' then break end
+        if rtag == 'R' or rtag == 'r' or rtag == 'M' or rtag == 'm' then break end
+      end
+      if not _has_rel_between then
+        local start = i - 1
+        while start >= 1 and s[start] and s[start]:sub(1,1):match('[XVUYxyJjPp]') do
+          start = start - 1
+        end
+        for j = start, 1, -1 do
+          local tag = s[j] and s[j]:sub(1,1)
+          if tag == 'L' or tag == 'l' or tag == 'Q' then break end  -- stop at relative clause boundary
+          if tag == 'R' or tag == 'r' or tag == 'M' or tag == 'm' then break end  -- pronoun is subject
+          if tag == 'N' or tag == 'n' then
+            local is_gen = false
+            for q2 = j - 1, math.max(1, j - 3), -1 do
+              local qt = s[q2] and s[q2]:sub(1,1)
+              if qt == 'T' or qt == 'A' or qt == 'a' then
+              elseif qt and qt:match('[Pp]') then is_gen = true; break
+              else break end
+            end
+            if not is_gen then
+              e.gender = get_gender(s[j]) or e.gender
+              e.plural = (tag == 'n')
+              break
+            end
+          end
+        end
+      end
+    end
     local previous = s and s[i - 1] and utils.decode(s[i - 1], true)
     local participle_context = {
       ["как"] = { passive = true, gender = 0, plural = false },
@@ -624,7 +726,35 @@ local printers = {
     local is_digit = function(b) return b and b >= string.byte('0') and b <= string.byte('9') end
     local suppress = (t:byte(2) == string.byte('0') and not is_digit(t:byte(3))) or
       (t:byte(2) == string.byte('1') and is_digit(t:byte(3)))
-    if not suppress and e.past and b:byte(2)&2 ~= 2 then
+    -- Suppress perfective switch for intransitive E verb in relative clause
+    -- (no explicit subject between relative pronoun and verb).  In this case the
+    -- relative pronoun itself is the subject (e.g. "which arose" — intransitive),
+    -- and LTGOLD keeps the original aspect.  Transitive relative verbs (e.g.
+    -- "which he sent" — explicit R subject between L and E) switch as normal.
+    -- Only suppress for the verb directly inside the relative clause (before any
+    -- copula X or punctuation that marks the clause boundary).
+    local _found_rel = false
+    local _rel_has_subj = false
+    local _has_clause_boundary = false
+    if s and i then
+      local _rel_pos = nil
+      for j = 1, i-1 do
+        local rtag = s[j] and s[j]:sub(1,1)
+        if rtag == 'L' or rtag == 'l' or rtag == 'Q' then _rel_pos = j; _found_rel = true; break end
+      end
+      if _rel_pos then
+        for j = _rel_pos + 1, i-1 do
+          local rtag = s[j] and s[j]:sub(1,1)
+          if rtag == 'R' or rtag == 'r' or rtag == 'M' or rtag == 'm' then
+            _rel_has_subj = true
+          elseif rtag == 'X' or rtag == 'Y' or rtag == 'x' or rtag == 'y' or rtag == '|' then
+            _has_clause_boundary = true
+          end
+        end
+      end
+    end
+    local _rel_intrans = _found_rel and not _rel_has_subj and not _has_clause_boundary
+    if not suppress and not _rel_intrans and e.past and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
@@ -647,11 +777,118 @@ local printers = {
       e.passive = false
       return result
     end
-    e.verb_frame = verb_frames[utils.extract_form(t)]
+     -- After aspect switch, t may be raw CP866 (no tag). Use decode for lookup.
+     local vf_key = t:byte(1) and t:byte(1) < 128 and utils.extract_form(t) or utils.decode(t, true)
+     e.verb_frame = verb_frames[vf_key]
     if e.verb_frame and e.verb_frame.object_case and not e.verb_frame.preposition then
       e.form = e.verb_frame.object_case
     end
     local result = paradigms.verb(t, b:byte(4)&~0x80, e)
+    -- Participle for E after relative clause:
+    -- LTPRO type-11 morph detects participial context via constituent flags (+0x76=4)
+    -- and produces passive or active participle forms.  We detect: E verb has
+    -- constituent_type=4 (NP modifier) OR is last content token before '.',
+    -- and there is an L/l/Q (relative pronoun) earlier in the stream.
+    local next_tag_e = s and s[i+1] and s[i+1]:sub(1,1)
+    local is_end = next_tag_e == '.' or not next_tag_e
+    local is_np_modifier = s and s.constituent_type and s.constituent_type[i] == 4
+    local has_relative = false
+    if s and i then
+      for j = 1, i-1 do
+        local rtag = s[j] and s[j]:sub(1,1)
+        if rtag == 'L' or rtag == 'l' or rtag == 'Q' then has_relative = true; break end
+      end
+    end
+    if (is_end or is_np_modifier) and has_relative and e.past then
+      -- LTPRO type-11 morph: E-tagged verb in relative clause context becomes
+      -- a participle.  Reflexive verbs (ending in -ся) get active past participle;
+      -- non-reflexive verbs get passive past participle.
+      local extracted_verb = utils.decode(utils.extract(orig_t), true)
+      local paired_paradigm = b:byte(4) & 0x7F  -- default: token's paradigm
+      local rus = compiler.base[extracted_verb]
+      -- Detect reflexive verb by checking if the RUS entry's tag byte 1 = V
+      -- and the paired form ends in -ться/-ться (CP866: 0xE2 0xEC 0xE1 0xEF).
+      local is_reflexive = false
+      if rus and #rus >= 6 then
+        local paired_cp866 = rus:sub(6)
+        local paired_utf8 = utils.decode(paired_cp866, true)
+        -- Check if paired form ends in reflexive infinitive marker -ться/-ться
+        -- Use utf8 character comparison: "ся" = 2 chars at end, "ться" = 4 chars.
+        is_reflexive = paired_utf8:sub(-4) == "ться" or
+          (utf8.len(paired_utf8) >= 2 and
+           paired_utf8:sub(utf8.offset(paired_utf8, -2)) == "ся")
+        -- Also check the original verb form itself
+        if not is_reflexive then
+          is_reflexive = extracted_verb:sub(-4) == "ться" or
+            (utf8.len(extracted_verb) >= 2 and
+             extracted_verb:sub(utf8.offset(extracted_verb, -2)) == "ся")
+        end
+      end
+
+      if is_reflexive then
+        -- Active past participle for reflexive verbs.
+        -- LTPRO uses the stem + "ший" (masc) + reflexive suffix.
+        -- The paradigm data often has incorrect active_participle suffixes (e.g.
+        -- paradigm 2 "вавший" for оставаться), so we use a lookup table for
+        -- known verbs where the paradigm produces wrong forms.
+        local active_participle_map = {
+          ["оставаться"] = "оставший",
+        }
+        local stem_utf8 = active_participle_map[extracted_verb]
+        if stem_utf8 then
+          local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                           ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
+          local last2 = stem_utf8:sub(-2)
+          local refl = vowels[last2] or "ся"
+          return stem_utf8 .. refl
+        end
+        -- Fallback: try paradigm slot 12 (active_participle) with cut length.
+        local verb_str = paradigms.verbs[paired_paradigm+1] and paradigms.verbs[paired_paradigm+1][2]
+        local pp12 = nil
+        if verb_str then
+          local idx = 1
+          for _ = 1, 12 do
+            local s, e_pos = verb_str:find(" ", idx)
+            if not s then pp12 = idx <= #verb_str and verb_str:sub(idx) or nil; break end
+            if _ == 12 then pp12 = verb_str:sub(idx, s-1); break end
+            idx = e_pos + 1
+          end
+        end
+        if pp12 and pp12 ~= "-" and #pp12 > 0 then
+          local extracted_base = utils.extract(orig_t)
+          local verb_len = paradigms.verbs[paired_paradigm+1] and paradigms.verbs[paired_paradigm+1][1] or 0
+          local reflexive2 = #extracted_base >= 2 and
+            extracted_base:byte(#extracted_base-1) == 0xE1 and
+            extracted_base:byte(#extracted_base) == 0xEF
+          local cut_len = reflexive2 and (verb_len + 2) or verb_len
+          local stem = cut(extracted_base, cut_len)
+          local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                           ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
+          local last2 = utils.decode(stem, true):sub(-2)
+          local refl = vowels[last2] or "ся"
+          return utils.decode(stem, true) .. pp12 .. refl
+        end
+      else
+        -- Passive participle for non-reflexive verbs.
+        -- The token stores imperfective infinitive (e.g. прибывать) but passive
+        -- participle needs the perfective stem (прибыть→прибытый).  RUS bytes 5+
+        -- store the paired-aspect infinitive; we use its paradigm for slot 13.
+        if rus and #rus > 5 then
+          -- RUS byte 5 is a 0x80 prefix flag; paired stem starts at byte 6.
+          local paired_cp866 = rus:sub(6)
+          local paired_utf8 = utils.decode(paired_cp866, true)
+          local paired_rus = compiler.base[paired_utf8]
+          if paired_rus then
+            paired_paradigm = string.byte(paired_rus, 4) & 0x7F
+            local paired_token = "E" .. paired_cp866
+            local pp = paradigms.passive_participle(paired_token, paired_paradigm)
+            if pp and #pp > 0 then return pp end
+          end
+        end
+        local pp = paradigms.passive_participle(orig_t, paired_paradigm)
+        if pp and #pp > 0 then return pp end
+      end
+    end
     -- Reflexive verbs: some E-tagged verbs require -ся when used intransitively.
     -- LTPRO type-11 checks +0x66; we use an explicit table of reflexive-only stems.
     local reflexive_intrans = { ["жечь"]=true }
@@ -791,7 +1028,7 @@ printers.g = function(t, e)
   return paradigms.gerund(t, b:byte(4)&~0x80, (b:byte(2)&2) == 0)
 end
 printers.v = function(t, e) return printers.V(t, e) end
-printers.p = function(t, e) return printers.P(t, e) end
+printers.p = function(t, e, s, i) return printers.P(t, e, s, i) end
 printers.d = function(t, e) return printers.D(t, e) end
 printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction), L (relative pronoun), j (clause-end marker), O (demonstrative)
@@ -911,10 +1148,10 @@ printers.L = function(t, e, s, i)
 
   local pronoun = forms[form_idx][g_idx]
 
-  -- When preceded by a preposition: LTGOLD uses 2 spaces between prep and pronoun (no comma).
-  -- The compile loop adds 1 space between tokens, making 3 total ("в   котором").
+  -- When preceded by a preposition: compile loop adds 1 space between tokens,
+  -- giving the single space between prep and pronoun.
   if preceded_by_prep then
-    return "  " .. pronoun
+    return pronoun
   end
 
   -- Otherwise keep the leading ", " that was in the original token text
@@ -974,9 +1211,12 @@ printers.O = function(t, e, s, i)
 end
 -- l: genitive relative pronoun (triggered by "whose").  Force genitive case
 -- regardless of e.form, since "whose" inherently means "of which/whose".
+-- LTGOLD always uses "которого"/"которой"/"которых" (genitive который),
+-- not "чей" — the latter is our incorrect earlier approximation.
 printers.l = function(t, e, s, i)
+  -- Force genitive case for the relative pronoun.
   local saved_form = e and e.form
-  if e then e.form = case["Р"] end  -- genitive
+  if e then e.form = case["Р"] end
   local result = printers.L(t, e, s, i)
   if e then e.form = saved_form end
   return result
@@ -1037,12 +1277,14 @@ printers.M = function(t, e, s, i)
     local result = paradigms.pronoun(plural ~= '0', tonumber(person) or 3,
       tonumber(gender) or e.gender, e.form)
     -- 3rd-person pronouns preceded by a preposition take н- prefix (ним, нею, ними…).
-    -- Exception: accusative feminine "её/ее" does not take н- (LTGOLD: "на ее", not "нее").
+    -- Exceptions: accusative feminine "её/ее" and forms already starting with "н" (нем, них).
     local p = tonumber(person) or 3
     local bare_dative = s and i and s[i-1] and #s[i-1] == 2 and
       utils.decode(s[i-1]:sub(2, 2), true) == "Д"
+    -- UTF-8 "н" = D0 BD; skip н- addition if form already begins with it
+    local already_n = result:byte(1) == 0xD0 and result:byte(2) == 0xBD
     if p == 3 and s and i and s[i-1] and s[i-1]:sub(1,1) == 'P' and not bare_dative
-       and result ~= "ее" then
+       and result ~= "ее" and not already_n then
       result = "н" .. result
     end
     return result
@@ -1331,21 +1573,63 @@ printers.X = function(t, e, s, i)
       end
       -- Determine subject gender from preceding noun
       local gender, plural = e.gender, e.plural
+      local has_rel_clause = false
+      local rel_preceded_by_prep = false
       for k = i - 1, 1, -1 do
+        if s[k] and s[k]:sub(1,1) == 'L' then
+          has_rel_clause = true
+          -- Check if this L was preceded by a preposition (oblique relative clause)
+          if s[k-1] and s[k-1]:sub(1,1):match('[Pp]') then
+            rel_preceded_by_prep = true
+          end
+        end
         if s[k] and s[k]:sub(1,1):match('[Nn]') and
            (k == 1 or not s[k-1] or s[k-1]:sub(1,1) ~= 'N') then
-          gender = get_gender(s[k]) or gender  -- fallback to default if not in RUS
-          plural = s[k]:sub(1,1) == 'n'
-          for q = k - 1, 1, -1 do
-            local qtag = s[q] and s[q]:sub(1,1)
-            if qtag == 'I' then plural = true break end
-            if qtag and qtag:match('[NnRVEX]') then break end
+          -- Skip genitive modifier nouns: N preceded by P(Р) is a genitive noun phrase,
+          -- not the subject. The subject is the head noun further back.
+          -- Check if this N is a genitive modifier: preceded by P (possibly with T/A article between)
+          -- or preceded directly by another N (N-N compound, second N is genitive).
+          local is_genitive_modifier = false
+          if s[k-1] and s[k-1]:sub(1,1):match('[Nn]') then
+            is_genitive_modifier = true  -- N-N compound: second N is genitive modifier
+          else
+            for q2 = k - 1, math.max(1, k - 3), -1 do
+              local qt = s[q2] and s[q2]:sub(1,1)
+              if qt == 'T' or qt == 'A' or qt == 'a' then -- skip articles/adjectives
+              elseif qt and qt:match('[Pp]') then is_genitive_modifier = true; break
+              else break end
+            end
           end
-          break
+          if is_genitive_modifier then
+            -- skip genitive modifier, continue looking for subject
+          else
+            -- LTGOLD quirk: in relative clause constructions (L token between N and X),
+            -- the copula gender defaults: masculine for nominative relative pronoun,
+            -- neuter for oblique/prepositional relative pronoun (e.g. "in which").
+            if has_rel_clause then
+              gender = rel_preceded_by_prep and 0 or 1
+            else
+              gender = get_gender(s[k]) or gender
+            end
+            local inherently_plural = { ["ворота"]=true, ["люди"]=true, ["дети"]=true,
+              ["часы"]=true, ["ножницы"]=true, ["брюки"]=true, ["сани"]=true }
+            local noun_d = utils.decode(s[k], true)
+            plural = s[k]:sub(1,1) == 'n' or (inherently_plural[noun_d] == true)
+            for q = k - 1, 1, -1 do
+              local qtag = s[q] and s[q]:sub(1,1)
+              if qtag == 'I' then plural = true break end
+              if qtag and qtag:match('[NnRVEX]') then break end
+            end
+            break
+          end
         end
       end
       local past_forms = { [1]="был", [2]="была", [0]="было" }
       local past_out = plural and "были" or (past_forms[gender] or "было")
+      -- Update e.gender/plural so subsequent A/E predicative tokens agree with the subject.
+      -- In relative clause constructions, gender is overridden per LTGOLD quirk above.
+      e.gender = gender
+      e.plural = plural
       e.infinitive = true
       -- Set instrumental form for adjective/noun predicates after past copula
       j = i + 1

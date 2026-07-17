@@ -306,6 +306,12 @@ local function replace(ts, j, m, t, s)
 		-- When resolving an E/e token to V, preserve past-tense info as V!
 		-- so the compiler conjugates as past tense (e.g. signed→подписал not подписывает).
 		local was_past = ts[j] and ts[j]:sub(1, 1):match('[Ee]')
+		-- E0 tokens (h-tag converted) must stay imperfective: flag before find_and_replace.
+		local is_digit_b = function(b) return b and b >= string.byte('0') and b <= string.byte('9') end
+		local was_e0 = was_past and ts[j] and
+			ts[j]:byte(1) == string.byte('E') and
+			ts[j]:byte(2) == string.byte('0') and
+			not is_digit_b(ts[j]:byte(3))
 		local is_v = (s == 'V')
 		-- X1 copula (was/were) + Z with A form → resolve to adjective, not verb.
 		-- find() packs Z/N/A into one iter entry; use direct string search instead.
@@ -319,8 +325,9 @@ local function replace(ts, j, m, t, s)
 			dbg.log(3, "  $V handler: was_past=", tostring(was_past), " x1=", tostring(x1_past_context), " is_v=", tostring(is_v), " tag=", ts[j] and ts[j]:sub(1,1))
 			find_and_replace(ts, j, s)
 			if is_v and (was_past or x1_past_context or y1_perfect_context) and ts[j] and ts[j]:sub(1, 1) == 'V' then
-				-- V! for E/e past → perfective switch; V= for X1/Y1 simple past → no switch
-				local marker = was_past and '!' or '='
+				-- V! for E/e past → perfective switch; V= for X1/Y1 simple past or E0 (h-tag) → no switch
+				-- E0 (h-converted) tokens must stay imperfective (h means "use imperfective past directly").
+				local marker = (was_past and not x1_past_context and not y1_perfect_context and not was_e0) and '!' or '='
 				stream.set_token(ts, j, 'V' .. marker .. ts[j]:sub(2))
 				x1_past_context = false
 				y1_perfect_context = false
@@ -793,9 +800,14 @@ local function resolve_post_rule_contexts(ts)
 	for i = 1, #ts do
 		if ts.source and ts.source[i] and ts.source[i]:lower() == "it" and
 		   ts[i]:sub(1, 1) == "R" then
-			-- Object "it" selects the demonstrative paradigm; subject/copular "it"
-			-- remains handled by apply_copular_it_compatibility below.
-			stream.set_token(ts, i, "O" .. utils.encode("это"))
+			-- Object "it" after a preposition: keep R, the compiler handles
+			-- prepositional case via e.form (set by preceding P printer).
+			if i > 1 and ts[i-1] and ts[i-1]:sub(1,1) == 'P' then
+				-- Keep R-tagged for prepositional context (о нем, not об этом)
+			else
+				-- Object "it" elsewhere: select demonstrative paradigm.
+				stream.set_token(ts, i, "O" .. utils.encode("это"))
+			end
 		end
 	end
 end

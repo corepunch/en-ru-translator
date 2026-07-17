@@ -493,6 +493,7 @@ paradigms.past_verb = past_verb
 local irregular_past = {
   ["мочь"]    = { "могло",  "мог",   "могла",  "могли"  },
   ["жечь"]    = { "жгло",   "жег",   "жгла",   "жгли"   },
+  ["жить"]    = { "жило",   "жил",   "жила",   "жили"   },
   ["лечь"]    = { "легло",  "лёг",   "легла",  "легли"  },
   ["течь"]    = { "текло",  "тёк",   "текла",  "текли"  },
   ["помочь"]  = { "помогло","помог",  "помогла","помогли"},
@@ -593,9 +594,26 @@ function paradigms.verb(base, table_id, e)
       -- Russian short passive plural uses -ны, not the past-tense -ни pattern.
       return utils.decode(stem, true) .. part:sub(1, -9) .. "ны"
     end
-    local short = utf8.len(part) > 3 and string.sub(part, 1, utf8.offset(part, -3) - 1) or ""
+    -- Short passive participle: strip adjectival ending, append gender suffix.
+    -- "-нный" → "-н" (drop "ный"); "-тый"/"-итый" → "-т"/"-ит" (drop "ый").
+    local short_base
+    if part:sub(-8) == "нный" then
+      -- double-н endings: нный → н (drop "нный" except first н: keep part up to -7, no suffix)
+      short_base = part:sub(1, -7)
+    elseif utf8.len(part) >= 2 then
+      local last2_offset = utf8.offset(part, -2)
+      local last2 = part:sub(last2_offset)
+      if last2 == "ый" or last2 == "ой" or last2 == "ий" then
+        short_base = part:sub(1, last2_offset - 1)
+      else
+        short_base = utf8.len(part) > 3 and string.sub(part, 1, utf8.offset(part, -3) - 1) or ""
+      end
+    else
+      short_base = ""
+    end
+    local short_endings = { [2]="", [3]="а", [1]="о", [4]="ы" }
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
-    return utils.decode(stem, true)..short..past_verb[past_idx]
+    return utils.decode(stem, true) .. short_base .. (short_endings[past_idx] or "")
   else
     -- past tense: gender-based agreement (masc="", fem="а", neut="о", pl="и")
     local past_idx = e.plural and 4 or ((e.gender or 1) + 1)
@@ -606,7 +624,13 @@ function paradigms.verb(base, table_id, e)
       local irr_result = irr[past_idx == 1 and 1 or (past_idx == 2 and 2 or (past_idx == 3 and 3 or 4))]
       return irr_result .. (reflexive and reflexive_suffix(irr_result) or "")
     end
-    local past_suf = word_at(str, 8)
+    local past_suf_raw = word_at(str, 8, true)
+    local past_suf = (past_suf_raw == "=" or past_suf_raw == nil) and "" or past_suf_raw
+    -- -нуть/-сть/-зть verbs with '=' in past slot: masc = bare stem (no suffix),
+    -- but fem/neut/pl still need "л" before the gender ending (возникла, возникло, возникли).
+    if past_suf_raw == "=" and past_verb[past_idx] ~= "" then
+      past_suf = "л"
+    end
     -- -йти/-ити verbs: past suffix "шел"/"ишел" drops the 'е' for non-masc forms.
     -- E.g. пройти: прошел (m), прошла (f), прошло (n), прошли (pl).
     -- "шел" = ш(2) + е(2) + л(2) in UTF-8. Remove middle "е" (bytes -4,-3) for non-masc.

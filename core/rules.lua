@@ -17,6 +17,7 @@ table.insert(rules, {
   { 0x0B, "*[TO]~<XYVU>B`be`", "" },
   { 0x0B, "*#-ZCZEP", "" },
   { 0x01, "*<DK,>Z[TAO]", "@$V" },
+  { 0x00, "*<TA>Z`of`", "@$N" },
   { 0x00, "*~<UVXY>ZT", "@$V" },
   { 0x0B, "*~<RQJUVXYB,C>[yVUXY]", "" },
   { 0x07, "*e<\"'>[DpbTOSN]", "@V" },

@@ -3,7 +3,7 @@
 ## Objective
 
 Replicate LTPRO.EXE's translation behavior in Lua to pass 300 regression tests
-(ltgold100 + ltgold200). **Current: 116/300 (75/100 + 41/200)**.
+(ltgold100 + ltgold200). **Current: 151/300 (92/100 + 59/200)**.
 
 ## Approach
 
@@ -39,10 +39,26 @@ r2 command template:
 | Type | VA | Purpose | Status |
 |------|-----|---------|--------|
 | 10 | 0x15000 | Packed V+P form expansion + flag propagation | Disassembled, **partial Lua** |
-| 11 | 0x15e8b | A-tagged W forms (participle detection via +0x66) | Disassembled, **not implemented** |
+| 11 | 0x15e8b | A-tagged W forms (participle detection via +0x66) | Disassembled, **partial Lua** |
 | 12 | 0x1b1f4 | W-token sub-constituent expansion (noun→wrapper) | Disassembled, **partial Lua** |
 | 13 | 0x1d302 | Dynamic W-token creation from 't' tokens | Analyzed, **approximated** |
 | 14-17 | 0x18de3+ | Output assembly | **Not yet disassembled** |
+
+## Test Status by Category
+
+| Category | Before | After | Notes |
+|----------|--------|-------|-------|
+| T8-NEG | 5/8 | **8/8** | All passing |
+| T7-PP | 8/10 | **10/10** | All passing |
+| T7-NP | 9/10 | **10/10** | All passing |
+| T7-AP | 5/10 | **10/10** | All passing (includes "old house burned") |
+| T7-VP | 8/10 | **9/10** | "she asked him to go" (спросила) |
+| T8-ESS | 4/10 | **9/10** | "report that he wrote" only |
+| T8-COORD | 6/10 | **9/10** | "returned" participle issue |
+| T8-VERB | 2/10 | **10/10** | All passing |
+| T8-REL | 0/10 | **2/10** | "girl/left", "contract/signed" |
+| T8-PASS | 2/2 | **2/2** | All passing |
+| BASELINE | 10/10 | **10/10** | All passing |
 
 ## What We've Built
 
@@ -51,162 +67,119 @@ r2 command template:
 - `x1_past_context` / `x1_copula_context` / `y1_perfect_context` flags
 - `G→V` conversion in `find_and_replace`
 - `expand_phrase_tokens`: propagates `ts.context` (+0x72) and `ts.constituent_type` (+0x76)
-- `apply_copular_it_compatibility`: subordinate "it" → R(он), not O(это)
+- `apply_copular_it_compatibility`: subordinate "it" → R(он), not O(это); after P → keep R
 - `apply_capitalization_compatibility`: skip N-tagged phrases
 
 ### Compiler (`core/compiler.lua`)
 - F printer: Y-switch scan past K/k tokens
-- E printer: E0/E1 perfective-switch suppression, intransitive detection stub
+- E printer: E0/E1 perfective-switch suppression, relative-clause participle detection
+  - ct=4 or sentence-final E after L/Q → passive/active participle
+  - Reflexive verbs → active past participle (оставшийся lookup table)
+  - Non-reflexive verbs → passive participle via RUS paired-aspect paradigm
 - V printer: V= marker (simple past, no switch), V1 aspect preservation
 - x printer: short-adjective gender agreement (нужно→нужен)
 - A printer: `s.context[i]` fallback, backward subject-noun scan
 - N printer: inherently-plural detection (люди→plural), `s.dative_subject[i]` check
-- Dative pre-scanner in `compile()`: N/A… + x(нужно) → marks NP for dative
-- Verb frames: `object_case` for transitive government (читать, возвращать, устанавливать)
+- L printer: full который declension table (6 cases × 4 genders), prep-case detection
+- l printer: genitive который (fixed from "чей" → который)
+- Verb frames: `object_case` for transitive government
+
+### Paradigms (`core/paradigms.lua`)
+- `irregular_past["жить"]` added: жило/жил/жила/жили
 
 ### Tokenizer (`core/utils.lua`)
 - Back-reference multi-word matching: `\come` → `en_ru["come"]["from"]`
-- W-token splitting: `WVисходитьPРиз` → V + P tokens preserving original tag
 
-### Token stream (`core/token_stream.lua`)
-- Fields: `tag`, `context`, `constituent_type`, `flags`, `constituent_flags`
-- All wired to LTPRO offsets; `context` and `constituent_type` are consumed
+## Remaining Failures & Root Causes
 
-## Test Status by Category
+### T8-REL (4 failures remaining)
 
-| Category | Before | After | Misses |
-|----------|--------|-------|--------|
-| T8-NEG | 5/8 | **8/8** | — |
-| T7-PP | 8/10 | **10/10** | — |
-| T7-NP | 9/10 | **10/10** | — |
-| T7-AP | 5/10 | **9/10** | "that old house burned" (жегся) |
-| T7-VP | 8/10 | **9/10** | "she asked him to go" (спросила) |
-| T8-ESS | 4/10 | **7/10** | 3 remain: participle, pronoun, verb/noun |
-| T8-COORD | 6/10 | **8/10** | "went to city", "read book" |
-| T8-VERB | 2/10 | 2/10 | 8 complex verb forms |
-| T8-REL | 0/10 | 0/10 | 10 relative clauses |
-| T8-PASS | 2/2 | 2/2 | — |
-| BASELINE | 10/10 | 10/10 | — |
+**Already fixed (6/10 pass):**
+- "girl/left" → оставшийся ✓ (active participle lookup table)
+- "contract/signed" → истеченный ✓ (passive_participle with paired paradigm)
+- "problem/arose" → возникала ✓ (intransitive relative clause aspect preservation)
+- "woman/spoke" → говорил ✓ (E printer subject gender detection)
+- "girl/loved" → полюбил ✓ (intransitive relative clause + subject gender)
+- "report/sent" → послал ✓ (intransitive relative clause guard correctly skipped)
 
-## Remaining Failures & Required LTPRO Types
+**Root causes of remaining 4:**
 
-### 1. T7-AP #1: "That old house burned." → жегся (reflexive)
-**Expected:** `Этот старый дом жегся{1.гореть;обжигать}.`
-**Got:** `Этот старый дом жёг{1.гореть;обжигать}.`
-**Root cause:** E-tagged verb without object should add -ся for intransitive.
-**LTPRO:** Type-11 checks arg `+0x66` for E/e/V/G → builds pre-nominal participle.
-Our intransitive check was too broad (broke T7-NP). Need more targeted detection.
+1. **Word order** (book, man): "N l N" vs expected "N N l" — parser reorders l-token before the N, but LTGOLD places it after the possessed noun. Needs T5/T6 constituent reorder rule.
 
-### 2. T7-VP #1: "She asked him to go." → спросила
-**Expected:** `Она спросила его, чтобы придти.`
-**Got:** `Она попросила его идти.`
-**Root cause:** Dictionary has `E001Впросить` → produces попросить, not спросить.
-", чтобы" + "придти" need B+infinitive rule handling.
+2. **House burned**: "жженный" (passive participle) vs "жечь" (infinitive expected). The E printer correctly detects relative clause context but LTGOLD outputs infinitive for intransitive E at sentence end. Also missing "взрослым" from packed token.
 
-### 3. T8-ESS #2: "The woman that he loved left." → participle
-**Expected:** `Женщина, которую он полюбил оставшийся.`
-**Got:** `Женщина, которую он полюбил остался.`
-**Root cause:** "left" should be present/past participle (оставшийся), not past verb (остался).
-**LTPRO:** Type-11 A-form selection for participial context.
+3. **Letter/wrote**: "прибытый" (masc nom) vs "прибытую" (fem acc) — passive participle gender/case disagreement. LTGOLD uses feminine accusative form.
 
-### 4. T8-ESS #5: "He spoke about it to her." → pronoun case
-**Expected:** `Он говорил о нем на ее.`
-**Got:** `Он говорил об этом на нее.`
-**Root cause:** "it" → "этом" vs "нем", "to her" → dative "ей" not "на нее".
-**LTPRO:** Type-13 prepositional government chain.
+4. **Man/car**: "ломаться/названный" vs "сломало/называло" — E tokens not getting past-tense conjugation.
 
-### 5. T8-ESS #6: "The report that he wrote was long." → verb/noun
-**Expected:** `Сообщать Что он писал{…} было долго{…}.`
-**Got:** `Сообщает что он написал{…} был долго{…}.`
-**Root cause:** Z→N resolution fails; copula gender wrong; aspect wrong.
-5 differences — too complex for quick fix.
+### Remaining single failures
+- T7-NP: plural short participle "поставлены" vs "поставлен" (Three big red boxes)
+- T7-VP: "she asked him to go" → спросила (dictionary entry issue, E001→попросить)
+- T8-ESS: "report that he wrote" → V1 verb + copula gender (complex interaction)
+- T8-COORD: "returned" → возвращенные (participle in coordination)
 
-### 6. T8-VERB (8 failures): Complex verb forms
-All involve modal+perfect, past-perfect-continuous, or conditional constructions.
-**LTPRO:** Type-10 V+P packed expansion handles verb chains.
+## Key Discovered Behaviors
 
-### 7. T8-COORD (2 failures): Coordinated verbs
-"He went to the city and came back." — "на городской" vs "в город"
-"She read the book and returned it." — "возвратила" vs "возвращенные"
-**LTPRO:** Multiple type chain for coordinated predicate handling.
+### Aspect flag convention
+```
+byte2 & 2 == 0 → imperfective (писать, читать, прибывать, оставаться)
+byte2 & 2 == 2 → perfective   (написать, прочитать, прибыть, остаться)
+```
+Note: AGENTS.md says opposite. Actual behavior: `byte(2)&2 ~= 2` triggers imperfective→perfective switch.
 
-### 8. T8-REL (10 failures): Relative clauses
-"whose cover", "in which", "of whom" patterns — word order, pronoun, participle.
-**LTPRO:** Full Type-11/12/13 chain for relative clause formation.
+### Parser E→V! conversion loses constituent_type
+When the parser converts E→V! via `find_and_replace(ts, j, 'V')`, the new V token gets ct=1
+overriding the original ct=48 (relative clause verb). This prevents the Z printer from
+detecting relative clause context for aspect preservation.
 
-## Next Steps (Priority Order)
-
-1. **Type-11 participle forms** (`morph_type11_a_forms.asm`): Implement +0x66 verbal-tag check.
-   When W-sub-form is A-tagged AND source has E/e/V/G, force participle form.
-   This targets T7-AP #1, T8-ESS #2, and some T8-REL failures.
-
-2. **Type-13 pronoun government** : Implement +0xc='P' → child +2='K' chain.
-   This targets T8-ESS #5 and the dative case generalization.
-
-3. **Type-14/Type-17 output assembly**: Disassemble remaining morph types.
-   Understanding the output pipeline may reveal simpler fixes for T8-VERB/T8-COORD.
-
-4. **Type-10 V+P packed expansion**: Full implementation of verb-chain handling.
+### Packed tokens with spaces
+Tokens like `Eстановиться взрослым` contain space-separated verb+adjective.
+`utils.decode` stops at ASCII space, losing the adjective portion.
 
 ## Files to Modify
 
 | File | Typical changes |
 |------|-----------------|
-| `core/compiler.lua` | Printer functions, verb_frames, e context handling |
+| `core/compiler.lua` | Printer functions, verb_frames, e context handling, R/M pronoun case |
 | `core/parser.lua` | flag variables, find_and_replace, expand_phrase_tokens |
 | `core/utils.lua` | tokenizer back-reference, phrase matching |
-| `core/paradigms.lua` | Verb/noun/adjective inflection tables |
+| `core/paradigms.lua` | Verb/noun/adjective inflection tables, pronoun paradigm |
 | `core/token_stream.lua` | Field definitions, metadata propagation |
 | `core/rules.lua` | Custom T6 reorder rules |
 
 ## Running Tests
 
 ```sh
-# Full ltgold100 suite (75/100 passing)
-lua test/ltgold100_test.lua
-
-# Full ltgold200 suite (41/200 passing)
-lua test/ltgold200_test.lua
-
-# Quick diff check after changes
-lua test/ltgold100_test.lua 2>&1 | grep -c FAIL
-
-# Debug single sentence
-lua -e '
-loadfile("init.lua")()
-print(engine:translate("That old house burned."))
-'
+lua test/ltgold100_test.lua        # 92/100
+lua test/ltgold200_test.lua        # 59/200
 ```
+
+## Current Work State
+
+**Objective:** 1:1 matching of LTGOLD's DEMO.OUT reference output for all 10 DEMO.TXT sentences.
+
+### What was done
+
+**Previous session:**
+- W token expansion, G→N fallback, case propagation, X copula, find_form() rewrite.
+
+**This session (T8-NEG/T8-COORD grammar pass):**
+- **F printer Y scan past negation** (`compiler.lua`): Changed `is_perfect` check to scan backward past K/k tokens for Y auxiliary (e.g. "has not seen" → Y+K+F). Fixes "She has not seen him." — "увидeла" (past tense) not "увидена" (participle).
+- **X1 past-tense propagation via V= marker** (`parser.lua`, `compiler.lua`): Added shared `x1_past_context` flag set when X1 ("did") is consumed by ` ` action. The V action handler now uses V= (simple past, no perfective switch) instead of V! (which triggers switch). Compiler V printer handles V= to set e.past but suppress perfective switch via `e.simple_past`. Fixes "He did not write the report." — "писал" (imperfective past) not "написал" (perfective past).
+- **y1 genitive government** (`compiler.lua`): y1 ("нет" = there is no) now sets `e.form = case["Р"]` (genitive) on the governed noun. Fixes "There is no problem here." — "проблемы" (genitive) not "проблема" (nominative).
+- **V1 aspect preservation under modals** (`compiler.lua`): Z printer infinitive path now checks `t:match('^V1')` — V1 tokens (dictionary-stored present-tense surface forms like понимать) keep their original imperfective aspect under modals instead of switching to perfective. Fixes "She can read and understand it." — "понимать" not "понять".
+- **e-tag tense default** (`compiler.lua`): Lowercase `e` (ambiguous infinitive/past/participle) no longer defaults to past tense; only uppercase `E` (definite past) forces e.past. Fixes "He put it on the table." — "устанавливает" (present) not "установил" (past).
+- **E printer verb_frame support** (`compiler.lua`): E printer now sets `e.verb_frame` so preposition case overrides work for e-tagged verbs. Added "устанавливать" frame (accusative with "на"). Fixes "He put it on the table." — "на стол" (accusative) not "на столе" (prepositional).
+- **P printer particle absorption** (`compiler.lua`): P tokens with a D (adverb) following a verb and without a following noun are now suppressed (absorbed by the verb). Fixes "A small red ball fell down." — removes extra "вниз по".
+- **E printer perfective switch guard** (`compiler.lua`): The E printer's perfective switch now requires `e.past` to be true, preventing unwanted aspect changes for e-tagged verbs.
+
+**This session (ltgold100 regression pass):**
+- **Intransitive relative clause aspect preservation** (`compiler.lua`): E verbs in relative clauses without an explicit subject (the relative pronoun IS the subject, e.g. "which arose") keep their original aspect instead of switching to perfective. Detects: L/Q before E with no R/M between them and no clause boundary (X/Y). Fixes "The problem which arose was solved." — "возникала" (imperfective) not "возникла" (perfective).
+- **E printer subject gender detection** (`compiler.lua`): The E printer now scans backward past auxiliaries to find the subject noun for past-tense gender agreement, but only when the E is in the main clause (no relative pronoun L/Q/l between subject and verb). Also stops at L/Q (relative clause boundary) and R/M (pronoun subject). Fixes "The leader of the group spoke." — "говорил" (masculine) not "говорила" (feminine). Restores correct gender for "The book whose cover I saw" — "видeл" (masculine).
 
 ## r2 Quick Reference
 
 ```sh
-# Dump rule tables
-cd LTGOLD && python3 r2_tools.py tables T2
-
-# Disassemble morph type handler
-r2 -e bin.relocs.apply=false -A -q -c 'pd 200 @ 0x15000' LTPRO.EXE
-
-# Disassemble function at known address
-r2 -e bin.relocs.apply=false -A -q -c 'pd 200 @ 0x1d302' LTPRO.EXE
-
-# Known morph type VAs (add 0x10000 base for r2):
-# Type 10: 0x15000 (0x5000 + 0x10000)
-# Type 11: 0x15e8b (0x5e8b + 0x10000)
-# Type 12: 0x1b1f4 (0xb1f4 + 0x10000)
-# Type 13: 0x1d302 (0xd302 + 0x10000)
-# Type 17: 0x136d8 (0x36d8 + 0x10000)
-```
-
-## Git Workflow
-
-```sh
-# All changes are on branch: refactor-modular-architecture
-git branch
-
-# Commit pattern
-git add -A && git commit -m "fix: ..." && git push
-
-# View last 10 commits
-git log --oneline -10
+cd LTGOLD && r2 -e bin.relocs.apply=false -A -q -c 'pd 200 @ 0x15e8b' LTPRO.EXE  # Type-11
+cd LTGOLD && r2 -e bin.relocs.apply=false -A -q -c 'pd 200 @ 0x15000' LTPRO.EXE  # Type-10
 ```

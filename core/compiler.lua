@@ -625,6 +625,11 @@ local printers = {
     while text_start <= #t and t:byte(text_start) >= 0x80 and t:byte(text_start) <= 0x8F do
       text_start = text_start + 1  -- skip flag bytes
     end
+    -- Rebuild token without flag bytes so paradigms.verb() doesn't include them in the stem.
+    if text_start > code_len + 1 then
+      t = 'E' .. t:sub(2, code_len) .. t:sub(text_start)
+      text_start = code_len + 1  -- recalculate after rebuild
+    end
     local d = utils.decode(t:sub(text_start), true)
     local e_form = utils.extract_form(t)  -- E form only (before A/other tags)
     local orig_t = t  -- save before perfective switch modifies t

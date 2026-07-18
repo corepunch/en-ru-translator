@@ -1019,6 +1019,14 @@ local printers = {
 
 -- S: demonstrative pronoun (adjective form) — use adjective declension if possible, else decode
 printers.S = function(t, e)
+  local s_text = utils.decode(t, true)
+  -- Negative pronouns (ничто, никто, никакой) require не before the following verb:
+  -- "ничто не изменило", "никто не пришел".  Also set neuter gender for ничто.
+  local neg_prons = { ["ничто"]=true, ["никто"]=true, ["никакой"]=true, ["ничей"]=true }
+  if neg_prons[s_text] then
+    e.negate_next = true
+    if s_text == "ничто" then e.gender = 0 end  -- ничто is neuter
+  end
   local all = find_form(t, 'O')
   if all and utils.decode(all, true) == "весь" then
     local forms = { "все", "всех", "всем", "все", "всеми", "всех" }
@@ -1027,7 +1035,7 @@ printers.S = function(t, e)
   end
   local ok, res = pcall(printers.A, t, e)
   if ok and res and #res > 0 then return res end
-  return utils.decode(t, true)
+  return s_text
 end
 printers.V = function(t, e, s, i)
 	-- V! is the parser's resolved simple-past marker for an E/e dictionary form that has no separately packed V alternative.
@@ -2127,6 +2135,29 @@ function compiler.compile(s, options)
         c[#c] = c[#c] .. out:sub(1,1)
         out = out:sub(2):match("^%s*(.*)") or ""
       end
+      -- LTGOLD capitalizes the pronoun after "поскольку" (Since he → "Поскольку Он").
+      -- Set flag on J(поскольку) tokens; consumed on next R token or cleared on content.
+      if e.capitalize_next_R then
+        if tag == 'R' then
+          e.capitalize_next_R = false
+          if out then
+            local b1, b2 = out:byte(1), out:byte(2)
+            if b1 and b2 and (b1 == 0xD0 or b1 == 0xD1) then
+              local cp = (b1 == 0xD0 and b2 - 0x80 or b2 - 0x80 + 0x40) + 0x400
+              if cp >= 0x430 and cp <= 0x44F then
+                local uc = cp - 0x20
+                local ub1 = 0xD0 + (uc - 0x400 >= 0x40 and 1 or 0)
+                local ub2 = (uc - 0x400) % 0x40 + 0x80
+                out = string.char(ub1, ub2) .. out:sub(3)
+              end
+            end
+          end
+        elseif tag ~= 'j' and tag ~= 'T' and tag ~= 't' then
+          e.capitalize_next_R = false  -- clear on first non-R, non-article content token
+        end
+      end
+      -- Set flag on J(поскольку) tokens AFTER the check so it fires on the next token.
+      if tag == 'J' and out == "поскольку" then e.capitalize_next_R = true end
       -- uppercase output when the source word was all-caps (e.g. AGREEMENT → СОГЛАШЕНИЕ).
       -- Only the main Russian word is uppercased; the {N.alt} alternatives part is left as-is.
       -- caps == true  → ALL-CAPS output  (source word was e.g. "AGREEMENT")

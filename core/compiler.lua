@@ -1204,6 +1204,12 @@ printers.J = function(t, e, s, i)
     idx = idx + 1
   end
   local out = utils.decode(table.concat(result), false)
+  -- LTGOLD maps sentence-initial "as" to "Поскольку" (causal), not "как" (manner).
+  -- The dictionary provides both forms but the rule system selects the J tag which
+  -- defaults to "как".  Source-word detection overrides to match LTGOLD output.
+  if s and s.source and s.source[i] and s.source[i]:lower() == "as" and out == "как" then
+    out = "Поскольку"
+  end
   -- Capitalize "что" after V1 infinitive subject ("Сообщать Что...").
   -- V1 tokens in subject position output infinitive form; LTGOLD capitalizes the conjunction.
   if s and i and i > 1 and out == "что" then

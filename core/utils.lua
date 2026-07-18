@@ -40,7 +40,7 @@ function utils.extract_form(s)
   while i <= #s do
     local b = s:byte(i)
     if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or
-       b == 0x3B or b == 0x5C or b == 0x2E then break end
+       b == 0x3B or b == 0x5C or b == 0x2E or b == 0x7C then break end
     if b >= 127 then
       result[#result+1] = encoding.character(b)
     elseif b == 0x20 or b == 0x2D then

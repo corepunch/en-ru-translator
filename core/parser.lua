@@ -53,7 +53,7 @@ end
 local function iter(t)
 	local d, c, i = {}, {}, 1
 	t,c = extract_pharses(t)
-	for pos, w in t:gmatch("()(%a+[%d%$/;,. \127-\255]+)") do
+	for pos, w in t:gmatch("()(%a+[%d%$/;,. %-\127-\255]+)") do
     table.insert(d, { w, t:sub(pos) })
 	end
   -- for w in t:gmatch("(%a+[%d%$/; \127-\255]+)") do table.insert(d, w) end
@@ -683,10 +683,13 @@ local rule_set_preprocessors = {
 	end,
 	[6] = function(ts)
 		-- T6 validates heads after ambiguity rules, so expose adjective heads first.
+		-- Skip I-tagged (numeral) tokens: their A-form is a declined case, not an attributive adjective.
 		for i = 1, #ts - 1 do
+			if ts[i]:sub(1,1) == 'I' then goto continue end
 			if is(ts[i + 1], "Nn") and find(ts[i], "A") then
 				find_and_replace(ts, i, "A")
 			end
+			::continue::
 		end
 	end,
 }
@@ -938,6 +941,22 @@ function parser.collect(dic, ts)
 	-- grammatical rules have stabilized, keeping them out of general semantics.
 	apply_copular_it_compatibility(ts)
 	apply_capitalization_compatibility(ts)
+	-- Possessive reorder: N owner ' #0 N possessed → N possessed P(gen) N owner
+	-- "director's report" → tokens [N report] [P Р] [N director]
+	for i = 1, #ts - 3 do
+		if ts[i] and ts[i]:sub(1,1) == 'N' and
+		   ts[i+1] and ts[i+1]:sub(1,1) == "'" and
+		   ts[i+2] and ts[i+2]:sub(1,1) == '#' and ts[i+2]:sub(2) == '0' and
+		   ts[i+3] and ts[i+3]:sub(1,1) == 'N' then
+			-- Swap: move possessed noun before possessor, insert P Р
+			local owner = ts[i]
+			local possessed = ts[i+3]
+			ts[i] = possessed
+			ts[i+1] = '\x50\x90'  -- P Р (genitive preposition)
+			ts[i+2] = owner
+			stream.set_token(ts, i+3, ' ')  -- mark as consumed (space outputs nothing)
+		end
+	end
 	expand_phrase_tokens(ts)
 	-- Propagate T7/T8 constituent flags to token metadata for compiler use.
 	-- LTPRO morph engine types 10-14 read these from token+0x76.

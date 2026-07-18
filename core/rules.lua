@@ -611,6 +611,7 @@ table.insert(rules, {
   { 0x00, "KDG", "13" },
   { 0x00, "KNXDA", "4" },
   { 0x00, "KANV", "23" },
+  { 0x00, "lN", "21" },  -- "whose cover" → swap l (relative) + N (genitive noun): "покрытие которой"
 })
 
 -- Post-T6 cleanup block (LTPRO offset 0x2AB30)

@@ -3,7 +3,7 @@
 ## Objective
 
 Replicate LTPRO.EXE's translation behavior in Lua to pass 300 regression tests
-(ltgold100 + ltgold200). **Current: 151/300 (92/100 + 59/200)**.
+(ltgold100 + ltgold200). **Current: 185/300 (94/100 + 91/200)**.
 
 ## Approach
 
@@ -76,16 +76,24 @@ r2 command template:
   - ct=4 or sentence-final E after L/Q → passive/active participle
   - Reflexive verbs → active past participle (оставшийся lookup table)
   - Non-reflexive verbs → passive participle via RUS paired-aspect paradigm
+  - **V1 subject position** → infinitive form (report→Сообщать not Сообщает)
+  - **V1 gender propagation** → sets e.gender from RUS for X copula agreement
+  - **Coordinated past detection** → look-ahead for C+E to resolve lowercase e to past
+  - **X copula plural from digit code** → X11x = plural (Three boxes were → поставлены)
 - V printer: V= marker (simple past, no switch), V1 aspect preservation
 - x printer: short-adjective gender agreement (нужно→нужен)
 - A printer: `s.context[i]` fallback, backward subject-noun scan
 - N printer: inherently-plural detection (люди→plural), `s.dative_subject[i]` check
 - L printer: full который declension table (6 cases × 4 genders), prep-case detection
 - l printer: genitive который (fixed from "чей" → который)
+- J printer: capitalize "Что" after V1 infinitive subject
 - Verb frames: `object_case` for transitive government
 
 ### Paradigms (`core/paradigms.lua`)
 - `irregular_past["жить"]` added: жило/жил/жила/жили
+
+### Parser (`core/parser.lua`)
+- **T6 reorder rule: `lN → 21`** — swap relative pronoun + genitive noun ("whose cover" → "покрытие которой")
 
 ### Tokenizer (`core/utils.lua`)
 - Back-reference multi-word matching: `\come` → `en_ru["come"]["from"]`
@@ -102,9 +110,9 @@ r2 command template:
 - "girl/loved" → полюбил ✓ (intransitive relative clause + subject gender)
 - "report/sent" → послал ✓ (intransitive relative clause guard correctly skipped)
 
-**Root causes of remaining 4:**
+**Root causes of remaining 6:**
 
-1. **Word order** (book, man): "N l N" vs expected "N N l" — parser reorders l-token before the N, but LTGOLD places it after the possessed noun. Needs T5/T6 constituent reorder rule.
+1. **Word order** (book, man): "N l N" vs expected "N N l" — added lN reorder rule but case agreement now wrong (покрытия которого vs покрытие которой). Need to fix case propagation.
 
 2. **House burned**: "жженный" (passive participle) vs "жечь" (infinitive expected). The E printer correctly detects relative clause context but LTGOLD outputs infinitive for intransitive E at sentence end. Also missing "взрослым" from packed token.
 
@@ -113,10 +121,8 @@ r2 command template:
 4. **Man/car**: "ломаться/названный" vs "сломало/называло" — E tokens not getting past-tense conjugation.
 
 ### Remaining single failures
-- T7-NP: plural short participle "поставлены" vs "поставлен" (Three big red boxes)
-- T7-VP: "she asked him to go" → спросила (dictionary entry issue, E001→попросить)
-- T8-ESS: "report that he wrote" → V1 verb + copula gender (complex interaction)
-- T8-COORD: "returned" → возвращенные (participle in coordination)
+- T7-VP: "she asked him to go" → спросила (dictionary entry issue, E001→попросить paired stem conflict with He would go→попросила)
+- T8-COORD: "returned" → возвращенные (passive participle in coordination)
 
 ## Key Discovered Behaviors
 
@@ -141,7 +147,8 @@ Tokens like `Eстановиться взрослым` contain space-separated v
 | File | Typical changes |
 |------|-----------------|
 | `core/compiler.lua` | Printer functions, verb_frames, e context handling, R/M pronoun case |
-| `core/parser.lua` | flag variables, find_and_replace, expand_phrase_tokens |
+| `core/parser.lua` | flag variables, find_and_replace, expand_phrase_tokens, V1 subject detection |
+| `core/rules.lua` | T6 reorder rules (lN, etc.) |
 | `core/utils.lua` | tokenizer back-reference, phrase matching |
 | `core/paradigms.lua` | Verb/noun/adjective inflection tables, pronoun paradigm |
 | `core/token_stream.lua` | Field definitions, metadata propagation |
@@ -150,8 +157,8 @@ Tokens like `Eстановиться взрослым` contain space-separated v
 ## Running Tests
 
 ```sh
-lua test/ltgold100_test.lua        # 92/100
-lua test/ltgold200_test.lua        # 59/200
+lua test/ltgold100_test.lua        # 94/100
+lua test/ltgold200_test.lua        # 91/200
 ```
 
 ## Current Work State
@@ -176,6 +183,13 @@ lua test/ltgold200_test.lua        # 59/200
 **This session (ltgold100 regression pass):**
 - **Intransitive relative clause aspect preservation** (`compiler.lua`): E verbs in relative clauses without an explicit subject (the relative pronoun IS the subject, e.g. "which arose") keep their original aspect instead of switching to perfective. Detects: L/Q before E with no R/M between them and no clause boundary (X/Y). Fixes "The problem which arose was solved." — "возникала" (imperfective) not "возникла" (perfective).
 - **E printer subject gender detection** (`compiler.lua`): The E printer now scans backward past auxiliaries to find the subject noun for past-tense gender agreement, but only when the E is in the main clause (no relative pronoun L/Q/l between subject and verb). Also stops at L/Q (relative clause boundary) and R/M (pronoun subject). Fixes "The leader of the group spoke." — "говорил" (masculine) not "говорила" (feminine). Restores correct gender for "The book whose cover I saw" — "видeл" (masculine).
+
+**This session (92→94/100):**
+- **X copula plural from digit code** (`compiler.lua`): X1xx past copula now reads plural from the second digit of the code (X11x=plural "были", X10x=singular). Fixes "Three big red boxes were delivered." — "поставлены" (plural short participle) not "поставлен" (singular).
+- **V1 subject position → infinitive** (`compiler.lua`): V1 tokens preceded by article/adjective now output infinitive form and set e.gender from RUS data for copula agreement. Fixes "The report that he wrote was long." — "Сообщать" (infinitive) not "Сообщает" (present 3sg), and "было" (neuter) not "был" (masculine).
+- **J printer capitalization** (`compiler.lua`): "Что" capitalized after V1 infinitive subject. Fixes remaining diff in "The report that he wrote" sentence.
+- **Coordinated past tense detection** (`compiler.lua`): Lowercase e-tag looks ahead for C conjunction followed by uppercase E (past verb) and propagates past tense. Fixes "She can read and understand it." — both verbs now infinitive under modal. Also recovers "He put it on the table." which was accidentally broken by earlier fix.
+- **T6 reorder rule lN→21** (`rules.lua`): Swaps relative pronoun (l) and genitive noun (N) for "whose X" constructions: "покрытие которой" not "которой покрытие".
 
 ## r2 Quick Reference
 

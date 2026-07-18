@@ -2,6 +2,8 @@ local utils = require "core.utils"
 local paradigms = require "core.paradigms"
 local dbg = require "core.dbg"
 local compiler = {}
+-- Forward declaration (defined later, used in printers)
+local reset_clause_context
 
 -- utf8_upper: uppercase Cyrillic letters in a UTF-8 string.
 -- Only affects Russian а-п (D0 B0-D0 BF) → А-П (D0 90-D0 9F)
@@ -203,8 +205,12 @@ local printers = {
     end
     -- Predicative short form: after present copula X003 only (e.infinitive=true AND nominative form).
     -- X1xx/X2xx also set e.infinitive but e.form=Т (instrumental) → use full adj form instead.
+    -- Attributive adjective (followed by N) always uses full form regardless of copula context.
     -- Subject noun precedes the copula, so search backward for it.
-    if e.infinitive and e.form == case["И"] then
+    local next_is_noun = s and i and s[i+1] and s[i+1]:sub(1,1):match('[Nn]')
+    -- Don't use short form when preceded by an adverb (e.g. "очень большой" not "очень большa")
+    local prev_is_adv = s and i and s[i-1] and s[i-1]:sub(1,1):match('[Dd]')
+    if e.infinitive and e.form == case["И"] and not next_is_noun and not prev_is_adv then
       e.infinitive = false
       local utf = utils.decode(utils.extract(a), true)
       local stem = #utf > 4 and utf:sub(1, #utf - 4) or utf
@@ -411,6 +417,15 @@ local printers = {
       e.form = case[second]
       local result = utils.extract_form("P" .. t:sub(3))
       dbg.log(2, string.format("    P: case=%s form=%d", second, e.form))
+      -- Range context: P Вна between I...I → "до" (от девяти ДО пяти).
+      if result == "на" and s and i then
+        local prev_tag = s[i-1] and s[i-1]:sub(1,1)
+        local next_tag = s[i+1] and s[i+1]:sub(1,1)
+        if (prev_tag == 'I' or prev_tag == '#') and (next_tag == 'I' or next_tag == '#') then
+          e.form = case["Р"]
+          return "до"
+        end
+      end
       if e.verb_frame and result == e.verb_frame.preposition then
         e.form = e.verb_frame.object_case
         return e.verb_frame.emit and result or ""
@@ -431,9 +446,15 @@ local printers = {
   Z = function(t, e, s, i)
     local d = utils.extract_form(t)
     if #d == 0 then
-      -- leading tag has no Russian text, but secondary forms might have
-      if #utils.decode(t, true) > 0 then return "" end
-      return ""
+      -- For v-tagged tokens with a V subform (e.g. v V писать;записывать), extract V-form.
+      if t:byte(1) == 0x76 and t:byte(2) == 0x56 then
+        d = utils.extract_form('V' .. t:sub(3))
+      end
+      if #d == 0 then
+        -- leading tag has no Russian text, but secondary forms might have
+        if #utils.decode(t, true) > 0 then return "" end
+        return ""
+      end
     end
     e.form = case["В"]
     dbg.log(2, string.format("    Z start: word=%-12s infinitive=%s perfective=%s",
@@ -610,11 +631,13 @@ local printers = {
     local b = compiler.base[d]
     if not b then return d end
     -- Lowercase 'e' = ambiguous infinitive/past/participle. When preceded by a modal
-    -- (U/X/Y) or infinitive particle (B/b), keep as infinitive (can read → может читать).
+    -- (U/X/B/b), keep as infinitive (can read → может читать).
+    -- Exception: after Y (perfect auxiliary "had"), treat as past perfective.
     local prev_tag = s and s[i - 1] and s[i - 1]:sub(1, 1)
-    local is_after_modal = prev_tag and prev_tag:match('[UXYBb]') ~= nil
+    local is_after_modal = prev_tag and prev_tag:match('[UXBb]') ~= nil
+    local is_after_perfect = prev_tag == 'Y'
     local is_ambiguous = t:sub(1, 1) == 'e'
-    if is_ambiguous and is_after_modal then
+    if is_ambiguous and is_after_modal and not is_after_perfect then
       e.infinitive = true
       if e.modal_scope then
         e.modal_scope.consumed = true
@@ -626,7 +649,25 @@ local printers = {
     -- (infinitive / past / participle). Without a temporal context signal (like
     -- an X1/Y auxiliary), default unambiguous e to non-past to match LTGOLD's
     -- present-tense treatment of bare e-tagged verbs (e.g. "He put it on...").
-    e.past = not is_ambiguous
+    -- However, if e is coordinated with an uppercase E past verb (C conjunction),
+    -- propagate past tense: "read the book and returned it" → both past.
+    -- After Y (perfect aux): force past tense for ambiguous e-tagged verbs.
+    e.past = (not is_ambiguous) or is_after_perfect
+    if is_ambiguous and not e.past and s and i then
+      for ahead = i + 1, math.min(i + 8, #s) do
+        local atag = s[ahead] and s[ahead]:sub(1, 1)
+        if atag == 'C' then
+          -- Check if conjunction is followed by an uppercase E (past verb)
+          local next_v = s[ahead + 1] and s[ahead + 1]:sub(1, 1)
+          if next_v == 'E' then
+            e.past = true
+            break
+          end
+        elseif atag and atag:match('[RM]') then
+          break  -- hit pronoun subject/object boundary, stop scanning
+        end
+      end
+    end
     -- Clear infinitive flag set by X1xx copula: E output is not an infinitive.
     e.infinitive = false
     -- Detect subject gender for past-tense agreement.  Only scan backward when
@@ -680,6 +721,13 @@ local printers = {
       (prev_token:match("^X1") ~= nil)
     if is_past_copula and not has_agent then
       e.passive = true
+      -- Inherit plural from X copula: X11x = plural (были), X10x = singular (был/была/было).
+      -- This handles constructions like "Three boxes were delivered" where the subject
+      -- noun is genitive singular (ящика) but the copula correctly marks plural.
+      local x_code = prev_token:match("^X(%d+)")
+      if x_code and #x_code >= 2 and x_code:sub(2,2) == '1' then
+        e.plural = true
+      end
     end
     -- Detect instrumental agent "by" (PТ = CP866 byte 0x92). This signals
     -- LTGOLD's reflexive passive: imperfective verb past + -ся suffix.
@@ -934,6 +982,17 @@ printers.V = function(t, e, s, i)
 		if progressive_past then e.progressive = true end
 		if simple_past then e.simple_past = true end
 	end
+  -- V1 tokens in subject position (after article/adjective): output infinitive form.
+  -- "The report that he wrote" → V1сообщать is the subject; LTGOLD outputs "Сообщать"
+  -- (infinitive) instead of "Сообщает" (present 3sg conjugation).
+  -- Also set e.gender from RUS data so the X copula inherits correct gender agreement.
+  if t:byte(1) == 0x56 and t:byte(2) == 0x31 and s and i then
+    local prev_tag = s[i-1] and s[i-1]:sub(1,1)
+    if prev_tag and prev_tag:match('[TAa]') then
+      e.infinitive = true
+      e.gender = get_gender(t) or e.gender
+    end
+  end
   if e.modal_scope and (not e.modal_scope.consumed or e.modal_scope.awaiting_coord) then
     -- T7 coordinated VP flags keep every verb under the same modal auxiliary.
     e.infinitive, e.perfective = true, e.modal_scope.perfective
@@ -1027,8 +1086,30 @@ printers.g = function(t, e)
   e.form = case["В"]
   return paradigms.gerund(t, b:byte(4)&~0x80, (b:byte(2)&2) == 0)
 end
-printers.v = function(t, e) return printers.V(t, e) end
-printers.p = function(t, e, s, i) return printers.P(t, e, s, i) end
+printers.v = function(t, e, s, i)
+  -- "Let us" → v + M11 (1st person plural): suppress the M pronoun (давайте нас → давайте).
+  if s and i and s[i+1] and s[i+1]:sub(1,1) == 'M' then
+    local m = s[i+1]
+    -- M11 = 1st person plural (us) — drop it after "давайте"
+    if m:byte(2) == 0x31 and m:byte(3) == 0x31 then
+      e.suppress_next_M = true
+    end
+  end
+  return printers.V(t, e)
+end
+printers.p = function(t, e, s, i)
+  -- When followed by a clause (R or N subject), prefer J-form (subordinating conjunction).
+  -- e.g. "before she arrived" → "прежде, чем она прибудет" not "перед она прибыла".
+  if s and i and s[i+1] and s[i+1]:sub(1,1):match('[RN]') then
+    local jform = find_form(t, 'J')
+    if jform and #jform > 0 then
+      -- Strip leading ASCII digits (e.g. "2прежде, чем" → "прежде, чем")
+      local text = utils.decode(jform, false):gsub("^%d+", "")
+      if #text > 0 then return text end
+    end
+  end
+  return printers.P(t, e, s, i)
+end
 printers.d = function(t, e) return printers.D(t, e) end
 printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction), L (relative pronoun), j (clause-end marker), O (demonstrative)
@@ -1036,21 +1117,33 @@ printers.f = function(t) return utils.decode(t, true) end
 -- J (subordinating conjunction): decode only the J-form text, stopping at the next
 -- packed tag letter (P, C, b, B, etc.) that begins a government chain.
 -- e.g. JеслиPПпри → "если"; J, когдаPПпри → ", когда"
-printers.J = function(t)
-  local s = t:sub(2)
+printers.J = function(t, e, s, i)
+  local s_text = t:sub(2)
   -- Skip optional digit code (e.g. J01, J21)
-  local i = 1
-  while i <= #s and s:byte(i) >= 48 and s:byte(i) <= 57 do i = i + 1 end
+  local idx = 1
+  while idx <= #s_text and s_text:byte(idx) >= 48 and s_text:byte(idx) <= 57 do idx = idx + 1 end
   local result = {}
-  while i <= #s do
-    local b = s:byte(i)
+  while idx <= #s_text do
+    local b = s_text:byte(idx)
     -- Stop at ASCII letter that begins a new tag (next packed form)
     -- Allow comma (0x2C), space (0x20), hyphen (0x2D) as part of Russian text
     if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then break end
-    result[#result+1] = s:sub(i, i)
-    i = i + 1
+    result[#result+1] = s_text:sub(idx, idx)
+    idx = idx + 1
   end
-  return utils.decode(table.concat(result), false)
+  local out = utils.decode(table.concat(result), false)
+  -- Capitalize "что" after V1 infinitive subject ("Сообщать Что...").
+  -- V1 tokens in subject position output infinitive form; LTGOLD capitalizes the conjunction.
+  if s and i and i > 1 and out == "что" then
+    local prev = s[i-1]
+    if prev and prev:sub(1,1) == 'V' and prev:byte(2) == 0x31 then
+      local prev_prev = s[i-2]
+      if prev_prev and prev_prev:sub(1,1):match('[TAa]') then
+        out = "Что"
+      end
+    end
+  end
+  return out
 end
 -- z: -s/-es form (verb/noun ambiguity). After prepositions prefer noun form.
 -- LTGOLD resolves z via T2/T3 constituent-type rules; this is a fallback.
@@ -1064,9 +1157,43 @@ end
 -- q: future/perfective aspect marker injected by the X2xx auxiliary handler.
 -- Sets e.perfective so the following verb conjugates as perfective (future in Russian).
 -- LTGOLD encodes this in T7/T8 guard-rule constituent-type flags.
-printers.q = function(t, e)
+printers.q = function(t, e, s, i)
   e.perfective = true
   dbg.log(2, "    q: perfective=true (future auxiliary)")
+  -- When followed by a V that has no perfective paired form, output "будет + infinitive".
+  -- Verbs with a paired form use single-word perfective future (вызовет, последует, etc.)
+  if s and i then
+    local j = i + 1
+    while s[j] and s[j]:sub(1,1):match('[TdK]') do j = j + 1 end
+    local nxt = s[j] and s[j]:sub(1,1)
+    if nxt == 'V' then
+      local vd = utils.extract_form(s[j])
+      local vb = compiler.base[vd]
+      local has_paired = vb and #vb >= 6 and vb:byte(6) >= 128
+      -- Only use "будет + infinitive" when no paired perfective exists
+      if not has_paired then
+        local person, plural = 3, false
+        for k = i - 1, 1, -1 do
+          local ktag = s[k] and s[k]:sub(1,1)
+          if ktag == 'R' then
+            local p1, p2 = s[k]:match("R(%d)(%d)")
+            local rcode = (p1 or "") .. (p2 or "")
+            if rcode == "11" then plural, person = true, 1
+            elseif rcode == "12" then plural, person = true, 2
+            elseif rcode == "13" then plural = true
+            end
+            break
+          elseif ktag and ktag:match('[NnA]') then break end
+        end
+        local fut = { [1]=plural and "будем" or "буду",
+                      [2]=plural and "будете" or "будешь",
+                      [3]=plural and "будут" or "будет" }
+        e.infinitive = true
+        e.infinitive_particle = true
+        return fut[person] or "будет"
+      end
+    end
+  end
   return ""
 end
 printers.L = function(t, e, s, i)
@@ -1161,7 +1288,11 @@ printers.L = function(t, e, s, i)
   end
   return pronoun
 end
-printers.j = function(t) return "," end  -- clause-end marker outputs the comma it replaced
+printers.j = function(t, e) reset_clause_context(e); return "," end  -- clause-end marker resets context
+-- | (so-that connector): full decode preserves embedded punctuation like "так, что".
+printers["|"] = function(t) return utils.decode(t:sub(2), false) end
+-- ' (possessive marker): silent in Russian.
+printers["'"] = function() return "" end
 printers.O = function(t, e, s, i)
   local d = utils.decode(t, true)
   if d == "весь" then return printers.S(t, e) end
@@ -1271,6 +1402,7 @@ printers.Q = function(t, e)
   return raw
 end
 printers.M = function(t, e, s, i)
+  if e.suppress_next_M then e.suppress_next_M = false; return "" end
   local plural, person, gender = t:match("M(%d)(%d)(%d)")
   if not plural then plural, person = t:match("M(%d)(%d)") end
   if plural then
@@ -1297,6 +1429,36 @@ end
 -- 5+: nom numeral + gen-pl adj + gen-pl noun
 -- 1: nom numeral + nom adj + nom noun
 printers.I = function(t, e, s, i)
+  -- When preceded by a preposition, use the appropriate oblique form.
+  local prev_tok = s and i and s[i-1]
+  if prev_tok and (prev_tok:sub(1,1) == 'P' or prev_tok:sub(1,1) == 'p') then
+    -- Instrumental context: derive from A-form by replacing trailing -и with -ью.
+    if e.form == case["Т"] then
+      local aform_str = find_form(t, 'A')
+      if aform_str and #aform_str > 0 then
+        local atext = utils.decode(aform_str, true)
+        -- пяти→пятью, десяти→десятью, etc.: replace trailing и with ью
+        local instr = atext:gsub("и$", "ью")
+        if instr ~= atext then
+          -- Propagate instrumental to following noun via e.numeral
+          e.numeral = e.numeral or {}
+          e.numeral.noun_form = case["Т"]
+          e.numeral.noun_plural = true
+          e.numeral.adjective_form = case["Т"]
+          e.numeral.adjective_plural = true
+          e.form = case["Т"]
+          return instr
+        end
+      end
+    end
+    -- Genitive context: use A-form directly.
+    if e.form == case["Р"] then
+      local aform = find_form(t, 'A')
+      if aform and #aform > 0 then
+        return utils.decode(aform, true)
+      end
+    end
+  end
   -- Extract I-form (nominative numeral): output "три", "пять", etc.
   local i_text = utils.extract_form(t)
   if #i_text == 0 then i_text = utils.decode(t, true) end
@@ -1346,12 +1508,27 @@ printers.Y = function(t, e, s, i)
 end
 -- x (impersonal/there-is), y (have existential), i (indefinite article form)
 printers.x = function(t, e, s, i)
+  -- x1 = existential past copula "there was/were": output быть past agreeing with following noun.
+  if t:byte(2) == 0x31 then  -- '1' = past tense marker
+    local j = i and (i + 1) or nil
+    while s and j and s[j] and s[j]:sub(1,1):match('[TKA#]') do j = j + 1 end
+    local gender, plural = 0, false
+    if s and j and s[j] then
+      local tag = s[j]:sub(1,1)
+      if tag:match('[Nn]') then
+        gender = get_gender(s[j]) or 0
+        plural = tag == 'n'
+      end
+    end
+    local past_forms = { [1]="был", [2]="была", [0]="было" }
+    return plural and "были" or (past_forms[gender] or "было")
+  end
   -- x = impersonal verb / existential ("нужно" = it is necessary).
   -- When followed by a noun, decline as short adjective agreeing with it.
   local decoded = utils.decode(t, true)
    if decoded == "нужно" and s and i then
      local j = i + 1
-     while s[j] and s[j]:sub(1,1):match('[Tq]') do j = j + 1 end
+     while s[j] and s[j]:sub(1,1):match('[TqAa]') do j = j + 1 end
      if s[j] and s[j]:sub(1,1):match('[Nn]') then
        local gender = get_gender(s[j]) or 1
        local forms = { [1]="нужен", [2]="нужна", [0]="нужно" }
@@ -1379,6 +1556,11 @@ printers.B = function(t, e)
 end
 printers.b = function(t, e)
   e.infinitive, e.infinitive_particle, e.perfective = true, true, false
+  -- When b token has textual content (e.g. "имеет необходимость"), output it.
+  if #t > 1 then
+    local text = utils.decode(t:sub(2), false)
+    if #text > 0 then return text end
+  end
   return ""
 end
 -- W (multi-word phrase) — output decoded. For packed W-tokens with sub-forms
@@ -1406,11 +1588,38 @@ end
 -- # (proper noun / untranslatable): output raw string, reformat digit-only sequences
 -- back to comma-formatted numbers (e.g. 1000000 → 1,000,000) since tokenize strips commas.
 -- An unknown word between a modal and a verb breaks the modal chain in LTGOLD.
-printers["#"] = function(t, e)
+printers["#"] = function(t, e, s_tok, i)
   e.modal_scope = nil
   e.infinitive = false
   e.perfective = false
-  local s = t:sub(2)
+  local payload = t:sub(2)
+  -- #0 = zero pronoun (possessive marker complement) — silent in Russian.
+  if payload == "0" then return "" end
+  -- "##" = no-determiner or standalone interjection
+  if payload == "#" then
+    -- Sentence-initial position before comma → "Нет" interjection
+    if i == 1 and s_tok and s_tok[i+1] and s_tok[i+1]:sub(1,1) == ',' then return "Нет" end
+    -- Before A+N or N → "Никакой/Никакое/Никакая/Никакие" declining to match noun
+    local j = i and (i + 1) or nil
+    local noun
+    if s_tok and j then
+      while s_tok[j] and s_tok[j]:sub(1,1):match('[TAa]') do j = j + 1 end
+      if s_tok[j] and s_tok[j]:sub(1,1):match('[Nn]') then noun = s_tok[j] end
+    end
+    if noun then
+      local gender = get_gender(noun) or 1
+      local plural = noun:sub(1,1) == 'n' or e.plural
+      -- Никакой declines: masc=Никакой, fem=Никакая, neut=Никакое, pl=Никакие
+      local forms = { [1]="Никакой", [2]="Никакая", [0]="Никакое" }
+      e.form = case["И"]
+      return plural and "Никакие" or (forms[gender] or "Никакой")
+    end
+    return "Нет"
+  end
+  local s = payload
+  -- Strip ordinal suffixes from numeric ordinals (1st→1, 2nd→2, 3rd→3, 4th→4, etc.)
+  local ord_num = s:match("^(%d+)%a+$")
+  if ord_num then s = ord_num end
   if s:match("^%d+$") then
     -- Match LTGOLD's intentionally simplified numeral agreement: 2-4 select
     -- nominative plural, while 0/5-9 and the teens select genitive plural.
@@ -1421,9 +1630,25 @@ printers["#"] = function(t, e)
     if #s > 3 then return s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "") end
     return s
   end
-  -- Proper names: decode CP866 and strip LTGOLD metadata prefix (digit+м= pattern).
-  local decoded = utils.decode(s, false)
-  decoded = decoded:gsub("^%d+м=", "")
+  -- Proper names: decode CP866. Strip LTGOLD metadata prefix (digit+gender_byte+= pattern).
+  -- e.g. "0м=Джон" (masculine), "0ж=Анна" (feminine) → strip the 3-byte prefix.
+  local stripped = s:gsub("^%d+[\xac\xa6]=", "")  -- CP866 м=0xAC, ж=0xA6
+  -- Empty proper name (stripped to ""): use source word (e.g. "0ж=" → source "Anna").
+  if #stripped == 0 and s_tok and i and s_tok.source and s_tok.source[i] then
+    return s_tok.source[i]
+  end
+  local decoded = utils.decode(stripped, false)
+  -- Genitive declension for proper names: masculine names ending in consonant get -а.
+  if e.form == case["Р"] and #decoded > 0 then
+    local last = decoded:sub(-1)
+    -- ASCII consonants (for romanized names like "John"→"Джон") and Cyrillic consonants
+    -- Simplified: add -а to masculine proper names in genitive context
+    local vowels = {["а"]=true,["е"]=true,["ё"]=true,["и"]=true,["о"]=true,["у"]=true,["ы"]=true,["э"]=true,["ю"]=true,["я"]=true,
+                    ["a"]=true,["e"]=true,["i"]=true,["o"]=true,["u"]=true}
+    if not vowels[last:lower()] then
+      return decoded .. "а"
+    end
+  end
   return decoded
 end
 printers.F = function(t, e, s, i)
@@ -1545,14 +1770,55 @@ printers.X = function(t, e, s, i)
     e.infinitive = true
     e.form = case["И"]
     dbg.log(2, "    X (copula 003): infinitive=true, form=nom")
-    if s and s[i+1] and s[i+1]:match("A[\128-\255]") then return "" end
+    -- Silent when directly followed by A, or followed by D+A (adverb-modified predicate adj)
+    if s and s[i+1] then
+      local nxt = s[i+1]:sub(1,1)
+      if nxt == 'A' then return "" end
+      if nxt == 'D' and s[i+2] and s[i+2]:sub(1,1) == 'A' then return "" end
+    end
     return "-"
   else
     local code = t:match("%d+") or ""
-    -- X2xx = future auxiliary ("will"): output nothing, mark next verb as perfective future.
+    -- X2xx = future auxiliary ("will"): mark next verb as perfective future.
+    -- When followed by N/A (nominal predicate), output future copula "будет/будем/etc."
     if code:sub(1,1) == '2' then
       e.perfective = true
       dbg.log(2, "    X (future 2xx): perfective=true")
+      -- Future copula: X2xx + (skip T/d) + N or A → output "будет/будем/etc."
+      if s and i then
+        local j = i + 1
+        while s[j] and s[j]:sub(1,1):match('[TdK]') do j = j + 1 end
+        local nxt = s[j] and s[j]:sub(1,1)
+        if nxt and nxt:match('[NAV]') then
+          -- Determine person/number from subject pronoun
+          local person, plural = 3, false
+          for k = i - 1, 1, -1 do
+            local ktag = s[k] and s[k]:sub(1,1)
+            if ktag == 'R' then
+              local p1, p2 = s[k]:match("R(%d)(%d)")
+              local rcode = (p1 or "") .. (p2 or "")
+              if rcode == "11" then plural, person = true, 1   -- мы
+              elseif rcode == "01" or rcode == "1" then person = 1  -- я
+              elseif rcode == "12" then plural, person = true, 2  -- вы
+              elseif rcode == "13" then plural = true          -- они
+              end
+              break
+            elseif ktag and ktag:match('[NnA]') then break end
+          end
+          local fut = { [1]=plural and "будем" or "буду",
+                        [2]=plural and "будете" or "будешь",
+                        [3]=plural and "будут" or "будет" }
+          if nxt:match('[NA]') then
+            e.form = case["Т"]
+            e.infinitive = true
+          else
+            -- For V (infinitive verb), set infinitive context
+            e.infinitive = true
+            e.infinitive_particle = true
+          end
+          return fut[person] or "будет"
+        end
+      end
       return ""
     end
     -- X1xx = past copula ("was/were").
@@ -1583,16 +1849,25 @@ printers.X = function(t, e, s, i)
             rel_preceded_by_prep = true
           end
         end
-        if s[k] and s[k]:sub(1,1):match('[Nn]') and
-           (k == 1 or not s[k-1] or s[k-1]:sub(1,1) ~= 'N') then
+        local is_subject_candidate = s[k] and s[k]:sub(1,1):match('[Nn]') and
+           (k == 1 or not s[k-1] or s[k-1]:sub(1,1) ~= 'N')
+        -- V1 tokens in subject position (after article/adjective) also count as subjects.
+        -- E.g. "The report that he wrote" — V1сообщать is the subject noun.
+        local is_v1_subject = false
+        if not is_subject_candidate and s[k] and s[k]:sub(1,1) == 'V' and
+           s[k]:byte(2) == 0x31 and s[k-1] and s[k-1]:sub(1,1):match('[TAa]') then
+          is_subject_candidate = true
+          is_v1_subject = true
+        end
+        if is_subject_candidate then
           -- Skip genitive modifier nouns: N preceded by P(Р) is a genitive noun phrase,
           -- not the subject. The subject is the head noun further back.
           -- Check if this N is a genitive modifier: preceded by P (possibly with T/A article between)
           -- or preceded directly by another N (N-N compound, second N is genitive).
           local is_genitive_modifier = false
-          if s[k-1] and s[k-1]:sub(1,1):match('[Nn]') then
+          if not is_v1_subject and s[k-1] and s[k-1]:sub(1,1):match('[Nn]') then
             is_genitive_modifier = true  -- N-N compound: second N is genitive modifier
-          else
+          elseif not is_v1_subject then
             for q2 = k - 1, math.max(1, k - 3), -1 do
               local qt = s[q2] and s[q2]:sub(1,1)
               if qt == 'T' or qt == 'A' or qt == 'a' then -- skip articles/adjectives
@@ -1633,7 +1908,7 @@ printers.X = function(t, e, s, i)
       e.infinitive = true
       -- Set instrumental form for adjective/noun predicates after past copula
       j = i + 1
-      while j and s and s[j] and s[j]:sub(1,1) == 'T' do j = j + 1 end
+      while j and s and s[j] and s[j]:sub(1,1):match('[TDd]') do j = j + 1 end
       if j and s[j] and s[j]:sub(1,1):match('[NA]') then
         e.form = case["Т"]
       end
@@ -1667,7 +1942,7 @@ local function new_context()
   }
 end
 
- local function reset_clause_context(e)
+reset_clause_context = function(e)
   -- LTPRO punctuation closes transient verb/aspect government but preserves
   -- subject features until a later constituent replaces them.
   e.past, e.passive, e.imperative = false, false, false
@@ -1739,7 +2014,8 @@ function compiler.compile(s, options)
   -- for i, w in ipairs(s) do print(utils.decode(w)) end
 
   for i, w in ipairs(s) do
-    if #w == 1 and w:match"[,%!%.;:]" then
+    if w == ' ' then goto next_token -- skip space-only placeholder tokens
+    elseif #w == 1 and w:match"[,%!%.;:]" then
       if #c > 0 then c[#c] = c[#c]..w
       else table.insert(c, w) end
       if w == ',' or w == ';' then reset_clause_context(e) end
@@ -1781,9 +2057,13 @@ function compiler.compile(s, options)
         out = (quote_open and "\3" or "\2") .. out
         quote_open = not quote_open
       end
-      if out and #out > 0 then table.insert(c, out:find('#') and out:sub(2) or out) end
+      if out and #out > 0 then
+        local val = out:find('#') and out:sub(2) or out
+        table.insert(c, val)
+      end
       e.word = e.word + 1
     end
+    ::next_token::
   end
   -- Always capitalize the first output word. Russian sentences start with a capital
   -- regardless of which source token ended up first after any reordering.

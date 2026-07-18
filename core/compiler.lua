@@ -2072,7 +2072,25 @@ printers.X = function(t, e, s, i)
     -- X1xx = past copula ("was/were").
     -- Output: past tense of быть agreeing with subject gender/number.
     -- быть past: был(m)/была(f)/было(n)/были(pl)
+    -- When X1xx has an embedded verb that is NOT быть (e.g. X113присутствовать), conjugate it.
     if s and i and code:sub(1,1) == '1' then
+      local embedded_form = utils.extract_form(t)
+      local embedded_b = compiler.base[embedded_form]
+      -- Only use embedded verb if it exists and is NOT быть (the copula itself)
+      if embedded_b and #embedded_form > 0 and embedded_form ~= "быть" then
+        local e_emb = { plural = e.plural, gender = e.gender, form = e.form,
+                        past = true, passive = false, person = e.person or 3 }
+        for k = i - 1, 1, -1 do
+          local ktag = s[k] and s[k]:sub(1,1)
+          if ktag == 'R' or ktag == 'r' then break end
+          if ktag == 'N' or ktag == 'n' then
+            e_emb.gender = get_gender(s[k]) or e_emb.gender
+            e_emb.plural = (ktag == 'n')
+            break
+          end
+        end
+        return paradigms.verb(t, embedded_b:byte(4)&~0x80, e_emb)
+      end
       local j = i + 1
       while s[j] and s[j]:sub(1,1) == 'T' do j = j + 1 end
       local next_tag = s[j] and s[j]:sub(1,1)

@@ -5,6 +5,77 @@ local compiler = {}
 -- Forward declaration (defined later, used in printers)
 local reset_clause_context
 
+-- Transliterate Latin name to CP866 Cyrillic (from LTPRO table at 0x32602 in LTPRO.EXE).
+-- Greedy match: try two-letter combos first, then single letters.
+local translit_table = {
+  -- Two-letter combos (must come before single letters)
+  Zh = "\x86", Ch = "\x97", Sh = "\x98", Shch = "\x99",
+  Ts = "\x96", Yu = "\x9E", Ya = "\x9F",
+  -- Single letters
+  A = "\x80", B = "\x81", V = "\x82", G = "\x83", D = "\x84", E = "\x85",
+  Z = "\x87", I = "\x88", J = "\x89", K = "\x8A", L = "\x8B", M = "\x8C",
+  N = "\x8D", O = "\x8E", P = "\x8F", R = "\x90", S = "\x91", T = "\x92",
+  U = "\x93", F = "\x94", H = "\x95", C = "\x96", Y = "\x9B",
+  X = "\x95", W = "\x82", Q = "\x8A",
+}
+local function transliterate_name(name)
+  local result = {}
+  local i = 1
+  while i <= #name do
+    local ch = name:sub(i, i)
+    -- Skip non-alpha characters
+    if not ch:match("%a") then
+      result[#result+1] = ch
+      i = i + 1
+    else
+      -- Try to capitalize for lookup
+      local upper = ch:upper()
+      local matched = false
+      -- Try three-letter, then two-letter combos
+      for len = 3, 2, -1 do
+        local slice = name:sub(i, i + len - 1)
+        local up_slice = slice:sub(1,1):upper() .. slice:sub(2)
+        local cp866 = translit_table[up_slice]
+        if cp866 then
+          -- Preserve case: if original is lowercase, use lowercase CP866
+          if ch == ch:lower() and cp866 >= "\x80" and cp866 <= "\x9f" then
+            -- CP866 uppercase А-Я (0x80-0x9F) → lowercase а-п (0xA0-0xAF) or р-я (0xE0-0xEF)
+            local byte = cp866:byte(1)
+            if byte <= 0x8F then
+              cp866 = string.char(byte + 0x20)  -- 0x80→0xA0, 0x8F→0xAF
+            else
+              cp866 = string.char(byte + 0x50)  -- 0x90→0xE0, 0x9F→0xEF
+            end
+          end
+          result[#result+1] = cp866
+          i = i + len
+          matched = true
+          break
+        end
+      end
+      if not matched then
+        -- Single letter fallback
+        local cp866 = translit_table[upper]
+        if cp866 then
+          if ch == ch:lower() and cp866 >= "\x80" and cp866 <= "\x9f" then
+            local byte = cp866:byte(1)
+            if byte <= 0x8F then
+              cp866 = string.char(byte + 0x20)
+            else
+              cp866 = string.char(byte + 0x50)
+            end
+          end
+          result[#result+1] = cp866
+        else
+          result[#result+1] = ch  -- pass through unknown chars
+        end
+        i = i + 1
+      end
+    end
+  end
+  return table.concat(result)
+end
+
 -- utf8_upper: uppercase Cyrillic letters in a UTF-8 string.
 -- Only affects Russian а-п (D0 B0-D0 BF) → А-П (D0 90-D0 9F)
 -- and р-я (D1 80-D1 8F) → Р-Я (D0 A0-D0 AF). ASCII unchanged.
@@ -1097,6 +1168,11 @@ printers.V = function(t, e, s, i)
       e.gender = get_gender(t) or e.gender
     end
   end
+  -- After infinitive V (token ending with 'b' = infinitive particle): next V stays infinitive.
+  -- "учиться говорить" → both infinitive; token Vучитьсяb has 'b' suffix.
+  if s and i and s[i-1] and s[i-1]:sub(1,1) == 'V' and s[i-1]:sub(-1) == 'b' then
+    e.infinitive = true
+  end
   if e.modal_scope and (not e.modal_scope.consumed or e.modal_scope.awaiting_coord) then
     -- T7 coordinated VP flags keep every verb under the same modal auxiliary.
     e.infinitive, e.perfective = true, e.modal_scope.perfective
@@ -1778,9 +1854,13 @@ printers["#"] = function(t, e, s_tok, i)
   -- Proper names: decode CP866. Strip LTGOLD metadata prefix (digit+gender_byte+= pattern).
   -- e.g. "0м=Джон" (masculine), "0ж=Анна" (feminine) → strip the 3-byte prefix.
   local stripped = s:gsub("^%d+[\xac\xa6]=", "")  -- CP866 м=0xAC, ж=0xA6
-  -- Empty proper name (stripped to ""): use source word (e.g. "0ж=" → source "Anna").
+  -- Empty proper name (stripped to ""): transliterate source word (e.g. "0ж=" → "Anna" → "Анна").
   if #stripped == 0 and s_tok and i and s_tok.source and s_tok.source[i] then
-    return s_tok.source[i]
+    local src = s_tok.source[i]
+    if src:match("^%a+$") then
+      return utils.decode(transliterate_name(src), true)
+    end
+    return src
   end
   local decoded = utils.decode(stripped, false)
   -- Genitive declension for proper names: masculine names ending in consonant get -а.

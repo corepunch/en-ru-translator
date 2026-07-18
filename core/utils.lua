@@ -149,7 +149,7 @@ function utils.tokenize(s, en_ru)
   local adverb_endings = {
     ["ический"] = "ически",
     ["ый"] = "о",
-    ["ий"] = "и",
+    ["ий"] = "о",
     ["ой"] = "о",
   }
 
@@ -173,6 +173,7 @@ function utils.tokenize(s, en_ru)
           local lex = entry and entry.__lex
           local source = lex and lex:sub(1, 1)
           if source == "V" or source == "Z" or source == "N" or
+             source == "e" or source == "E" or
              (family == "D" and source == "A") then
             -- Z13 marks English -s ambiguity; an N lemma resolves to plural n.
             local tag = family == "Z" and source == "N" and "n" or family

@@ -508,17 +508,22 @@ local printers = {
            local prev = s[j]
            if prev then
              local pt = prev:sub(1,1)
-              if pt == 'E' or pt == 'e' or prev:sub(2,2) == '!' then
-                -- Only switch to perfective when there is an object pronoun (M/m/R/r)
-                -- between the past verb and the infinitive particle:
-                -- "asked him to go" → придти (perfective)
-                -- "began to speak" → говорить (imperfective — no object between)
-                -- Sentence-initial e/E with following object is a "let" construction
-                -- (Let him speak → говорить, not сказать). Skip perfective switch.
-                if not (j == 1 and s[j+1] and s[j+1]:sub(1,1):match('[MmRr]')) then
-                  if saw_object then e.perfective = true end
-                end
-                break
+               if pt == 'E' or pt == 'e' or pt == 'U' or prev:sub(2,2) == '!' then
+                 if pt == 'U' then
+                   -- Modal verb triggers perfective switch for its complement verb.
+                   e.perfective = true
+                 else
+                   -- Only switch to perfective when there is an object pronoun (M/m/R/r)
+                   -- between the past verb and the infinitive particle:
+                   -- "asked him to go" → придти (perfective)
+                   -- "began to speak" → говорить (imperfective — no object between)
+                   -- Sentence-initial e/E with following object is a "let" construction
+                   -- (Let him speak → говорить, не сказал). Skip perfective switch.
+                   if not (j == 1 and s[j+1] and s[j+1]:sub(1,1):match('[MmRr]')) then
+                     if saw_object then e.perfective = true end
+                   end
+                 end
+                 break
              elseif pt == 'M' or pt == 'm' or pt == 'R' or pt == 'r' then
                saw_object = true
              elseif pt ~= 'b' and pt ~= 'B' and pt ~= 'T' then
@@ -695,6 +700,12 @@ local printers = {
     -- propagate past tense: "read the book and returned it" → both past.
     -- After Y (perfect aux): force past tense for ambiguous e-tagged verbs.
     e.past = e.imperative or (not is_ambiguous) or is_after_perfect
+    -- q (future auxiliary) overrides past tense: "will have finished" → future perfective.
+    -- E with perfective flag from q should conjugate as present tense of the
+    -- perfective verb (= Russian simple future: завершит, not завершил).
+    if e.past and e.perfective and s and i and s[i-1] and s[i-1]:sub(1,1) == 'q' then
+      e.past = false
+    end
     if is_ambiguous and not e.past and s and i then
       for ahead = i + 1, math.min(i + 8, #s) do
         local atag = s[ahead] and s[ahead]:sub(1, 1)
@@ -752,6 +763,15 @@ local printers = {
               local noun_d = utils.decode(s[j], true)
               e.gender = get_gender(s[j]) or e.gender
               e.plural = (tag == 'n') or (inherently_plural[noun_d] == true)
+              -- Compound subject: "X и Y" (N C ... N) → plural.
+              -- Scan backward from the noun for a conjunction (C) before another noun/pronoun.
+              if not e.plural then
+                for k = j - 1, 1, -1 do
+                  local ktag = s[k] and s[k]:sub(1,1)
+                  if ktag == 'C' then e.plural = true; break end
+                  if ktag and ktag:match('[NnRrMmLlQ]') then break end
+                end
+              end
               break
             end
           end
@@ -808,13 +828,22 @@ local printers = {
       local e_refl = { plural = e.plural, gender = e.gender, form = e.form,
                        past = true, passive = false, person = e.person or 3 }
       local result = paradigms.verb(t, b:byte(4)&~0x80, e_refl)
-      -- Determine the correct reflexive suffix (-сь after vowels, -ся after consonants).
+      -- Check if stem is reflexive (CP866 ends with с=0xE1 + я=0xEF = "-ся").
+      -- If so, paradigms.verb() already appended the reflexive suffix; don't double-append.
+      local extracted = utils.extract(t)
+      local is_reflexive = #extracted >= 2 and
+        extracted:byte(#extracted-1) == 0xE1 and
+        extracted:byte(#extracted) == 0xEF
+      if is_reflexive then
+        e.passive = false
+        return result
+      end
+      -- Non-reflexive verb: -сь after vowels, -ся after consonants (same table as paradigms.lua).
       local last2 = result:sub(-2)
-      local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
-                       ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
-      local refl = vowels[last2] or "ся"
+      local vowels = {["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                      ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь"}
       e.passive = false
-      return result .. refl
+      return result .. (vowels[last2] or "ся")
     end
     -- E0 (parser-converted from h-tag, byte3 = CP866 non-digit): suppress switch.
     -- E0x (dictionary codes E01, E02 etc., byte3 = digit): allow switch.
@@ -856,7 +885,11 @@ local printers = {
       end
     end
     local _rel_intrans = _found_rel and not _rel_has_subj and not _has_clause_boundary
-    if not suppress and not _rel_intrans and e.past and b:byte(2)&2 ~= 2 then
+    -- Perfective switch: E verb switches to its perfective paired stem when:
+    --   e.past=true (standard past tense), or
+    --   e.perfective=true from q (future auxiliary: "will have finished" → завершить)
+    local is_future_q = e.perfective and s and i and s[i-1] and s[i-1]:sub(1,1) == 'q'
+    if not suppress and not _rel_intrans and (e.past or is_future_q) and b:byte(2)&2 ~= 2 then
       local pt = b:sub(6)
       if #pt > 0 and pt:byte(1) >= 128 then
         dbg.log(2, string.format("    E perfective switch: %s → %s", d, utils.decode(pt)))
@@ -1077,8 +1110,9 @@ printers.V = function(t, e, s, i)
   end
   -- Detect instrumental agent "by" (PТ). V from a passive X+E conversion gets this context.
   -- LTGOLD emits imperfective reflexive past (-ся) for these constructions.
+  -- Skip when e.infinitive (verb is under a modal): "must leave by noon" is temporal, not agent.
   local has_agent = s and i and s[i+1] and s[i+1]:sub(1,1) == 'P' and
-    #s[i+1] == 2 and s[i+1]:byte(2) == 0x92
+    #s[i+1] == 2 and s[i+1]:byte(2) == 0x92 and not e.infinitive
   if has_agent then
     local d = utils.extract_form(t)
     local b = compiler.base[d]
@@ -1086,10 +1120,17 @@ printers.V = function(t, e, s, i)
       local e_refl = { plural = e.plural, gender = e.gender, form = e.form,
                        past = true, passive = false, person = e.person or 3 }
       local result = paradigms.verb(t, b:byte(4)&~0x80, e_refl)
-      local last2 = result:sub(-2)
-      local vowels = { ["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
-                       ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь" }
       e.passive = false
+      -- Check if stem is reflexive (CP866 ends with с=0xE1 + я=0xEF = "-ся").
+      -- If so, paradigms.verb() already appended the reflexive suffix; don't double-append.
+      local extracted = utils.extract(t)
+      local is_reflexive = #extracted >= 2 and
+        extracted:byte(#extracted-1) == 0xE1 and
+        extracted:byte(#extracted) == 0xEF
+      if is_reflexive then return result end
+      local last2 = result:sub(-4, -1)
+      local vowels = {["ю"]="сь",["у"]="сь",["е"]="сь",["а"]="сь",
+                      ["о"]="сь",["и"]="сь",["ы"]="сь",["э"]="сь",["ь"]="сь"}
       return result .. (vowels[last2] or "ся")
     end
   end
@@ -1180,7 +1221,21 @@ end
 printers.p = function(t, e, s, i)
   -- When followed by a clause (R or N subject), prefer J-form (subordinating conjunction).
   -- e.g. "before she arrived" → "прежде, чем она прибудет" not "перед она прибыла".
+  -- Exception: "since Monday" → "с Понедельника" (preposition), not "поскольку Понедельник" (conjunction).
   if s and i and s[i+1] and s[i+1]:sub(1,1):match('[RN]') then
+    local pform = utils.decode(t:sub(2), true)
+    local source = s.source and s.source[i] and s.source[i]:lower()
+    -- When source is "since", use the preposition form (P-form) instead of
+    -- conjunction (J-form): "since Monday" → "с Понедельника", not "поскольку Понедельник".
+    if source == "since" then
+      -- The P token stores case_marker + preposition (e.g. pРс = gen + с).
+      -- Decode from byte 3 to skip the case marker byte.
+      local pform = #t >= 3 and utils.decode(t:sub(3), true) or ""
+      if #pform > 0 then
+        e.form = case["Р"]  -- "since" governs genitive
+        return pform
+      end
+    end
     local jform = find_form(t, 'J')
     if jform and #jform > 0 then
       -- Strip leading ASCII digits (e.g. "2прежде, чем" → "прежде, чем")
@@ -1865,6 +1920,29 @@ printers.X = function(t, e, s, i)
       local nxt = s[i+1]:sub(1,1)
       if nxt == 'A' then return "" end
       if nxt == 'D' and s[i+2] and s[i+2]:sub(1,1) == 'A' then return "" end
+    end
+    -- Default copula output: "-" (dash). Pro-verb "does" only fires at end of sentence.
+    if s and s[i+1] and s[i+1]:sub(1,1) ~= '.' then return "-" end
+    -- Pro-verb "does/do": conjugate "делать" based on subject (e.g. "as she does" → "она делает")
+    local utf_form = utils.extract_form(t)
+    local b = compiler.base[utf_form]
+    if b then
+      local person, plural = 3, false
+      for k = (i or 1) - 1, 1, -1 do
+        local ktag = s[k] and s[k]:sub(1,1)
+        if ktag == 'R' then
+          local rcode = s[k]:match("R(%d%d)")
+          if rcode == "11" then plural, person = true, 1   -- мы
+          elseif rcode == "12" then plural, person = true, 2  -- вы
+          elseif rcode == "13" then plural = true           -- они
+          end
+          break
+        elseif ktag and ktag:match('[NnA]') then break end
+      end
+      local vt = 'V' .. utils.encode(utf_form)
+      local e_conj = { plural = plural, gender = e.gender, form = case["И"],
+                       past = false, person = person }
+      return paradigms.verb(vt, b:byte(4)&~0x80, e_conj)
     end
     return "-"
   else

@@ -133,11 +133,18 @@ local function find_and_replace(ts, j, s)
 	-- and orphan trailing forms (e.g. WAэлектронныйNперевод → AэлектронныйNперевод, losing Nперевод).
 	elseif #s == 1 and ts[j]:byte(1) == string.byte('G') and s == 'V' then
 		stream.set_token(ts, j, 'V' .. ts[j]:sub(2))
+	elseif #s == 1 and s == 'F' and ts[j]:byte(1) ~= string.byte('W') then
+		-- Rule-generated F (e.g. `having`E → F): the token has no embedded F form,
+		-- so retag the leading byte. The '9' digit marks the F as rule-converted:
+		-- LTGOLD governs nominative objects after converted F but genitive objects
+		-- after dictionary F (Завершаемый работа vs Видимый результата).
+		dbg.diag("tag", "retag F (rule-generated):", utils.decode(ts[j], true))
+		stream.set_token(ts, j, 'F9' .. ts[j]:sub(2))
 	elseif #s == 1 and ts[j]:byte(1) ~= string.byte('W') then
 		local _, e = ts[j]:find(s, 1, true)
 		if e then
-		  dbg.diag("tag", "sub-resolve:", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(e), true))
-		  stream.set_token(ts, j, ts[j]:sub(e))
+			dbg.diag("tag", "sub-resolve:", utils.decode(ts[j], true), "→", utils.decode(ts[j]:sub(e), true))
+			stream.set_token(ts, j, ts[j]:sub(e))
 		end
 	end
 end

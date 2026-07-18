@@ -46,6 +46,24 @@ function encoding.extract(text)
 end
 
 function encoding.decode_cyrillic(text)
+  -- The LTGOLD DIC format uses ')' to separate a packed stem from the full
+  -- Russian form (e.g. Nврем)время).  When the text before ')' consists only
+  -- of a tag + short Cyrillic abbreviation (no punctuation like ; . { ), use
+  -- the full form after ')' instead of the abbreviated stem.
+  local paren = text:find('\x29')
+  if paren then
+    local before_cp866 = text:sub(1, paren - 1)
+    -- Strip the leading tag byte(s)
+    local tag_stripped = before_cp866:gsub("^[A-Z]+", "")
+    local before_utf = encoding.decode(tag_stripped)
+    local cyrillic = before_utf:gsub("[^абвгдежзиклмнопрстуфхцчшщъыьэюяё]", "")
+    local non_cyrillic = before_utf:gsub("[абвгдежзиклмнопрстуфхцчшщъыьэюяё]", "")
+    -- Pure Cyrillic abbreviation (no punctuation) → use the full form after ')'
+    if #cyrillic > 0 and #non_cyrillic == 0 and #cyrillic <= 10 then
+      local after = text:sub(paren + 1)
+      return encoding.extract(encoding.decode(after))
+    end
+  end
   return encoding.extract(encoding.decode(text))
 end
 

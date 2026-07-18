@@ -498,6 +498,31 @@ local printers = {
      -- their original aspect under modals (e.g. can understand → может понимать).
      if e.infinitive then
        e.infinitive, e.infinitive_particle = false, false
+       -- LTGOLD switches to perfective infinitive after both modals and past-tense verbs:
+       -- "can read → может прочитать", "asked him to go → попросила придти".
+       -- Detect past context: scan backward past infinitive particle (b/B) to find
+       -- a preceding E/e/V! token.
+       if not e.perfective and s and i then
+         local saw_object = false
+         for j = i - 1, math.max(1, i - 4), -1 do
+           local prev = s[j]
+           if prev then
+             local pt = prev:sub(1,1)
+             if pt == 'E' or pt == 'e' or prev:sub(2,2) == '!' then
+               -- Only switch to perfective when there is an object pronoun (M/m/R/r)
+               -- between the past verb and the infinitive particle:
+               -- "asked him to go" → придти (perfective)
+               -- "began to speak" → говорить (imperfective — no object between)
+               if saw_object then e.perfective = true end
+               break
+             elseif pt == 'M' or pt == 'm' or pt == 'R' or pt == 'r' then
+               saw_object = true
+             elseif pt ~= 'b' and pt ~= 'B' and pt ~= 'T' then
+               break  -- stop at non-infinitive-particle / non-pronoun token
+             end
+           end
+         end
+       end
        if e.perfective and compiler.base[d] and (compiler.base[d]:byte(2)&2) ~= 2 then
          -- For imperfective modals (may/might) or when first verb stayed imperfective (e-tagged),
          -- coordinated verbs stay imperfective. For perfective modals (can/must), they switch.

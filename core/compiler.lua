@@ -508,13 +508,17 @@ local printers = {
            local prev = s[j]
            if prev then
              local pt = prev:sub(1,1)
-             if pt == 'E' or pt == 'e' or prev:sub(2,2) == '!' then
-               -- Only switch to perfective when there is an object pronoun (M/m/R/r)
-               -- between the past verb and the infinitive particle:
-               -- "asked him to go" → придти (perfective)
-               -- "began to speak" → говорить (imperfective — no object between)
-               if saw_object then e.perfective = true end
-               break
+              if pt == 'E' or pt == 'e' or prev:sub(2,2) == '!' then
+                -- Only switch to perfective when there is an object pronoun (M/m/R/r)
+                -- between the past verb and the infinitive particle:
+                -- "asked him to go" → придти (perfective)
+                -- "began to speak" → говорить (imperfective — no object between)
+                -- Sentence-initial e/E with following object is a "let" construction
+                -- (Let him speak → говорить, not сказать). Skip perfective switch.
+                if not (j == 1 and s[j+1] and s[j+1]:sub(1,1):match('[MmRr]')) then
+                  if saw_object then e.perfective = true end
+                end
+                break
              elseif pt == 'M' or pt == 'm' or pt == 'R' or pt == 'r' then
                saw_object = true
              elseif pt ~= 'b' and pt ~= 'B' and pt ~= 'T' then
@@ -660,6 +664,14 @@ local printers = {
     local orig_t = t  -- save before perfective switch modifies t
     local b = compiler.base[d]
     if not b then return d end
+    -- Sentence-initial E/e verbs need imperative mood (same as Z printer line 494).
+    -- E.g. "Let him speak" → E-tagged позволять produces imperative Позвольте.
+    -- Also set e.past to trigger the perfective-switch which selects the perfective
+    -- paired stem (позволить → Позвольте, not позволять → Позволяйте).
+    if e.word == 1 then
+      e.imperative = true
+      e.past = true
+    end
     -- Lowercase 'e' = ambiguous infinitive/past/participle. When preceded by a modal
     -- (U/X/B/b), keep as infinitive (can read → может читать).
     -- Exception: after Y (perfect auxiliary "had"), treat as past perfective.
@@ -682,7 +694,7 @@ local printers = {
     -- However, if e is coordinated with an uppercase E past verb (C conjunction),
     -- propagate past tense: "read the book and returned it" → both past.
     -- After Y (perfect aux): force past tense for ambiguous e-tagged verbs.
-    e.past = (not is_ambiguous) or is_after_perfect
+    e.past = e.imperative or (not is_ambiguous) or is_after_perfect
     if is_ambiguous and not e.past and s and i then
       for ahead = i + 1, math.min(i + 8, #s) do
         local atag = s[ahead] and s[ahead]:sub(1, 1)
@@ -704,7 +716,12 @@ local printers = {
     -- the E verb is in the main clause (no relative pronoun L/Q/l between the
     -- subject and the verb).  Inside a relative clause, the subject is usually
     -- a pronoun (R) closer to the verb, or the gender is carried by context.
-    if s and i and e.past then
+    -- When preceded by X1xx past copula, skip subject scan: the copula already
+    -- determined correct gender/plural (including inherently-plural nouns like
+    -- ворота, люди, дети that have uppercase N tag but are semantically plural).
+    local prev_is_x_copula = s and i and s[i-1] and s[i-1]:sub(1,1) == 'X' and
+      (s[i-1]:match("^X1") ~= nil)
+    if s and i and e.past and not prev_is_x_copula then
       local _has_rel_between = false
       for j = i - 1, 1, -1 do
         local rtag = s[j] and s[j]:sub(1,1)
@@ -730,8 +747,11 @@ local printers = {
               else break end
             end
             if not is_gen then
+              local inherently_plural = { ["ворота"]=true, ["люди"]=true, ["дети"]=true,
+                ["часы"]=true, ["ножницы"]=true, ["брюки"]=true, ["сани"]=true }
+              local noun_d = utils.decode(s[j], true)
               e.gender = get_gender(s[j]) or e.gender
-              e.plural = (tag == 'n')
+              e.plural = (tag == 'n') or (inherently_plural[noun_d] == true)
               break
             end
           end
@@ -802,8 +822,12 @@ local printers = {
     -- E1 (single-digit, byte3 = CP866 non-digit, e.g. told→E1говорить): allow switch.
     -- Also suppress for lowercase e (ambiguous) without explicit past context.
     local is_digit = function(b) return b and b >= string.byte('0') and b <= string.byte('9') end
-    local suppress = (t:byte(2) == string.byte('0') and not is_digit(t:byte(3))) or
+    -- Imperative verbs need the perfective paired stem (позволить→Позвольте,
+    -- not позволять→Позволяйте).  Override the E1x suppression for these.
+    local suppress = not e.imperative and (
+      (t:byte(2) == string.byte('0') and not is_digit(t:byte(3))) or
       (t:byte(2) == string.byte('1') and is_digit(t:byte(3)))
+    )
     -- Suppress perfective switch for intransitive E verb in relative clause
     -- (no explicit subject between relative pronoun and verb).  In this case the
     -- relative pronoun itself is the subject (e.g. "which arose" — intransitive),
@@ -980,6 +1004,15 @@ local printers = {
         result = result .. (vowels[result:sub(-2)] or "ся")
       end
     end
+    -- Reset imperative after producing the form, and set infinitive context
+    -- for the following verb in "let" constructions (Let him speak → Позвольте ему говорить).
+    if e.imperative then
+      e.imperative = false
+      e.past = false
+      e.form = case["Д"]  -- dative: "let him" governs dative (Позвольте ему)
+      e.infinitive = true
+      e.perfective = false
+    end
     return result
   end,
 }
@@ -1118,14 +1151,23 @@ printers.g = function(t, e)
 end
 printers.v = function(t, e, s, i)
   -- "Let us" → v + M11 (1st person plural): suppress the M pronoun (давайте нас → давайте).
+  local is_let_us = false
   if s and i and s[i+1] and s[i+1]:sub(1,1) == 'M' then
     local m = s[i+1]
     -- M11 = 1st person plural (us) — drop it after "давайте"
     if m:byte(2) == 0x31 and m:byte(3) == 0x31 then
       e.suppress_next_M = true
+      is_let_us = true
     end
   end
-  return printers.V(t, e)
+  local result = printers.V(t, e)
+  -- After "давайте", the following verb takes imperfective infinitive.
+  -- Set AFTER V/Z finishes so the context isn't consumed by the давайте form.
+  if is_let_us then
+    e.infinitive = true
+    e.perfective = false
+  end
+  return result
 end
 printers.p = function(t, e, s, i)
   -- When followed by a clause (R or N subject), prefer J-form (subordinating conjunction).
@@ -1642,6 +1684,10 @@ printers["#"] = function(t, e, s_tok, i)
       -- Никакой declines: masc=Никакой, fem=Никакая, neut=Никакое, pl=Никакие
       local forms = { [1]="Никакой", [2]="Никакая", [0]="Никакое" }
       e.form = case["И"]
+      -- "No X" as determiner ("No large truck...") requires не negation before the
+      -- following verb: "Никакой грузовик НЕ прошел".  Flag it so the compile loop
+      -- injects не before the next main verb.
+      e.negate_next = true
       return plural and "Никакие" or (forms[gender] or "Никакой")
     end
     return "Нет"
@@ -1909,10 +1955,17 @@ printers.X = function(t, e, s, i)
             -- skip genitive modifier, continue looking for subject
           else
             -- LTGOLD quirk: in relative clause constructions (L token between N and X),
-            -- the copula gender defaults: masculine for nominative relative pronoun,
-            -- neuter for oblique/prepositional relative pronoun (e.g. "in which").
+            -- the copula gender depends on the predicate type after the copula:
+            -- oblique relative (prep+L) → neuter ("книга, покрытие которой ... было старым")
+            -- nominative relative (bare L) + A/D (adjective/adverb) → neuter
+            -- nominative relative (bare L) + E (participle) → masculine ("проблема ... был решен")
             if has_rel_clause then
-              gender = rel_preceded_by_prep and 0 or 1
+              if rel_preceded_by_prep then
+                gender = 0  -- oblique relative → always neuter
+              else
+                -- nominative relative: adjective/adverb predicate → neuter, participle → masculine
+                gender = (next_tag and next_tag:match('[ADad]')) and 0 or 1
+              end
             else
               gender = get_gender(s[k]) or gender
             end
@@ -2050,6 +2103,12 @@ function compiler.compile(s, options)
       else table.insert(c, w) end
       if w == ',' or w == ';' then reset_clause_context(e) end
     else
+      -- не-injection: ## no-determiner flag → insert не before the main verb.
+      -- "No large truck passed" → "Никакой большой грузовик НЕ прошел ворота".
+      if e.negate_next and w:sub(1,1):match('[VvEeGgZzFf]') then
+        table.insert(c, "не")
+        e.negate_next = false
+      end
       local tag, ok, out, err = render_token(w, e, s, i)
       -- Strip leading comma when this is the first output element (sentence-initial
       -- clause connective).  LTGOLD stores ",Когда" for "when" so the comma attaches

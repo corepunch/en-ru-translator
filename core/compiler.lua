@@ -498,6 +498,21 @@ local printers = {
           return "до"
         end
       end
+      -- Language override: "в" + language → "на" (на русском, на английском)
+      if result == "в" and s and i then
+        local next_token = s[i+1]
+        if next_token then
+          local next_form = utils.extract_form(next_token)
+          local languages = { ["русский"]=true, ["английский"]=true, ["немецкий"]=true,
+            ["французский"]=true, ["испанский"]=true, ["итальянский"]=true,
+            ["китайский"]=true, ["японский"]=true, ["арабский"]=true,
+            ["португальский"]=true, ["польский"]=true, ["чешский"]=true,
+            ["греческий"]=true, ["турецкий"]=true, ["корейский"]=true }
+          if languages[next_form] then
+            result = "на"
+          end
+        end
+      end
       if e.verb_frame and result == e.verb_frame.preposition then
         e.form = e.verb_frame.object_case
         return e.verb_frame.emit and result or ""

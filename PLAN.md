@@ -1,187 +1,182 @@
-# W Token Refactoring Plan
+# PLAN.md — Building a Better English→Russian Translator
 
-## Problem
+## Philosophy
 
-W tokens (multi-word phrase markers) are packed as opaque strings (`WAэлектронныйNперевод`)
-and passed through all 8 rule-set passes with no first-class structure. This forces scattered
-workarounds across `utils.lua`, `parser.lua`, `token_stream.lua`, and `compiler.lua`.
+LTPRO (1990-1993) was a pioneering DOS translator but has serious limitations:
+- Incorrect case agreement (genitive instead of accusative, wrong plurals)
+- Missing tense sequencing rules (before → future tense in Russian)
+- Wrong preposition choices (в instead of на for languages)
+- Undeclined proper names (Дом Питер instead of Дом Питера)
+- Broken constructions ("not as...as", gerunds, "both...and")
+- Many dictionary entries with wrong translations
 
-### Fragility inventory
+We've extracted LTPRO's valuable components (paradigm tables, dictionary format,
+rule engine), but we're now building **beyond** LTPRO with proper Russian grammar.
 
-1. **`is()` full-string scan** (`parser.lua:30`): checks `word:upper():find(tag_char)` to
-   determine the primary tag of a W token. Works only because CP866 Cyrillic bytes (0x80–0xFF)
-   never match ASCII — an accidental invariant.
+## Current Scores
 
-2. **`iter()` can't see sub-constituents** of W tokens: `%a+` in its gmatch swallows `W` + the
-   following tag letter together as `WA`, so `find(tok, 'A')` returns nil. The `A` constituent
-   is invisible to rule matching.
-
-3. **`expand_phrase_tokens()` gmatch pattern** (`parser.lua:550`):
-   `([%a ][0-9]*[\127-\255]+)` — relies on `W` having no CP866 chars after it. The space in
-   `[%a ]` was added as a hack for multi-word Russian (e.g. `WNспособность погашать`).
-
-4. **`phrases=true` side-channel** (`token_stream.lua:4`): a boolean flag on expanded tokens,
-   consumed only by `compiler.lua:127` for one specific behavior (nounless-phrase adj → lemma
-   form). Not a general mechanism.
-
-5. **`component_caps`** (`utils.lua:257`): collected during tokenization, stored as metadata,
-   consumed during expansion. Implicit contract between 3 files.
-
-6. **Reorder suppression** (`parser.lua:378`): inline `ts[pos]:match("^WV")` check rather than
-   a data-driven property of the W token.
-
-7. **Caps propagation** (`parser.lua:514–537`): inline `ts[i]:sub(1,1) == 'W'` loop for
-   LTGOLD-compatible "init" caps bleed across consecutive W phrases.
-
-## Plan
-
-### Step 1 — Add a proper W token parser (`utils.lua`)
-
-Add `parse_W(token)` that splits the packed string into structured constituents:
-
-```lua
-{
-  tag = "A",  -- primary constituent tag
-  constituents = {
-    { tag = "A", text = "<CP866>" },
-    { tag = "N", text = "<CP866>" },
-  }
-}
+```
+ltgold100: 93/100
+ltgold200: 128/200  (+21 from baseline 107)
+Total:     221/300
 ```
 
-The parser walks the string character by character: skip `W`, then alternate between
-reading an ASCII tag letter and CP866 Cyrillic bytes. Embedded paradigm indices (e.g.
-`N001`) are handled by consuming ASCII digits before the Cyrillic run.
+## Architecture
 
-**Property:** `parse_W(W)` always succeeds (W tokens are well-formed by dictionary
-construction). Returns `nil` for non-W tokens.
-
-**Tests:** `test/parser_test.lua` — assert constituent count, tags, and text for
-`WAadjNnoun`, `WVverbPprep`, `WNnoun`, `WAadjNWnounNnoun` patterns.
-
-**No regressions** — no existing code calls this new function yet.
-
----
-
-### Step 2 — Replace `is()` full-string scan with parsed primary tag (`parser.lua:30-33`)
-
-Change from:
-```lua
-if word:sub(1,1) == 'W' then
-  if word:upper():find(class:sub(i,i)) then return true end
-end
 ```
-to:
-```lua
-if word:sub(1,1) == 'W' then
-  local parsed = parse_W(word)
-  if parsed and class:find(parsed.tag, 1, true) then return true end
-end
+Input text
+  → Tokenize (lookup en_ru dictionary, attach grammatical tags)
+  → Parse (apply T1-T8 pattern-matching rules from parser.lua)
+  → Compile (inflect tokens via compiler.lua + paradigms.lua)
+  → Output
 ```
 
-Same semantics — checks only the first constituent's tag letter against the class.
-Data-driven, no magic. Removes the accidental ASCII-only invariant.
+## Phase 1: Fix Dictionary Mappings (impact: ~5 tests)
 
-**Tests:** existing `make test` — behavior is identical for all current dictionary entries.
+### Wrong verbs
+| English | LTPRO gives | Should be | Context |
+|---------|------------|-----------|---------|
+| "run" (running) | останавливаться (to stop) | бежать (to run) | He is running |
+| "present" (be present) | представлять (to represent) | присутствовать (be present) | Both were present |
+| "either" (each) | также (also) | каждый (each) | Either answer |
+| "see" (imperative) | видеть (to see) | смотреть (to look) | See page twelve |
 
----
+### Missing past tenses
+| English | Missing | Should map to |
+|---------|---------|---------------|
+| "rebuilt" | ✓ already added | разрабатывать |
+| "rebuilt" prefix | missing "вновь" | need re- prefix handling |
 
-### Step 3 — Use `parse_W()` in `expand_phrase_tokens()` (`parser.lua:540-570`)
+**Actions:**
+- Fix dictionary entries in `data/BASE.DIC`
+- Add context-disambiguating entries where needed
 
-Replace the gmatch loop:
-```lua
-for word in ts[i]:gmatch("([%a ][0-9]*[\127-\255]+)") do
-```
-with iteration over `parse_W(ts[i]).constituents`.
+## Phase 2: Preposition Overrides (impact: ~3 tests)
 
-This eliminates the fragile pattern and the implicit invariant about `W` having no
-CP866 trail. The `component_caps` metadata distribution and `phrases=true` assignment
-remain unchanged in this step.
+Russian preposition choice is context-sensitive. "in" → "в" by default
+but changes to "на" for:
 
-**Tests:** `make test` + `demo/compare.lua` — output must be byte-identical.
+| Context | English | Rule | Example |
+|---------|---------|------|---------|
+| Languages | "in Russian" | на + language | на русском |
+| Abstract positions | "in first place" | на + position | на первом месте |
+| Physical impact | "hurt on the door" | о/в + accusative | в дверь |
 
----
+**Implementation:** `core/compiler.lua` P printer context checks
+- After P token, if next N is a language name → override preposition to "на"
+- After P token, if next N is an ordinal position → override to "на"
 
-### Step 4 — Cache parsed W data in token stream (`token_stream.lua`)
+## Phase 3: Case Government Rules (impact: ~6 tests)
 
-Add a `ts.W_data` table (keyed by position) so `parse_W()` is called once per W token
-rather than re-parsing on every access. Populated lazily on first `parse_W()` call.
+### Ordinal + Noun
+- After ordinals 1-4 (1st, 2nd, 3rd, 4th): accusative singular
+- After ordinals 5+: nominative/genitive plural
+- "5th chapter" → "5 главу" (accusative, not genitive)
+- **File:** `core/compiler.lua` N printer
 
-**Tests:** `test/token_stream_test.lua` — verify W_data is populated on access and
-cleared on stream mutations.
+### Numeral + Noun case
+Russian numeral agreement:
+- 1: nominative singular
+- 2-4: genitive singular (два стола)
+- 5-20: genitive plural (пять столов)
+- 21: nominative singular again
+- 22-24: genitive singular
+- etc.
 
----
+**Implementation:** `core/compiler.lua` I printer case propagation
 
-### Step 5 — Replace `phrases` side-channel with `phrase_index` (`token_stream.lua`, `compiler.lua`)
+### Compound subject plural
+- "X and Y" → verb should be plural ("говорили" not "говорила")
+- ✓ Already implemented in E printer subject scan
 
-Instead of `phrases = true` on every expanded sub-constituent, set `phrase_index = N`
-where `N` is the position in the stream of the original W token (0 = not from a phrase).
-The A printer in `compiler.lua:127` checks `s.phrase_index` instead of `s.phrases`.
+## Phase 4: Missing Constructions (impact: ~10 tests)
 
-This makes the mechanism extensible — other printers can consult `phrase_index` for
-phrase-aware behavior without new side-channels.
+### "not as ADJ as" → "не так ADJ как"
+- Currently broken: produces "не - как высок Поскольку она"
+- Need parser rule: detect "not as ADJ as" pattern
+- **File:** `core/parser.lua` new rule in T4
 
-**Tests:** `make test` — nounless-phrase A adjectives must still emit lemma form.
+### Gerunds "Having done X" → "Сделав X"
+- "Having finished the work" → "Закончив работу"
+- Currently outputs: "Завершаемый работа" (wrong participle form)
+- Need: detect "Having + V-ed" → Russian adverbial participle
+- **File:** `core/parser.lua` T3-GER rules
 
----
+### "both X and Y" with verbs
+- "He both reads and writes" → "Он и читает и пишет"
+- Currently outputs: "как чтение так и пишет" (converts verb to noun)
+- Need: keep both as verbs, not convert to noun
+- **File:** `core/parser.lua` T4-BOTH
 
-### Step 6 — Generalize reorder suppression (`parser.lua:373-385`)
+### "either...or" / "neither...nor"
+- Already partially working
 
-Replace the inline `ts[pos]:match("^WV")` with a helper:
-```lua
-local function is_W_verb_head(ts, pos)
-  local parsed = parse_W(ts[pos])
-  return parsed and parsed.tag == 'V'
-end
-```
+## Phase 5: Tense Sequencing (impact: ~3 tests)
 
-Makes the suppression condition explicit instead of embedded in the application loop.
-No behavior change.
+### "before" requires future in Russian
+- "before she arrived" → "прежде чем она прибудет" (future, not past)
+- Rule: J(прежде чем) + past tense → future tense
+- **File:** `core/parser.lua` tense sequencing
 
-**Tests:** `make test` — T5/T6 reorder must be suppressed for WV phrases exactly as before.
+### "when/if/as" temporal clauses
+- Often require conditionals or future
+- Already partially working
 
----
+## Phase 6: Dictionary Expansion
 
-### Step 7 — Generalize caps propagation (`parser.lua:514-537`)
+### New words to add
+| English | Tags | Russian | File |
+|---------|------|---------|------|
+| loudly | D | громко;инф)шумный | BASE.DIC ✓ |
+| rebuilt | E | разрабатывать;инф)строить | BASE.DIC ✓ |
+| orc | N | орк | DUNGEON.DIC |
+| goblin | N | гоблин | DUNGEON.DIC |
 
-Replace the inline `ts[i]:sub(1,1) == 'W'` loop with a helper:
-```lua
-local function is_W_token(ts, pos)
-  return ts[pos]:byte(1) == 0x57  -- 'W'
-end
-```
+### Re-prefix handling
+- "rebuilt" = re + built → вновь + разработан
+- Need prefix-detection in tokenizer/parser
+- **File:** `core/parser.lua` or `core/utils.lua`
 
-Minimal change — just moves the magic byte check to a named function for readability.
-Future readers can find all W-token decisions by grepping `is_W_token`.
+## Phase 7: Test Suite Modernization
 
-**Tests:** `make test` — "init" caps must still leak across consecutive W phrases.
+### Stop matching LTPRO errors
+Mark tests as "LTPRO_ERROR" where LTPRO output is grammatically wrong:
+- "Дом Питер" → correct is "Дом Питера" (genitive)
+- "прибыла после before" → correct is "прибудет" (future)
+- Case errors in T6-NUM tests
 
-## What NOT to change
+### Add correct Russian reference
+- Create `test/reference_correct.txt` with grammatically correct Russian
+- Flag tests where our output is better than LTPRO's
 
-- **Dictionary format** (`data/BASE.DIC`, `data/*.RUS`): keep packed strings, no schema change.
-- **Rule format** (`core/rules.lua`): `@W`, `.$NW`, `[NW]` etc. stay as-is.
-- **8-pass rule application** (`core/parser.lua`): the rule engine itself is untouched.
-- **`iter()` / `find()` / `matches()`**: these are LTGOLD core and work correctly for
-  non-W tokens. Only `is()` changes.
+## Implementation Plan
 
-## Files affected (final)
+| Priority | Task | Tests | Effort |
+|----------|------|-------|--------|
+| P0 | Preposition overrides (на for languages) | +2 | Small |
+| P1 | Dictionary fixes (run, present, either) | +3 | Small |
+| P2 | Numeral + Noun case rules | +5 | Medium |
+| P3 | "not as...as" parser rule | +3 | Medium |
+| P4 | Gerund parser rules | +5 | Large |
+| P5 | "both...and" verb coordination | +1 | Medium |
+| P6 | Tense sequencing (before→future) | +2 | Medium |
+| P7 | Re-prefix handling | +1 | Small |
+| P8 | Dictionary expansion (dungeon words) | - | Small |
 
-| File | Changes |
-|------|---------|
-| `core/utils.lua` | Add `parse_W()` function |
-| `core/parser.lua` | Steps 2, 3, 6, 7: `is()`, `expand_phrase_tokens()`, reorder guard, caps helper |
-| `core/token_stream.lua` | Steps 4, 5: `W_data` cache, `phrase_index` field |
-| `core/compiler.lua` | Step 5: A printer uses `phrase_index` instead of `phrases` |
-| `test/parser_test.lua` | Add unit tests for `parse_W()` |
+**Estimated total: +22 tests → 150/200**
 
-## Verification
+## Files Reference
 
-Each step is independently testable:
-
-```sh
-make test                          # all existing tests must pass
-lua test/parser_test.lua           # new parse_W unit tests
-lua demo/compare.lua               # zero diff against DEMO_REFERENCE
-lua demo/demo_walk.lua             # word-by-word N/M progress
-lua init.lua --diag=tag            # verify tag resolution unchanged
-```
+| File | What goes there |
+|------|-----------------|
+| `core/compiler.lua` | Printer functions, case government, preposition overrides |
+| `core/parser.lua` | Pattern-matching rules, construction detection |
+| `core/rules.lua` | T1-T8 rule tables extracted from LTPRO |
+| `core/paradigms.lua` | Noun/verb/adjective inflection tables |
+| `core/utils.lua` | Tokenizer, encoding, string helpers |
+| `core/load.lua` | Dictionary file loading |
+| `data/BASE.DIC` | Main dictionary (English → Russian) |
+| `data/BASE.RUS` | Russian paradigm data (gender, paradigm ID) |
+| `test/ltgold200_test.lua` | 200 regression tests (some with LTPRO errors) |
+| `test/ltgold100_test.lua` | 100 regression tests |
+| `PLAN.md` | This file |

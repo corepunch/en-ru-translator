@@ -484,6 +484,20 @@ local printers = {
         e.form = e.verb_frame.object_case
         return e.verb_frame.emit and result or ""
       end
+      -- Language override: "в" + language → "на"
+      if result == "в" and s and i then
+        local next_token = s[i+1]
+        if next_token then
+          local next_form = utils.extract_form(next_token)
+          local languages = { ["русский"]=true, ["Русский"]=true, ["английский"]=true, ["Английский"]=true,
+            ["немецкий"]=true, ["Немецкий"]=true, ["французский"]=true, ["Французский"]=true,
+            ["испанский"]=true, ["Испанский"]=true, ["итальянский"]=true, ["Итальянский"]=true,
+            ["китайский"]=true, ["Китайский"]=true, ["японский"]=true, ["Японский"]=true }
+          if languages[next_form] then
+            result = "на"
+          end
+        end
+      end
       return with_rel_spaces(result)
     elseif case[second] then
       e.form = case[second]
@@ -502,15 +516,17 @@ local printers = {
       if result == "в" and s and i then
         local next_token = s[i+1]
         if next_token then
-          local next_form = utils.extract_form(next_token)
-          local languages = { ["русский"]=true, ["английский"]=true, ["немецкий"]=true,
-            ["французский"]=true, ["испанский"]=true, ["итальянский"]=true,
-            ["китайский"]=true, ["японский"]=true, ["арабский"]=true,
-            ["португальский"]=true, ["польский"]=true, ["чешский"]=true,
-            ["греческий"]=true, ["турецкий"]=true, ["корейский"]=true }
-          if languages[next_form] then
-            result = "на"
+          -- Check all forms in the token for language adjectives (A-form, N-form, etc.)
+          local has_lang = false
+          for f in next_token:gmatch("[%a%d]*[\127-\255]+") do
+            -- Language adjectives end in -ский/-цкий or common declined forms
+            if f:match("[сС]к[ийои]") or f:match("[сС]ком$") or f:match("[сС]кой$") or
+               f:match("[цЦ]к[ийои]") or f:match("[цЦ]ком$") or f:match("[цЦ]кой$") then
+              has_lang = true
+              break
+            end
           end
+          if has_lang then result = "на" end
         end
       end
       if e.verb_frame and result == e.verb_frame.preposition then

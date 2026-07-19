@@ -197,6 +197,21 @@ local cases = {
 
 local passed, failed, total = 0, 0, 0
 
+-- Simple Cyrillic lowercase helper
+local function cyrillic_lower(s)
+  local result = {}
+  for i = 1, #s do
+    local b = s:byte(i)
+    -- ASCII lowercase A-Z (0x41-0x5A) -> a-z (0x61-0x7A)
+    if b >= 0x41 and b <= 0x5A then
+      result[#result+1] = b + 0x20
+    else
+      result[#result+1] = b
+    end
+  end
+  return string.char(table.unpack(result))
+end
+
 for _, case in ipairs(cases) do
   local group, input, expected_words = case[1], case[2], case[3]
   total = total + 1
@@ -210,7 +225,7 @@ for _, case in ipairs(cases) do
     failed = failed + 1
   else
     local got = compiler.compile(parsed, { quiet = true })
-    local got_lower = got:lower()
+    local got_lower = cyrillic_lower(got)
 
     -- Check if key words are present in the output
     local words_ok = true

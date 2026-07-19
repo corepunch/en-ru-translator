@@ -403,6 +403,12 @@ local printers = {
     -- Clear copula short-form context: a noun closes the X003+adj construction.
     e.infinitive = false
     local d = utils.decode(t, true)
+    -- For hyphenated forms like "юго-запад", decode_cyrillic stops at '-',
+    -- so fall back to extract_form which preserves the full form.
+    local extract = utils.extract_form(t)
+    if #d < #extract then
+      d = extract
+    end
     local b = compiler.base[d]
     if not b then
       dbg.diag("multi", "noun no base:", d)

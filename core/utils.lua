@@ -176,7 +176,9 @@ function utils.tokenize(s, en_ru)
              source == "e" or source == "E" or
              (family == "D" and source == "A") then
             -- Z13 marks English -s ambiguity; an N lemma resolves to plural n.
-            local tag = family == "Z" and source == "N" and "n" or family
+            -- Also: if base is Z with embedded N sub-form (ZVverbNnoun), -s means plural noun.
+            local has_n_in_z = family == "Z" and source == "Z" and lex:find('N', 3, true) ~= nil
+            local tag = (family == "Z" and (source == "N" or has_n_in_z)) and "n" or family
             local translation = derived_translation(family, lex)
             -- LTPRO keeps the analyzer-selected primary tag at +0x0c and the
             -- dictionary lemma's original class at +0x66.

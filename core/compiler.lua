@@ -393,6 +393,7 @@ local printers = {
          ["ножницы"]=true, ["брюки"]=true, ["ворота"]=true, ["сани"]=true }
        local ntext = utils.decode(t, true)
        if plural_only[ntext] then e.plural = true
+       elseif e.plural_next_noun then e.plural = true; e.plural_next_noun = nil
        else e.plural = false end
      end
      -- Dative subject: "need" construction (X needs Y → X-dat нужен Y-nom)
@@ -1735,6 +1736,9 @@ printers.x = function(t, e, s, i)
       if tag:match('[Nn]') then
         gender = get_gender(s[j]) or 0
         plural = tag == 'n'
+        -- Also detect plurality from source word ending in -s/-es (n→N rule lost the n tag)
+        local src = s.source and s.source[j]
+        if not plural and src and src:match('[sS]$') then plural = true end
       end
     end
     local past_forms = { [1]="был", [2]="была", [0]="было" }
@@ -1825,15 +1829,21 @@ printers["#"] = function(t, e, s_tok, i)
     end
     if noun then
       local gender = get_gender(noun) or 1
-      local plural = noun:sub(1,1) == 'n' or e.plural
-      -- Никакой declines: masc=Никакой, fem=Никакая, neut=Никакое, pl=Никакие
-      local forms = { [1]="Никакой", [2]="Никакая", [0]="Никакое" }
+      -- Detect plurality: tag 'n', or source word ends in -s/-es (n→N rule lost the tag)
+      local noun_j = j
+      local src_noun = s_tok and s_tok.source and s_tok.source[noun_j]
+      local plural = noun:sub(1,1) == 'n' or e.plural or
+        (src_noun and src_noun:match('[sS]$') ~= nil)
+      -- никакой declines: masc=никакой, fem=никакая, neut=никакое, pl=никакие
+      -- Caps are handled by apply_source_caps based on the source "no" word position.
+      local forms = { [1]="никакой", [2]="никакая", [0]="никакое" }
       e.form = case["И"]
+      if plural then e.plural_next_noun = true end
       -- "No X" as determiner ("No large truck...") requires не negation before the
       -- following verb: "Никакой грузовик НЕ прошел".  Flag it so the compile loop
       -- injects не before the next main verb.
       e.negate_next = true
-      return plural and "Никакие" or (forms[gender] or "Никакой")
+      return plural and "никакие" or (forms[gender] or "никакой")
     end
     return "Нет"
   end
@@ -1995,10 +2005,11 @@ printers.X = function(t, e, s, i)
     e.infinitive = true
     e.form = case["И"]
     dbg.log(2, "    X (copula 003): infinitive=true, form=nom")
-    -- Silent when directly followed by A, or followed by D+A (adverb-modified predicate adj)
+    -- Silent when directly followed by A, E (passive participle), or D+A
     if s and s[i+1] then
       local nxt = s[i+1]:sub(1,1)
       if nxt == 'A' then return "" end
+      if nxt == 'E' then e.passive = true; return "" end  -- present passive: "is locked"
       if nxt == 'D' and s[i+2] and s[i+2]:sub(1,1) == 'A' then return "" end
     end
     -- Default copula output: "-" (dash). Pro-verb "does" only fires at end of sentence.
@@ -2032,10 +2043,14 @@ printers.X = function(t, e, s, i)
     if code:sub(1,1) == '2' then
       e.perfective = true
       dbg.log(2, "    X (future 2xx): perfective=true")
-      -- Future copula: X2xx + (skip T/d) + N or A → output "будет/будем/etc."
+      -- Future copula: X2xx + (skip T/d/X-copula) + N or A → output "будет/будем/etc."
       if s and i then
         local j = i + 1
-        while s[j] and s[j]:sub(1,1):match('[TdK]') do j = j + 1 end
+        local skipped_x_copula = false
+        while s[j] and s[j]:sub(1,1):match('[TdKX]') do
+          if s[j]:sub(1,1) == 'X' then skipped_x_copula = true end
+          j = j + 1
+        end
         local nxt = s[j] and s[j]:sub(1,1)
         if nxt and nxt:match('[NAV]') then
           -- Determine person/number from subject pronoun
@@ -2057,7 +2072,8 @@ printers.X = function(t, e, s, i)
                         [2]=plural and "будете" or "будешь",
                         [3]=plural and "будут" or "будет" }
           if nxt:match('[NA]') then
-            e.form = case["Т"]
+            -- Existential "there will be N" uses nominative; predicative uses instrumental.
+            if not skipped_x_copula then e.form = case["Т"] end
             e.infinitive = true
           else
             -- For V (infinitive verb), set infinitive context
@@ -2187,6 +2203,13 @@ printers.X = function(t, e, s, i)
       end
       dbg.log(2, "    X (past copula 1xx): " .. past_out)
       return past_out
+    end
+    -- Suppress X(быть) when it immediately follows a X2xx future auxiliary that
+    -- already output the future copula (e.g. "will be" → "будет", suppress bare "быть").
+    local prev_tok = s and i and s[i - 1]
+    if prev_tok and prev_tok:sub(1,1) == 'X' and (prev_tok:match("^X2") ~= nil) then
+      e.infinitive = true
+      return ""
     end
     local p = printers.V(t, e)
     e.infinitive = true

@@ -810,10 +810,9 @@ local function resolve_post_rule_contexts(ts)
 	for i = 1, #ts do
 		if ts.source and ts.source[i] and ts.source[i]:lower() == "it" and
 		   ts[i]:sub(1, 1) == "R" then
-			-- Object "it" after a preposition: keep R, the compiler handles
-			-- prepositional case via e.form (set by preceding P printer).
+			-- Object "it" after a preposition: use demonstrative "это" (prepositional: этом).
 			if i > 1 and ts[i-1] and ts[i-1]:sub(1,1) == 'P' then
-				-- Keep R-tagged for prepositional context (о нем, not об этом)
+				stream.set_token(ts, i, "O" .. utils.encode("это"))
 			else
 				-- Object "it" elsewhere: select demonstrative paradigm.
 				stream.set_token(ts, i, "O" .. utils.encode("это"))
@@ -871,6 +870,10 @@ end
   				-- Skip: don't capitalize a copula/verb that follows a subject noun.
   				if ts[i]:match('^[Nn]') then goto continue end
   				if ts[j] and ts[j]:match('^[VX]') and not ts.caps[j] then ts.caps[j] = "init" end
+  			end
+  			-- LTPRO propagates caps from init-cap O pronoun (e.g. "It") to following copula X.
+  			if ts[i - 1]:match('^O') and ts.caps[i - 1] == "init" then
+  				if ts[i] and ts[i]:match('^X') and not ts.caps[i] then ts.caps[i] = "init" end
   			end
   			::continue::
   		end

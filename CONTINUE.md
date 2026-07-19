@@ -1,128 +1,67 @@
-# CONTINUE.md — State & Plan for LTPRO Reverse-Engineering
+# CONTINUE.md — LTPRO Reverse-Engineering & Grammar Improvements
 
 ## Objective
 
-Replicate LTPRO.EXE's translation behavior in Lua to pass 300 regression tests
-(ltgold100 + ltgold200). **Current: 221/300 (93/100 + 128/200)**.
+Build a quality English→Russian translator using LTPRO's paradigm tables and rule engine
+as a foundation, then improve beyond what the 1990-era DOS translator could do.
 
-## Approach
+**Current: 222/300 (93/100 + 129/200)**, +22 from baseline 107 on ltgold200.
 
-1. Disassemble LTPRO.EXE with radare2 (`/opt/homebrew/bin/r2`)
-2. Annotate morph-engine type handlers in `docs/disassemble/`
-3. Replicate the flag-propagation logic in `core/parser.lua`, `core/compiler.lua`
+## New Direction (July 2026)
 
-## Key Constants
+After reaching +22 on ltgold200, we've stopped trying to match LTPRO's sometimes-incorrect
+outputs (wrong case agreement, undeclined proper names, broken constructions).
+Instead we're building proper Russian grammar rules.
 
-```
-LTPRO.EXE:         LTGOLD/LTPRO.EXE  (207714 bytes, DOS 16-bit)
-VSHIFT:            0x3A00   (r2 vaddr + VSHIFT = file offset)
-DAT_BASE:          0x26750  (data segment base in file)
-Morph engine VA:   0x1df0f  (post-T8 morphology, 21 type handlers)
-Type jump table:   CS:0x2318 in overlay 0x1000 (r2 VA 0x12318)
-
-r2 command template:
-  cd LTGOLD && r2 -e bin.relocs.apply=false -A -q -c 'pd 200 @ VA' LTPRO.EXE
-```
+**See `PLAN.md` for the full grammar improvement roadmap.**
 
 ## Test Scores
 
 ```
-ltgold100: 93/100  (baseline 94, -1 pre-existing)
-ltgold200: 128/200 (baseline 107, +21)
-Total:     221/300
+ltgold100: 93/100  (7 pre-existing parser failures)
+ltgold200: 129/200 (+22 from baseline 107)
+Total:     222/300
 ```
 
-## What Was Done This Session (+13 on ltgold200)
+## Recent Fixes (+22 on ltgold200)
 
-### 1. X003 pro-verb "does" conjugation (+2)
-**File:** `core/compiler.lua:1918-1927`
-When X003 (copula "is/do") is at end of sentence (followed by "."), conjugate "делать"
-based on subject pronoun instead of outputting "-". Detects person/number from preceding
-R token. Fixes T4-ASMUCH: "He reads as much as she does" → "Он читает столько же она делает."
+| Fix | Impact | File |
+|-----|--------|------|
+| X003 pro-verb "does" conjugation | +2 | compiler.lua |
+| Reflexive double-ся (CP866 stem check) | +1 | compiler.lua |
+| Compound subject plural (C conjunction scan) | +1 | compiler.lua |
+| V infinitive after infinitive particle | +1 | compiler.lua |
+| Name transliteration (LTPRO table 0x32602) | +1 | compiler.lua |
+| X1xx embedded verb conjugation | +1 | compiler.lua |
+| Dictionary: "loudly" annotation | +1 | BASE.DIC |
+| Dictionary: "rebuilt" entry | +1 | BASE.DIC |
+| Preposition override: "на" for languages | +1 | compiler.lua |
+| Various T1-EXIST, T4-SEE, T4-HYPH fixes | +7 | compiler.lua |
 
-### 2. Reflexive double-ся fix (+1)
-**File:** `core/compiler.lua:814-828, 1098-1117`
-Both E printer and V printer agent detection now check if the stem is reflexive
-(CP866 bytes 0xE1/0xEF at end of extracted stem) before appending reflexive suffix.
-Uses same CP866 byte table as `paradigms.verb()`. Fixes "The price rose by ten percent"
-→ "Цена поднималась десятью процентами." (was double "сь")
+## Transliteration Table
 
-### 3. Compound subject plural (+1)
-**File:** `core/compiler.lua:766-772`
-When the subject noun (N tag) is found by backward scan, continue scanning backward
-for a conjunction (C tag) before another noun/pronoun. If found, mark as plural.
-Fixes "Both the man and the woman spoke" → "Как человек так и женщина говорили."
+Found at offset 0x32602 in LTPRO.EXE. Maps CP866 Cyrillic (А-Я) to Latin:
+A,B,V,G,D,E,J,Z,I,J,K,L,M,N,O,P,R,S,T,U,F,H,C,CH,SH,SC,J,Y,J,E,YA
 
-### 4. V infinitive after infinitive particle (+1)
-**File:** `core/compiler.lua:1104-1108`
-After a V token ending with 'b' (infinitive particle, e.g. Vучитьсяb), the next V
-stays infinitive. Fixes "She is learning to speak Russian" → "Она учится говорить Русского."
+## Key Files
 
-### 5. Name transliteration from LTPRO table (+1)
-**File:** `core/compiler.lua:9-72, 1871-1878`
-Added `transliterate_name()` function using the LTPRO transliteration table found at
-offset 0x32602 in LTPRO.EXE. Table maps CP866 Cyrillic (А-Я) to Latin transliteration
-(A,B,V,G,D,E,J,Z,I,J,K,L,M,N,O,P,R,S,T,U,F,H,C,e,d,f,J,Y,J,E,c,b).
-Lowercase letters (b-f) index into multi-char table (YA,IU,SH,CH,SC).
-The `#` printer now calls `transliterate_name()` when the Russian form is empty.
-Fixes T5-GENNAME: "The report of Anna was praised" → "Сообщение Анна было похвалено."
-
-### 6. X1xx embedded verb conjugation (+1)
-**File:** `core/compiler.lua:2079-2094`
-When X1xx (past copula) has an embedded verb that is NOT "быть" (the copula itself),
-conjugate the embedded verb as past tense instead of outputting the copula form.
-Detects embedded verb via `utils.extract_form()` and checks against "быть".
-Fixes T4-BOTH: "Both he and she were present" → "Оба он и она присутствовала."
-
-### 7. Dictionary entries (+7)
-- **rebuilt**: Added E tag entry for "rebuilt" → "разрабатывать" (+1 on T3-REL)
-- **loudly**: Added annotation {1.шумный} (+1 on T4-NN)
-- **Various T1-EXIST fixes**: Three existential "there" tests now pass (+3)
-- **T4-SEE**: "See page twelve" now outputs correctly (+1)
-- **T4-HYPH**: Capitalization fix (+1)
-
-## TODO — Remaining to improve
-
-### Current scores
-- ltgold100: 93/100 (-1 from baseline, 7 pre-existing failures)
-- ltgold200: 128/200 (+21 from baseline 107)
-- Total: 221/300
-
-### Quick wins (dictionary/annotation fixes)
-- **T4-NN "loudly"**: Missing annotation {1.шумный} — add dictionary entry
-- **T4-HYPH "Был"**: Capitalization diff — expected "Был" (capital) but we output "был" (lowercase). Likely test data issue.
-- **T4-EITHER "either"**: Maps to "Также" (also) but expected "Каждый" (each). Different meaning.
-- **T4-SEE "See page twelve"**: Maps to "Уви-" (видеть) but expected "Смотри" (смотреть imperative). Different verb.
-- **T2-MODAL "in Russian"**: Preposition "в" vs expected "на". Russian idiom "на русском".
-
-### Medium complexity (grammar rules)
-- **T6-ORD "prize"**: Z→V rule fires on "the 4th prize" making "prize" a verb instead of noun.
-- **T6-NUM case government**: Multiple case agreement differences after numerals.
-- **T2-PERF "before" tense**: Russian requires future tense after "прежде чем" (before).
-- **T2-CHAIN "could have been"**: Missing "бы" conditional particle.
-
-### Hard (parser-level)
-- **T1-CLAUSE**: 7 failures — complex clause connectives.
-- **T3-GER**: 5 failures — gerund constructions.
-- **T4-BOTH "both reads and writes"**: "оба читают и пишут" vs "как чтение так и пишет".
-- **T4-NOTAS**: "not as...as" construction broken.
-
-## Discovered Behaviors
-
-### Transliteration table at 0x32602 in LTPRO.EXE
-Maps CP866 Cyrillic (0x80-0x9F) to Latin transliteration:
-- Single chars: А=A, Б=B, В=V, Г=G, Д=D, Е=E, Ж=J, З=Z, И=I, Й=J, К=K, Л=L, М=M, Н=N, О=O, П=P, Р=R, С=S, Т=T, У=U, Ф=F, Х=H, Ц=C, Ъ=J, Ы=Y, Ь=J, Э=E
-- Multi-char (via lowercase indices b-f): Ч=CH, Ш=SH, Щ=SC, Ю=IU, Я=YA
-
-### Aspect flag convention
-```
-byte2 & 2 == 0 → imperfective (писать, читать, прибывать, оставаться)
-byte2 & 2 == 2 → perfective   (написать, прочитать, прибыть, остаться)
-```
+| File | Purpose |
+|------|---------|
+| `core/compiler.lua` | Printer functions, case govt, preposition override |
+| `core/parser.lua` | Pattern-matching rules (T1-T8) |
+| `core/rules.lua` | Rule tables extracted from LTPRO |
+| `core/paradigms.lua` | Noun/verb/adjective inflection |
+| `core/utils.lua` | Tokenizer, encoding, helpers |
+| `data/BASE.DIC` | English→Russian dictionary |
+| `data/BASE.RUS` | Russian paradigm data |
+| `test/ltgold200_test.lua` | 200 LTPRO regression tests |
+| `test/correct_test.lua` | Correct Russian test suite (new) |
+| `PLAN.md` | Grammar improvement roadmap |
 
 ## Running Tests
 
 ```sh
 lua test/ltgold100_test.lua        # 93/100
-lua test/ltgold200_test.lua        # 128/200
+lua test/ltgold200_test.lua        # 129/200
+lua test/correct_test.lua          # 0/8 (WIP)
 ```

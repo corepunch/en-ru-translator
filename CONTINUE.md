@@ -1,29 +1,33 @@
-# CONTINUE.md — LTPRO Reverse-Engineering & Grammar Improvements
+# CONTINUE.md — LTPRO Reverse-Engineering & Zork Translation
 
 ## Objective
 
-Build a quality English→Russian translator using LTPRO's paradigm tables and rule engine
-as a foundation, then improve beyond what the 1990-era DOS translator could do.
+Build a quality English→Russian translator for text adventure games.
+**Primary target: Zork I: The Great Underground Empire.**
 
-**Current: 222/300 (93/100 + 129/200)**, +22 from baseline 107 on ltgold200.
+**Current: 25/57 Zork tests (44%), 129/200 LTPRO tests (+22), 93/100 ltgold100.**
 
-## New Direction (July 2026)
+## Zork Translation Status
 
-After reaching +22 on ltgold200, we've stopped trying to match LTPRO's sometimes-incorrect
-outputs (wrong case agreement, undeclined proper names, broken constructions).
-Instead we're building proper Russian grammar rules.
+**What works:**
+- Room descriptions (partial)
+- Object interactions (take, drop, open)
+- Navigation (go direction)
+- Compound directions (northeast, southwest, etc.)
+- Basic combat messages
 
-**See `PLAN.md` for the full grammar improvement roadmap.**
+**What needs fixing:**
+1. Imperative vs infinitive in player commands
+2. Missing vocabulary (troll, coffin, lantern, etc.)
+3. Compound subject plural agreement
+4. Preposition choice (на vs в)
+5. Case government rules
 
-## Test Scores
+**Key vocabulary added:**
+- 85 DIC entries for Zork-specific words
+- 80 RUS entries for paradigm data
 
-```
-ltgold100: 93/100  (7 pre-existing parser failures)
-ltgold200: 129/200 (+22 from baseline 107)
-Total:     222/300
-```
-
-## Recent Fixes (+22 on ltgold200)
+## Recent Session (+22 on ltgold200)
 
 | Fix | Impact | File |
 |-----|--------|------|

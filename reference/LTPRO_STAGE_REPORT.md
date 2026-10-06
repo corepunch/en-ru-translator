@@ -7,6 +7,9 @@ to 44/77**; 33 differences remain. The production pipeline does not yet use the
 native passes, because the native lexical analyzer is still a slice. Full
 output-file formatting is not yet implemented in Lua.
 
+Addresses, frames, fields and harness pitfalls from this work are consolidated
+in [the native map](LTPRO_NATIVE_MAP.md).
+
 ## Executable evidence
 
 `tools/ltpro_trace.py` instruments disposable copies of the frozen LTPRO image.

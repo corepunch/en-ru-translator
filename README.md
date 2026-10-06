@@ -7,7 +7,9 @@ The translation pipeline is not yet a one-to-one implementation.
 The [fresh executable corpus](test/ltpro/README.md) currently matches 44/77 paragraphs.
 The native T1–T4 and reorder passes are ported and verified against captured
 executable state; the full lexical analyzer, T7/T8, generation and output are not. Native stage work and remaining gates are recorded in the
-[parity plan](reference/LTPRO_PARITY_PLAN.md) and [stage report](reference/LTPRO_STAGE_REPORT.md).
+[parity plan](reference/LTPRO_PARITY_PLAN.md) and [stage report](reference/LTPRO_STAGE_REPORT.md);
+addresses, frames, record fields and harness mechanics are consolidated in the
+[native map](reference/LTPRO_NATIVE_MAP.md).
 
 ## Requirements
 

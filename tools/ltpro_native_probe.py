@@ -180,6 +180,9 @@ class Machine:
             elif m=='shl':
                 a,n=self.get(ins,op[0]),self.get(ins,op[1]);self.set(ins,op[0],a<<n)
                 self.zf=self.get(ins,op[0])==0
+            elif m=='shr':
+                a,n=self.get(ins,op[0]),self.get(ins,op[1]);self.set(ins,op[0],a>>n)
+                self.zf=self.get(ins,op[0])==0
             elif m=='imul' and len(op)==1:
                 signed=lambda v:v-65536 if v&0x8000 else v
                 value=signed(self.reg('ax'))*signed(self.get(ins,op[0]))

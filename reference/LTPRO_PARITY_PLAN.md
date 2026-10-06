@@ -9,10 +9,13 @@ historical [PLAN.md](PLAN.md), while preserving those notes as evidence to reche
 The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementation:
 
 - All 77 instrumented output files equal the original oracle bytes on both runs.
-- Native lexical/T1/T2 boundaries and 36 T1 rule-selection events are captured.
+- Native lexical/T1/T2/T3 boundaries and 36 T1 rule-selection events are captured.
 - The independent T1 port matches 77 sentence-stage fixtures and all 36 events.
   Another 648 generated/instruction fixtures exercise every T1 selector,
   including allocation success/limit/failure and an explicitly synthetic selector 8.
+- The T2 and T3 ports match 76 captured T1→T2 and 76 T2→T3 fixtures each, and
+  962 and 872 generated-node instruction fixtures cover every T2 and T3
+  selector body, including bodies no supplied record selects.
 - The two planned exact-word lexical/node slices match their native initialized
   word fields; the metadata decoder passes 1,377 instruction comparisons.
 - A generated ledger inventories all 410 selectors and 282 distinct targets,
@@ -23,10 +26,12 @@ The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementat
   15 cases without corpus regressions. An additional 16-case capitalization
   matrix matches two identical native runs. This is not full-file or universal parity.
 
-Next: finish native analyzer/lookup branches, then port T2/T3/T4 scheduling and
-handlers using the captured boundaries. Unobserved branches, global allocation
-state, later generation and document/file output remain explicit
-gaps. The production pipeline still uses the legacy later passes. No milestone
+Next: port the per-word sub-rule loader (`word pattern*$action` dictionary
+records) and the remaining analyzer/lookup branches, add a T4-boundary hook in
+the caller's frame, then port the separate T4 function and constituent creation.
+Unobserved branches, global allocation state, later generation and document/file
+output remain explicit gaps. The production pipeline still uses the legacy
+parser and later passes; the native T1–T3 ports are development entry points. No milestone
 below is declared complete merely because its current corpus passes.
 
 ## Objective and completion contract
@@ -268,10 +273,10 @@ The initial deliverable was **phase 1 plus one lexical vertical slice**:
 3. A Lua loader/node path reproducing their native lexical state, with fixtures.
 4. An updated routine ledger and effort range based on the measured work in that slice.
 
-Snapshots, the first-divergence report, two lexical slices and the initial ledger
-are delivered in the stage report. Complete semantic mapping and branch coverage
-are still open. The next deliverable is the native lookup/analyzer expansion and
-T1 allocation fixtures, followed by T2 handler events and implementation. These
+Snapshots, the first-divergence report, two lexical slices, the initial ledger
+and the T2/T3 ports are delivered in the stage report. Complete semantic mapping
+and branch coverage are still open. The next deliverable is the sub-rule loader
+and native lookup/analyzer expansion, followed by the T4 boundary and port. These
 measurements establish the method, but do not yet justify a completion date for
 phases 2–5. If tracing stalls, change the tracing mechanism; do not substitute
 more sentence-specific patches.

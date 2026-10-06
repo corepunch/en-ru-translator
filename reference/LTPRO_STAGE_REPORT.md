@@ -1,9 +1,11 @@
 # Native stage implementation — 2026-10-06
 
 The independent Lua path now reconstructs the two planned lexical examples and
-executes native T1 scheduling over captured nodes. Full translation parity is
-still incomplete: production paragraph matches improved from **29/77 to 44/77**;
-33 differences remain. Full output-file formatting is not yet implemented in Lua.
+executes native T1, T2 and T3 scheduling over captured nodes. Full translation
+parity is still incomplete: production paragraph matches improved from **29/77
+to 44/77**; 33 differences remain. The production pipeline does not yet use the
+native passes, because the native lexical analyzer is still a slice. Full
+output-file formatting is not yet implemented in Lua.
 
 ## Executable evidence
 
@@ -16,6 +18,15 @@ It uses the installed DOSBox-X and patches four verified instruction sequences:
 | `11D5F` | T1 rule matched, before dispatch | Save selector; initialize selector search |
 | `1254A` | T1 and question preprocessing finished | Initialize T2 table pointer |
 | `13700` | T2 finished | Initialize T3 table pointer |
+| `14168` | T3 rule-record test; dumps only when the next record is null, i.e. after the last T3 rule and its rebuild | Load rule pointer; read its pattern offset |
+
+The T3 site is the loop's own entry jump target, so it cannot sit at the
+preceding rule advance (`14164`): a hook there is jumped into mid-instruction.
+A first attempt did exactly that and silently skipped T3 while three
+T3-independent outputs still matched; the raw trace exposed the missing record.
+The original relocation table fills its MZ header exactly, so the instrumented
+copy grows the header by one paragraph. Load addresses are header-relative and
+the hook sites keep their original file offsets.
 
 The hook preserves flags, general registers, DS and ES. It dumps the vector,
 cached tags, each record's first `282h` bytes, and selected T1 rule/selector/endpoint.
@@ -23,7 +34,10 @@ Original assets stay untouched; copied assets are checked after execution.
 The manifest retains raw bytes and normalizes node identity by physical address,
 including aliases and identity across boundaries.
 
-All **77 complete output files** equal the original oracle bytes on **both runs**.
+All **77 complete output files** equal the original oracle bytes on **both runs**
+with the five-site image. Every input that reaches T2 also reaches the T3
+boundary: T1, T2 and T3 are one native function (`0E1F:0009`) that returns 1
+after the T3 table, and no corpus input takes its early return in T2 or T3.
 Known semantic fields and match events repeat. Uninitialized bytes in sentinel
 records remain in the raw captures but are not labeled semantic state.
 
@@ -48,6 +62,8 @@ output passes. No change to the source executable was needed.
 | `core/ltpro/nodes.lua` | Raw record import, physical pointer identity, linked records and null-parent boundary construction | Alias/invalid-link checks and native calloc-constructor fixtures; records retain unnamed bytes |
 | `core/ltpro/first_pass.lua` | T1 normalization, rule order, handler writes, cache rebuilds and early termination | **77/77** DOS sentence-stage fixtures and **36/36** native rule-selection events, including intermediate fields |
 | `core/ltpro/cleanup.lua` | Cleanup used by question preprocessing | Verified within the captured T1 question paths; only selectors appearing in the nine extracted records are implemented |
+| `core/ltpro/second_pass.lua` | T2 scheduling, all 53 selector bodies the table uses plus unreferenced 17 and 53, linked-record moves, auxiliary links at `+62`, prefix strings at `+243`, stale `DS:C7B1` after handler rebuilds | **76/76** DOS T1→T2 fixtures; **962/962** generated-node instruction fixtures covering every selector |
+| `core/ltpro/third_pass.lua` | T3 scheduling, the 36 selector bodies the table uses plus 8 unreferenced non-default bodies, the `back` endpoint adjustment, terminator-dependent selector 37 | **76/76** DOS T2→T3 fixtures; **872/872** generated-node instruction fixtures covering every selector |
 
 T1 has 15 extracted selector entries plus its default. All bodies are implemented.
 The unchanged grammar corpus observes **0, 1, 10, 11, 20 and 63**. An additional
@@ -65,6 +81,46 @@ The wider allocator lifecycle and non-null-parent constructor path are still
 unported. The question
 tests cover `Who saw the dog?` and `What is this?`, not every question branch.
 These passing fixtures do not establish all-input equivalence.
+
+## T2 and T3 scheduling
+
+Both passes share the T1 frame and vector. Unlike T1, which stops after its
+first default rewrite, T2 and T3 scan every rule from position 1 while
+`DS:C7B1 - 1 > position`, continue after each match endpoint, and rebuild once
+per rule only when the replacement routine removed a node. Fourteen T2 and
+eleven T3 handler bodies call the vector rebuild themselves without storing
+the returned count, so `count` is modeled as a separate variable from the
+vector; selectors 51–54 (T2) and 34 (T3) do store it. A Lua read of a vector
+slot beyond the rebuilt vector is reported as an event rather than guessed.
+
+Field semantics observed in these handlers: `+62` is a far pointer to the
+auxiliary record (set to the X/Y node and written through by T2 selector 49),
+`+98` addresses the record's own `+11C` translation (the `strrchr` reading
+tests), `+243` receives the prefixes `неужели ` and `не `, and `+6A`'s low six
+bits select the verb frame while bit 6 is the aspect bit T3 reads. Several
+descending searches stop at `position-1` when no node carries the sought tag,
+and T3 selector 6 never tests the head itself; the ports keep these quirks.
+
+The generated probes empty the preceding tables (and the question cleanup
+table for T3) in a disposable image, so T1 normalization is the only earlier
+transformation, then isolate each original record or run the complete table.
+Synthetic selectors exercise bodies no supplied record selects.
+
+## T4 findings
+
+The caller `12DC:0342` runs `0E1F:0009` (T1–T3), then `108F:000F` (file
+`142FF..1608D`) with its own `848h`-byte frame, then the reorder routine
+`1279:000D` already ported in `reorder.lua`. `108F:000F` begins with two
+pre-passes before its 178-record, 9-byte-record rule loop: one rewrites `N`
+readings to `A` from cached-tag contexts (`NN`, `NAN`, `NdN`, `NHN`, `N-N`)
+and translation markers, and one applies per-word sub-rules. Those sub-rules
+are the **289** dictionary records of the form `word pattern*$action` (for
+example `in <TAOHI>!врм!*$PРв течение`); the loader at `0A4F:1603` (file
+`F4F3`) stores up to
+ten of them per word in `14Fh`-byte records (pattern at `+0`, action at
+`+50h`) addressed from node `+94` with the count at `+93`. The capture does
+not yet dump those arrays, and the lexical slice does not attach them, so T4
+is blocked on that loader and a T4-boundary hook in the caller's frame.
 
 `reference/LTPRO_ROUTINE_LEDGER.json` inventories **410 selectors**, their aliases,
 grammar references, defaults and **282 distinct target addresses**. It also lists
@@ -123,6 +179,10 @@ demo regressions pass. Its dictionaries remain distinct from the frozen oracle.
 python3 tools/ltpro_trace.py --ids --output test/ltpro/stages.json
 python3 tools/ltpro_first_pass_probe.py
 python3 tools/ltpro_first_pass_native_probe.py
+python3 tools/ltpro_second_pass_probe.py
+python3 tools/ltpro_second_pass_native_probe.py --variants 2 --full-table 8
+python3 tools/ltpro_third_pass_probe.py
+python3 tools/ltpro_third_pass_native_probe.py --variants 2 --full-table 8
 python3 tools/ltpro_lexical_probe.py
 python3 tools/ltpro_readings_probe.py
 python3 tools/ltpro_ledger.py
@@ -138,13 +198,15 @@ that expectation and the oracle have not been rewritten to conceal the mismatch.
 ## Remaining work and planning implications
 
 The method now has measured results: full-DOS field snapshots, original instruction
-comparisons and the independent Lua slice agree. The next dependency is complete
-native lookup/analyzer state, followed by T2/T3/T4 callers and constituent creation.
-Most lexical and later-handler branches, generation callers, global allocation
-state, document lifecycle and full-file output remain open.
+comparisons and the independent Lua slice agree through T3. The next dependency
+is the per-word sub-rule loader and the complete native lookup/analyzer state,
+followed by the T4 function, constituent creation and generation. Most lexical
+branches, T4 and later handlers, generation callers, global allocation state,
+document lifecycle and full-file output remain open.
 
 Keep the existing multi-week planning assessment. These measurements do not
-justify a tighter delivery range: T1 corpus coverage reached six selectors, while
-T2/T3/T4 and T7/T8 contain many more unresolved state transitions. The static ledger
+justify a tighter delivery range: T1–T3 are verified over captured nodes, but
+T4 adds loader-dependent sub-rules, and T7/T8 and generation contain many
+more unresolved state transitions. The static ledger
 is an inventory rather than a completed writer/reader map. Phase 1's observability
 and initial slice are delivered; its full semantic mapping gate remains open.

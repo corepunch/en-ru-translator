@@ -27,7 +27,13 @@ SITES = [
     (2, 'T1', 0x1254A, bytes.fromhex('8c5ef4c746f21c0e')),
     (3, 'T2', 0x13700, bytes.fromhex('8c5ef0c746ee4814')),
     (4, 'T1-match', 0x11D5F, bytes.fromhex('8946d2b90f00')),
+    # T3 shares the T1/T2 frame and returns at 14177 through a relative jump, so
+    # its boundary is the rule-record test, which is also the loop's entry jump
+    # target; the hook dumps only once the record is null, i.e. after the final
+    # T3 rule and its rebuild. 14164 is unusable: 14168 is a jump target.
+    (5, 'T3', 0x14168, bytes.fromhex('c45eee268b07')),
 ]
+CONDITIONAL = {5}
 
 
 class Code:
@@ -55,6 +61,13 @@ def instrument(original):
     if digest(original) != EXE_SHA256: raise ValueError('unsupported executable identity')
     header = struct.unpack_from('<H', original, 8)[0] * 16
     count, table = struct.unpack_from('<H', original, 6)[0], struct.unpack_from('<H', original, 24)[0]
+    # The original relocation table fills its header exactly. Grow the header by
+    # one paragraph for the hook relocations; load addresses are header-relative,
+    # so only file offsets shift. Hook sites below stay original file offsets.
+    shift = 16
+    image = bytearray(original[:header] + bytes(shift) + original[header:])
+    struct.pack_into('<H', image, 8, header // 16 + 1)
+    header += shift
     if table + (count + len(SITES)) * 4 > header: raise ValueError('no relocation header space')
     code = Code()
     entries = []
@@ -64,6 +77,10 @@ def instrument(original):
         code.data.extend(displaced)
         # PUSHF; save AX BX CX DX SI DI BP DS ES. BP remains the native frame.
         code.emit('9c 50 53 51 52 56 57 55 1e 06')
+        if stage in CONDITIONAL:
+            # ES:BX holds the next rule record from the displaced LES; skip the
+            # dump unless its pattern pointer is null (table exhausted).
+            code.emit('268b07 260b4702'); code.near('0f85', f'restore{stage}')
         # Record the selected native rule before its handler executes. Other
         # boundaries zero these words instead of inheriting a previous event.
         for displacement,label in [(0xD2,'handler'),(0xF6,'rule_offset'),(0xF8,'rule_segment'),(0xFA,'last')]:
@@ -73,6 +90,7 @@ def instrument(original):
         code.emit('b8'); code.word(stage)
         code.emit('8b0eb1c7 16 07 8db6bef7')  # CX=count; ES=SS; SI=BP-842h
         code.near('e8', 'dump')
+        code.label(f'restore{stage}')
         code.emit('07 1f 5d 5f 5e 5a 59 5b 58 9d cb')
     code.label('dump')
     # Header: magic, stage, count, DS, SS, selector, rule pointer and endpoint.
@@ -113,7 +131,6 @@ def instrument(original):
     for name in ('stage','count','ds','ss','handler','rule_offset','rule_segment','last'):
         code.label(name); code.word(0)
     payload = code.finish()
-    image = bytearray(original)
     image.extend(b'\0' * (header + HOOK_SEGMENT * 16 - len(image)))
     image.extend(payload)
     # The C startup (03A81..03AA1) shrinks its DOS allocation to SS+stack size,
@@ -121,6 +138,7 @@ def instrument(original):
     # cannot release the hook's memory to dictionary/node allocations.
     struct.pack_into('<H', image, 14, HOOK_SEGMENT+(len(payload)+15)//16)
     for index, ((_, _, site, displaced), entry) in enumerate(zip(SITES, entries)):
+        site += shift
         image[site:site+len(displaced)] = b'\x9a' + struct.pack('<HH', entry, HOOK_SEGMENT) + b'\x90'*(len(displaced)-5)
         # Relocation addresses are module coordinates; normalize their segment:offset.
         relocation = site + 3 - header
@@ -135,7 +153,7 @@ def decode_trace(raw):
     while pos < len(raw):
         if raw[pos:pos+4] != b'LTTR': raise ValueError(f'invalid trace magic at {pos}')
         stage,count,ds,ss,handler,rule_offset,rule_segment,last = struct.unpack_from('<8H',raw,pos+4); pos += 20
-        if stage not in (1,2,3,4) or not 0 < count <= 512: raise ValueError('invalid trace header')
+        if stage not in (1,2,3,4,5) or not 0 < count <= 512: raise ValueError('invalid trace header')
         vector = [struct.unpack_from('<HH',raw,pos+i*4) for i in range(count+1)]
         pos += (count+1)*4
         if vector[-1] != (0,0): raise ValueError('unterminated vector')
@@ -247,6 +265,8 @@ def main():
                     sequence=sequence[1:]
                     while sequence and sequence[0]=='T1-match': sequence=sequence[1:]
                     if sequence[:2]==['T1','T2']: sequence=sequence[2:]
+                    # T3 may be absent when the shared function returns early.
+                    if sequence[:1]==['T3']: sequence=sequence[1:]
                 repetitions.append(snapshots)
             except Exception:
                 log_path=root/'host.log'

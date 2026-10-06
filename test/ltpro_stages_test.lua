@@ -25,6 +25,19 @@ assert(result.vector[4][0x66]==string.byte('D'))
 assert(result.vector[4][0x11C]==cp('затемCзатемJзатемjтогда'))
 assert(not pcall(lexical.analyze,forms,'An unknown word.'))
 
+-- T2 over native nodes: `has` is removed and the participle becomes the verb,
+-- as in the captured case-048 boundary.
+local second_pass=require 'core.ltpro.second_pass'
+local perfect=dictionary.from_bytes(cp('he*R031онrу негоmему\nhas*Y003иметьyесть\\have\nworked*Eработать\\work\n'))
+local analyzed=lexical.analyze(perfect,'He has worked.')
+assert(analyzed.tags=='*RYE*')
+local after_t1=first_pass.run(analyzed.root,{terminator=0x2E})
+assert(after_t1.tags=='*RYE*' and #after_t1.events==0)
+local after_t2=second_pass.run(analyzed.root,{count=after_t1.count})
+assert(after_t2.tags=='*RV*' and after_t2.count==4)
+assert(after_t2.vector[2][0x12]=='worked' and after_t2.vector[2][0x75]==1 and after_t2.vector[2][0x73]==1)
+assert(#after_t2.events==2 and after_t2.events[1].handler==60 and after_t2.events[2].handler==24)
+
 local n=nodes.new('P',{[0x0B]=1,[0x0F]=0})
 assert(readings.decode(n,cp('ВПвb'))==1)
 assert(n[0x76]==8 and n[0x11C]==cp('Пвb'))

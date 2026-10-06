@@ -2,6 +2,9 @@
 
 A Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator (LinguaTech Systems, 1992).
 
+Compatibility work is tracked in [the binary comparison](reference/LTPRO_COMPARISON.md).
+The translation pipeline is not yet a one-to-one implementation.
+
 ## Requirements
 
 Lua 5.3+ (uses bitwise operators `>>`, `&`).
@@ -180,7 +183,6 @@ docs/                    Reference documentation
   tools.md               Python reverse-engineering tools
 work/                    Active research notes (reverse-engineering in progress)
 LTGOLD/                  Original DOS binaries + test harness
-AGENTS.md                Guide for AI coding assistants working on this project
 ```
 
 ## Further reading
@@ -190,4 +192,4 @@ AGENTS.md                Guide for AI coding assistants working on this project
 - [docs/dictionary.md](docs/dictionary.md) — full BASE.DIC / BASE.RUS binary format
 - [docs/pipeline.md](docs/pipeline.md) — detailed stage-by-stage walkthrough
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system overview and debug flags
-- [DISASSEMBLY.md](DISASSEMBLY.md) — reverse-engineering the original binary with radare2
+- [DISASSEMBLY.md](DISASSEMBLY.md) — binary research notes and current LTPRO comparison

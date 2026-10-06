@@ -1,5 +1,9 @@
 # PLAN.md — Reverse-Engineering the LTGOLD Rule System
 
+Historical research notes; several table roles, flag interpretations, and scan-order
+claims below have been disproved. See [the current executable comparison](LTPRO_COMPARISON.md).
+This document is reference material, not agent instructions.
+
 ## What We're Dealing With
 
 LTGOLD (= SARMA 2.0, LinguaTech Systems, 1992) is a rule-based English→Russian machine
@@ -33,11 +37,11 @@ The three objectives map onto concrete open questions:
 `` `word` `` (insert literal Russian), tag letters that relabel.
 
 ### Confirmed table roles (coarse)
-T1: clause boundary / discourse connectives  
-T2: modal auxiliaries, passive, relative clauses  
-T3: "that"-clauses, relative pronouns  
-T4: idioms, collocations, tag normalization  
-T5: late cleanup (copula, "is the")  
+T1: clause boundary / discourse connectives\
+T2: modal auxiliaries, passive, relative clauses\
+T3: "that"-clauses, relative pronouns\
+T4: idioms, collocations, tag normalization\
+T5: late cleanup (copula, "is the")\
 T6/T7/T8: structural validation / no-action "protect" rules
 
 ### Confirmed lowercase = "already resolved"
@@ -118,59 +122,11 @@ Design test sentences that exercise one symbol at a time:
 - `^`: `"to go"` → tests `^` in replacements (word join?)
 - `=`: look for rules with `=` in replacement, craft matching input
 
-### Phase 2 — Disassembly (workflow variant B)
+### Phase 2 — Binary semantics
 
-**Goal:** Read the actual C code that interprets patterns/replacements; confirm all symbol meanings from source.
-
-**Tool:** `r2 + r2ghidra` as documented in DISASSEMBLY.md.
-
-#### 2a. Re-generate decompiled C
-
-```sh
-# Rule processor (main matching loop)
-r2 -q -e bin.cache=true -A \
-   -c "pdg @ 0x0004d608" -c q LTGOLD/LTGOLD.EXE \
-   | sed 's/\x1b\[[0-9;]*m//g' > /tmp/ltgold_4d608.c
-
-# Replacement handler
-r2 -q -e bin.cache=true -A \
-   -c "pdg @ 0x0004e1e3" -c q LTGOLD/LTGOLD.EXE \
-   | sed 's/\x1b\[[0-9;]*m//g' > /tmp/ltgold_4e1e3.c
-
-# Secondary function called by rule processor
-r2 -q -e bin.cache=true -A \
-   -c "pdg @ 0x0004e95d" -c q LTGOLD/LTGOLD.EXE \
-   | sed 's/\x1b\[[0-9;]*m//g' > /tmp/ltgold_4e95d.c
-```
-
-#### 2b. Map replacement byte dispatch
-
-In `0x4E1E3` (replacement handler), find the switch/if-else on the replacement byte.
-Every `case 0xXX:` or `cmp al, 0xXX` corresponds to one replacement symbol.
-
-Symbols to look up: `0x5E` (^), `0x3D` (=), `0x3B` (;), `0x7C` (|), `0x26` (&),
-`0x2B` (+), `0x6A` (j), `0x5F` (_), `0x21` (!).
-
-Expected outcome: a complete table mapping every replacement byte to its semantic action.
-
-#### 2c. Map pattern byte dispatch
-
-In `0x4D608` (rule processor), find the `try_match_pattern` equivalent.
-Look for comparisons against `0x28` `(`, `0x29` `)`, `0x7B` `{`, `0x7D` `}`, `0x2D` `-`.
-These reveal how those chars are parsed in patterns.
-
-#### 2d. Map T6/T7/T8 "no-action" semantics
-
-Find where the code calls the validation tables and what happens after a match:
-- Is a flag set on the token? (e.g. `token.flags |= PROTECTED`)
-- Does matching prevent the token from being matched again by later tables?
-- Cross-reference calls to the T6/T7/T8 dispatch with what the compiler reads later.
-
-#### 2e. Priority byte semantics
-
-The first byte of each rule (0x00–0x45 seen in rules.lua) is discarded in our Lua
-implementation. In the binary, find where rules are sorted or filtered by this byte.
-Likely answers: rule priority within a pass, or a rule-category mask.
+The prescribed disassembly/decompilation instructions have been removed.
+Current verified addresses and open semantic questions are recorded in
+[LTPRO_COMPARISON.md](LTPRO_COMPARISON.md); tool choice is unrestricted.
 
 ### Phase 3 — Synthesis and documentation
 
@@ -201,7 +157,7 @@ does: does it set a protection flag, skip a token, or something else?
 Once meanings are confirmed:
 - Implement `^`, `=`, `;`, `|`, `&`, `+`, `j` in `replace()` in [parser.lua](parser.lua)
 - Implement `(` `)` `{` `}` grouping in `try_match_pattern()`
-- Implement priority sorting: sort rules by first byte before applying
+- Recover table-specific handler dispatch; handler IDs are not sorting priorities
 
 #### 3e. Run full test suite
 
@@ -229,7 +185,7 @@ Phase 3d  →  parser.lua updated
 Phase 3e  →  end-to-end test
 ```
 
-Phases 1 and 2 can be interleaved: start 2a (decompile) while 1a/1b run.
+Phases 1 and 2 can be interleaved: start binary analysis while 1a/1b run.
 
 ---
 
@@ -282,7 +238,7 @@ RULES_APPLIED.md is done when:
 
 ## LTPRO.EXE Table Locations (verified)
 
-All rule tables reside in the decompressed `LTGOLD/LTPRO.EXE` (207,714 bytes).  
+All rule tables reside in the decompressed `LTGOLD/LTPRO.EXE` (207,714 bytes).\
 Offsets below are **direct file offsets within LTPRO.EXE** — no shift needed.
 
 | Table | LTPRO Start | LTPRO End | Bytes | Record Size | Rules | 1st Rule Pattern |
@@ -295,10 +251,10 @@ Offsets below are **direct file offsets within LTPRO.EXE** — no shift needed.
 | T7 | `0x2AC92` | `0x2ADAA` | 280 | 8 | 35 | `P<$>N` |
 | T8 | `0x2B134` | `0x2B3CC` | 664 | 8 | 83 | `J[VUXY]` |
 
-All 660 records verified: every `pat_off`/`act_off` pointer lands within file bounds.  
+All 660 records verified: every `pat_off`/`act_off` pointer lands within file bounds.\
 Table 6 (56 rules, between T5 and T7) is deliberately skipped — zeroing it crashes the program.
 
-Derivation (for reference): `LTPRO_offset = DAT_BASE + (LTGOLD.dat_offset - 242)`,  
+Derivation (for reference): `LTPRO_offset = DAT_BASE + (LTGOLD.dat_offset - 242)`,\
 where `DAT_BASE = 0x26750` and `SHIFT = 242` converts from the extracted `LTGOLD.dat` coordinate space.
 
 ---
@@ -360,8 +316,8 @@ This scans all tables in reverse order (T8 → T7 → T5 → T4 → T3 → T2 �
 4. Each test: copies LTPRO.EXE, patches the suffix's pattern strings to null bytes, writes `SW.EXE`, runs `./run_test.sh "She can speak Russian." SW.EXE` via DOSBox-X headless, captures output
 5. `TIMEOUT` (10s) means the engine entered an infinite loop scanning past the end of a corrupted table — the sentinel record (null pat_off/act_off) was never reached
 
-To scan a single table: `python3 sweep_rules.py --table T8`  
-To test a single rule: `python3 sweep_rules.py --table T8 --rule 80`  
+To scan a single table: `python3 sweep_rules.py --table T8`\
+To test a single rule: `python3 sweep_rules.py --table T8 --rule 80`\
 To (re-)capture baseline only: `python3 sweep_rules.py --baseline`
 
 ---
@@ -746,7 +702,7 @@ Special cases:
 | [RULES_APPLIED.md](RULES_APPLIED.md) | Target doc — fill in as we learn |
 | [RESEARCH.md](RESEARCH.md) | Accumulated findings |
 | [LTGOLD/patch_rules.py](LTGOLD/patch_rules.py) | Table-zeroing tool — extend for single-rule patches |
-| [DISASSEMBLY.md](DISASSEMBLY.md) | r2ghidra workflow |
+| [DISASSEMBLY.md](DISASSEMBLY.md) | Binary research notes |
 | `LTGOLD/LTPRO.EXE` | Decompressed binary (208K) — patch target |
 | `LTGOLD/LTGOLD.EXE` | Original compressed binary — disassembly source |
 | `debug/T[1-8].txt` | Annotated rule dumps with concrete examples per table |

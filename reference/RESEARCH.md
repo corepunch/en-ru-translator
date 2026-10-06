@@ -45,22 +45,6 @@ This documentation directly explains the codes we see in `BASE.DIC` and `BASE.RU
 
 **Searched but found nothing relevant:** BetaArchive forums, exetools.com reversing forum, direct site-restricted queries against old-dos.ru for "LTGOLD"
 
-## Tooling Decision
-
-**Primary tool:** radare2 with r2ghidra for decompilation and analysis.
-
-**Fallback:** dis86 only if r2 output is too messy to understand.
-
-**Reasoning:**
-- r2ghidra already gives us working C code (4188 lines for the rule processor)
-- No extra setup needed (BSL config, flat binary extraction)
-- All analysis tools (`afl`, `axt`, `/x`) are built-in
-- dis86 adds complexity without proportional benefit for our use case
-
-**Workflow:** r2 → decompile with `pdg` → search C output with `rg` → go back to r2 for details.
-
-See [DISASSEMBLY.md](DISASSEMBLY.md) for the complete workflow.
-
 ## Rule Tables in LTGOLD.dat
 
 `LTGOLD.dat` is the data section extracted from `LTGOLD.EXE` at offset `0x50960`

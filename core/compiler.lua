@@ -495,7 +495,8 @@ printers.L = function(t, e, s, i)
   end
   return result
 end
-printers.j = function(t) return "" end  -- clause-end marker is silent
+-- Lexical j readings emit their text; bare clause-end markers remain silent.
+printers.j = function(t) return utils.extract_form(t) end
 printers.O = function(t, e, s, i)
   local d = utils.decode(t, true)
   if d == "весь" then return printers.S(t, e) end
@@ -716,13 +717,8 @@ function compiler.compile(s, options)
       -- caps == true  → ALL-CAPS output  (source word was e.g. "AGREEMENT")
       -- caps == "init"→ Initial-cap only (source word was e.g. "Metric" or "Fish")
       -- LTGOLD tracks this via its input word capitalisation flags.
-      -- "init" caps (initial capitalisation) only encodes sentence-start position in
-      -- the source. The sentence capitalizer below handles that unconditionally for the
-      -- actual first output word, so passing "init" here is always either redundant (first
-      -- word) or wrong (any later word after a reorder). Only ALL-CAPS (caps == true)
-      -- reflects a property of the source word itself and must be preserved everywhere.
       local src_caps = s.caps and s.caps[i]
-      out = apply_source_caps(out, src_caps == true and true or nil)
+      out = apply_source_caps(out, src_caps)
       out = append_alternatives(out, w, e)
       dbg.log(1, string.format("  [%d] tag=%-2s token=%-30s => %-25s  e={inf=%s perf=%s plur=%s form=%s}",
         i, tag, utils.decode(w):sub(1,30), utils.decode(out or ''),
@@ -737,9 +733,9 @@ function compiler.compile(s, options)
       e.word = e.word + 1
     end
   end
-  -- Always capitalize the first output word. Russian sentences start with a capital
-  -- regardless of which source token ended up first after any reordering.
-  if #c > 0 then
+  -- Native output retains lowercase input. With source metadata, sentence
+  -- capitalization follows its first word, including a removed initial article.
+  if #c > 0 and s.initial_caps ~= false then
     local first = c[1]
     -- find first Cyrillic/Latin char and uppercase it
     c[1] = first:gsub("^([\xD0\xD1])([\x80-\xBF])", function(b1, b2)

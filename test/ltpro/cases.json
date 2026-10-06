@@ -1,0 +1,387 @@
+[
+  {
+    "id": "case-001",
+    "group": "historical",
+    "input": "She can speak Russian."
+  },
+  {
+    "id": "case-002",
+    "group": "historical",
+    "input": "He is in the house."
+  },
+  {
+    "id": "case-003",
+    "group": "historical",
+    "input": "She sat on the chair."
+  },
+  {
+    "id": "case-004",
+    "group": "historical",
+    "input": "He must not go."
+  },
+  {
+    "id": "case-005",
+    "group": "historical",
+    "input": "The dog that I saw ran away."
+  },
+  {
+    "id": "case-006",
+    "group": "historical",
+    "input": "He was arrested by the police."
+  },
+  {
+    "id": "case-007",
+    "group": "historical",
+    "input": "You are standing in an open field."
+  },
+  {
+    "id": "case-008",
+    "group": "historical",
+    "input": "The house door is open."
+  },
+  {
+    "id": "case-009",
+    "group": "historical",
+    "input": "He cannot go."
+  },
+  {
+    "id": "case-010",
+    "group": "historical",
+    "input": "She has been seen."
+  },
+  {
+    "id": "case-011",
+    "group": "existing-regression",
+    "input": "This AGREEMENT is a sample for testing the electronic translation program."
+  },
+  {
+    "id": "case-012",
+    "group": "existing-regression",
+    "input": "AGREEMENT ON SUPPLY OF FISH MEAL"
+  },
+  {
+    "id": "case-013",
+    "group": "existing-regression",
+    "input": "Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT."
+  },
+  {
+    "id": "case-014",
+    "group": "existing-regression",
+    "input": "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations."
+  },
+  {
+    "id": "case-015",
+    "group": "existing-regression",
+    "input": "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal."
+  },
+  {
+    "id": "case-016",
+    "group": "existing-regression",
+    "input": "The total price for the goods and services as defined in EXHIBIT A is USD."
+  },
+  {
+    "id": "case-017",
+    "group": "existing-regression",
+    "input": "The exclusive remedy for breach of this warranty shall be the replacement."
+  },
+  {
+    "id": "case-018",
+    "group": "existing-regression",
+    "input": "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void."
+  },
+  {
+    "id": "case-019",
+    "group": "existing-regression",
+    "input": "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments."
+  },
+  {
+    "id": "case-020",
+    "group": "existing-regression",
+    "input": "The Letter of Credit shall allow for partial shipments and partial payment."
+  },
+  {
+    "id": "case-021",
+    "group": "existing-regression",
+    "input": "EXHIBIT A."
+  },
+  {
+    "id": "case-022",
+    "group": "existing-regression",
+    "input": "by all means."
+  },
+  {
+    "id": "case-023",
+    "group": "existing-regression",
+    "input": "by all means of transport."
+  },
+  {
+    "id": "case-024",
+    "group": "existing-regression",
+    "input": "He walked including me."
+  },
+  {
+    "id": "case-025",
+    "group": "existing-regression",
+    "input": "5 Metric tons."
+  },
+  {
+    "id": "case-026",
+    "group": "existing-regression",
+    "input": "2 Metric tons."
+  },
+  {
+    "id": "case-027",
+    "group": "existing-regression",
+    "input": "It will be a replacement."
+  },
+  {
+    "id": "case-028",
+    "group": "existing-regression",
+    "input": "fish-meal."
+  },
+  {
+    "id": "case-029",
+    "group": "existing-regression",
+    "input": "well-known product."
+  },
+  {
+    "id": "case-030",
+    "group": "existing-regression",
+    "input": "buyer-seller agreement."
+  },
+  {
+    "id": "case-031",
+    "group": "existing-regression",
+    "input": "A-B."
+  },
+  {
+    "id": "case-032",
+    "group": "existing-regression",
+    "input": "state-of-the-art product."
+  },
+  {
+    "id": "case-033",
+    "group": "existing-regression",
+    "input": "He said, I agree."
+  },
+  {
+    "id": "case-034",
+    "group": "existing-regression",
+    "input": "He said, \"I agree.\""
+  },
+  {
+    "id": "case-035",
+    "group": "existing-regression",
+    "input": "\"Fish meal\", seller said."
+  },
+  {
+    "id": "case-036",
+    "group": "ambiguity",
+    "input": "I work."
+  },
+  {
+    "id": "case-037",
+    "group": "ambiguity",
+    "input": "The work is good."
+  },
+  {
+    "id": "case-038",
+    "group": "ambiguity",
+    "input": "They work."
+  },
+  {
+    "id": "case-039",
+    "group": "ambiguity",
+    "input": "He works."
+  },
+  {
+    "id": "case-040",
+    "group": "ambiguity",
+    "input": "The works are good."
+  },
+  {
+    "id": "case-041",
+    "group": "ambiguity",
+    "input": "An open door."
+  },
+  {
+    "id": "case-042",
+    "group": "ambiguity",
+    "input": "Open the door."
+  },
+  {
+    "id": "case-043",
+    "group": "auxiliary",
+    "input": "He can go."
+  },
+  {
+    "id": "case-044",
+    "group": "auxiliary",
+    "input": "He must go."
+  },
+  {
+    "id": "case-045",
+    "group": "auxiliary",
+    "input": "He will go."
+  },
+  {
+    "id": "case-046",
+    "group": "auxiliary",
+    "input": "He did not go."
+  },
+  {
+    "id": "case-047",
+    "group": "auxiliary",
+    "input": "He is working."
+  },
+  {
+    "id": "case-048",
+    "group": "auxiliary",
+    "input": "He has worked."
+  },
+  {
+    "id": "case-049",
+    "group": "auxiliary",
+    "input": "He had worked."
+  },
+  {
+    "id": "case-050",
+    "group": "auxiliary",
+    "input": "The door was opened."
+  },
+  {
+    "id": "case-051",
+    "group": "auxiliary",
+    "input": "The door is closed."
+  },
+  {
+    "id": "case-052",
+    "group": "clause",
+    "input": "If he comes then I go."
+  },
+  {
+    "id": "case-053",
+    "group": "clause",
+    "input": "If he comes, I go."
+  },
+  {
+    "id": "case-054",
+    "group": "clause",
+    "input": "When he comes, I go."
+  },
+  {
+    "id": "case-055",
+    "group": "clause",
+    "input": "I know that he works."
+  },
+  {
+    "id": "case-056",
+    "group": "clause",
+    "input": "Who saw the dog?"
+  },
+  {
+    "id": "case-057",
+    "group": "clause",
+    "input": "What is this?"
+  },
+  {
+    "id": "case-058",
+    "group": "clause",
+    "input": "Please open the door."
+  },
+  {
+    "id": "case-059",
+    "group": "numbers",
+    "input": "One book."
+  },
+  {
+    "id": "case-060",
+    "group": "numbers",
+    "input": "Two books."
+  },
+  {
+    "id": "case-061",
+    "group": "numbers",
+    "input": "Five books."
+  },
+  {
+    "id": "case-062",
+    "group": "numbers",
+    "input": "The price is 10 percent."
+  },
+  {
+    "id": "case-063",
+    "group": "numbers",
+    "input": "The meeting is on June 15."
+  },
+  {
+    "id": "case-064",
+    "group": "numbers",
+    "input": "The meeting is on May 1."
+  },
+  {
+    "id": "case-065",
+    "group": "reorder",
+    "input": "A house door."
+  },
+  {
+    "id": "case-066",
+    "group": "reorder",
+    "input": "A door of the house."
+  },
+  {
+    "id": "case-067",
+    "group": "reorder",
+    "input": "A new house door."
+  },
+  {
+    "id": "case-068",
+    "group": "reorder",
+    "input": "A buyer-seller agreement."
+  },
+  {
+    "id": "case-069",
+    "group": "negation",
+    "input": "There is a book."
+  },
+  {
+    "id": "case-070",
+    "group": "negation",
+    "input": "There are two books."
+  },
+  {
+    "id": "case-071",
+    "group": "negation",
+    "input": "There is no book."
+  },
+  {
+    "id": "case-072",
+    "group": "negation",
+    "input": "He is not a teacher."
+  },
+  {
+    "id": "case-073",
+    "group": "punctuation",
+    "input": "(The house)."
+  },
+  {
+    "id": "case-074",
+    "group": "punctuation",
+    "input": "He said: \"Go.\""
+  },
+  {
+    "id": "case-075",
+    "group": "punctuation",
+    "input": "ABC-123."
+  },
+  {
+    "id": "case-076",
+    "group": "punctuation",
+    "input": "Xylophornium is here."
+  },
+  {
+    "id": "case-077",
+    "group": "known-failure",
+    "input": "The cat sat on the mat."
+  }
+]

@@ -2,6 +2,7 @@
 
 Historical research notes; several table roles, flag interpretations, and scan-order
 claims below have been disproved. See [the current executable comparison](LTPRO_COMPARISON.md).
+The current work sequence is in [the LTPRO parity plan](LTPRO_PARITY_PLAN.md).
 This document is reference material, not agent instructions.
 
 ## What We're Dealing With

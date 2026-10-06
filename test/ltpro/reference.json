@@ -1,0 +1,652 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-06T08:40:44.244385+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "922959036bad1bba22288c974d0b5ffee8a918c280cbbbab13b6adcd83d841f8",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "case-001",
+      "group": "historical",
+      "input": "She can speak Russian.",
+      "raw_cp866_hex": "8eada020acaea6a5e220e1aaa0a7a0e2ec2090e3e1e1aaaea3ae2e0d0a",
+      "raw_sha256": "95304b080411e107ecfb3ad9bf0da7c775342731c3110e0e9ca1c955046b2c67",
+      "translation": "Она может сказать Русского."
+    },
+    {
+      "id": "case-002",
+      "group": "historical",
+      "input": "He is in the house.",
+      "raw_cp866_hex": "8ead202d20a220a4aeaca52e0d0a",
+      "raw_sha256": "f10a86d74e1dcc8b1e8a1059872e6ccef5e1500b8e83f117b2df2ec78029a926",
+      "translation": "Он - в доме."
+    },
+    {
+      "id": "case-003",
+      "group": "historical",
+      "input": "She sat on the chair.",
+      "raw_cp866_hex": "8eada020afaee1a8a465aba020ada020e1e2e3aba52e0d0a",
+      "raw_sha256": "d91995e0ea3b104a80098540ad8c1cc34432f71cc399f589ba0301e955821bdb",
+      "translation": "Она посидeла на стуле."
+    },
+    {
+      "id": "case-004",
+      "group": "historical",
+      "input": "He must not go.",
+      "raw_cp866_hex": "8ead20ada520a4aeaba6a5ad20afe0a8a4e2a82e0d0a",
+      "raw_sha256": "78cdf02c2cc72f54aa8a1e706a94ad31f85c258a3a6a684bca894569a348efb8",
+      "translation": "Он не должен придти."
+    },
+    {
+      "id": "case-005",
+      "group": "historical",
+      "input": "The dog that I saw ran away.",
+      "raw_cp866_hex": "91aea1a0aaa02c20aaaee2aee0e3ee209f20a2a8a465ab20e3a1a5a3a0e2ec2e0d0a",
+      "raw_sha256": "d64440f2757fcc8cc44c7d5518340676784b7c9363c80183c5b2ddd349acff31",
+      "translation": "Собака, которую Я видeл убегать."
+    },
+    {
+      "id": "case-006",
+      "group": "historical",
+      "input": "He was arrested by the police.",
+      "raw_cp866_hex": "8ead20a0e0a5e1e2aea2eba2a0abe1ef20afaeaba8e6a8a5a92e0d0a",
+      "raw_sha256": "9a7ab8a09306d8f140bceaace2c0c95ce4937804992a8a527346ca39f409e063",
+      "translation": "Он арестовывался полицией."
+    },
+    {
+      "id": "case-007",
+      "group": "historical",
+      "input": "You are standing in an open field.",
+      "raw_cp866_hex": "82eb20e1e2aea8e2a520a220aee2aae0ebe2aea920aea1aba0e1e2a82e0d0a",
+      "raw_sha256": "b3b942554a4d1a3fc2e23350f8a3d2e0422fb8f774fd5ea3bde2fe330ce576bf",
+      "translation": "Вы стоите в открытой области."
+    },
+    {
+      "id": "case-008",
+      "group": "historical",
+      "input": "The house door is open.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a4aeaca020aee2aae0ebe2a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "b4629824d11b6505915af1eb9b066199e60b916914dd5ad8304a217ff188d853",
+      "translation": "Дверь{1.вход} дома открыта."
+    },
+    {
+      "id": "case-009",
+      "group": "historical",
+      "input": "He cannot go.",
+      "raw_cp866_hex": "8ead20ada520acaea6a5e220afe0a8a4e2a82e0d0a",
+      "raw_sha256": "3fa00a05808b69e7149067562065302370fb1c97206ebe22cf02e1de6fc975a8",
+      "translation": "Он не может придти."
+    },
+    {
+      "id": "case-010",
+      "group": "historical",
+      "input": "She has been seen.",
+      "raw_cp866_hex": "8eada020a1ebaba020e3a2a8a4a5ada02e0d0a",
+      "raw_sha256": "389f6b92c373988c35ba9feb966c28fbe531d1ae52eee601b794d2aa869e08c2",
+      "translation": "Она была увидена."
+    },
+    {
+      "id": "case-011",
+      "group": "existing-regression",
+      "input": "This AGREEMENT is a sample for testing the electronic translation program.",
+      "raw_cp866_hex": "9de2ae20918e838b8098858d8885202d20aea1e0a0a7a5e67b312ea2eba1aee0aaa07d20a4abef20a8e1afebe2a0ada8ef20afe0aea3e0a0acaceb20edaba5aae2e0aeadadaea3ae20afa5e0a5a2aea4a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202073616d706c653a206974656d202d20aea1e0a0a7a5e63b206d617468202d20a2eba1aee0aaa00d0a0d0a",
+      "raw_sha256": "082a5edaa67bee3a24d78644de6b66ed20ca69bf45e3868211ea4d2cfbd80529",
+      "translation": "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода."
+    },
+    {
+      "id": "case-012",
+      "group": "existing-regression",
+      "input": "AGREEMENT ON SUPPLY OF FISH MEAL",
+      "raw_cp866_hex": "848e838e828e90208e208f8e919280828a8520909b818d8e89208c938a880d0a",
+      "raw_sha256": "57a38441821a8375d4edbba83e5abf281c15af9c0fb04013c9f20214fba2dad5",
+      "translation": "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ"
+    },
+    {
+      "id": "case-013",
+      "group": "existing-regression",
+      "input": "Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT.",
+      "raw_cp866_hex": "8aa0aa208f8e8a938f8092858b9c20e2a0aa20a8208f908e848082859620e1aea3aba0e8a0eee2e1ef20e1aeaee2a2a5e2e1e2a2aea2a0e2ec20a2e1a5ac20e1e0aeaaa0ac20a820e3e1abaea2a8efac20aeafe0a5a4a5aba5adadebac20a220ede2aeac20918e838b8098858d88882e0d0a",
+      "raw_sha256": "bf40d09966657ea8b8ac7e1f9d9525215db48f715a1725146dfaf7f272b471b2",
+      "translation": "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ."
+    },
+    {
+      "id": "case-014",
+      "group": "existing-regression",
+      "input": "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations.",
+      "raw_cp866_hex": "91928e908e8d9b7b312eafa0e0e2a8ef3ba2a5e7a5e0a8adaaa07d20a220ede2aeac20918e838b8098858d888820afe0a8a7ada0eee22c20e7e2ae20aeada820eee0a8a4a8e7a5e1aaa820e3afaeabadaeacaee7a5adeb20afe0a5a4e1e2a0a2abefe2ec20a8e520aee0a3a0ada8a7a0e6a8a82e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020706172746965733a20696e206120636f6e7472616374202d2091928e908e8d9b3b20706f6c69746963616c202d20afa0e0e2a8ef3b2067657420746f676574686572202d20a2a5e7a5e0a8adaaa00d0a0d0a",
+      "raw_sha256": "303ecc75a255bdd3060a1e02410f5c3c3c4734aaefca84d164672a6903ebf865",
+      "translation": "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации."
+    },
+    {
+      "id": "case-015",
+      "group": "existing-regression",
+      "input": "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal.",
+      "raw_cp866_hex": "8f908e848082859620afaee1e2a0a2a8e2208f8e8a938f8092858b9e20312c3030302c303030208ca5e2e0a8e7a5e1aaa8e520e2aeadad2090eba1adaea9208ce3aaa82e0d0a",
+      "raw_sha256": "11980ae254142c0ed1d6ae3cbe6667cf478b8c5d470a8ca52af7dbdcf0671078",
+      "translation": "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки."
+    },
+    {
+      "id": "case-016",
+      "group": "existing-regression",
+      "input": "The total price for the goods and services as defined in EXHIBIT A is USD.",
+      "raw_cp866_hex": "8ea1e9a0ef20e6a5ada020a4abef20e2aea2a0e0aea220a820e3e1abe3a320aaa0aa20aeafe0a5a4a5aba5adae20a2208f90888b8e86858d88887b312eedaae1afaeada0e27d202d20848e8b8b8090209198802e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020657868696269743a20616464656e64756d202d208f90888b8e86858d88883b206974656d206f6e20646973706c6179202d20edaae1afaeada0e20d0a0d0a",
+      "raw_sha256": "063aa529fe91f5605c05c6e2a871ad884ab47c65717fb12183c6e48a27e11157",
+      "translation": "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США."
+    },
+    {
+      "id": "case-017",
+      "group": "existing-regression",
+      "input": "The exclusive remedy for breach of this warranty shall be the replacement.",
+      "raw_cp866_hex": "85a4a8ade1e2a2a5adada0ef208aaeacafa5ade1a0e6a8ef2087a0208da0e0e3e8a5ada8a520ede2aea920a3a0e0a0ade2a8a820a1e3a4a5e220a7a0aca5adaea92e0d0a",
+      "raw_sha256": "28e65518a86268903e2ad158f1e834a75d4fabe5030733dab97ad243da4c01b8",
+      "translation": "Единственная Компенсация За Нарушение этой гарантии будет заменой."
+    },
+    {
+      "id": "case-018",
+      "group": "existing-regression",
+      "input": "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void.",
+      "raw_cp866_hex": "9de2ae20918e838b8098858d888520a7a0aca5adefa5e220a2e1a520afe0a5a4eba4e3e9a8a520afa5e0a5a3aea2aee0eb20a820aaaee0e0a5e1afaeada4a5ade6a8ee2c20a7a0e1e2a0a2abefef20a8e520e3e2e0a0e2a8a2e8a8a920a7a0aaaeadade3ee20e1a8abe32e0d0a",
+      "raw_sha256": "03b457fad0a0a71555c113f5b239fd0ab1df6c9c810a6a8a301b5d7b83a3b4c8",
+      "translation": "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу."
+    },
+    {
+      "id": "case-019",
+      "group": "existing-regression",
+      "input": "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments.",
+      "raw_cp866_hex": "93afa0aaaea2aaa020a4aeaba6ada020a3a0e0a0ade2a8e0aea2a0e2ec20afaeabade3ee20a1a5a7aeafa0e1adaee1e2ec208f908e84938a928e8220a220e2a5e7a5ada8a520e2e0a0ade1afaee0e2a8e0aea2aaa820a2e1a5aca820a2a8a4a0aca820e2e0a0ade1afaee0e2a020a2aaabeee7a0ef20afa5e0a5a3e0e3a7aaa82e0d0a",
+      "raw_sha256": "4f3da890e37eae491f4c168fd461edd6fdd751c66a8534de429014ab3ce1f316",
+      "translation": "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки."
+    },
+    {
+      "id": "case-020",
+      "group": "existing-regression",
+      "input": "The Letter of Credit shall allow for partial shipments and partial payment.",
+      "raw_cp866_hex": "80aaaae0a5a4a8e2a8a2208faea7a2aeaba8e220e7a0e1e2a8e7adebac20a3e0e3a7a0ac7b312eafaee1e2a0a2aaa07d20a820e7a0e1e2a8e7adaeace320afaba0e2a5a6e32e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020736869706d656e74733a20636172676f202d20a3e0e3a7a0ac3b207175616e74697479206f6620676f6f6473207368697070656420746f676574686572202d20afaee1e2a0a2aaa00d0a0d0a",
+      "raw_sha256": "ac4d1e28e566f16e622214a08192d9d50370699109b94fec2ef555b6ba44f797",
+      "translation": "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу."
+    },
+    {
+      "id": "case-021",
+      "group": "existing-regression",
+      "input": "EXHIBIT A.",
+      "raw_cp866_hex": "8f8e8a808688928520412e0d0a",
+      "raw_sha256": "29c5675b0cb05c5bac74dd4fdfd5b12d5dd2d1f9fc774940d44bffbad85c9909",
+      "translation": "ПОКАЖИТЕ A."
+    },
+    {
+      "id": "case-022",
+      "group": "existing-regression",
+      "input": "by all means.",
+      "raw_cp866_hex": "a2ae20e7e2ae20a1eb20e2ae20ada820e1e2a0abae2e0d0a",
+      "raw_sha256": "f100aeca9fc563fbb92c718fe11d15a434cebf796b55193a60c4dcd09668e462",
+      "translation": "во что бы то ни стало."
+    },
+    {
+      "id": "case-023",
+      "group": "existing-regression",
+      "input": "by all means of transport.",
+      "raw_cp866_hex": "a2e1a5aca820a2a8a4a0aca820e2e0a0ade1afaee0e2a02e0d0a",
+      "raw_sha256": "225775f61ecc279316e13969cf2efb0244ac058246f966ea151e9ea8718e6148",
+      "translation": "всеми видами транспорта."
+    },
+    {
+      "id": "case-024",
+      "group": "existing-regression",
+      "input": "He walked including me.",
+      "raw_cp866_hex": "8ead20afe0aee8a5ab20a2aaabeee7a0ef20aca5adef2e0d0a",
+      "raw_sha256": "2e5e39982efa6ac3707ed6cf5ab233cb9a10266991ee52626de9454a8eed4d08",
+      "translation": "Он прошел включая меня."
+    },
+    {
+      "id": "case-025",
+      "group": "existing-regression",
+      "input": "5 Metric tons.",
+      "raw_cp866_hex": "35208ca5e2e0a8e7a5e1aaa8e520e2aeadad2e0d0a",
+      "raw_sha256": "bb3bde61961bd4b043c6af6b825476357e5f174f46dfbf76ba19dba3e79ceda2",
+      "translation": "5 Метрических тонн."
+    },
+    {
+      "id": "case-026",
+      "group": "existing-regression",
+      "input": "2 Metric tons.",
+      "raw_cp866_hex": "32208ca5e2e0a8e7a5e1aaa8a520e2aeadadeb2e0d0a",
+      "raw_sha256": "ddc898db7fea610dcca9e973b172264073abe008dead41a0008b467cb6bfc1f4",
+      "translation": "2 Метрические тонны."
+    },
+    {
+      "id": "case-027",
+      "group": "existing-regression",
+      "input": "It will be a replacement.",
+      "raw_cp866_hex": "9de2ae2081e3a4a5e220a7a0aca5adaea92e0d0a",
+      "raw_sha256": "53a5bfe70aa00844d7a2b45214dc2d93c89820827195ada3ab00b4e63da1bb3e",
+      "translation": "Это Будет заменой."
+    },
+    {
+      "id": "case-028",
+      "group": "existing-regression",
+      "input": "fish-meal.",
+      "raw_cp866_hex": "e0eba1ada0ef20ace3aaa02e0d0a",
+      "raw_sha256": "973f259653f790785f14ffafe64b8a78e3b8e0e3b33c8b092dce2a4a0b7916c2",
+      "translation": "рыбная мука."
+    },
+    {
+      "id": "case-029",
+      "group": "existing-regression",
+      "input": "well-known product.",
+      "raw_cp866_hex": "a8a7a2a5e1e2adeba920afe0aea4e3aae22e0d0a",
+      "raw_sha256": "0b97ccd6d4725ccf45de863a6456e5b2353152f7a8a674b97da58f0a5cd9a1bb",
+      "translation": "известный продукт."
+    },
+    {
+      "id": "case-030",
+      "group": "existing-regression",
+      "input": "buyer-seller agreement.",
+      "raw_cp866_hex": "e1aea3aba0e8a5ada8a520afe0aea4a0a2e6a020afaeaae3afa0e2a5abef2e0d0a",
+      "raw_sha256": "07801bc7f012a091a6b99e7b8a598c16f2a7c26618600563fb8335165cedd360",
+      "translation": "соглашение продавца покупателя."
+    },
+    {
+      "id": "case-031",
+      "group": "existing-regression",
+      "input": "A-B.",
+      "raw_cp866_hex": "2d422e0d0a",
+      "raw_sha256": "b551a4100725744195126718609cc00cdc2bd98918a6810e2a90ed04b5565984",
+      "translation": "-B."
+    },
+    {
+      "id": "case-032",
+      "group": "existing-regression",
+      "input": "state-of-the-art product.",
+      "raw_cp866_hex": "e1aea2e0a5aca5adadeba920afe0aea4e3aae22e0d0a",
+      "raw_sha256": "b1f0f98144941cac6c2e7e4aad3b274f4d31e4e1c70d719ee29e765b4f895ba9",
+      "translation": "современный продукт."
+    },
+    {
+      "id": "case-033",
+      "group": "existing-regression",
+      "input": "He said, I agree.",
+      "raw_cp866_hex": "8ead20e1aaa0a7a0ab2c209f20e1aea3aba0e8a0eee1ec7b312ee1aea3aba0e1aea2eba2a0e2ec7d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202061677265653a2068617665207468652073616d65206f70696e696f6e202d20e1aea3aba0e8a0eee1ec3b206e65676f7469617465202d20e1aea3aba0e1aea2eba2a0e2ec0d0a0d0a",
+      "raw_sha256": "90635aa878ccc63a2b75c5a2f2a3d3a438f06a20aa7dca7a92eeefc20e3bc0be",
+      "translation": "Он сказал, Я соглашаюсь{1.согласовывать}."
+    },
+    {
+      "id": "case-034",
+      "group": "existing-regression",
+      "input": "He said, \"I agree.\"",
+      "raw_cp866_hex": "8ead20e1aaa0a7a0ab2c20229f20e1aea3aba0e8a0eee1ec7b312ee1aea3aba0e1aea2eba2a0e2ec7d2e220d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202061677265653a2068617665207468652073616d65206f70696e696f6e202d20e1aea3aba0e8a0eee1ec3b206e65676f7469617465202d20e1aea3aba0e1aea2eba2a0e2ec0d0a0d0a",
+      "raw_sha256": "55fb585f1caa921b5384c8c894e11c6dcedb4f53cb15777037e1d465928ce694",
+      "translation": "Он сказал, \"Я соглашаюсь{1.согласовывать}.\""
+    },
+    {
+      "id": "case-035",
+      "group": "existing-regression",
+      "input": "\"Fish meal\", seller said.",
+      "raw_cp866_hex": "2290eba1ada0ef208ce3aaa0222c20afe0aea4a0a2a5e620e1aaa0a7a0ab2e0d0a",
+      "raw_sha256": "e650d2716e4eb8bc12ec5e39a98a7121004fa1872387525563c4104ee07fc8e8",
+      "translation": "\"Рыбная Мука\", продавец сказал."
+    },
+    {
+      "id": "case-036",
+      "group": "ambiguity",
+      "input": "I work.",
+      "raw_cp866_hex": "9f20e0a0a1aee2a0ee2e0d0a",
+      "raw_sha256": "b076450be9cafddd4a813d856e791b55ebf465b42ee6bd01a9fac5bc655d6f82",
+      "translation": "Я работаю."
+    },
+    {
+      "id": "case-037",
+      "group": "ambiguity",
+      "input": "The work is good.",
+      "raw_cp866_hex": "90a0a1aee2a07b312ee2e0e3a47d20e5aee0aee8a0ef2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020776f726b3a206a6f62202d2090a0a1aee2a03b206c61626f72202d20e2e0e3a40d0a0d0a",
+      "raw_sha256": "b3e4de3f0db6c7b95a85387846cc66440482f2e35c3888df7aa52774b2a8b6f1",
+      "translation": "Работа{1.труд} хорошая."
+    },
+    {
+      "id": "case-038",
+      "group": "ambiguity",
+      "input": "They work.",
+      "raw_cp866_hex": "8eada820e0a0a1aee2a0eee22e0d0a",
+      "raw_sha256": "516d80dd185adf8841c6abaaccde944c51bd2d21164fd735ee744d2c1c22d285",
+      "translation": "Они работают."
+    },
+    {
+      "id": "case-039",
+      "group": "ambiguity",
+      "input": "He works.",
+      "raw_cp866_hex": "8ead20e0a0a1aee2a0a5e22e0d0a",
+      "raw_sha256": "18268735d223fce0da3dd2fe9b3a389aeaa8c796ef85594c420d1c6386fe0238",
+      "translation": "Он работает."
+    },
+    {
+      "id": "case-040",
+      "group": "ambiguity",
+      "input": "The works are good.",
+      "raw_cp866_hex": "90a0a1aee2a020e5aee0aee8a0ef2e0d0a",
+      "raw_sha256": "f5d0463caefdd9cfafad893247b72e838c7a4ec89c1a12104eeca19d54780066",
+      "translation": "Работа хорошая."
+    },
+    {
+      "id": "case-041",
+      "group": "ambiguity",
+      "input": "An open door.",
+      "raw_cp866_hex": "8ee2aae0ebe2a0ef20a4a2a5e0ec7b312ea2e5aea47d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d20a4a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "f809bfb2857cbd4d0db0161c5394c848b3422fd2ea181f4c955dc7f0eb1302ab",
+      "translation": "Открытая дверь{1.вход}."
+    },
+    {
+      "id": "case-042",
+      "group": "ambiguity",
+      "input": "Open the door.",
+      "raw_cp866_hex": "8ee2aae0aea9e2a520a4a2a5e0ec7b312ea2e5aea47d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d20a4a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "917c27dd1db4114452d9519a19e4b5a419990a433ce4ff481f729f635a65cf18",
+      "translation": "Откройте дверь{1.вход}."
+    },
+    {
+      "id": "case-043",
+      "group": "auxiliary",
+      "input": "He can go.",
+      "raw_cp866_hex": "8ead20acaea6a5e220afe0a8a4e2a82e0d0a",
+      "raw_sha256": "cd72a2f5a027a9bf70e6b89bcb8c5addf921627909818ed1b9f4181e9e8e9fc5",
+      "translation": "Он может придти."
+    },
+    {
+      "id": "case-044",
+      "group": "auxiliary",
+      "input": "He must go.",
+      "raw_cp866_hex": "8ead20a4aeaba6a5ad20afe0a8a4e2a82e0d0a",
+      "raw_sha256": "f2ddc3e6d8591b5c978f7f2c60a765fd858faf43d9a2e4e65c51ff966c75bff5",
+      "translation": "Он должен придти."
+    },
+    {
+      "id": "case-045",
+      "group": "auxiliary",
+      "input": "He will go.",
+      "raw_cp866_hex": "8ead20afe0a8a4a5e22e0d0a",
+      "raw_sha256": "ac6a4d82acc8016d3494e2abc38d22bb8229025c059af28549b22f1ee0ad1ea2",
+      "translation": "Он придет."
+    },
+    {
+      "id": "case-046",
+      "group": "auxiliary",
+      "input": "He did not go.",
+      "raw_cp866_hex": "8ead20ada520e8a5ab2e0d0a",
+      "raw_sha256": "baeb75fd58124639519456ae6c42d93e4595487306fbfc78e0f5f3824a0b91c7",
+      "translation": "Он не шел."
+    },
+    {
+      "id": "case-047",
+      "group": "auxiliary",
+      "input": "He is working.",
+      "raw_cp866_hex": "8ead20e0a0a1aee2a0a5e22e0d0a",
+      "raw_sha256": "18268735d223fce0da3dd2fe9b3a389aeaa8c796ef85594c420d1c6386fe0238",
+      "translation": "Он работает."
+    },
+    {
+      "id": "case-048",
+      "group": "auxiliary",
+      "input": "He has worked.",
+      "raw_cp866_hex": "8ead20e0a0a1aee2a0ab2e0d0a",
+      "raw_sha256": "d5b9a69c97d8d05db4eb3fd8c6f9fbd914b530b88721e54205b1d8a0ea4cc476",
+      "translation": "Он работал."
+    },
+    {
+      "id": "case-049",
+      "group": "auxiliary",
+      "input": "He had worked.",
+      "raw_cp866_hex": "8ead20e0a0a1aee2a0ab2e0d0a",
+      "raw_sha256": "d5b9a69c97d8d05db4eb3fd8c6f9fbd914b530b88721e54205b1d8a0ea4cc476",
+      "translation": "Он работал."
+    },
+    {
+      "id": "case-050",
+      "group": "auxiliary",
+      "input": "The door was opened.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a1ebaba020aee2aae0ebe2a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "535f4e246501d380a15e3a208028de645c25add12d11a5c1a503d3c946dc880f",
+      "translation": "Дверь{1.вход} была открыта."
+    },
+    {
+      "id": "case-051",
+      "group": "auxiliary",
+      "input": "The door is closed.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a7a0aae0ebe2a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "c229ab000276406b9e3259cca554ec76556e8bdbe3588bc1bc038c201924aa6d",
+      "translation": "Дверь{1.вход} закрыта."
+    },
+    {
+      "id": "case-052",
+      "group": "clause",
+      "input": "If he comes then I go.",
+      "raw_cp866_hex": "85e1aba820aead20afe0a8e5aea4a8e220e2aea3a4a0209f20a8a4e32e0d0a",
+      "raw_sha256": "dba6757bce474fc51076f96d8b44c7a0740d27efcaa6136f5eb22e3e9cdfab2f",
+      "translation": "Если он приходит тогда Я иду."
+    },
+    {
+      "id": "case-053",
+      "group": "clause",
+      "input": "If he comes, I go.",
+      "raw_cp866_hex": "85e1aba820aead20afe0a8e5aea4a8e22c209f20a8a4e32e0d0a",
+      "raw_sha256": "e1ac3ba77b4fa6c89b0e4d6f2fe679e6ccdbc6786f5e03a169c3399df047da30",
+      "translation": "Если он приходит, Я иду."
+    },
+    {
+      "id": "case-054",
+      "group": "clause",
+      "input": "When he comes, I go.",
+      "raw_cp866_hex": "8aaea3a4a020aead20afe0a8e5aea4a8e22c209f20a8a4e32e0d0a",
+      "raw_sha256": "84a1e8dae71a6246b3f64da19c7624ae0f74d10a7dcd1b24d0ee268f1f66572c",
+      "translation": "Когда он приходит, Я иду."
+    },
+    {
+      "id": "case-055",
+      "group": "clause",
+      "input": "I know that he works.",
+      "raw_cp866_hex": "9f20a7ada0ee2c20e7e2ae20aead20e0a0a1aee2a0a5e22e0d0a",
+      "raw_sha256": "ae78c7202063ac18ed677970127e9f90e84ff6bcadcaab2a62b67d2219a33c4a",
+      "translation": "Я знаю, что он работает."
+    },
+    {
+      "id": "case-056",
+      "group": "clause",
+      "input": "Who saw the dog?",
+      "raw_cp866_hex": "8ae2ae20a2a8a465ab20e1aea1a0aae33f0d0a",
+      "raw_sha256": "e0f3abaa162c323245aca51d873b3fca8fc4d1c032f7260370535909b77cb8a6",
+      "translation": "Кто видeл собаку?"
+    },
+    {
+      "id": "case-057",
+      "group": "clause",
+      "input": "What is this?",
+      "raw_cp866_hex": "97e2ae209de2ae3f0d0a",
+      "raw_sha256": "c46def3ab9b43250787fbdb0504bac5fae1adef4def7bb115bd61fb1bfa07bf1",
+      "translation": "Что Это?"
+    },
+    {
+      "id": "case-058",
+      "group": "clause",
+      "input": "Please open the door.",
+      "raw_cp866_hex": "8faea6a0abe3a9e1e2a020aee2aae0aea9e2a520a4a2a5e0ec7b312ea2e5aea47d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d20a4a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "334a48342a61c62242e28c68cf80fa42d5f268d5fa13daf29db9ea878222329b",
+      "translation": "Пожалуйста откройте дверь{1.вход}."
+    },
+    {
+      "id": "case-059",
+      "group": "numbers",
+      "input": "One book.",
+      "raw_cp866_hex": "8ea4a8ad20aaada8a3a02e0d0a",
+      "raw_sha256": "2a214e885d8e2f90547d71c07e7dff4848c30b277db969428f8bf962d2836a1b",
+      "translation": "Один книга."
+    },
+    {
+      "id": "case-060",
+      "group": "numbers",
+      "input": "Two books.",
+      "raw_cp866_hex": "84a2a520aaada8a3a82e0d0a",
+      "raw_sha256": "18159fe6d1c45934126d82f756d0fff3fa3c5121a5cef7d319a3dec8f75c5239",
+      "translation": "Две книги."
+    },
+    {
+      "id": "case-061",
+      "group": "numbers",
+      "input": "Five books.",
+      "raw_cp866_hex": "8fefe2ec20aaada8a32e0d0a",
+      "raw_sha256": "19b872c884e43c2262fe2b6ff5bdfa618b5e000471215faa5145e880e6bad9ec",
+      "translation": "Пять книг."
+    },
+    {
+      "id": "case-062",
+      "group": "numbers",
+      "input": "The price is 10 percent.",
+      "raw_cp866_hex": "96a5ada0202d20313020afe0aee6a5ade22e0d0a",
+      "raw_sha256": "45807d4ab6e8b04951833f5d6f63688dc50c389344a9de21c5f2972612c041d9",
+      "translation": "Цена - 10 процент."
+    },
+    {
+      "id": "case-063",
+      "group": "numbers",
+      "input": "The meeting is on June 15.",
+      "raw_cp866_hex": "91aea1e0a0ada8a5202d20a22088eeada52031352e0d0a",
+      "raw_sha256": "37aaf476cc6b459d05df936e0d1ecc4db90e52184a18a7317ce156d0bd8bf411",
+      "translation": "Собрание - в Июне 15."
+    },
+    {
+      "id": "case-064",
+      "group": "numbers",
+      "input": "The meeting is on May 1.",
+      "raw_cp866_hex": "91aea1e0a0ada8a5202d20ada0208caea6a5e220312e0d0a",
+      "raw_sha256": "eae5a7f20be6e03e7f15a6dea974a755d426c999b22f9f48779eae1adcf96cc9",
+      "translation": "Собрание - на Может 1."
+    },
+    {
+      "id": "case-065",
+      "group": "reorder",
+      "input": "A house door.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "293030b3560837866e0f3ccbb07622100854e70679f4423264e6a61db20d00c4",
+      "translation": "Дверь{1.вход} дома."
+    },
+    {
+      "id": "case-066",
+      "group": "reorder",
+      "input": "A door of the house.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "293030b3560837866e0f3ccbb07622100854e70679f4423264e6a61db20d00c4",
+      "translation": "Дверь{1.вход} дома."
+    },
+    {
+      "id": "case-067",
+      "group": "reorder",
+      "input": "A new house door.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20adaea2aea3ae20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "cf7f997d4706574bc40e83947d2fd76c3ff94ac64142734f88f2afc8bc09a1a5",
+      "translation": "Дверь{1.вход} нового дома."
+    },
+    {
+      "id": "case-068",
+      "group": "reorder",
+      "input": "A buyer-seller agreement.",
+      "raw_cp866_hex": "91aea3aba0e8a5ada8a520afe0aea4a0a2e6a020afaeaae3afa0e2a5abef2e0d0a",
+      "raw_sha256": "83d317b1127a185818c42371171f7b3b09b4daa8acd26c29be561c13eccd7a73",
+      "translation": "Соглашение продавца покупателя."
+    },
+    {
+      "id": "case-069",
+      "group": "negation",
+      "input": "There is a book.",
+      "raw_cp866_hex": "85e1e2ec20aaada8a3a02e0d0a",
+      "raw_sha256": "0fdd58e39e294f1118d0c18bfb3dde4c7b2ec8550d9c96a8635b331b871dcbfe",
+      "translation": "Есть книга."
+    },
+    {
+      "id": "case-070",
+      "group": "negation",
+      "input": "There are two books.",
+      "raw_cp866_hex": "85e1e2ec20a4a2a520aaada8a3a82e0d0a",
+      "raw_sha256": "d05a88b90c06ea298dc5f8e60aa85c6cbc88286fdc67cb5da111fff3d21d518f",
+      "translation": "Есть две книги."
+    },
+    {
+      "id": "case-071",
+      "group": "negation",
+      "input": "There is no book.",
+      "raw_cp866_hex": "8da5e220aaada8a3a82e0d0a",
+      "raw_sha256": "f15a19d6782d64dd60861088ba31b8cfb44daff91b1030a18588e37f749770cd",
+      "translation": "Нет книги."
+    },
+    {
+      "id": "case-072",
+      "group": "negation",
+      "input": "He is not a teacher.",
+      "raw_cp866_hex": "8ead20ada5202d20e3e7a8e2a5abec2e0d0a",
+      "raw_sha256": "c3da616b605488ef42eca164111d31b33e1d3795273cba5037e4da085eb6ac6c",
+      "translation": "Он не - учитель."
+    },
+    {
+      "id": "case-073",
+      "group": "punctuation",
+      "input": "(The house).",
+      "raw_cp866_hex": "2884aeac292e0d0a",
+      "raw_sha256": "8d573c227fc138d118ac2978baa89b1f2daeb2ef3d8c3717083dd85d9ad03075",
+      "translation": "(Дом)."
+    },
+    {
+      "id": "case-074",
+      "group": "punctuation",
+      "input": "He said: \"Go.\"",
+      "raw_cp866_hex": "8ead20e1aaa0a7a0ab3a202288a4e2a82e220d0a",
+      "raw_sha256": "d2bb076ea4c011da3b700ddbb71df386579edf367bf2ec461b1c7eda05a492ee",
+      "translation": "Он сказал: \"Идти.\""
+    },
+    {
+      "id": "case-075",
+      "group": "punctuation",
+      "input": "ABC-123.",
+      "raw_cp866_hex": "4142432d3132332e0d0a",
+      "raw_sha256": "0c8447211bb5df1a7d879a12638073863828d3b7be3cfd7ed11019a2c8210bec",
+      "translation": "ABC-123."
+    },
+    {
+      "id": "case-076",
+      "group": "punctuation",
+      "input": "Xylophornium is here.",
+      "raw_cp866_hex": "58796c6f70686f726e69756d202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "1d6fc72c78eebffa29865796650792117537b57bd6af8b2a5e4fd8b9d711e619",
+      "translation": "Xylophornium - здесь."
+    },
+    {
+      "id": "case-077",
+      "group": "known-failure",
+      "input": "The cat sat on the mat.",
+      "raw_cp866_hex": "8aaee8aaa020afaee1a8a465aba020a220aaaea2a5e07b312eaca0e2e0a8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206d61743a20727567202d20aaaea2a5e03b206d6174726978202d20aca0e2e0a8e6a00d0a0d0a",
+      "raw_sha256": "6ec11af08ec3bbc5a2ecbbcdce4bec3c03059f9636dfb9a48eec1be220ae5a9e",
+      "translation": "Кошка посидeла в ковер{1.матрица}."
+    }
+  ]
+}

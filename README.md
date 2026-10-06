@@ -4,6 +4,9 @@ A Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator (Li
 
 Compatibility work is tracked in [the binary comparison](reference/LTPRO_COMPARISON.md).
 The translation pipeline is not yet a one-to-one implementation.
+The [fresh executable corpus](test/ltpro/README.md) currently matches 44/77 paragraphs.
+Native stage work and remaining gates are recorded in the
+[parity plan](reference/LTPRO_PARITY_PLAN.md) and [stage report](reference/LTPRO_STAGE_REPORT.md).
 
 ## Requirements
 
@@ -31,7 +34,7 @@ lua bin/encoding.lua decode < greeting.cp866
 ```
 Input (English)
   → Tokenize    — look up each word in BASE.DIC; unknown words get tag #
-  → Parse       — apply 692 pattern-matching rules in 8 passes (T1–T8)
+  → Parse       — apply extracted grammar through the legacy T1–T8 pipeline
   → Compile     — inflect tokens into Russian using BASE.RUS + paradigms.lua
   → Output (Russian)
 ```
@@ -160,7 +163,7 @@ dictionary_store.lua     Loads BASE.DIC / BASE.RUS for the core
 core/
   translator.lua         Public translation API (tokenize → parse → compile)
   parser.lua             Rule application engine
-  rules.lua              692 pattern-matching rules (T1–T8)
+  rules.lua              702 extracted grammar records (including guards and cleanup)
   compiler.lua           Russian inflection and output generation
   paradigms.lua          Noun / adjective / verb declension tables
   load.lua               Dictionary file parser (CP866 trie)
@@ -177,7 +180,7 @@ debug/
   T1.txt … T8.txt        Annotated binary dumps of all 8 rule tables
 docs/                    Reference documentation
   pipeline.md            Stage-by-stage pipeline walkthrough
-  rules.md               Complete pattern/replacement syntax + tag table
+  rules.md               Rule-language reference, examples, and known limits
   dictionary.md          BASE.DIC / BASE.RUS binary format
   paradigms.md           Morphological inflection tables
   tools.md               Python reverse-engineering tools
@@ -188,7 +191,7 @@ LTGOLD/                  Original DOS binaries + test harness
 ## Further reading
 
 - [docs/case-study-zork.md](docs/case-study-zork.md) — worked example: diagnosing errors, adding vocabulary, adding rules
-- [docs/rules.md](docs/rules.md) — complete pattern/replacement syntax, tag table, flag semantics
+- [docs/rules.md](docs/rules.md) — pattern/action examples, tag and symbol glossary, handler metadata, and unresolved native behavior
 - [docs/dictionary.md](docs/dictionary.md) — full BASE.DIC / BASE.RUS binary format
 - [docs/pipeline.md](docs/pipeline.md) — detailed stage-by-stage walkthrough
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system overview and debug flags

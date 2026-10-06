@@ -28,6 +28,10 @@ class Machine:
         self.cache = {}
         self.zf = self.sf = self.of = self.cf = False
         self.steps = 0
+        self.before_instruction = None
+        self.heap_next = 0xB0000
+        self.allocations = []
+        self.calloc_failure = False
 
     def reg(self, name, value=None):
         parent = name if name in self.r else name[0] + 'x'
@@ -90,9 +94,23 @@ class Machine:
         sp=self.reg('ss')*16+self.reg('sp')
         ptr=lambda at: self.read(sp+at+2,2)*16+self.read(sp+at,2)
         if offset==0x3df1: self.reg('ax',len(self.cstring(ptr(0))))
-        elif offset==0x3db0:
+        elif offset in (0x3db0,0x3d11):
             a,b=self.cstring(ptr(0)),self.cstring(ptr(4))
+            # 0000:3DB0 folds ASCII a-z; 0000:3D11 is the exact byte comparison.
+            if offset==0x3db0: a,b=a.upper(),b.upper()
             self.reg('ax',(a>b)-(a<b))
+        elif offset==0x432:
+            # Compiler block-copy helper uses CX bytes and callee-pops two pointers.
+            source,dest,n=ptr(0),ptr(4),self.reg('cx')
+            self.mem[dest:dest+n]=self.mem[source:source+n]
+            self.reg('es',self.read(sp+6,2));self.reg('cx',0)
+            self.zf=True;self.cf=self.sf=self.of=False
+            self.reg('sp',self.reg('sp')+8)
+        elif offset==0x3f44:
+            haystack,chars=self.cstring(ptr(0)),self.cstring(ptr(4))
+            found=next((i for i,c in enumerate(haystack) if c in chars),-1)
+            self.reg('ax',self.read(sp,2)+found if found>=0 else 0)
+            self.reg('dx',self.read(sp+2,2) if found>=0 else 0)
         elif offset in (0x3cd4,0x3f90,0x3fd9):
             target=bytes([self.read(sp+4,2)&255]) if offset!=0x3fd9 else self.cstring(ptr(4))
             haystack=self.cstring(ptr(0))
@@ -115,11 +133,23 @@ class Machine:
             n=self.read(sp+8,2);a=self.cstring(ptr(0))[:n];b=self.cstring(ptr(4))[:n]
             self.reg('ax',(a>b)-(a<b))
         elif offset==0x1baa: pass  # free does not alter observable live-node fields
+        elif offset==0x1951:
+            # calloc is a library primitive; native record construction still runs.
+            if self.calloc_failure:
+                self.reg('ax',0);self.reg('dx',0)
+                return True
+            n=self.read(sp,2)*self.read(sp+2,2)
+            address=self.heap_next;self.heap_next+=max(0x400,(n+15)&~15)
+            assert self.heap_next<0xF0000,'probe heap exhausted'
+            self.mem[address:address+n]=bytes(n)
+            self.allocations.append(address)
+            self.reg('ax',address&15);self.reg('dx',address>>4)
         else: return False
         return True
 
     def run(self):
         while (self.reg('cs'),self.reg('ip'))!=(0xffff,0xffff):
+            if self.before_instruction and self.before_instruction(self): break
             key=(self.reg('cs'),self.reg('ip'))
             if key not in self.cache:
                 physical=(key[0]*16+key[1])&0xfffff
@@ -155,6 +185,9 @@ class Machine:
                 value=signed(self.reg('ax'))*signed(self.get(ins,op[0]))
                 self.reg('ax',value);self.reg('dx',value>>16)
                 self.cf=self.of=not -32768<=value<=32767
+            elif m=='call':
+                # Near calls in the large-model grammar explicitly push CS first.
+                target=self.get(ins,op[0]);self.push(self.reg('ip'));self.reg('ip',target)
             elif m=='lcall':
                 segment,offset=self.get(ins,op[0]),self.get(ins,op[1])
                 if not self.library(segment,offset):
@@ -165,11 +198,11 @@ class Machine:
             elif m=='loop':
                 self.reg('cx',self.reg('cx')-1)
                 if self.reg('cx'):self.reg('ip',self.get(ins,op[0]))
-            elif m in ('jmp','je','jne','jl','jle','jg','jge','jb','jbe','ja'):
+            elif m in ('jmp','je','jne','jl','jle','jg','jge','jb','jbe','ja','jae'):
                 condition={'jmp':True,'je':self.zf,'jne':not self.zf,'jl':self.sf!=self.of,
                            'jle':self.zf or self.sf!=self.of,'jg':not self.zf and self.sf==self.of,
                            'jge':self.sf==self.of,'jb':self.cf,'jbe':self.cf or self.zf,
-                           'ja':not self.cf and not self.zf}[m]
+                           'ja':not self.cf and not self.zf,'jae':not self.cf}[m]
                 if condition:self.reg('ip',self.get(ins,op[0]))
             else:raise AssertionError(f'unsupported {key}: {ins.mnemonic} {ins.op_str}')
 
@@ -205,6 +238,8 @@ class GoldMachine(Machine):
 
 
 def lua_value(value):
+    if value is None:return 'nil'
+    if isinstance(value,bool):return 'true' if value else 'false'
     if isinstance(value,dict):return '{'+','.join('['+lua_value(int(k) if k.isdigit() else k)+']='+lua_value(v) for k,v in value.items())+'}'
     if isinstance(value,list):return '{'+','.join(lua_value(v) for v in value)+'}'
     if isinstance(value,str):return '"'+''.join('\\%03d'%b for b in value.encode('cp866'))+'"'

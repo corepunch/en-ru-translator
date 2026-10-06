@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-06T09:46:29.243830+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "fc14150ae30c87c1a8e0503eb146793e1d3282d98f1663b67dfdf0b1aabd6c5c",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "caps-001",
+      "group": "capitalization",
+      "input": "house.",
+      "raw_cp866_hex": "a4aeac2e0d0a",
+      "raw_sha256": "bdf01d24ab53d3333a182e4bbcad82ed8eaae892e880f29fe5f0a5a7de7197e8",
+      "translation": "дом."
+    },
+    {
+      "id": "caps-002",
+      "group": "capitalization",
+      "input": "House.",
+      "raw_cp866_hex": "84aeac2e0d0a",
+      "raw_sha256": "6059c8f77c0248f52943c2a200985a0f4698c9a1339f47f3e21e492b53ee6190",
+      "translation": "Дом."
+    },
+    {
+      "id": "caps-003",
+      "group": "capitalization",
+      "input": "HOUSE.",
+      "raw_cp866_hex": "848e8c2e0d0a",
+      "raw_sha256": "3f294f94739e755130bd7d30bc25d631e40d7ed677d341cae7ba5c4a931d9352",
+      "translation": "ДОМ."
+    },
+    {
+      "id": "caps-004",
+      "group": "capitalization",
+      "input": "the house.",
+      "raw_cp866_hex": "a4aeac2e0d0a",
+      "raw_sha256": "bdf01d24ab53d3333a182e4bbcad82ed8eaae892e880f29fe5f0a5a7de7197e8",
+      "translation": "дом."
+    },
+    {
+      "id": "caps-005",
+      "group": "capitalization",
+      "input": "The house.",
+      "raw_cp866_hex": "84aeac2e0d0a",
+      "raw_sha256": "6059c8f77c0248f52943c2a200985a0f4698c9a1339f47f3e21e492b53ee6190",
+      "translation": "Дом."
+    },
+    {
+      "id": "caps-006",
+      "group": "capitalization",
+      "input": "the house door.",
+      "raw_cp866_hex": "a4a2a5e0ec7b312ea2e5aea47d20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d20a4a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "3d6483bcbef2c9e1623193149354d5b834026d4da230b62be5e54df389ac8c92",
+      "translation": "дверь{1.вход} дома."
+    },
+    {
+      "id": "caps-007",
+      "group": "capitalization",
+      "input": "The house door.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "293030b3560837866e0f3ccbb07622100854e70679f4423264e6a61db20d00c4",
+      "translation": "Дверь{1.вход} дома."
+    },
+    {
+      "id": "caps-008",
+      "group": "capitalization",
+      "input": "fish meal.",
+      "raw_cp866_hex": "e0eba1ada0ef20ace3aaa02e0d0a",
+      "raw_sha256": "973f259653f790785f14ffafe64b8a78e3b8e0e3b33c8b092dce2a4a0b7916c2",
+      "translation": "рыбная мука."
+    },
+    {
+      "id": "caps-009",
+      "group": "capitalization",
+      "input": "Fish meal.",
+      "raw_cp866_hex": "90eba1ada0ef208ce3aaa02e0d0a",
+      "raw_sha256": "6ff9f0ef9941b83b68686a5c177d8cb3bd5a6ba1cee6536a6bdd6a46eff1da10",
+      "translation": "Рыбная Мука."
+    },
+    {
+      "id": "caps-010",
+      "group": "capitalization",
+      "input": "FISH MEAL.",
+      "raw_cp866_hex": "909b818d809f208c938a802e0d0a",
+      "raw_sha256": "b97ac43c95a095b2dca45a4743064b96866836280ad531901015352ce0598207",
+      "translation": "РЫБНАЯ МУКА."
+    },
+    {
+      "id": "caps-011",
+      "group": "capitalization",
+      "input": "Metric tons.",
+      "raw_cp866_hex": "8ca5e2e0a8e7a5e1aaa8a520e2aeadadeb2e0d0a",
+      "raw_sha256": "e6fe87f109bf2b0334466b74fc4fff6bbe4b5d91f99851ad08b9865be5e8674c",
+      "translation": "Метрические тонны."
+    },
+    {
+      "id": "caps-012",
+      "group": "capitalization",
+      "input": "metric tons.",
+      "raw_cp866_hex": "aca5e2e0a8e7a5e1aaa8a520e2aeadadeb2e0d0a",
+      "raw_sha256": "4dcf1ce32686f4621b1db0474535bf3ad90e4f50f54f4eae0387ca43df6a8460",
+      "translation": "метрические тонны."
+    },
+    {
+      "id": "caps-013",
+      "group": "capitalization",
+      "input": "It will be a replacement.",
+      "raw_cp866_hex": "9de2ae2081e3a4a5e220a7a0aca5adaea92e0d0a",
+      "raw_sha256": "53a5bfe70aa00844d7a2b45214dc2d93c89820827195ada3ab00b4e63da1bb3e",
+      "translation": "Это Будет заменой."
+    },
+    {
+      "id": "caps-014",
+      "group": "capitalization",
+      "input": "it will be a replacement.",
+      "raw_cp866_hex": "ede2ae20a1e3a4a5e220a7a0aca5adaea92e0d0a",
+      "raw_sha256": "2371ac8b413a3dcbf61928896007b302a1198bc9419c613e90e818dd8b801708",
+      "translation": "это будет заменой."
+    },
+    {
+      "id": "caps-015",
+      "group": "capitalization",
+      "input": "The Letter of Credit shall allow for partial shipments.",
+      "raw_cp866_hex": "80aaaae0a5a4a8e2a8a2208faea7a2aeaba8e220e7a0e1e2a8e7adebac20a3e0e3a7a0ac7b312eafaee1e2a0a2aaa07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020736869706d656e74733a20636172676f202d20a3e0e3a7a0ac3b207175616e74697479206f6620676f6f6473207368697070656420746f676574686572202d20afaee1e2a0a2aaa00d0a0d0a",
+      "raw_sha256": "88d2cd4c9b198e9fa91a8197725dc5572ad753ad12e2164e417c481cfa2011b4",
+      "translation": "Аккредитив Позволит частичным грузам{1.поставка}."
+    },
+    {
+      "id": "caps-016",
+      "group": "capitalization",
+      "input": "the Letter of Credit shall allow for partial shipments.",
+      "raw_cp866_hex": "80aaaae0a5a4a8e2a8a2208faea7a2aeaba8e220e7a0e1e2a8e7adebac20a3e0e3a7a0ac7b312eafaee1e2a0a2aaa07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020736869706d656e74733a20636172676f202d20a3e0e3a7a0ac3b207175616e74697479206f6620676f6f6473207368697070656420746f676574686572202d20afaee1e2a0a2aaa00d0a0d0a",
+      "raw_sha256": "88d2cd4c9b198e9fa91a8197725dc5572ad753ad12e2164e417c481cfa2011b4",
+      "translation": "Аккредитив Позволит частичным грузам{1.поставка}."
+    }
+  ]
+}

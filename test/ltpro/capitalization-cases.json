@@ -1,0 +1,82 @@
+[
+  {
+    "id": "caps-001",
+    "group": "capitalization",
+    "input": "house."
+  },
+  {
+    "id": "caps-002",
+    "group": "capitalization",
+    "input": "House."
+  },
+  {
+    "id": "caps-003",
+    "group": "capitalization",
+    "input": "HOUSE."
+  },
+  {
+    "id": "caps-004",
+    "group": "capitalization",
+    "input": "the house."
+  },
+  {
+    "id": "caps-005",
+    "group": "capitalization",
+    "input": "The house."
+  },
+  {
+    "id": "caps-006",
+    "group": "capitalization",
+    "input": "the house door."
+  },
+  {
+    "id": "caps-007",
+    "group": "capitalization",
+    "input": "The house door."
+  },
+  {
+    "id": "caps-008",
+    "group": "capitalization",
+    "input": "fish meal."
+  },
+  {
+    "id": "caps-009",
+    "group": "capitalization",
+    "input": "Fish meal."
+  },
+  {
+    "id": "caps-010",
+    "group": "capitalization",
+    "input": "FISH MEAL."
+  },
+  {
+    "id": "caps-011",
+    "group": "capitalization",
+    "input": "Metric tons."
+  },
+  {
+    "id": "caps-012",
+    "group": "capitalization",
+    "input": "metric tons."
+  },
+  {
+    "id": "caps-013",
+    "group": "capitalization",
+    "input": "It will be a replacement."
+  },
+  {
+    "id": "caps-014",
+    "group": "capitalization",
+    "input": "it will be a replacement."
+  },
+  {
+    "id": "caps-015",
+    "group": "capitalization",
+    "input": "The Letter of Credit shall allow for partial shipments."
+  },
+  {
+    "id": "caps-016",
+    "group": "capitalization",
+    "input": "the Letter of Credit shall allow for partial shipments."
+  }
+]

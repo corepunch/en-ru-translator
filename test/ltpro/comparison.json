@@ -1,0 +1,703 @@
+{
+  "reference_sha256": "f9a14e1705fa2b9e36d675682d1ace0e315137b2851d981f051f7b3b4fbee435",
+  "captured_at_utc": "2026-10-06T08:40:44.244385+00:00",
+  "lua_process_per_case": true,
+  "passed": 44,
+  "failed": 33,
+  "errors": 0,
+  "cases": [
+    {
+      "id": "case-001",
+      "group": "historical",
+      "input": "She can speak Russian.",
+      "expected": "Она может сказать Русского.",
+      "actual": "Она может говорить Русского.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-002",
+      "group": "historical",
+      "input": "He is in the house.",
+      "expected": "Он - в доме.",
+      "actual": "Он - в доме.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-003",
+      "group": "historical",
+      "input": "She sat on the chair.",
+      "expected": "Она посидeла на стуле.",
+      "actual": "Она посидeла на стуле.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-004",
+      "group": "historical",
+      "input": "He must not go.",
+      "expected": "Он не должен придти.",
+      "actual": "Он не должен идти.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-005",
+      "group": "historical",
+      "input": "The dog that I saw ran away.",
+      "expected": "Собака, которую Я видeл убегать.",
+      "actual": "Собака, которую Я видeл убегать.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-006",
+      "group": "historical",
+      "input": "He was arrested by the police.",
+      "expected": "Он арестовывался полицией.",
+      "actual": "Он арестован полицией.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-007",
+      "group": "historical",
+      "input": "You are standing in an open field.",
+      "expected": "Вы стоите в открытой области.",
+      "actual": "Вы стоите в открытой области.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-008",
+      "group": "historical",
+      "input": "The house door is open.",
+      "expected": "Дверь{1.вход} дома открыта.",
+      "actual": "Дверь{1.вход} дома должен открывать.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-009",
+      "group": "historical",
+      "input": "He cannot go.",
+      "expected": "Он не может придти.",
+      "actual": "Он не может идти.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-010",
+      "group": "historical",
+      "input": "She has been seen.",
+      "expected": "Она была увидена.",
+      "actual": "Она была увидена.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-011",
+      "group": "existing-regression",
+      "input": "This AGREEMENT is a sample for testing the electronic translation program.",
+      "expected": "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.",
+      "actual": "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-012",
+      "group": "existing-regression",
+      "input": "AGREEMENT ON SUPPLY OF FISH MEAL",
+      "expected": "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ",
+      "actual": "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-013",
+      "group": "existing-regression",
+      "input": "Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT.",
+      "expected": "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ.",
+      "actual": "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-014",
+      "group": "existing-regression",
+      "input": "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations.",
+      "expected": "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации.",
+      "actual": "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признавали, что они юридически уполномочены представлять их организации.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-015",
+      "group": "existing-regression",
+      "input": "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal.",
+      "expected": "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки.",
+      "actual": "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-016",
+      "group": "existing-regression",
+      "input": "The total price for the goods and services as defined in EXHIBIT A is USD.",
+      "expected": "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США.",
+      "actual": "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-017",
+      "group": "existing-regression",
+      "input": "The exclusive remedy for breach of this warranty shall be the replacement.",
+      "expected": "Единственная Компенсация За Нарушение этой гарантии будет заменой.",
+      "actual": "Единственная Компенсация За Нарушение этой гарантии будет заменой.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-018",
+      "group": "existing-regression",
+      "input": "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void.",
+      "expected": "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу.",
+      "actual": "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-019",
+      "group": "existing-regression",
+      "input": "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments.",
+      "expected": "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки.",
+      "actual": "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-020",
+      "group": "existing-regression",
+      "input": "The Letter of Credit shall allow for partial shipments and partial payment.",
+      "expected": "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу.",
+      "actual": "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-021",
+      "group": "existing-regression",
+      "input": "EXHIBIT A.",
+      "expected": "ПОКАЖИТЕ A.",
+      "actual": "ПОКАЖИТЕ A.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-022",
+      "group": "existing-regression",
+      "input": "by all means.",
+      "expected": "во что бы то ни стало.",
+      "actual": "во что бы то ни стало.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-023",
+      "group": "existing-regression",
+      "input": "by all means of transport.",
+      "expected": "всеми видами транспорта.",
+      "actual": "всеми видами транспорта.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-024",
+      "group": "existing-regression",
+      "input": "He walked including me.",
+      "expected": "Он прошел включая меня.",
+      "actual": "Он прошел включая меня.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-025",
+      "group": "existing-regression",
+      "input": "5 Metric tons.",
+      "expected": "5 Метрических тонн.",
+      "actual": "5 Метрических тонн.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-026",
+      "group": "existing-regression",
+      "input": "2 Metric tons.",
+      "expected": "2 Метрические тонны.",
+      "actual": "2 Метрические тонны.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-027",
+      "group": "existing-regression",
+      "input": "It will be a replacement.",
+      "expected": "Это Будет заменой.",
+      "actual": "Это Будет заменой.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-028",
+      "group": "existing-regression",
+      "input": "fish-meal.",
+      "expected": "рыбная мука.",
+      "actual": "рыбная мука.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-029",
+      "group": "existing-regression",
+      "input": "well-known product.",
+      "expected": "известный продукт.",
+      "actual": "известный продукт.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-030",
+      "group": "existing-regression",
+      "input": "buyer-seller agreement.",
+      "expected": "соглашение продавца покупателя.",
+      "actual": "соглашение продавца покупателя.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-031",
+      "group": "existing-regression",
+      "input": "A-B.",
+      "expected": "-B.",
+      "actual": "-B.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-032",
+      "group": "existing-regression",
+      "input": "state-of-the-art product.",
+      "expected": "современный продукт.",
+      "actual": "современный продукт.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-033",
+      "group": "existing-regression",
+      "input": "He said, I agree.",
+      "expected": "Он сказал, Я соглашаюсь{1.согласовывать}.",
+      "actual": "Он сказал, Я соглашался{1.согласовывать}.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-034",
+      "group": "existing-regression",
+      "input": "He said, \"I agree.\"",
+      "expected": "Он сказал, \"Я соглашаюсь{1.согласовывать}.\"",
+      "actual": "Он сказал, \"Я соглашался{1.согласовывать}.\"",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-035",
+      "group": "existing-regression",
+      "input": "\"Fish meal\", seller said.",
+      "expected": "\"Рыбная Мука\", продавец сказал.",
+      "actual": "\"Рыбная Мука\", продавец сказал.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-036",
+      "group": "ambiguity",
+      "input": "I work.",
+      "expected": "Я работаю.",
+      "actual": "Я работаю.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-037",
+      "group": "ambiguity",
+      "input": "The work is good.",
+      "expected": "Работа{1.труд} хорошая.",
+      "actual": "Работа{1.трудAрабочий} хорошая.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-038",
+      "group": "ambiguity",
+      "input": "They work.",
+      "expected": "Они работают.",
+      "actual": "Они работают.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-039",
+      "group": "ambiguity",
+      "input": "He works.",
+      "expected": "Он работает.",
+      "actual": "Он работает.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-040",
+      "group": "ambiguity",
+      "input": "The works are good.",
+      "expected": "Работа хорошая.",
+      "actual": "Работает - хороший.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-041",
+      "group": "ambiguity",
+      "input": "An open door.",
+      "expected": "Открытая дверь{1.вход}.",
+      "actual": "Открытая дверь{1.вход}.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-042",
+      "group": "ambiguity",
+      "input": "Open the door.",
+      "expected": "Откройте дверь{1.вход}.",
+      "actual": "Откройте дверь{1.вход}.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-043",
+      "group": "auxiliary",
+      "input": "He can go.",
+      "expected": "Он может придти.",
+      "actual": "Он может идти.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-044",
+      "group": "auxiliary",
+      "input": "He must go.",
+      "expected": "Он должен придти.",
+      "actual": "Он должен идти.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-045",
+      "group": "auxiliary",
+      "input": "He will go.",
+      "expected": "Он придет.",
+      "actual": "Он придет.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-046",
+      "group": "auxiliary",
+      "input": "He did not go.",
+      "expected": "Он не шел.",
+      "actual": "Он не идет.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-047",
+      "group": "auxiliary",
+      "input": "He is working.",
+      "expected": "Он работает.",
+      "actual": "Он работает.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-048",
+      "group": "auxiliary",
+      "input": "He has worked.",
+      "expected": "Он работал.",
+      "actual": "У работал.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-049",
+      "group": "auxiliary",
+      "input": "He had worked.",
+      "expected": "Он работал.",
+      "actual": "Он работал.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-050",
+      "group": "auxiliary",
+      "input": "The door was opened.",
+      "expected": "Дверь{1.вход} была открыта.",
+      "actual": "Дверь{1.вход} открыла.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-051",
+      "group": "auxiliary",
+      "input": "The door is closed.",
+      "expected": "Дверь{1.вход} закрыта.",
+      "actual": "Дверь{1.вход} закрыла.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-052",
+      "group": "clause",
+      "input": "If he comes then I go.",
+      "expected": "Если он приходит тогда Я иду.",
+      "actual": "Если он приходит тогда Я иду.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-053",
+      "group": "clause",
+      "input": "If he comes, I go.",
+      "expected": "Если он приходит, Я иду.",
+      "actual": "При он приходит, Я иду.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-054",
+      "group": "clause",
+      "input": "When he comes, I go.",
+      "expected": "Когда он приходит, Я иду.",
+      "actual": "При он приходит, Я иду.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-055",
+      "group": "clause",
+      "input": "I know that he works.",
+      "expected": "Я знаю, что он работает.",
+      "actual": "Я знал что он работает.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-056",
+      "group": "clause",
+      "input": "Who saw the dog?",
+      "expected": "Кто видeл собаку?",
+      "actual": "Кто видeл собака",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-057",
+      "group": "clause",
+      "input": "What is this?",
+      "expected": "Что Это?",
+      "actual": "Какой - это",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-058",
+      "group": "clause",
+      "input": "Please open the door.",
+      "expected": "Пожалуйста откройте дверь{1.вход}.",
+      "actual": "Открывает дверь{1.вход}.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-059",
+      "group": "numbers",
+      "input": "One book.",
+      "expected": "Один книга.",
+      "actual": "Один книга.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-060",
+      "group": "numbers",
+      "input": "Two books.",
+      "expected": "Две книги.",
+      "actual": "Двая книга.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-061",
+      "group": "numbers",
+      "input": "Five books.",
+      "expected": "Пять книг.",
+      "actual": "Пяти книга.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-062",
+      "group": "numbers",
+      "input": "The price is 10 percent.",
+      "expected": "Цена - 10 процент.",
+      "actual": "Цена - 10 процента.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-063",
+      "group": "numbers",
+      "input": "The meeting is on June 15.",
+      "expected": "Собрание - в Июне 15.",
+      "actual": "Собрание - на Мес 15.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-064",
+      "group": "numbers",
+      "input": "The meeting is on May 1.",
+      "expected": "Собрание - на Может 1.",
+      "actual": "Собрание - на Может 1.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-065",
+      "group": "reorder",
+      "input": "A house door.",
+      "expected": "Дверь{1.вход} дома.",
+      "actual": "Дверь{1.вход} дома.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-066",
+      "group": "reorder",
+      "input": "A door of the house.",
+      "expected": "Дверь{1.вход} дома.",
+      "actual": "Дверь{1.вход} дома.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-067",
+      "group": "reorder",
+      "input": "A new house door.",
+      "expected": "Дверь{1.вход} нового дома.",
+      "actual": "Дверь{1.вход} новый дом.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-068",
+      "group": "reorder",
+      "input": "A buyer-seller agreement.",
+      "expected": "Соглашение продавца покупателя.",
+      "actual": "Соглашение продавца покупателя.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-069",
+      "group": "negation",
+      "input": "There is a book.",
+      "expected": "Есть книга.",
+      "actual": "Есть книга.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-070",
+      "group": "negation",
+      "input": "There are two books.",
+      "expected": "Есть две книги.",
+      "actual": "Есть двая книга.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-071",
+      "group": "negation",
+      "input": "There is no book.",
+      "expected": "Нет книги.",
+      "actual": "Нет книга.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-072",
+      "group": "negation",
+      "input": "He is not a teacher.",
+      "expected": "Он не - учитель.",
+      "actual": "Он не - учитель.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-073",
+      "group": "punctuation",
+      "input": "(The house).",
+      "expected": "(Дом).",
+      "actual": "Дом",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-074",
+      "group": "punctuation",
+      "input": "He said: \"Go.\"",
+      "expected": "Он сказал: \"Идти.\"",
+      "actual": "Он сказал: \"Ишел.\"",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-075",
+      "group": "punctuation",
+      "input": "ABC-123.",
+      "expected": "ABC-123.",
+      "actual": "АЗБУКА -123.",
+      "matched": false,
+      "error": false
+    },
+    {
+      "id": "case-076",
+      "group": "punctuation",
+      "input": "Xylophornium is here.",
+      "expected": "Xylophornium - здесь.",
+      "actual": "Xylophornium - здесь.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "case-077",
+      "group": "known-failure",
+      "input": "The cat sat on the mat.",
+      "expected": "Кошка посидeла в ковер{1.матрица}.",
+      "actual": "Кошка посиденная на ковер{1.матрицаAматовый}.",
+      "matched": false,
+      "error": false
+    }
+  ]
+}

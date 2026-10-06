@@ -22,8 +22,8 @@ for line in file2:lines() do
 end
 file:close(); file2:close()
 
--- Expected outputs for the current engine behavior.
--- These targets prefer natural Russian style over LTGOLD's legacy capitalization quirks.
+-- Project-dictionary regressions. Capitalization follows the frozen LTPRO
+-- captures in test/ltpro/reference.json; this suite is not a raw-file oracle.
 local expected_cases = {
   { "This AGREEMENT is a sample for testing the electronic translation program.",
     "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода." },
@@ -34,33 +34,33 @@ local expected_cases = {
   { "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations.",
     "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации." },
   { "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal.",
-    "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 метрических тонн рыбной муки." },
+    "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки." },
   { "The total price for the goods and services as defined in EXHIBIT A is USD.",
     "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США." },
   { "The exclusive remedy for breach of this warranty shall be the replacement.",
-    "Единственная компенсация за нарушение этой гарантии будет заменой." },
+    "Единственная Компенсация За Нарушение этой гарантии будет заменой." },
   { "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void.",
     "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу." },
   { "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments.",
     "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки." },
   { "The Letter of Credit shall allow for partial shipments and partial payment.",
-    "Аккредитив позволит частичным грузам{1.поставка} и частичному платежу." },
+    "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу." },
   -- Focused LTPRO probes captured directly through LTGOLD/run_test.sh.
   { "EXHIBIT A.", "ПОКАЖИТЕ A." },
-  { "by all means.", "Во что бы то ни стало." },
-  { "by all means of transport.", "Всеми видами транспорта." },
+  { "by all means.", "во что бы то ни стало." },
+  { "by all means of transport.", "всеми видами транспорта." },
   { "He walked including me.", "Он прошел включая меня." },
-  { "5 Metric tons.", "5 метрических тонн." },
-  { "2 Metric tons.", "2 метрические тонны." },
-  { "It will be a replacement.", "Это будет заменой." },
-  { "fish-meal.", "Рыбная мука." },
-  { "well-known product.", "Известный продукт." },
-  { "buyer-seller agreement.", "Соглашение продавца покупателя." },
+  { "5 Metric tons.", "5 Метрических тонн." },
+  { "2 Metric tons.", "2 Метрические тонны." },
+  { "It will be a replacement.", "Это Будет заменой." },
+  { "fish-meal.", "рыбная мука." },
+  { "well-known product.", "известный продукт." },
+  { "buyer-seller agreement.", "соглашение продавца покупателя." },
   { "A-B.", "-B." },
-  { "state-of-the-art product.", "Современный продукт." },
+  { "state-of-the-art product.", "современный продукт." },
   { "He said, I agree.", "Он сказал, Я соглашаюсь{1.согласовывать}." },
   { "He said, \"I agree.\"", "Он сказал, \"Я соглашаюсь{1.согласовывать}.\"" },
-  { "\"Fish meal\", seller said.", "\"рыбная мука\", продавец сказал." },
+  { "\"Fish meal\", seller said.", "\"Рыбная Мука\", продавец сказал." },
 }
 
 local fail, total = 0, 0

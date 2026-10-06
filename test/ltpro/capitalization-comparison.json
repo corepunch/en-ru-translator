@@ -1,0 +1,154 @@
+{
+  "reference_sha256": "cd1744d259f9e7bc9c14cebb2117ef94b048da0b7809483b4d6d9dfe8e29eb8c",
+  "captured_at_utc": "2026-10-06T09:46:29.243830+00:00",
+  "lua_process_per_case": true,
+  "passed": 16,
+  "failed": 0,
+  "errors": 0,
+  "cases": [
+    {
+      "id": "caps-001",
+      "group": "capitalization",
+      "input": "house.",
+      "expected": "дом.",
+      "actual": "дом.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-002",
+      "group": "capitalization",
+      "input": "House.",
+      "expected": "Дом.",
+      "actual": "Дом.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-003",
+      "group": "capitalization",
+      "input": "HOUSE.",
+      "expected": "ДОМ.",
+      "actual": "ДОМ.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-004",
+      "group": "capitalization",
+      "input": "the house.",
+      "expected": "дом.",
+      "actual": "дом.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-005",
+      "group": "capitalization",
+      "input": "The house.",
+      "expected": "Дом.",
+      "actual": "Дом.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-006",
+      "group": "capitalization",
+      "input": "the house door.",
+      "expected": "дверь{1.вход} дома.",
+      "actual": "дверь{1.вход} дома.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-007",
+      "group": "capitalization",
+      "input": "The house door.",
+      "expected": "Дверь{1.вход} дома.",
+      "actual": "Дверь{1.вход} дома.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-008",
+      "group": "capitalization",
+      "input": "fish meal.",
+      "expected": "рыбная мука.",
+      "actual": "рыбная мука.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-009",
+      "group": "capitalization",
+      "input": "Fish meal.",
+      "expected": "Рыбная Мука.",
+      "actual": "Рыбная Мука.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-010",
+      "group": "capitalization",
+      "input": "FISH MEAL.",
+      "expected": "РЫБНАЯ МУКА.",
+      "actual": "РЫБНАЯ МУКА.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-011",
+      "group": "capitalization",
+      "input": "Metric tons.",
+      "expected": "Метрические тонны.",
+      "actual": "Метрические тонны.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-012",
+      "group": "capitalization",
+      "input": "metric tons.",
+      "expected": "метрические тонны.",
+      "actual": "метрические тонны.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-013",
+      "group": "capitalization",
+      "input": "It will be a replacement.",
+      "expected": "Это Будет заменой.",
+      "actual": "Это Будет заменой.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-014",
+      "group": "capitalization",
+      "input": "it will be a replacement.",
+      "expected": "это будет заменой.",
+      "actual": "это будет заменой.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-015",
+      "group": "capitalization",
+      "input": "The Letter of Credit shall allow for partial shipments.",
+      "expected": "Аккредитив Позволит частичным грузам{1.поставка}.",
+      "actual": "Аккредитив Позволит частичным грузам{1.поставка}.",
+      "matched": true,
+      "error": false
+    },
+    {
+      "id": "caps-016",
+      "group": "capitalization",
+      "input": "the Letter of Credit shall allow for partial shipments.",
+      "expected": "Аккредитив Позволит частичным грузам{1.поставка}.",
+      "actual": "Аккредитив Позволит частичным грузам{1.поставка}.",
+      "matched": true,
+      "error": false
+    }
+  ]
+}

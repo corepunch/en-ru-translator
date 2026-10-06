@@ -138,6 +138,8 @@ function utils.tokenize(s, en_ru)
   -- Token provenance is mutated atomically with lexical entries so phrase
   -- backtracking and later parser reorders cannot desynchronise metadata.
   local prev, tbl, words, last, i = nil, stream.new(), {}, 0, 1
+  local initial = s:match('%a')
+  tbl.initial_caps = initial and initial:match('%u') ~= nil or false
   local phrase_all_caps = false  -- track caps across multi-word phrase lookups
   local phrase_component_caps = {}
 

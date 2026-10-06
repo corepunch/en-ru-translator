@@ -3,12 +3,23 @@
 The production translator is **not yet one-to-one** with either executable.
 Recovered grammar and morphology data now match LTPRO. Isolated Lua ports of
 reordering and four morphology helpers pass instruction-level comparisons against
-**both** binaries. The parser/compiler still needs native lexical state, general
-matchers, handler bodies, and orchestration.
+**both** binaries. New lexical matching, replacement, and T8 constituent-matching
+ports pass LTPRO instruction comparisons. The parser/compiler still needs native
+lexical state, handler bodies, orchestration, and integration of these ports.
+
+Native stage work now also reproduces **77/77 T1 sentence-stage fixtures** and
+**36/36 native rule-selection events**, plus the two planned lexical slices.
+The reading metadata decoder passes **1,377/1,377** original-instruction cases.
+Production paragraph matches increased from **29/77 to 44/77** after preserving
+lexical j readings and native capitalization. All T1 selector bodies also pass
+648 controlled-node instruction fixtures, and a new casing matrix matches 16/16
+native paragraphs. Scope, branch gaps, the 410-selector ledger and reproduction
+are in [the native stage report](LTPRO_STAGE_REPORT.md).
 
 Project agent instructions were removed. Older research is reference material to
-recheck. No DOSBox or new packages were installed. The optional verification tools
-use already available Python/Capstone; runtime and extraction remain pure Lua.
+recheck. The initial instruction probes used already available Python/Capstone.
+DOSBox-X 2026.10.01 was subsequently installed through Homebrew with user
+authorization to capture full-program references; runtime and extraction remain pure Lua.
 Neither `LTGOLD/` nor the reference `open-rts` project was modified.
 
 ## Targets
@@ -157,39 +168,100 @@ fixture groups: **7,029 cases pass per binary**, executing 1,664,261 instruction
 
 These are isolated function checks, not complete DOS execution, independent CPU
 conformance proofs, or exhaustive translator proofs. Allocator effects, startup,
-I/O, and surrounding parser state are outside the harness. No new full-program
-translation captures were made.
+I/O, and surrounding parser state are outside the harness. Separate full-program
+captures are documented below.
 
 Evidence: [grammar instructions](LTPRO_EVIDENCE.asm) and
 [morphology instructions](LTPRO_MORPHOLOGY.asm).
 
 ## Translation checks
 
-Historical comparisons use original `LTGOLD/BASE.DIC` and `.RUS`, preserving
-translation spelling, capitalization, and punctuation. They exclude capture line
-endings and the separate meanings appendix. Capture binary/config provenance is
-incomplete; these are historical observations, not fresh full-program results.
+### Native grammar primitives added on 2026-10-06
+
+| Module | Original entry | Differential cases | Executed instructions |
+|---|---|---:|---:|
+| `core/ltpro/matcher.lua` | `1313:0A67`, file `0x17597` | 4,780/4,780 | 1,168,859 |
+| `core/ltpro/replacement.lua` | `1313:01B4`, file `0x16CE4` | 2,048/2,048 | 599,068 |
+| `core/ltpro/constituent_matcher.lua` | `1C3D:0135`, file `0x1FF05` | 1,403/1,403 | 201,460 |
+
+These are isolated LTPRO checks, not full translation or LTGOLD grammar checks.
+The fixtures cover all 563 lexical-pattern records and 83 T8 records, including
+representative matching inputs, failures, randomized cases, and caches that differ
+from current node tags. Native successes: 1,900 lexical and 351 constituent cases.
+Replacement checks compare current tag, previous tag, text, and cached tags.
+
+Newly verified operational meanings:
+
+- `*` consumes a real boundary node; ordinary matches inspect current tag `+0x0C`.
+- Backticks compare `+0x12` with ASCII case folding, or `+0x9C` with exact bytes.
+- `!text!` searches `+0x11C` for `text)`; `!мес!` is a substring test, not insertion.
+- Angle spans locate the first following anchor and do not backtrack. `<$>` and
+  empty `<>` impose no span-tag restriction. Negated spans reject empty spans.
+- Bare `$` recursively tries the remainder here, then after one skipped node.
+  `[$]` accepts one node while preserving pending negation.
+- Native replacements directly write tag bytes, preserving the old tag at `+0x66`.
+  `@` keeps the node; `^`, `=`, `;`, `&`, `#`, and `j` are real tag writes.
+  A space marks deletion for subsequent compaction; it never injects `q` here.
+- Backticked actions update `+0x11C`, optionally changing the tag; `@`/`?` prefixes
+  keep it. The native Russian-letter classifier and 80-byte text limit are preserved.
+- T8 is separate: `.` consumes any constituent; bare `$` is an ordinary tag test.
+
+The probes also exposed an error in the shared test harness: `0000:3DB0` is ASCII
+case-insensitive comparison, not exact comparison. It is now modeled correctly;
+`0000:3D11` is the exact-byte routine. New helper substitutions cover compiler
+block-copy and `strpbrk`; grammar decisions continue to execute original instructions.
+
+Unsupported scope is explicit: embedded lexical alternatives inside `[]`/`<>`
+occur in native code but in none of the extracted rules. Their spare-slot and
+loop-bound behavior needs caller/stack-state modeling; the ports reject that syntax.
+Malformed/overflowing strings and arbitrary uninitialized memory are not covered.
+The new modules are not wired into the legacy production parser: its packed lexical
+strings do not yet supply the full native node and handler state. No new full-program
+translation parity is claimed. See [the rule reference](../docs/rules.md) and
+[original instruction evidence](LTPRO_MATCHER_EVIDENCE.asm).
+
+### Full translation status
+
+The [fresh 77-case corpus](../test/ltpro/README.md) runs the supplied unpacked
+LTPRO with the original BASE files and supplied configuration. Two complete
+DOSBox-X runs produced identical raw output for every case. The capture records
+all six asset hashes, input hashes, emulator version, configuration, and command
+arguments. Scratch mounts contain copies; the originals are never mounted.
+
+Current Lua matches **44/77**, with **33 mismatches and zero runtime errors**.
+Both implementations start a fresh process per input. Paragraph comparison retains
+spelling, case, spaces, punctuation, and inline meanings; it excludes newline
+framing and the separately delimited meanings appendix. Full CP866 output remains
+in the reference. This corpus establishes a reproducible baseline, not exhaustive
+coverage. `If he comes then I go.` originally lost `тогда` in Lua; native T1
+snapshots identified the erased j reading. It now produces
+`Если он приходит тогда Я иду.` in both implementations.
+
+All ten historical reference paragraphs were reproduced by the fresh capture.
+Their old capture metadata was incomplete, but the new corpus now records binary
+and configuration provenance for those same inputs and outputs.
 
 Exact matches improved from **3/10 to 5/10**. Restoring Latin `e` fixed the `She sat
 on the chair.` and `The dog that I saw ran away.` comparisons. Five gaps remain:
 
 | Input | Historical capture | Current Lua |
 |---|---|---|
-| She can speak Russian. | Она может сказать Русского. | Она может говорить русского. |
+| She can speak Russian. | Она может сказать Русского. | Она может говорить Русского. |
 | He must not go. | Он не должен придти. | Он не должен идти. |
 | He was arrested by the police. | Он арестовывался полицией. | Он арестован полицией. |
 | The house door is open. | Дверь{1.вход} дома открыта. | Дверь{1.вход} дома должен открывать. |
 | He cannot go. | Он не может придти. | Он не может идти. |
 
-The 25-case Lua regression passes, but mixes historical and preferred-natural
-expectations. `test/translator_test.lua` still fails its custom `cat sat on the mat`
+The 25-case project-dictionary regression passes. Its casing expectations now
+retain the frozen executable's quirks; it remains separate from the original-BASE
+oracle. `test/translator_test.lua` still fails its custom `cat sat on the mat`
 expectation after removal of unsupported rules. Its expectation was not changed to
 the current incorrect output. The standard runner therefore still exits nonzero.
 
 ## Remaining work
 
 1. Native lexical-node construction and dictionary metadata/alternative handling.
-2. General matcher and replacement operators (`!`, `$`, `=`, `;`, etc.).
+2. Integration of the verified matcher/replacement ports; unused embedded-alternative paths.
 3. T1–T4, cleanup, T7/T8 handler bodies, scheduling, and constituent links.
 4. Caller-level aspect, passive/copular state, case, and agreement.
 5. Complete analyzer spelling changes, capitalization, and output formatting.

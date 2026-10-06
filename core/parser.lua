@@ -231,7 +231,12 @@ local replacement_actions = {
 	['^'] = keep_replacement,
 	['='] = keep_replacement,
 	[';'] = keep_replacement,
-	['j'] = function(ts, j) ts[j] = 'j' end,
+	['j'] = function(ts, j)
+		-- Native T1 changes +0C to j without erasing +11C. A lexical j
+		-- reading (for example then -> тогда) survives; punctuation has none.
+		local form = find(ts[j], 'j')
+		ts[j] = form or 'j'
+	end,
 	['|'] = function(ts, j) ts[j] = '|' end,
 	['&'] = function(ts, j) find_and_replace(ts, j, 'C') end,
 	['#'] = function(ts, j)
@@ -514,7 +519,7 @@ local function apply_copular_it_compatibility(ts)
 					-- LTGOLD resolves copular "it" as demonstrative это, not personal он.
 					ts[i] = 'O' .. utils.encode('это')
 					-- Intentional LTGOLD future-copula capitalization bug: "It will" emits Будет.
-					if future and ts.caps then ts.caps[j] = "init" end
+					if future and ts.caps then ts.caps[j] = ts.caps[i] end
 				end
 			end
 		end
@@ -566,7 +571,10 @@ local function expand_phrase_tokens(ts)
 				-- e.g. "AGREEMENT ON" (all-caps W phrase) → each sub-token is uppercase.
 				stream.remove(ts, i)
 				for j = #expanded, 1, -1 do
-					local expanded_caps = type(component_caps) == 'table' and component_caps[j] or metadata.caps
+					-- Native W expansion copies the phrase's capitalization to its
+					-- constituents, including lowercase later source words.
+					local expanded_caps = metadata.caps or
+						(type(component_caps) == 'table' and component_caps[j] or false)
 					stream.insert(ts, i, expanded[j], {
 						caps = expanded_caps,
 						phrases = true,

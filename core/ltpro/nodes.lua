@@ -8,6 +8,54 @@ function nodes.new(tag, fields)
   return node
 end
 
+-- 0687:0812 allocates a zeroed 15h-byte boundary record. This narrower
+-- constructor is used with a null parent by T1; it is not a lexical-node clone.
+function nodes.boundary(tag, marker, state)
+  state = state or {}
+  if state.limit and (state.count or 0) >= state.limit then return nil end
+  local node
+  if state.allocate then node=state.allocate() else node={} end
+  if not node then return nil end
+  for at=0,0x14 do node[at]=0 end
+  node[0x0C],node[0x0D],node[0x0E]=tag:byte(),marker:byte(),0x44
+  node[0x12],node[0x9C],node[0x11C]=tag,'',''
+  state.count=(state.count or 0)+1
+  return node
+end
+
+-- Import captured records without treating unnamed bytes as disposable padding.
+-- Pointer identity is physical (segment*16+offset), not textual segment:offset.
+function nodes.from_records(records)
+  local addresses, ordered = {}, {}
+  for i, record in ipairs(records) do
+    local address = record.segment * 16 + record.offset
+    local node = addresses[address]
+    if not node then
+      local raw = assert(record.bytes)
+      assert(#raw >= 0x26B, 'truncated native lexical record')
+      node = {raw=raw, native_address=address}
+      for at = 0, #raw - 1 do node[at] = raw:byte(at + 1) end
+      for _, at in ipairs({0x12,0x9C,0x11C}) do
+        local stop = assert(raw:find('\0',at+1,true), 'unterminated native lexical string')
+        node[at] = raw:sub(at+1,stop-1)
+      end
+      addresses[address] = node
+    else
+      assert(node.raw == record.bytes, 'conflicting aliased native record')
+    end
+    ordered[i] = node
+  end
+  for _, node in ipairs(ordered) do
+    local offset, segment = string.unpack('<I2I2', node.raw)
+    local address = segment * 16 + offset
+    assert(address == 0 or addresses[address], 'unresolved native next pointer')
+    node.next = addresses[address]
+  end
+  local vector = {}
+  for i,node in ipairs(ordered) do vector[i-1] = node end
+  return {next=ordered[1]}, vector, #ordered
+end
+
 function nodes.byte(node, offset)
   return node and node[offset] or 0
 end

@@ -149,4 +149,3 @@ print(string.format("aspect=%02X gender=%d paradigm=%d", b:byte(2), b:byte(3)&3,
 -- perfective stem:
 if #b > 5 then print("perfective:", utils.decode(b:sub(6))) end
 ```
-

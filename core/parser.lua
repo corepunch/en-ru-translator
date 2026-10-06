@@ -150,6 +150,14 @@ choose = function(t, p, i)
 	return find(t[i], "RS") or verb(t, p, i)
 end
 
+-- Delimited operators share one reader; negation and boundaries keep their scan semantics.
+local pattern_delimiters = {
+  ['['] = { close = ']', kind = 'select' },
+  ['<'] = { close = '>', kind = 'any' },
+  ['`'] = { close = '`', kind = 'literal' },
+}
+local pattern_kinds = { ['*'] = 'wildcard' }
+
 local function pattern_tokens(m)
   local i, n = 1, false
   return function()
@@ -157,31 +165,19 @@ local function pattern_tokens(m)
 		::restart::
     if i > #m then return nil end
     local c = m:sub(i, i)
-    if c == '[' then
-      local j, close = i + 1, m:find(']', i)
-      if not close then error("Unclosed [") end
+    local delimiter = pattern_delimiters[c]
+    if delimiter then
+      local j, close = i + 1, m:find(delimiter.close, i + 1, true)
+      if not close then error('Unclosed ' .. c) end
       i = close + 1
-      return 'select', m:sub(j, close - 1), n  -- content between [ ]
-    elseif c == '<' then
-      local j, close = i + 1, m:find('>', i)
-      if not close then error("Unclosed <") end
-      i = close + 1
-      return 'any', m:sub(j, close - 1), n  -- content between < >
-    elseif c == '`' then
-      local j, close = i + 1, m:find('`', i + 1)
-      if not close then error("Unclosed `") end
-      i = close + 1
-      return 'literal', m:sub(j, close - 1), n  -- content between ` `
-    elseif c == '*' then
-      i = i + 1
-      return 'wildcard', '*', n
+      return delimiter.kind, m:sub(j, close - 1), n
     elseif c == '~' then
       i = i + 1
 			n = true
 			goto restart
     else
       i = i + 1
-      return 'char', c, n
+      return pattern_kinds[c] or 'char', c, n
     end
   end
 end
@@ -206,11 +202,17 @@ local function replacement_tokens(r)
   end
 end
 
-local function replace(ts, j, m, t, s)
-	if s == ' ' then
+local function keep_replacement() end
+local function relabel_replacement(ts, j, m, s)
+	if s then find_and_replace(ts, j, s) end
+end
+
+-- This is dispatch for existing Lua behavior, not newly recovered native semantics.
+local replacement_actions = {
+	[' '] = function(ts, j)
 		-- X2xx (shall/will = future auxiliary) → use 'q' perfective-marker instead of
 		-- a silent space so the compiler knows to conjugate the next verb as perfective.
-		-- LTGOLD encodes this via T7/T8 constituent-type flags; 'q' is our approximation.
+		-- 'q' remains the legacy approximation of the native auxiliary state.
 		if ts[j] and ts[j]:sub(1,1) == 'X' then
 			local xdigit = ts[j]:match('%d+')
 			if xdigit and xdigit:sub(1,1) == '2' then
@@ -221,30 +223,31 @@ local function replace(ts, j, m, t, s)
 		else
 			ts[j] = ' '
 		end
-	elseif m:find'*' and (j >= #ts or j == 1) then
-	elseif t == 'literal' then ts[j] = s
-	elseif s == '.' or s == '$' then
-	elseif s == '@' then find_and_replace(ts, j, m)
-	elseif s == '^' then
-		-- Preserve the structural separator for T6's N-N/NN patterns. The original
-		-- action marks a join; it does not concatenate lexical token bytes here.
-	elseif s == 'j' then
-		ts[j] = 'j'  -- inject end-of-clause boundary marker
-	elseif s == '|' then
-		ts[j] = '|'  -- inject clause-boundary separator
-	elseif s == '&' then
-		-- coordination marker: look for C-form, else no-op
-		find_and_replace(ts, j, 'C')
-	elseif s == '1' and ts[j] and ts[j]:sub(1, 1):match('[Ee]') then
-		-- Custom fallback action: mark an E/e form as resolved finite past without changing the behavior of LTGOLD's existing E-to-V rules.
-		ts[j] = 'V1' .. ts[j]:sub(2)
-	elseif s == '#' then
+	end,
+	['.'] = keep_replacement,
+	['$'] = keep_replacement,
+	['@'] = function(ts, j, m) find_and_replace(ts, j, m) end,
+	-- Preserve structural joins; '=' and ';' still await native semantics.
+	['^'] = keep_replacement,
+	['='] = keep_replacement,
+	[';'] = keep_replacement,
+	['j'] = function(ts, j) ts[j] = 'j' end,
+	['|'] = function(ts, j) ts[j] = '|' end,
+	['&'] = function(ts, j) find_and_replace(ts, j, 'C') end,
+	['#'] = function(ts, j)
 		-- Literal `a` is initially an article; LTGOLD's boundary rule restores the
 		-- original designator spelling (A) from the analyzer's source-token field.
 		ts[j] = '#' .. ((ts.source and ts.source[j]) or ts[j]:sub(2))
-	elseif s == '=' or s == ';' then
-		-- case-setting / clause-continuation: no-op until semantics are confirmed
-	elseif s then find_and_replace(ts, j, s)
+	end,
+}
+
+local function replace(ts, j, m, t, s)
+	-- Deletion precedes boundary/literal handling in the existing matcher contract.
+	if s == ' ' then replacement_actions[s](ts, j)
+	elseif m:find('*', 1, true) and (j >= #ts or j == 1) then
+	elseif t == 'literal' then ts[j] = s
+	else
+		(replacement_actions[s] or relabel_replacement)(ts, j, m, s)
 	end
 	return j+1
 end
@@ -290,37 +293,8 @@ end
 -- positions: list of token indices that were matched (in order)
 -- digits: the action string (e.g. "23", "3455")
 local function reorder_tokens(ts, positions, digits)
-	-- Snapshot complete entries; LTGOLD T5/T6 moves provenance with constituents.
-	local snap = stream.snapshot(ts, positions)
-	dbg.log(2, "    reorder: positions=", table.concat(positions,","),
-	  "digits=", digits,
-	  "snap=", table.concat(utils.map(snap, function(entry)
-	    return utils.decode(entry.token, true)
-	  end), ","))
-	-- track which snap indices have been used
-	local used = {}
-	-- write back in digit-specified order
-	for k = 1, #digits do
-		local d = tonumber(digits:sub(k, k))
-		if d and d >= 1 and d <= #snap and positions[k] then
-			stream.write(ts, positions[k], snap[d])
-			used[d] = true
-		end
-	end
-	-- fill remaining positions with unused snap entries in order
-	local next_snap = 1
-	for k = #digits + 1, #positions do
-		while used[next_snap] do next_snap = next_snap + 1 end
-		if next_snap <= #snap and positions[k] then
-			stream.write(ts, positions[k], snap[next_snap])
-			used[next_snap] = true
-			next_snap = next_snap + 1
-		end
-	end
-	dbg.log(2, "    reorder result:",
-	  table.concat(utils.map(positions, function(pos)
-	    return utils.decode(ts[pos], true)
-	  end), ","))
+	-- LTPRO consumes each digit against the already-mutated order.
+	stream.reorder(ts, positions, digits)
 	for _, pos in ipairs(positions) do
 		-- Hyphens consumed by a T5/T6 constituent reorder are structural and do not
 		-- surface in Russian (buyer-seller agreement → соглашение продавца покупателя).
@@ -369,39 +343,21 @@ local function collect_positions(ts, m, start)
 end
 
 local function match_pattern(ts, m, r, flags)
-	local is_digit_action = r and r:match("^%d+$")
 	for i = 1, #ts do
 		if try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), nop) then
 			dbg.log(1, "  Applying:", m, r)
-			if is_digit_action then
+			-- Diagnostic only: these are table-specific handler IDs, not constituent
+			-- types. Storing an ID does not execute its native handler.
+			if flags and flags > 0 and (r == nil or r == "" or r == ".") then
 				local positions = collect_positions(ts, pattern_tokens(m), i)
-				local verb_phrase = false
-				for _, pos in ipairs(positions or {}) do
-					-- W retains the first constituent tag immediately after its marker.
-					verb_phrase = verb_phrase or ts[pos]:match("^WV") ~= nil
-				end
-				-- T6's 0x02 records annotate W-constituent heads. LTPRO preserves
-				-- their surface order even when their digit action equals a reorder rule.
-				local constituent_head = flags == 0x02
-				if positions and #positions > 0 and not verb_phrase and not constituent_head then
-					reorder_tokens(ts, positions, r)
+				if positions and #positions > 0 then
+					local head_pos = positions[#positions]
+					ts.constituent_flags[head_pos] = flags
+					dbg.log(2, string.format("    T7/T8 flag 0x%02X → token %d (%s)",
+						flags, head_pos, utils.decode(ts[head_pos], true)))
 				end
 			else
-				-- Guard rules (T7/T8) have no rewrite action but carry constituent-type
-				-- flags. Store the flags on the LAST token of the matched span so the
-				-- compiler can use them for case/agreement decisions.
-				-- LTGOLD encodes PP (0x02), NP (0x06), VP (0x03), etc. in these flags.
-				if flags and flags > 0 and (r == nil or r == "" or r == ".") then
-					local positions = collect_positions(ts, pattern_tokens(m), i)
-					if positions and #positions > 0 then
-						local head_pos = positions[#positions]
-						ts.constituent_flags[head_pos] = flags
-						dbg.log(2, string.format("    T7/T8 flag 0x%02X → token %d (%s)",
-							flags, head_pos, utils.decode(ts[head_pos], true)))
-					end
-				else
-					try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
-				end
+				try_match_pattern(ts, pattern_tokens(m), i, replacement_tokens(r), replace)
 			end
 			dbg.log(3, "    tokens after:",
 			  table.concat(utils.map(ts, function(t)
@@ -460,13 +416,50 @@ local rule_set_preprocessors = {
 	end,
 }
 
+local function apply_reorder_sets(ts)
+	-- Match the native position-first, contiguous T5/T6 scan and skip consumed spans.
+	-- Packed lexical strings still lack the native predicate fields; keep the legacy
+	-- W adaptation here, while core.ltpro.reorder verifies the complete native pass.
+	remove_silent_tokens(ts)
+	rule_set_preprocessors[6](ts)
+	local first = 1
+	while first <= #ts do
+		local consumed = 1
+		local applied = false
+		for ri = 5, 6 do
+			for _, rule in ipairs(rules[ri]) do
+				local flags, pattern, digits = table.unpack(rule)
+				-- The compatibility adapter still resolves W heads through the legacy
+				-- matcher; native lexical nodes use a literal +0x0C tag comparison.
+				local positions = collect_positions(ts, pattern_tokens(pattern), first)
+				local verb_phrase = false
+				for _, pos in ipairs(positions or {}) do
+					verb_phrase = verb_phrase or (ts[pos] or ''):match('^WV') ~= nil
+				end
+				if positions and not verb_phrase and flags ~= 2 then
+					dbg.log(1, '  Applying reorder:', pattern, digits or '')
+					reorder_tokens(ts, positions, digits or '')
+					consumed, applied = #pattern, true
+					break
+				end
+			end
+			if applied then break end
+		end
+		first = first + consumed
+	end
+end
+
 local function apply_rule_sets(ts)
 	for ri, rs in ipairs(rules) do
-		if rule_set_preprocessors[ri] then rule_set_preprocessors[ri](ts) end
-		dbg.log(2, "Rule set T" .. ri .. ":")
-		for _, r in ipairs(rs) do
-			local flags, pat, act = table.unpack(r)
-			match_pattern(ts, pat, act or "", flags)
+		if ri == 5 then
+			apply_reorder_sets(ts)
+		elseif ri ~= 6 then
+			if rule_set_preprocessors[ri] then rule_set_preprocessors[ri](ts) end
+			dbg.log(2, "Rule set T" .. ri .. ":")
+			for _, r in ipairs(rs) do
+				local flags, pat, act = table.unpack(r)
+				match_pattern(ts, pat, act or "", flags)
+			end
 		end
 		dbg.log(3, "  After T" .. ri .. ":",
 		  table.concat(utils.map(ts, function(t)
@@ -588,9 +581,8 @@ end
 
 function parser.collect(dic, ts)
 	en_ru = dic
-	-- Constituent-type flags from T7/T8 guard rules. Indexed by token
-	-- position; stores the flags value so the compiler can use it for
-	-- case/agreement decisions (PP=0x02, NP=0x06, VP=0x03, etc.).
+	-- Legacy diagnostic storage. Native table-specific handlers are not implemented
+	-- merely by recording these IDs, and the compiler does not consume them.
 	ts.constituent_flags = {}
 	loop(ts)
 	-- These phases intentionally reproduce observable LTPRO output quirks after

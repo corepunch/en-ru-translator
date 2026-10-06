@@ -4,7 +4,7 @@ local reorder = require 'core.ltpro.reorder'
 for _, fixture in ipairs(assert(loadfile(arg[1]))()) do
   local records = {}
   for i, fields in ipairs(fixture) do
-    local record = {id = i, [0x98] = fields.text}
+    local record = {id = i, [0x11C] = fields.text}
     for key, value in pairs(fields) do if type(key) == 'number' then record[key] = value end end
     records[i] = record
   end

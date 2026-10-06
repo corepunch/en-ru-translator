@@ -32,8 +32,19 @@ SITES = [
     # target; the hook dumps only once the record is null, i.e. after the final
     # T3 rule and its rebuild. 14164 is unusable: 14168 is a jump target.
     (5, 'T3', 0x14168, bytes.fromhex('c45eee268b07')),
+    # T4 is the separate function 108F:000F with its vector at BP-848h. Its
+    # boundary is its own rule-record test, again a jump target, dumping only
+    # once the 9-byte record is null; the frame offset is adjusted by -6.
+    (6, 'T4', 0x1607A, bytes.fromhex('c45ef8268b07')),
+    # The reorder function 1279:000D (vector at BP-822h) has one exit: its
+    # result load, followed by a zero-length relative jump that stays harmless
+    # when displaced.
+    (7, 'reorder', 0x16786, bytes.fromhex('b80100eb00')),
 ]
-CONDITIONAL = {5}
+CONDITIONAL = {5, 6}
+FRAME_ADJUST = {6: -6, 7: 0x20}
+RULE_SIZE = 0x14F
+DUMP_RULES = True
 
 
 class Code:
@@ -50,6 +61,9 @@ class Code:
         self.fixups.append((len(self.data), name, False)); self.word(0)
     def near(self, opcode, name):
         self.emit(opcode); self.fixups.append((len(self.data), name, True)); self.word(0)
+    def far_call(self, segment, offset):
+        # The segment word needs an MZ relocation; its payload offset is returned.
+        self.emit('9a'); self.word(offset); at = len(self.data); self.word(segment); return at
     def finish(self):
         for at, name, relative in self.fixups:
             value = self.labels[name] - (at + 2 if relative else 0)
@@ -62,11 +76,11 @@ def instrument(original):
     header = struct.unpack_from('<H', original, 8)[0] * 16
     count, table = struct.unpack_from('<H', original, 6)[0], struct.unpack_from('<H', original, 24)[0]
     # The original relocation table fills its header exactly. Grow the header by
-    # one paragraph for the hook relocations; load addresses are header-relative,
+    # whole paragraphs for the hook relocations; load addresses are header-relative,
     # so only file offsets shift. Hook sites below stay original file offsets.
-    shift = 16
+    shift = -(-(table + (count + len(SITES)) * 4 - header) // 16) * 16
     image = bytearray(original[:header] + bytes(shift) + original[header:])
-    struct.pack_into('<H', image, 8, header // 16 + 1)
+    struct.pack_into('<H', image, 8, (header + shift) // 16)
     header += shift
     if table + (count + len(SITES)) * 4 > header: raise ValueError('no relocation header space')
     code = Code()
@@ -77,6 +91,9 @@ def instrument(original):
         code.data.extend(displaced)
         # PUSHF; save AX BX CX DX SI DI BP DS ES. BP remains the native frame.
         code.emit('9c 50 53 51 52 56 57 55 1e 06')
+        if stage in FRAME_ADJUST:
+            # Present this function's vector as BP-842h; BP is restored below.
+            code.emit('83c5'); code.data.append(FRAME_ADJUST[stage] & 0xff)
         if stage in CONDITIONAL:
             # ES:BX holds the next rule record from the displaced LES; skip the
             # dump unless its pattern pointer is null (table exhausted).
@@ -117,6 +134,15 @@ def instrument(original):
     code.emit('85ed 7503'); code.near('e9', 'close')
     code.emit('268b14 268b4402 8ed8 b9'); code.word(NODE_SIZE)
     code.near('e8', 'write')
+    if DUMP_RULES:
+        # Word records (+0E = 'W') own +93 sub-rule records of 14Fh bytes at +94.
+        code.emit('8bda 807f0e57'); code.near('0f85', 'no_rules')
+        code.emit('8a8f9300 30ed 0bc9'); code.near('0f84', 'no_rules')
+        code.emit('c5979400')
+        code.label('rules')
+        code.emit('51 b9'); code.word(RULE_SIZE); code.near('e8', 'write')
+        code.emit('81c2'); code.word(RULE_SIZE); code.emit('59 e2f2')
+        code.label('no_rules')
     code.emit('83c604 4d'); code.near('e9', 'nodes')
     code.label('close')
     code.emit('8bdf b43e cd21 7303'); code.near('e9','error')
@@ -137,13 +163,15 @@ def instrument(original):
     # ignoring the new MZ image length. Move the stack above the hook so startup
     # cannot release the hook's memory to dictionary/node allocations.
     struct.pack_into('<H', image, 14, HOOK_SEGMENT+(len(payload)+15)//16)
-    for index, ((_, _, site, displaced), entry) in enumerate(zip(SITES, entries)):
+    relocated = []
+    for (_, _, site, displaced), entry in zip(SITES, entries):
         site += shift
         image[site:site+len(displaced)] = b'\x9a' + struct.pack('<HH', entry, HOOK_SEGMENT) + b'\x90'*(len(displaced)-5)
+        relocated.append(site + 3 - header)
+    for index, relocation in enumerate(relocated):
         # Relocation addresses are module coordinates; normalize their segment:offset.
-        relocation = site + 3 - header
         struct.pack_into('<HH', image, table+(count+index)*4, relocation % 16, relocation // 16)
-    struct.pack_into('<H', image, 6, count+len(SITES))
+    struct.pack_into('<H', image, 6, count+len(relocated))
     struct.pack_into('<HH', image, 2, len(image)%512, (len(image)+511)//512)
     return bytes(image)
 
@@ -153,7 +181,7 @@ def decode_trace(raw):
     while pos < len(raw):
         if raw[pos:pos+4] != b'LTTR': raise ValueError(f'invalid trace magic at {pos}')
         stage,count,ds,ss,handler,rule_offset,rule_segment,last = struct.unpack_from('<8H',raw,pos+4); pos += 20
-        if stage not in (1,2,3,4,5) or not 0 < count <= 512: raise ValueError('invalid trace header')
+        if stage not in (1,2,3,4,5,6,7) or not 0 < count <= 512: raise ValueError('invalid trace header')
         vector = [struct.unpack_from('<HH',raw,pos+i*4) for i in range(count+1)]
         pos += (count+1)*4
         if vector[-1] != (0,0): raise ValueError('unterminated vector')
@@ -174,12 +202,22 @@ def decode_trace(raw):
                 return record[at:stop].decode('cp866')
             next_offset,next_segment = struct.unpack_from('<HH',record)
             next_address = next_segment*16+next_offset
+            rules = []
+            if record[0x0E] == 0x57 and record[0x93]:
+                for _ in range(record[0x93]):
+                    entry = raw[pos:pos+RULE_SIZE]; pos += RULE_SIZE
+                    if len(entry) != RULE_SIZE: raise ValueError('truncated sub-rule record')
+                    def field(at):
+                        stop = entry.find(b'\0',at)
+                        if stop < 0: raise ValueError('unterminated sub-rule field')
+                        return entry[at:stop].decode('cp866')
+                    rules.append({'pattern': field(0), 'action': field(0x50), 'raw_hex': entry.hex()})
             nodes.append({'id': identities[addresses[index]], 'pointer': [offset,segment],
                 'next': identities.get(next_address) if next_address else None,
                 'next_pointer': [next_offset,next_segment], 'tag': chr(record[0x0c]),
                 'previous_tag': record[0x66], 'source': text(0x12),
                 'lexical': text(0x9c), 'translation': text(0x11c),
-                'raw_hex': record.hex()})
+                'rules': rules, 'raw_hex': record.hex()})
         snapshot={'stage': SITES[stage-1][1], 'native_ds':ds, 'native_ss':ss,
                   'cache': cache[:-1].decode('ascii'), 'nodes': nodes}
         if stage==4:
@@ -195,7 +233,8 @@ def semantic(snapshot):
     # compare uninitialized record padding as semantic state; preserve it above.
     return {'stage':snapshot['stage'], 'cache':snapshot['cache'],
         'rule':snapshot.get('rule'),'handler':snapshot.get('handler'),'last':snapshot.get('last'),'nodes':[
-        {key:node[key] for key in ('id','next','tag','previous_tag','source','lexical','translation')}
+        dict({key:node[key] for key in ('id','next','tag','previous_tag','source','lexical','translation')},
+             rules=[(rule['pattern'],rule['action']) for rule in node['rules']])
         for node in snapshot['nodes']]}
 
 
@@ -265,8 +304,11 @@ def main():
                     sequence=sequence[1:]
                     while sequence and sequence[0]=='T1-match': sequence=sequence[1:]
                     if sequence[:2]==['T1','T2']: sequence=sequence[2:]
-                    # T3 may be absent when the shared function returns early.
+                    # T3 may be absent when the shared function returns early;
+                    # the caller then skips T4 as well.
                     if sequence[:1]==['T3']: sequence=sequence[1:]
+                    if sequence[:1]==['T4']: sequence=sequence[1:]
+                    if sequence[:1]==['reorder']: sequence=sequence[1:]
                 repetitions.append(snapshots)
             except Exception:
                 log_path=root/'host.log'

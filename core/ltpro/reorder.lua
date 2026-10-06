@@ -1,4 +1,5 @@
 -- Port of LTPRO 1279:000D (file 0x1619D), operating on original-shaped lexical nodes.
+-- The native +98 text pointer addresses the record's own +11C translation.
 local nodes = require "core.ltpro.nodes"
 local rules = require "core.rules"
 local reorder = {}
@@ -19,10 +20,10 @@ local handlers = {
       not (byte(v[last], 0x0F) == 0x77 and byte(v[first + 1], 0x0F) == 0x77)
   end,
   [4] = function(v, first)
-    return not assert(v[first][0x98], "missing native lexical text"):find("P", 1, true)
+    return not assert(v[first][0x11C], "missing native lexical text"):find("P", 1, true)
   end,
   [5] = function(v, first)
-    if assert(v[first + 1][0x98], "missing native lexical text") == "-" then
+    if assert(v[first + 1][0x11C], "missing native lexical text") == "-" then
       v[first + 1][0x0C] = 0x2D
       return false
     end
@@ -32,13 +33,13 @@ local handlers = {
   [7] = function(v, first, last) return byte(v[last], 0x0F) == 0x72 end,
   [8] = function(v, first)
     -- CP866 "мес)" at DS:43DB; strstr, not an English-source-word special case.
-    return assert(v[first][0x98], "missing native lexical text"):find("\xAC\xA5\xE1)", 1, true) ~= nil
+    return assert(v[first][0x11C], "missing native lexical text"):find("\xAC\xA5\xE1)", 1, true) ~= nil
   end,
   [9] = function(v, first, last)
     return byte(v[last], 0x0F) == 0x77 or byte(v[last - 1], 0x0F) == 0x77
   end,
   [10] = function(v, first)
-    return not assert(v[first + 1][0x98], "missing native lexical text"):find("P", 1, true)
+    return not assert(v[first + 1][0x11C], "missing native lexical text"):find("P", 1, true)
   end,
   [11] = function(v, first, last) return byte(v[last], 0x0F) ~= 0x77 end,
   [12] = function(v, first) return first <= 5 end,
@@ -116,7 +117,16 @@ function reorder.apply(root, tables)
   for i = 1, count - 1 do
     if vector[i][0x0C] == 0x54 then vector[i][0x0C] = 0x20 end
   end
-  return nodes.vector(root)
+  -- Native rebuilds its vector, count and tag cache only when a record was
+  -- blanked; otherwise DS:C5AE and DS:C7B1 keep their pre-reorder values
+  -- although the linked records are already swapped. The third result says
+  -- whether that rebuild happened.
+  local rebuilt = false
+  for i = 0, count - 1 do
+    if vector[i][0x0C] == 0x20 then rebuilt = true end
+  end
+  local compacted, compacted_count = nodes.vector(root)
+  return compacted, compacted_count, rebuilt
 end
 
 return reorder

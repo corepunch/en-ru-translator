@@ -13,9 +13,14 @@ The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementat
 - The independent T1 port matches 77 sentence-stage fixtures and all 36 events.
   Another 648 generated/instruction fixtures exercise every T1 selector,
   including allocation success/limit/failure and an explicitly synthetic selector 8.
-- The T2 and T3 ports match 76 captured T1→T2 and 76 T2→T3 fixtures each, and
-  962 and 872 generated-node instruction fixtures cover every T2 and T3
-  selector body, including bodies no supplied record selects.
+- The T2, T3 and T4 ports match 76 captured T1→T2, T2→T3 and T3→T4 fixtures
+  each; 962 and 872 generated-node instruction fixtures cover every T2 and T3
+  selector body, including bodies no supplied record selects, and the T4
+  probe covers its selectors, pre-passes and all 289 dictionary sub-rules.
+- Per-word sub-rules (`word pattern*$action` records) are captured with the
+  nodes and attached by the lexical slice.
+- The existing reorder port matches 76 captured T4→reorder fixtures once the
+  native stale tag cache after a swap without removal is modeled.
 - The two planned exact-word lexical/node slices match their native initialized
   word fields; the metadata decoder passes 1,377 instruction comparisons.
 - A generated ledger inventories all 410 selectors and 282 distinct targets,
@@ -26,12 +31,13 @@ The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementat
   15 cases without corpus regressions. An additional 16-case capitalization
   matrix matches two identical native runs. This is not full-file or universal parity.
 
-Next: port the per-word sub-rule loader (`word pattern*$action` dictionary
-records) and the remaining analyzer/lookup branches, add a T4-boundary hook in
-the caller's frame, then port the separate T4 function and constituent creation.
-Unobserved branches, global allocation state, later generation and document/file
-output remain explicit gaps. The production pipeline still uses the legacy
-parser and later passes; the native T1–T3 ports are development entry points. No milestone
+Next: port the remaining analyzer/lookup branches (multi-word phrases, suffix
+and prefix analysis, unknown words, annotations) so real input reaches the
+native passes, then capture and port the post-reorder driver stages
+(`151F:2740`, `1C3D:1B3F`, T8 `1986:000E`, `17AA:1D31`, and T7 `1313:1364`). Unobserved branches, global allocation state, later generation and
+document/file output remain explicit gaps. The production pipeline still uses
+the legacy parser and later passes; the native T1–T4 ports are development
+entry points. No milestone
 below is declared complete merely because its current corpus passes.
 
 ## Objective and completion contract
@@ -274,9 +280,9 @@ The initial deliverable was **phase 1 plus one lexical vertical slice**:
 4. An updated routine ledger and effort range based on the measured work in that slice.
 
 Snapshots, the first-divergence report, two lexical slices, the initial ledger
-and the T2/T3 ports are delivered in the stage report. Complete semantic mapping
-and branch coverage are still open. The next deliverable is the sub-rule loader
-and native lookup/analyzer expansion, followed by the T4 boundary and port. These
+and the T2/T3/T4 ports are delivered in the stage report. Complete semantic
+mapping and branch coverage are still open. The next deliverable is the native
+lookup/analyzer expansion, followed by the post-reorder stage boundaries. These
 measurements establish the method, but do not yet justify a completion date for
 phases 2–5. If tracing stalls, change the tracing mechanism; do not substitute
 more sentence-specific patches.

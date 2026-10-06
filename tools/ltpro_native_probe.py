@@ -192,7 +192,9 @@ class Machine:
                 # Near calls in the large-model grammar explicitly push CS first.
                 target=self.get(ins,op[0]);self.push(self.reg('ip'));self.reg('ip',target)
             elif m=='lcall':
-                segment,offset=self.get(ins,op[0]),self.get(ins,op[1])
+                if len(op)==1:
+                    pointer=self.read(self.address(ins,op[0]),4);segment,offset=pointer>>16,pointer&0xffff
+                else:segment,offset=self.get(ins,op[0]),self.get(ins,op[1])
                 if not self.library(segment,offset):
                     self.push(self.reg('cs'));self.push(self.reg('ip'))
                     self.reg('cs',segment);self.reg('ip',offset)

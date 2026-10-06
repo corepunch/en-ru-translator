@@ -2,6 +2,8 @@ local nodes = require 'core.ltpro.nodes'
 local first_pass = require 'core.ltpro.first_pass'
 local second_pass = require 'core.ltpro.second_pass'
 local third_pass = require 'core.ltpro.third_pass'
+local fourth_pass = require 'core.ltpro.fourth_pass'
+local reorder = require 'core.ltpro.reorder'
 local encoding = require 'core.encoding'
 local function unhex(s) return (s:gsub('%x%x',function(x) return string.char(tonumber(x,16)) end)) end
 local fixtures = dofile(assert(arg[1]))
@@ -38,7 +40,14 @@ for _,case in ipairs(fixtures) do
   for _,record in ipairs(case.before) do
     records[#records+1] = {offset=record.pointer[1],segment=record.pointer[2],bytes=unhex(record.raw_hex)}
   end
-  local root = nodes.from_records(records)
+  local root, imported = nodes.from_records(records)
+  for i,record in ipairs(case.before) do
+    if record.rules and #record.rules>0 then
+      local list={}
+      for _,rule in ipairs(record.rules) do list[#list+1]={pattern=rule.pattern,action=rule.action} end
+      imported[i-1].rules=list
+    end
+  end
   local differences = {}
   local rules
   if case.rules then
@@ -50,6 +59,23 @@ for _,case in ipairs(fixtures) do
   end
   local ok, result = pcall(function()
     if case.normalize then first_pass.run(root,{terminator=0x2E,rules={}}) end
+    if case.stage=='reorder' then
+      local vector,count,rebuilt=reorder.apply(root)
+      local tags={}
+      for i=0,count-1 do tags[#tags+1]=string.char(vector[i][0x0C]) end
+      if not rebuilt then tags={case.before_cache} end
+      return {vector=vector,count=count,tags=table.concat(tags),events={}}
+    end
+    if case.stage=='T4' then
+      if case.normalize then first_pass.run(root,{terminator=0x2E,rules={}}) end
+      -- Boundary records take the emulator's allocation addresses, in order.
+      local allocated=0
+      local boundaries={allocate=function()
+        allocated=allocated+1
+        return {native_address=assert(case.allocations and case.allocations[allocated],'unexpected native allocation')}
+      end}
+      return fourth_pass.run(root,{rules=rules,boundaries=boundaries})
+    end
     if case.stage=='T3' then
       if case.normalize then second_pass.run(root,{count=#case.before,rules={}}) end
       return third_pass.run(root,{count=#case.before,rules=rules,terminator=case.terminator})

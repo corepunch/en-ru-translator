@@ -3,7 +3,7 @@
 -- Search/merge policies are separate from byte ingestion.
 local dictionary={}
 function dictionary.from_bytes(bytes)
-  local result={bytes=bytes,records={},by_key={},unparsed={}}
+  local result={bytes=bytes,records={},by_key={},by_token={},unparsed={}}
   local start=1
   while start<=#bytes do
     local finish=bytes:find('\n',start,true) or (#bytes+1)
@@ -15,6 +15,10 @@ function dictionary.from_bytes(bytes)
       result.records[#result.records+1]=record
       result.by_key[record.key]=result.by_key[record.key] or {}
       local list=result.by_key[record.key];list[#list+1]=record
+      -- The native scan tokenizes keys on space and star and folds ASCII case.
+      local token=line:match('^([^ *]*)'):gsub('[A-Z]',string.lower)
+      result.by_token[token]=result.by_token[token] or {}
+      local tokens=result.by_token[token];tokens[#tokens+1]=record
     else result.unparsed[#result.unparsed+1]={raw=raw,offset=start-1} end
     start=finish+1
   end

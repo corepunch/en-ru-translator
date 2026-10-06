@@ -4,6 +4,23 @@
 local nodes=require 'core.ltpro.nodes'
 local readings=require 'core.ltpro.readings'
 local lexical={}
+-- 0A4F:1603 attaches up to ten `word pattern*$action` records to a word node:
+-- records whose first token matches the word and whose last star is followed
+-- by `$`. Multi-word phrase matching, which precedes that test natively, is
+-- not ported; a sub-rule pattern that starts with the next source word is
+-- therefore not distinguished here.
+function lexical.sub_rules(dictionary,word)
+  local rules={}
+  for _,record in ipairs(dictionary.by_token[word:gsub('[A-Z]',string.lower)] or {}) do
+    local line=record.raw:gsub('\r$','')
+    local star=line:match('^.*()%*')
+    if star and line:sub(star+1,star+1)=='$' and line:sub(#word+1,#word+1)==' ' then
+      if #rules>=10 then break end
+      rules[#rules+1]={pattern=line:sub(#word+2,star-1),action=line:sub(star+2)}
+    end
+  end
+  return rules
+end
 local function boundary(first)
   return nodes.new('*',{[0x0D]=0x2A,[0x0E]=0x44,[0x09]=first and 1 or 0,
     [0x12]='*',[0x9C]='',[0x11C]='',[0x66]=0})
@@ -26,6 +43,8 @@ function lexical.analyze(dictionary,input)
     fields[0x10],fields[0x87],fields[0x85],fields[0x86]=position-1,#source,0xFF,0xFF
     local node=nodes.new(initial,fields)
     readings.decode(node,payload)
+    local sub_rules=lexical.sub_rules(dictionary,source)
+    if #sub_rules>0 then node.rules=sub_rules end
     records[#records+1]=node
   end
   records[#records+1]=boundary(false)

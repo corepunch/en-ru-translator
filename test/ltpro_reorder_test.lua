@@ -7,7 +7,7 @@ local rules = require "core.rules"
 local function sentence(tags)
   local records = {nodes.new('*', {id = '^'})}
   for i = 1, #tags do
-    records[#records + 1] = nodes.new(tags:sub(i, i), {id = string.char(64 + i), [0x98] = ''})
+    records[#records + 1] = nodes.new(tags:sub(i, i), {id = string.char(64 + i), [0x11C] = ''})
   end
   records[#records + 1] = nodes.new('*', {id = '$'})
   return nodes.link(records)
@@ -79,14 +79,14 @@ end
 v[0][0x0C] = 0x2A
 v[5][0x0F],v[2][0x0F] = 0x77,0x77
 assert(not reorder.allowed(v,1,5,3)); v[5][0x0F],v[2][0x0F] = 0,0
-assert(reorder.allowed(v,1,5,4)); v[1][0x98] = 'NP'; assert(not reorder.allowed(v,1,5,4))
-v[2][0x98] = '-'; assert(not reorder.allowed(v,1,5,5) and nodes.tag(v[2]) == '-')
-v[2][0x98] = 'x'; assert(reorder.allowed(v,1,5,5))
+assert(reorder.allowed(v,1,5,4)); v[1][0x11C] = 'NP'; assert(not reorder.allowed(v,1,5,4))
+v[2][0x11C] = '-'; assert(not reorder.allowed(v,1,5,5) and nodes.tag(v[2]) == '-')
+v[2][0x11C] = 'x'; assert(reorder.allowed(v,1,5,5))
 assert(not reorder.allowed(v,1,5,6)); v[5][0x72] = 1; assert(reorder.allowed(v,1,5,6))
 assert(not reorder.allowed(v,1,5,7)); v[5][0x0F] = 0x72; assert(reorder.allowed(v,1,5,7))
-assert(not reorder.allowed(v,1,5,8)); v[1][0x98] = '\xAC\xA5\xE1)'; assert(reorder.allowed(v,1,5,8))
+assert(not reorder.allowed(v,1,5,8)); v[1][0x11C] = '\xAC\xA5\xE1)'; assert(reorder.allowed(v,1,5,8))
 assert(not reorder.allowed(v,1,5,9)); v[4][0x0F] = 0x77; assert(reorder.allowed(v,1,5,9))
-assert(reorder.allowed(v,1,5,10)); v[2][0x98] = 'P'; assert(not reorder.allowed(v,1,5,10))
+assert(reorder.allowed(v,1,5,10)); v[2][0x11C] = 'P'; assert(not reorder.allowed(v,1,5,10))
 assert(reorder.allowed(v,1,5,11)); v[5][0x0F] = 0x77; assert(not reorder.allowed(v,1,5,11))
 assert(reorder.allowed(v,5,5,12) and not reorder.allowed(v,6,6,12))
 assert(not reorder.allowed(v,1,5,97)); v[5][0x0F] = 0x61; assert(reorder.allowed(v,1,5,97))

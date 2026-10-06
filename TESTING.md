@@ -44,16 +44,19 @@ lua demo/compare.lua
 
 ## Native stage probes
 
-Compare the native T1, T2 and T3 ports with the captured DOS stage boundaries,
+Compare the native T1–T4 and reorder ports with the captured DOS stage boundaries,
 and with original-instruction runs over generated nodes (requires Capstone):
 
 ```sh
 python3 tools/ltpro_first_pass_probe.py
 python3 tools/ltpro_second_pass_probe.py
 python3 tools/ltpro_third_pass_probe.py
+python3 tools/ltpro_fourth_pass_probe.py
+python3 tools/ltpro_reorder_probe.py
 python3 tools/ltpro_first_pass_native_probe.py
 python3 tools/ltpro_second_pass_native_probe.py --variants 2 --full-table 8
 python3 tools/ltpro_third_pass_native_probe.py --variants 2 --full-table 8
+python3 tools/ltpro_fourth_pass_native_probe.py --variants 2 --full-table 8
 ```
 
 The captures in `test/ltpro/stages.json` come from `tools/ltpro_trace.py`,

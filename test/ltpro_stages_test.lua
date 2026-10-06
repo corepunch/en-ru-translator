@@ -38,6 +38,24 @@ assert(after_t2.tags=='*RV*' and after_t2.count==4)
 assert(after_t2.vector[2][0x12]=='worked' and after_t2.vector[2][0x75]==1 and after_t2.vector[2][0x73]==1)
 assert(#after_t2.events==2 and after_t2.events[1].handler==60 and after_t2.events[2].handler==24)
 
+-- Per-word sub-rules: dictionary order, star inside a pattern class, ten at most.
+local third_pass=require 'core.ltpro.third_pass'
+local fourth_pass=require 'core.ltpro.fourth_pass'
+local lines={'he*R031онrу негоmему','is*X003бытьUдолженfимеется ли\\be','is <dDkK>`present`*$ \\$`Vприсутствовать`',
+  'in*PВПвb','in <THI>`hours`*$PВчерез','in `full`[*]*$Dполностью\\ \\','the*T','house*Nдом','in spite of*Pнесмотря на'}
+for i=1,11 do lines[#lines+1]='in `extra'..i..'`*$D'..i end
+local sub=dictionary.from_bytes(cp(table.concat(lines,'\n')..'\n'))
+local attached=lexical.sub_rules(sub,'In')
+assert(#attached==10 and attached[1].pattern=='<THI>`hours`' and attached[1].action==cp('PВчерез'))
+assert(attached[2].pattern=='`full`[*]' and attached[2].action==cp('Dполностью\\ \\'))
+assert(attached[10].pattern=='`extra8`')
+local house=lexical.analyze(sub,'He is in the house.')
+assert(house.tags=='*RXPTN*' and #house.vector[2].rules==1 and #house.vector[3].rules==10 and house.vector[4].rules==nil)
+first_pass.run(house.root,{terminator=0x2E});second_pass.run(house.root,{});third_pass.run(house.root,{})
+local after_t4=fourth_pass.run(house.root,{})
+assert(after_t4.tags=='*RXPTN*' and #after_t4.events==3 and after_t4.events[3].handler==18)
+for _,event in ipairs(after_t4.events) do assert(not event.sub_rule) end
+
 local n=nodes.new('P',{[0x0B]=1,[0x0F]=0})
 assert(readings.decode(n,cp('ВПвb'))==1)
 assert(n[0x76]==8 and n[0x11C]==cp('Пвb'))

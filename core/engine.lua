@@ -152,7 +152,11 @@ function engine.run(input, options)
   local prefixed=analyzed.root.next
   while prefixed do
     if prefixed.derivation_prefix and (prefixed.text or '') ~= '' then
-      prefixed.text=prefixed.derivation_prefix .. prefixed.text
+      local reading=prefixed
+      while reading do
+        if (reading.text or '')~='' then reading.text=prefixed.derivation_prefix .. reading.text end
+        reading=reading.alternative
+      end
     end
     prefixed=prefixed.next
   end

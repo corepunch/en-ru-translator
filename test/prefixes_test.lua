@@ -21,4 +21,6 @@ local supplied = {dictionary=encoding.encode('cat*Nкот\n'), prefixes=encoding
 engine.translate('subcat', supplied)
 assert(type(supplied.prefixes) == 'string', 'do not replace caller options with parsed data')
 assert(not pcall(engine.translate, 'cat', {prefixes='/missing/prefixes.pre'}))
+local alternatives = engine.translate('subcat', {dictionary=encoding.encode('cat*Nкот;собака\n'), prefixes=rows})
+assert(alternatives:find('подкот',1,true) and alternatives:find('подсобака',1,true), alternatives)
 print('prefixes_test: passed')

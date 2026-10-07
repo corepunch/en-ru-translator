@@ -8,6 +8,8 @@ local usage = [[Usage: lua init.lua [--data DIR] [--exe FILE] [--dic FILE] [--ru
 
 Input and output are UTF-8. The translator accepts one sentence;
 it does not split multiple sentences. Asset options accept paths.
+Inline {~text~} preserves text; {~=text~} transliterates it.
+{~\N starts a list with 1-10 words per row; {~\. returns to sentence mode.
 --meanings appends a glossary of alternative meanings and annotations.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
 --domain LABEL prefers readings with that dictionary domain label (e.g. инф).

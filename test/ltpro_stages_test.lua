@@ -23,7 +23,9 @@ assert(result.tags=='*JRVjRV*')
 assert(#result.events==1 and result.events[1].rule==27 and result.events[1].handler==0)
 assert(result.vector[4][0x66]==string.byte('D'))
 assert(result.vector[4][0x11C]==cp('затемCзатемJзатемjтогда'))
-assert(not pcall(lexical.analyze,forms,'An unknown word.'))
+local unknown=lexical.analyze(forms,'An unknown word.')
+assert(unknown.tags=='*???*' and unknown.vector[2][0x12]=='unknown')
+assert(unknown.vector[2][0x74]==3 and unknown.vector[2][0x77]==1)
 
 -- T2 over native nodes: `has` is removed and the participle becomes the verb,
 -- as in the captured case-048 boundary.

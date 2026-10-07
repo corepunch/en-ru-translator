@@ -3,12 +3,12 @@
 A Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator (LinguaTech Systems, 1992).
 
 Compatibility work is tracked in [the binary comparison](reference/LTPRO_COMPARISON.md).
-The translation pipeline is not yet a one-to-one implementation.
-The [fresh executable corpus](test/ltpro/README.md) currently matches 44/77 paragraphs.
-Native grammar stages through T8, generation, sentence output and the meanings
-appendix are ported and verified against captured executable state. The full
-lexical analyzer, startup state and end-to-end integration are still incomplete;
-the production translator does not yet use the complete native path.
+The snapshot-free native CLI (`--ltpro`) now matches **77/77** original inputs and
+**20/20** newly captured inputs. It runs the recovered lexical, grammar, morphology
+and output stages directly in Lua. The EXE supplies static tables only.
+See the [CLI report](reference/LTPRO_CLI_REPORT.md) for commands and remaining
+analyzer limits. These results establish corpus parity, not universal equivalence.
+The older default translator remains at 44/77; use `--ltpro` for the native path.
 Native stage work and remaining gates are recorded in the
 [parity plan](reference/LTPRO_PARITY_PLAN.md) and [stage report](reference/LTPRO_STAGE_REPORT.md);
 addresses, frames, record fields and harness mechanics are consolidated in the
@@ -21,7 +21,11 @@ Lua 5.3+ (uses bitwise operators `>>`, `&`).
 ## Usage
 
 ```sh
-# Translate a sentence — prints Russian output
+# Native LTPRO path — UTF-8 sentence in, translated text out
+lua init.lua --ltpro "She can speak Russian."
+printf '%s' "Two books." | lua init.lua --ltpro
+
+# Older translator with custom dictionary/debug support
 lua init.lua "She can speak Russian."
 
 # Full debug trace: rule firings, token dump, compiler state
@@ -36,6 +40,10 @@ lua bin/encoding.lua decode < greeting.cp866
 ```
 
 ## How it works
+
+`--ltpro` uses `core/ltpro/pipeline.lua`; its native stages and limitations are
+described in the [CLI report](reference/LTPRO_CLI_REPORT.md). The older default
+pipeline below is retained for existing APIs, diagnostics and overlays.
 
 ```
 Input (English)

@@ -12,7 +12,7 @@ The driver `0687:05D5` runs, per sentence:
 
 | Step | Native | Lua | Verification |
 |---|---|---|---|
-| Lexical analysis | `0A4F:3B12` | `core/ltpro/lexical.lua` (exact-word slice only) | 2 planned snapshots |
+| Lexical analysis | `0A4F:3B12` | `lexical.lua`, `phrases.lua`, `suffixes.lua` | **75/75** single-sentence snapshots, including subrules |
 | T1–T3 | `0E1F:0009` | `first_pass`, `second_pass`, `third_pass` | 76–77 DOS fixtures each + generated instruction fixtures |
 | T4 | `108F:000F` | `fourth_pass.lua` | 76 DOS fixtures + 1,690 instruction fixtures |
 | T5/T6 reorder | `1279:000D` | `reorder.lua` | 76 DOS fixtures + 358 instruction cases |
@@ -147,9 +147,8 @@ lua test/ltpro_post_stages_test.lua
    by reading the code but are not yet differentially confirmed.
 6. **Two Lua representations.** T1–T4 and reorder operate on node tables
    (`nodes.lua`), the later stages on the memory model. A converter from node
-   tables to memory records (or a memory-model T1–T4) is needed before one
-   Lua run can go from lexical analysis to output. The DOS snapshots are the
-   current bridge.
+   tables to memory records is now provided by `bridge.lua`; `pipeline.lua`
+   runs from raw text through both representations without a DOS snapshot.
 
 ## Generation/output continuation — 2026-10-07
 
@@ -165,22 +164,16 @@ and cleanup at `0687:0A50` (file `ACC0`). The previous `7427/6A38/72C0`
 labels were load-image offsets, not offsets relative to segment `0687`.
 The last routine frees sentence memory; it does not wrap output files.
 
-## What remains for an LTPRO output file from Lua
+## Snapshot-free CLI continuation — 2026-10-07
 
-1. **Lexical analyzer**: multi-word phrases, suffix/prefix analysis,
-   unknown words, annotations and macros. The exact-word slice is still the
-   only native input entry point.
-2. **One representation**: connect T1–T4/reorder's node tables to memory
-   records, or move those passes onto memory, without a DOS snapshot bridge.
-3. **Startup state**: build DS globals, the BASE.RUS index, dictionary list
-   and heap from the original assets rather than captured process memory.
-4. **Document/file lifecycle**: input segmentation, punctuation supplied by
-   the outer driver, file framing, wrapping, CRLF and state between sentences.
-   The new output routines produce internal buffers, not a complete file.
-5. **Coverage and other modes**: close the earlier gaps above, generation
-   and output's unobserved branches and unsupported malformed-input behavior,
-   then verify configuration modes and held-out documents.
+The new `lua init.lua --ltpro` entry matches **77/77 original outputs and 20/20
+new captures**, starting with raw input. Static tables, heap and BASE.RUS index
+come from assets through `initialize.lua`; `bridge.lua` connects node tables to
+memory records. Lexical comparisons now include subrules and match 75/75
+single-sentence fixtures; the reading decoder matches 2,184 native calls.
 
-Production paragraph parity remains **44/77**. The new chain still starts with
-DOS lexical/grammar/startup state, so its 77/77 result is a downstream-stage
-measurement, not an end-to-end or universal parity claim.
+See [the CLI report](LTPRO_CLI_REPORT.md) for reproducible checks and limits.
+The user-scoped target is CLI text input/output: DOS UI/startup behavior and
+exact document/file formatting are not required. General sentence splitting,
+unported lexical branches and broader mode/branch coverage remain open. The
+older default translator is still 44/77; select `--ltpro` for the new engine.

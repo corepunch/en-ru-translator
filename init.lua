@@ -5,6 +5,8 @@ local translator = require "core.translator"
 -- The entry point is an imperative shell: it owns configuration, files, CLI
 -- arguments, stdout, and exit status while translation remains in modules.
 local input_sentence = "You are standing in an open field west of a white house, with a boarded front door."
+local ltpro_mode = false
+local ltpro_options, input_words = {}, {}
 
 local function load_config(path)
   local file = io.open(path, "r")
@@ -26,8 +28,22 @@ local function load_config(path)
 end
 
 local overlay_dicts = {}
-
 for _, value in ipairs(arg or {}) do
+  if value == "--ltpro" then ltpro_mode = true end
+end
+
+local function set_ltpro_asset(option, value)
+  assert(value and value ~= "", "missing value after " .. option)
+  if option == "--data" then ltpro_options.data_dir = value
+  elseif option == "--exe" then ltpro_options.executable = value
+  elseif option == "--dic" then ltpro_options.dictionary = value
+  elseif option == "--rus" then ltpro_options.russian = value end
+end
+
+local args = arg or {}
+local i = 1
+while i <= #args do
+  local value = args[i]
   if value == "--debug" then
     dbg.set_level(1)
   elseif value:match("^%-%-debug=(%d+)$") then
@@ -40,9 +56,41 @@ for _, value in ipairs(arg or {}) do
     load_config(value:match("^%-%-config=(.+)$"))
   elseif value:match("^%-%-dict=(.+)$") then
     table.insert(overlay_dicts, value:match("^%-%-dict=(.+)$"))
+  elseif value == "--ltpro" then
+    ltpro_mode = true
+  elseif value == "--help" or value == "-h" then
+    io.write("Usage: lua init.lua [legacy options] [sentence]\n",
+      "       lua init.lua --ltpro [--data DIR] [--exe FILE] [--dic FILE] [--rus FILE] [sentence]\n",
+      "The LTPRO path translates one sentence. With no sentence argument it reads stdin.\n")
+    os.exit(0)
+  elseif ltpro_mode and (value == "--data" or value == "--exe" or value == "--dic" or value == "--rus") then
+    i = i + 1
+    set_ltpro_asset(value, args[i])
+  elseif ltpro_mode and value:match("^%-%-[^=]+=") then
+    local option, asset = value:match("^(%-%-[^=]+)=(.*)$")
+    assert(option == "--data" or option == "--exe" or option == "--dic" or option == "--rus",
+      "unknown LTPRO option: " .. option)
+    set_ltpro_asset(option, asset)
   elseif value:sub(1, 2) ~= "--" then
     input_sentence = value
+    input_words[#input_words + 1] = value
   end
+  i = i + 1
+end
+
+if ltpro_mode then
+  assert(#overlay_dicts == 0,
+    "--dict overlays are supported by the legacy path; use --dic with --ltpro")
+  local input = table.concat(input_words, " ")
+  if input == "" then input = io.stdin:read("*a") or "" end
+  local pipeline = require "core.ltpro.pipeline"
+  local ok, output = pcall(pipeline.translate, input, ltpro_options)
+  if not ok then
+    io.stderr:write(tostring(output), "\n")
+    os.exit(1)
+  end
+  print(output)
+  os.exit(0)
 end
 
 _G.TRANSLATOR_DEBUG = dbg.level > 0

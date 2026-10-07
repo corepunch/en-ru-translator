@@ -63,8 +63,12 @@ apply within the grammatical reading selected for each word.
 Inline `{~text~}` spans preserve their contents verbatim, including spaces and
 case; `{~=text~}` spans transliterate their contents. Each span is one opaque
 record, so its contents bypass dictionary lookup and output capitalization.
-Spans must close with `~}` and cannot nest. Legacy list-layout directives are
-not part of this single-sentence interface and report a clear error.
+Spans must close with `~}` and cannot nest. `{~\2` starts a list with two words
+per row (counts 1–10 are supported); `{~\.` returns to sentence mode. List items
+translate independently, with tabs between columns and newlines between rows.
+A protected span counts as one item. Each section starts on a new line. List
+results expose individual translation states in `state.sections` instead of one
+sentence root; requested glossaries follow the complete list.
 
 Phrase keys support literal words/punctuation and `~` gaps. A gap captures zero
 or more words without crossing punctuation or protected spans; matching chooses

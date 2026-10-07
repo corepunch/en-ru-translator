@@ -13,6 +13,7 @@ local generation = require 'core.generation'
 local output = require 'core.output'
 local encoding = require 'core.encoding'
 local prefixes = require 'core.prefixes'
+local directives = require 'core.directives'
 
 local engine = {}
 
@@ -50,6 +51,37 @@ function engine.run(input, options)
   options = {}
   for key, value in pairs(configured) do options[key] = value end
   assert(type(input) == 'string', 'input sentence must be a UTF-8 string')
+  local sections=directives.sections(input)
+  if sections then
+    local chunks, states, glossary={},{},{}
+    local cell_options={}
+    for key,value in pairs(options) do cell_options[key]=value end
+    cell_options.meanings=false
+    for _,section in ipairs(sections) do
+      local items=section.columns and directives.items(section.input) or {section.input}
+      local lines,row={},{}
+      for index,item in ipairs(items) do
+        local translated,state=engine.run(item,cell_options)
+        states[#states+1]=state
+        row[#row+1]=translated
+        if options.meanings then
+          local meanings=output.meanings(state,state.root)
+          if meanings~='' then glossary[#glossary+1]=meanings end
+        end
+        if not section.columns or index%section.columns==0 then
+          lines[#lines+1]=table.concat(row,'\t');row={}
+        end
+      end
+      if #row>0 then lines[#lines+1]=table.concat(row,'\t') end
+      chunks[#chunks+1]=table.concat(lines,'\n')
+    end
+    local result=table.concat(chunks,'\n')
+    local meanings=table.concat(glossary,'\n')
+    if meanings~='' then result=result..'\n\n'..meanings end
+    return result,{output=result,text=encoding.decode(result),sections=states,
+      meanings=options.meanings and meanings or nil,
+      meanings_text=options.meanings and encoding.decode(meanings) or nil}
+  end
   local data = options.data_dir or 'LTGOLD'
   local executable = options.executable or (data .. '/LTPRO.EXE')
   local dic_source = options.dictionary or options.dic or (data .. '/BASE.DIC')

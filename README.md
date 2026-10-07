@@ -66,6 +66,17 @@ record, so its contents bypass dictionary lookup and output capitalization.
 Spans must close with `~}` and cannot nest. Legacy list-layout directives are
 not part of this single-sentence interface and report a clear error.
 
+Phrase keys support literal words/punctuation and `~` gaps. A gap captures zero
+or more words without crossing punctuation or protected spans; matching chooses
+the longest phrase, preferring a literal key on ties. A `~` in its reading
+re-inserts captured words, which receive normal lexical analysis. A reading
+without a gap keeps captured words after the translated phrase.
+
+`W` phrase readings distribute tagged words, metadata, and `#literal#` text.
+Slash-separated phrase readings default to the first alternative; the Lua option
+`phrase_reading = function(key, readings) return index end` selects another.
+The raw CP866 choices remain available as `node.phrase_readings` for diagnostics.
+
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,

@@ -4,6 +4,7 @@ local transliteration = require 'core.transliteration'
 local text = require 'core.text'
 local prefixes = require 'core.prefixes'
 local directives = require 'core.directives'
+local phrase_patterns = require 'core.phrase_patterns'
 
 local lexicon = {}
 
@@ -452,31 +453,78 @@ function lexicon.decode_reading(node, payload, options, macroSource)
   return p-1
 end
 
--- Literal-key branch of 0A4F:1713 and reading distribution in 0A4F:18F8.
--- Pattern keys and record insertion markers require separate ports.
+-- Longest phrase wins; a literal key wins a tie against a key with gaps.
 
 function lexicon.match_phrase(dictionary, records, index, key)
-  local best,finish
+  local best,finish,captures,best_gaps
   for _,record in ipairs(dictionary.by_token[key] or {}) do
-    if record.key:find(' ',1,true) and record.key:match("^[A-Za-z '-]+$") then
-      local words={}
-      for w in record.key:gmatch('%S+') do words[#words+1]=w:lower() end
-      local matched=words[1]==key
-      for j=2,#words do
-        local n=records[index+j-1]
-        if not n or n.kind~=0x57 or n.source:lower()~=words[j] then matched=false;break end
-      end
-      if matched and record.value:sub(1,1)~='$' and (not finish or index+#words-1>finish) then
-        best,finish=record,index+#words-1
+    if record.key:find(' ',1,true) and not record.raw:find('*$',1,true) then
+      local last,gaps=phrase_patterns.match(record.key,records,index,key)
+      if last and (not finish or last>finish or last==finish and #gaps<best_gaps) then
+        best,finish,captures,best_gaps=record,last,gaps,#gaps
       end
     end
   end
-  return best,finish
+  return best,finish,captures
 end
-function lexicon.apply_phrase(record, records, first, last, options)
+function lexicon.apply_phrase(record, records, first, last, options, captures)
   options = options or {}
   local value=record.value:match('^[^\\]*')
   local node=records[first]
+  local readings=phrase_patterns.readings(value)
+  if #readings>1 then
+    local selected=options.phrase_reading and options.phrase_reading(record.key,readings) or 1
+    assert(type(selected)=='number' and readings[selected], 'invalid phrase reading selection')
+    node.phrase_readings=readings
+    value=readings[selected]
+    value=value:match('^[A-Za-z]%.(W.*)$') or value
+  end
+  -- Two shipped entries omit/mistype a selector. Untagged text stays literal;
+  -- the Cyrillic lookalike А in black board is an adjective selector.
+  value=value:gsub('^W\x80','WA')
+  if value:sub(1,1)=='W' and value:sub(2,2)~='~' and not value:sub(2,2):match('[A-Za-z#]') then
+    value='Ww'..value:sub(2)
+  end
+  if captures and #captures>0 then
+    local held,literals,rendered={},{},{}
+    for _,capture in ipairs(captures) do for _,n in ipairs(capture) do held[n]=true end end
+    for at=first,last do if not held[records[at]] then literals[#literals+1]=records[at] end end
+    local template={}
+    for k,v in pairs(node) do template[k]=v end
+    local used=0
+    local segments=phrase_patterns.segments(value)
+    for segment,part in ipairs(segments) do
+      if part~='' and part~='W' then
+        if segment>1 then
+          if part:sub(1,1)==' ' then part='Ww'..part:sub(2)
+          elseif not part:sub(1,1):match('[A-Za-z#]') then part='Ww'..part
+          elseif value:sub(1,1)=='W' then part='W'..part end
+        end
+        local pieces
+        if used==0 then pieces=literals
+        else
+          local fresh={}
+          for k,v in pairs(template) do fresh[k]=v end
+          fresh.source,fresh.source_length,fresh.rules='',0,nil
+          pieces={fresh}
+        end
+        lexicon.apply_phrase({value=part},pieces,1,#pieces,options)
+        for _,n in ipairs(pieces) do rendered[#rendered+1]=n end
+        used=used+1
+      end
+      if segment<#segments then
+        for _,n in ipairs(captures[segment] or {}) do rendered[#rendered+1]=n end
+      end
+    end
+    -- A template without an explicit gap keeps captured objects after its text.
+    for gap=#segments,#captures do
+      for _,n in ipairs(captures[gap]) do rendered[#rendered+1]=n end
+    end
+    for _=first,last do table.remove(records,first) end
+    for at=#rendered,1,-1 do table.insert(records,first,rendered[at]) end
+    return first
+  end
+  if value:find('~',1,true) then value=table.concat(phrase_patterns.segments(value)) end
   if value:sub(1,1)~='W' then
     local t=value:sub(1,1)
     node.previous_tag=t:upper():byte()
@@ -496,14 +544,15 @@ function lexicon.apply_phrase(record, records, first, last, options)
   local oldtag,number=nodes.tag(node),node.number or 0
   local index=first
   while index<=last or tag~='' do
-    assert(tag~='' and tag:match('[ANnVvEhFebPCwX]'), 'native W phrase selector is not ported: '..tag)
+    assert(tag~='' and tag:match('[A-Za-z#]'), 'invalid W phrase selector: '..tag)
     local stop=pos
-    while stop<=#value and not value:sub(stop,stop):match('[A-Za-z ~#/;]') do
+    while stop<=#value and not value:sub(stop,stop):match(tag=='#' and '#' or '[A-Za-z ~#/]') do
       if value:sub(stop,stop)=='{' then stop=assert(value:find('}',stop,true),'unterminated phrase annotation') end
       stop=stop+1
     end
     local text=value:sub(pos,stop-1)
     local nexttag=value:sub(stop,stop)
+    if tag=='#' and nexttag=='#' then stop=stop+1;nexttag=value:sub(stop,stop) end
     if nexttag==' ' then nexttag='w' end
     if index>last then
       local fresh=nodes.new(tag,{kind=0x57,marker=0x77,source='',lookup='',
@@ -540,6 +589,10 @@ function lexicon.apply_phrase(record, records, first, last, options)
       text = macroText(n.source or '', text, options)
     end
     n.tag,n.previous_tag,n.reading=tag:byte(),tag:upper():byte(),text
+    if not tag:match('[ANVvEhFebPCwX]') then
+      lexicon.decode_reading(n,text,options)
+      n.reading_state=2
+    end
     if (n.marker or 0)==0 then n.marker=0x77 end
     tag,pos=nexttag,stop+1
     if tag=='' then
@@ -552,13 +605,11 @@ function lexicon.apply_phrase(record, records, first, last, options)
 end
 
 -- Lexical analyzer over CP866 strings and lossless dictionary data.
--- Ports literal lookup, phrase readings, macros and a bounded tokenizer;
--- unsupported pattern and suffix branches fail explicitly.
+-- Literal and patterned phrases share reading distribution and ordinary records.
 
 -- 0A4F:1603 attaches up to ten `word pattern*$action` records to a word node:
 -- records whose first token matches the word and whose last star is followed
--- by `$`. Literal phrase keys are handled separately; pattern-key phrase
--- matching and its interaction with these subrules remain outside this slice.
+-- by `$`. Phrase-key matching is separate from these grammatical subrules.
 function lexicon.sub_rules(dictionary,word)
   local rules={}
   for _,record in ipairs(dictionary.by_token[word:gsub('[A-Z]',string.lower)] or {}) do
@@ -753,7 +804,7 @@ local function decode(dictionary,records,index,options)
       end
     end
   end
-  local phrase,last=lexicon.match_phrase(dictionary,records,index,source:lower())
+  local phrase,last,captures=lexicon.match_phrase(dictionary,records,index,source:lower())
   -- Subrules are collected while scanning possible following words, even
   -- when a literal phrase later wins. At a terminal boundary no scan occurs.
   if records[index+1] and records[index+1].separator~=0x2A then
@@ -766,8 +817,8 @@ local function decode(dictionary,records,index,options)
     end
     if #rules>0 then node.rules=rules end
   end
-  if not phrase and backref then phrase,last=lexicon.match_phrase(dictionary,records,index,backref:lower()) end
-  if phrase then return lexicon.apply_phrase(phrase,records,index,last,options) end
+  if not phrase and backref then phrase,last,captures=lexicon.match_phrase(dictionary,records,index,backref:lower()) end
+  if phrase then return lexicon.apply_phrase(phrase,records,index,last,options,captures) end
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end

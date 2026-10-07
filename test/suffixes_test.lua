@@ -70,10 +70,10 @@ local hyphenated = lexicon.analyze(no_root, 'foo-ness')
 local left
 node = hyphenated.root.next
 while node do
-  if node.source == 'foo' then left = node end
+  if node.source == 'foo-ness' then left = node end
   node = node.next
 end
-assert(left and left.tag == string.byte('?'))
+assert(left and left.tag == string.byte('N') and left.surface_compound)
 result = assert(lexicon.lookup(derived, 'stronger'))
 assert(result.candidate == 'strong' and result.tag == 'A' and result.native_suffix == 'er')
 assert(result.fields.marker == 0x61 and result.fields.tense == 1)

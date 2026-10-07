@@ -309,6 +309,15 @@ function lexicon.surface_noun(source)
   return nil
 end
 
+local function derivational_compound(source)
+  local left, right = ascii_lower(source):match('^([^/-]+)[/-]([^/-]+)$')
+  if not left then return false end
+  for _, row in ipairs(rows) do
+    if row.selector == 'N00' and (left == row.ending or right == row.ending) then return true end
+  end
+  return false
+end
+
 -- Expose a defensive copy for fixture tooling; callers cannot change dispatch.
 function lexicon.suffix_rows()
   local out = {}
@@ -574,7 +583,7 @@ local function word(source, position)
   fields.source,fields.lookup,fields.reading,fields.previous_tag=source,'','',0
   fields.source_position,fields.source_length,fields.paradigm,fields.paradigm_high=position,#source,0xFF,0xFF
   local numeric=source:match('^[%d,]+$') ~= nil
-  local tag=numeric and 'H' or source:match("^[A-Za-z'-]+$") and '?' or '#'
+  local tag=numeric and 'H' or source:match("^[A-Za-z'/-]+$") and '?' or '#'
   fields.counted_word=tag=='?'
   if tag=='#' then fields.person,fields.gender=3,1 end
   -- 0687:0892 preserves the original length but bounds the source copy.
@@ -714,16 +723,17 @@ local function decode(dictionary,records,index,options)
       for at,v in pairs(derived.fields) do node[layout.key(at)]=v end
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
-    elseif not lookup_error and not source:find('[-/]') then
-      local surface=lexicon.surface_noun(source)
+    elseif not lookup_error then
+      local compound=derivational_compound(source)
+      local surface=compound and {tag='N',fields={number=0,case_mask=0}}
+        or not source:find('[-/]') and lexicon.surface_noun(source)
       if surface then
-        -- The miss epilogue at 0A4F:3AD1 writes person 3 and gender 1 and
-        -- keeps the N tag. previous_tag stays unset, so a following copula
-        -- takes the neuter short adjective. Hyphenated and slashed tokens
-        -- keep the split path below.
+        -- Unknown derivational nouns keep their surface spelling. Bare
+        -- endings in compounds follow the same Lua policy without splitting.
         node.reading_state,node.tag=1,surface.tag:byte()
         node.person,node.gender=3,1
         for at,v in pairs(surface.fields) do node[layout.key(at)]=v end
+        node.surface_compound=compound
       end
     end
   end
@@ -745,7 +755,7 @@ local function decode(dictionary,records,index,options)
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end
-  if not value then
+  if not value and not node.surface_compound then
     local left,separator,right=source:match('^([^/-]+)([/-])(.+)$')
     if left then
       local attempt=lexicon.attempt_fields(source)

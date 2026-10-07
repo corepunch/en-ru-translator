@@ -43,6 +43,11 @@ API callers can set `dictionary_entry = function(key, entries) return index end`
 to choose a different entry. This also applies to redirects and suffix stems;
 the dictionary records are preserved and should be treated as read-only.
 
+Hyphen and slash compounds first try an exact dictionary entry, then analyze
+their components while retaining the separator. A compound containing a bare
+derivational noun ending (such as `foo-ness` or `ment/foo`) stays intact as an
+unknown noun. This is an intentional Lua feature policy, not DOS output parity.
+
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,

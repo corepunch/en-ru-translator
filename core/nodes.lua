@@ -1,10 +1,11 @@
+local layout = require 'core.record_layout'
 local nodes = {}
 
 -- Native lexical-node operations recovered from LTPRO 1313:000E and 1313:12DF.
--- Numeric keys identify recovered grammatical fields; links and text are Lua values.
+-- Grammar properties are named Lua fields; links preserve ordinary table identity.
 function nodes.new(tag, fields)
   local node = fields or {}
-  node[0x0C] = tag:byte()
+  node.tag = tag:byte()
   return node
 end
 
@@ -16,32 +17,36 @@ function nodes.boundary(tag, marker, state)
   local node
   if state.allocate then node=state.allocate() else node={} end
   if not node then return nil end
-  for at=0,0x14 do node[at]=0 end
-  node[0x0C],node[0x0D],node[0x0E]=tag:byte(),marker:byte(),0x44
-  node[0x12],node[0x9C],node[0x11C]=tag,'',''
+  node.reading_state, node.marker, node.source_position = 0, 0, 0
+  node.tag,node.separator,node.kind=tag:byte(),marker:byte(),0x44
+  node.source,node.lookup,node.reading=tag,'',''
   state.count=(state.count or 0)+1
   return node
 end
 
-function nodes.byte(node, offset)
-  local value = node and node[offset]
+function nodes.number(node, field)
+  local value = node and node[layout.key(field)]
   return type(value) == "string" and (value:byte() or 0) or value or 0
 end
 
+function nodes.character(node, field)
+  return string.char(nodes.number(node, field))
+end
+
 function nodes.tag(node)
-  return string.char(nodes.byte(node, 0x0C))
+  return string.char(nodes.number(node, 'tag'))
 end
 
 function nodes.set_tag(node, tag)
-  assert(node, 'missing native node')[0x0C] = tag:byte()
+  assert(node, 'missing native node').tag = tag:byte()
 end
 
 function nodes.set_marker(node, marker)
-  assert(node, 'missing native node')[0x0F] = marker:byte()
+  assert(node, 'missing native node').marker = marker:byte()
 end
 
 function nodes.has_reading(node, tag)
-  return (assert(node, 'missing native node')[0x11C] or ''):find(tag, 1, true) ~= nil
+  return (assert(node, 'missing native node').reading or ''):find(tag, 1, true) ~= nil
 end
 
 function nodes.link(records)
@@ -57,11 +62,11 @@ end
 function nodes.vector(root)
   local vector, count, previous, node = {}, 0, nil, root.next
   while node and count < 512 do
-    if node[0x0C] == 0x20 then
+    if node.tag == 0x20 then
       local following = node.next
       if previous then previous.next = following else root.next = following end
       -- 0x16C4E preserves a removed X record as x; the object can have other owners.
-      if node[0x0F] == 0x58 then node[0x0C] = 0x78 end
+      if node.marker == 0x58 then node.tag = 0x78 end
       node = following
     else
       vector[count] = node
@@ -95,21 +100,20 @@ function nodes.prepare(root)
   local function visit(node)
     if not node or seen[node] then return end
     seen[node] = true
-    for _, f in ipairs({0x10, 0x85, 0x87}) do
-      local value = node[f] or 0
-      if value >= 0 and value <= 255 then value = value | ((node[f + 1] or 0) << 8) end
-      node[f] = value
+    for _, fields in ipairs({
+      {'source_position', 'source_position_high'},
+      {'paradigm', 'paradigm_high'},
+      {'source_length', 'source_length_high'},
+    }) do
+      local field, high = fields[1], fields[2]
+      local value = node[field] or 0
+      if value >= 0 and value <= 255 then value = value | ((node[high] or 0) << 8) end
+      node[field] = value
     end
-    for _, f in ipairs({0x12, 0x9C, 0x11C, 0x21B, 0x243}) do
-      if type(node[f]) ~= 'string' then
-        local bytes, i = {}, f
-        while type(node[i]) == 'number' and node[i] ~= 0 do
-          bytes[#bytes + 1] = string.char(node[i] & 255); i = i + 1
-        end
-        node[f] = table.concat(bytes)
-      end
+    for _, field in ipairs({'source', 'lookup', 'reading', 'suffix', 'prefix'}) do
+      if type(node[field]) ~= 'string' then node[field] = '' end
     end
-    node.text = node[0x11C]
+    node.text = node.reading
     visit(node.next); visit(node.aux)
   end
   visit(root.next)
@@ -119,9 +123,9 @@ function nodes.word(state, tag, text)
   if state.word_count >= 512 then return nil end
   state.word_count = state.word_count + 1
   local numeric = tag == 0x23 or tag == 0x3F or tag == 0x48
-  return {[0x0E]=0x57, [0x0C]=numeric and #text >= 40 and 0x23 or tag,
-    [0x85]=0xFFFF, [0x87]=#text, [0x12]=numeric and text:sub(1,80) or '',
-    [0x11C]=numeric and '' or text, text=numeric and '' or text}
+  return {kind=0x57, tag=numeric and #text >= 40 and 0x23 or tag,
+    paradigm=0xFFFF, source_length=#text, source=numeric and text:sub(1,80) or '',
+    reading=numeric and '' or text, text=numeric and '' or text}
 end
 
 function nodes.append(list, node)

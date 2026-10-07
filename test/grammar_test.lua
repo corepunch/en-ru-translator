@@ -3,7 +3,7 @@ local matching = require 'core.matching'
 local encode = require('core.encoding').encode
 local function vector(tags)
   local v = {}
-  for i = 1, #tags do v[i - 1] = {[12] = tags:byte(i), [18] = 'word', [156] = 'original', [284] = 'translation'} end
+  for i = 1, #tags do v[i - 1] = {tag = tags:byte(i), source = 'word', lookup = 'original', reading = 'translation'} end
   return v
 end
 local function equal(actual, expected, message)
@@ -32,34 +32,34 @@ local ok = pcall(matching.match, vector('*NN*'), 1, '[N`word`]')
 equal(ok, false, 'unused embedded alternatives fail explicitly')
 
 local v = vector('*NN*')
-v[1][18], v[1][156], v[1][284] = 'Work', 'EXACT', encode('единица(мес)')
+v[1].source, v[1].lookup, v[1].reading = 'Work', 'EXACT', encode('единица(мес)')
 equal(matching.match(v, 1, '`work`'), 1, 'ASCII-insensitive +12 comparison')
 equal(matching.match(v, 1, '`EXACT`'), 1, 'exact +9C comparison')
 equal(matching.match(v, 1, '`exact`'), 0, '+9C is case-sensitive')
 equal(matching.match(v, 1, encode('!мес!')), 1, 'annotation suffix search')
 equal(matching.match(v, 1, encode('!мес)!')), 0, 'bang operator appends closing parenthesis')
-v[1][12], v[1][284] = string.byte('V'), 'Nnoun'
+v[1].tag, v[1].reading = string.byte('V'), 'Nnoun'
 equal(matching.match(v, 1, 'N'), 0, 'tag matching ignores packed translation alternatives')
 equal(matching.replace(v, 1, 1, 'V', 'N'), 0, 'tag replacement keeps vector size')
-equal(v[1][12], string.byte('N'), 'native action retags without a noun reading')
-equal(v[1][102], string.byte('V'), 'prior tag retained at +66')
-equal(v[1][284], 'Nnoun', 'retag does not resolve lexical text')
+equal(v[1].tag, string.byte('N'), 'native action retags without a noun reading')
+equal(v[1].previous_tag, string.byte('V'), 'prior tag retained at +66')
+equal(v[1].reading, 'Nnoun', 'retag does not resolve lexical text')
 matching.replace(v, 1, 1, 'N', '@')
-equal(v[1][102], string.byte('V'), '@ leaves previous tag untouched')
+equal(v[1].previous_tag, string.byte('V'), '@ leaves previous tag untouched')
 matching.replace(v, 1, 1, 'N', encode('`Pк`'))
-equal(v[1][12], string.byte('P'), 'literal payload optional tag')
-equal(v[1][284], encode('к'), 'literal writes text field')
+equal(v[1].tag, string.byte('P'), 'literal payload optional tag')
+equal(v[1].reading, encode('к'), 'literal writes text field')
 matching.replace(v, 1, 1, 'P', encode('`@в`'))
-equal(v[1][12], string.byte('P'), 'literal @ keeps current tag')
-equal(v[1][284], encode('в'), 'literal @ writes only text')
+equal(v[1].tag, string.byte('P'), 'literal @ keeps current tag')
+equal(v[1].reading, encode('в'), 'literal @ writes only text')
 equal(matching.replace(v, 1, 1, 'P', ' '), 1, 'space requests subsequent vector compaction')
-equal(v[1][12], 32, 'native deletion has no synthetic q marker')
+equal(v[1].tag, 32, 'native deletion has no synthetic q marker')
 
 v = vector('*NDVNN*')
 matching.replace(v, 1, 5, 'N<D>VNN', '@$@AN')
-equal(v[3][12], string.byte('A'), '@ in the plain anchor run does not advance node')
-equal(v[4][12], string.byte('N'), 'following action advances after retag')
-equal(v[5][102], nil, 'unvisited node is unchanged')
+equal(v[3].tag, string.byte('A'), '@ in the plain anchor run does not advance node')
+equal(v[4].tag, string.byte('N'), 'following action advances after retag')
+equal(v[5].previous_tag, nil, 'unvisited node is unchanged')
 equal(matching.match_constituents('*VN*', 1, '.N'), 2, 'T8 dot consumes one constituent')
 equal(matching.match_constituents('*VN*', 1, '$N'), 0, 'T8 dollar is not lexical optional skip')
 equal(matching.match_constituents('*NV*', 1, '~.N'), 2, 'T8 dot preserves pending negation')

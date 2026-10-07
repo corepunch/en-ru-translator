@@ -4,7 +4,7 @@ local function has(s, c) return c ~= '' and s:find(c, 1, true) ~= nil end
 local function upper(s) return (s:gsub('[a-z]', string.upper)) end
 local function field(node, offset) return node and node[offset] or '' end
 local function word(node, value)
-  return upper(field(node, 0x12)) == upper(value) or field(node, 0x9C) == value
+  return upper(field(node, 'source')) == upper(value) or field(node, 'lookup') == value
 end
 local function plain_run(pattern, p)
   while has(delimiters, pattern:sub(p, p)) do p = p + 1 end
@@ -117,14 +117,14 @@ end
 function matching.match(vector, start, pattern, cached_tags)
   if not cached_tags then
     local tags, i = {}, 0
-    while vector[i] do tags[#tags + 1] = string.char(vector[i][0x0C] or 0); i = i + 1 end
+    while vector[i] do tags[#tags + 1] = string.char(vector[i].tag or 0); i = i + 1 end
     cached_tags = table.concat(tags)
   end
   return match_pattern(pattern, start, {
-    tag = function(i) return string.char(assert(vector[i], 'native matcher read beyond lexical vector')[0x0C] or 0) end,
+    tag = function(i) return string.char(assert(vector[i], 'native matcher read beyond lexical vector').tag or 0) end,
     cache = function(i) return cached_tags:sub(i + 1) end,
     word = function(i, value) return word(vector[i], value) end,
-    text = function(i, value) return has(field(vector[i], 0x11C), value) end,
+    text = function(i, value) return has(field(vector[i], 'reading'), value) end,
   })
 end
 
@@ -142,10 +142,10 @@ end
 function matching.words(vector, start, pattern, tags)
   return match_pattern(pattern, start, {
     null_matches = true,
-    tag = function(i) return string.char(vector[i] and vector[i][0x0C] or 0) end,
+    tag = function(i) return string.char(vector[i] and vector[i].tag or 0) end,
     cache = function(i) return tags:sub(i + 1) end,
     word = function(i, value) return word(vector[i], value) end,
-    text = function(i, value) return has(field(vector[i], 0x11C), value) end,
+    text = function(i, value) return has(field(vector[i], 'reading'), value) end,
   })
 end
 
@@ -169,13 +169,13 @@ function matching.replace(vector, first, last, pattern, action, state)
   if not action then return 0 end
   if not state then
     local tags, j = {}, 0
-    while vector[j] do tags[#tags + 1] = string.char(vector[j][0x0C]); j = j + 1 end
+    while vector[j] do tags[#tags + 1] = string.char(vector[j].tag); j = j + 1 end
     state = {tags = table.concat(tags)}
   end
   local i, p, a, removed = first, 1, 1, 0
   local function change(c)
     local node = assert(vector[i], 'native replacement read beyond lexical vector')
-    node[0x66], node[0x0C] = node[0x0C], c:byte()
+    node.previous_tag, node.tag = node.tag, c:byte()
     state.tags = state.tags:sub(1, i) .. c .. state.tags:sub(i + 2)
   end
   local function literal()
@@ -185,7 +185,7 @@ function matching.replace(vector, first, last, pattern, action, state)
     elseif not russian(action:byte(a)) then change(c); a = a + 1 end
     local start = a
     while a <= #action and action:sub(a, a) ~= '`' and a - start < 80 do a = a + 1 end
-    vector[i][0x11C] = action:sub(start, a - 1)
+    vector[i].reading = action:sub(start, a - 1)
   end
   local function skip_pattern(stops)
     while p <= #pattern and not has(stops, pattern:sub(p, p)) do p = p + 1 end
@@ -216,7 +216,7 @@ function matching.replace(vector, first, last, pattern, action, state)
           local cached = state.tags:sub(j + 1, j + 1)
           if cached == '' or cached == '\0' then break end
           local ok = (close == '`' and word(node, sought))
-            or (close == '!' and (node[0x11C] or ''):find(sought, 1, true))
+            or (close == '!' and (node.reading or ''):find(sought, 1, true))
             or (close == ']' and has(sought, cached))
           if ok then found = j; break end
         end

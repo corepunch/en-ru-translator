@@ -4,654 +4,663 @@ local agreement = require 'core.agreement'
 local nodes = require 'core.nodes'
 local text = require 'core.text'
 local syntax = {}
+local values = require 'core.grammar_values'
 
 local function context(state)
-  local c={state=state,NULL={null=true}}
-  function c.E(i) return state.elements[i] or {} end
-  function c.e0(i) return c.E(i).tag or 0 end
-  function c.e2(i) return c.E(i).class or 0 end
-  function c.first(i) return c.E(i).next or c.NULL end
-  function c.last(i) return c.E(i).last or c.NULL end
-  function c.next(r) return r.next or c.NULL end
-  function c.aux(r) return r.aux or c.NULL end
-  c.get=nodes.byte
-  function c.set(r,f,v) if not r.null then r[f]=v end end
-  function c.copy(dst,src,f) c.set(dst,f,c.get(src,f)) end
-  c.word=c.get
-  function c.find(r,test)
-    while not r.null do if test(c.get(r,0x0C)) then return r end; r=c.next(r) end
+  local ctx={state=state}
+  function ctx.element(i) return state.elements[i] or {} end
+  function ctx.element_tag(i) return string.char(ctx.element(i).tag or 0) end
+  function ctx.element_class(i) return string.char(ctx.element(i).class or 0) end
+  function ctx.first(i) return ctx.element(i).next end
+  function ctx.last(i) return ctx.element(i).last end
+  function ctx.next(r) return r and r.next end
+  function ctx.aux(r) return r and r.aux end
+  ctx.get=nodes.number
+  function ctx.set(r,f,v) if r then r[f]=v end end
+  function ctx.copy(dst,src,f) ctx.set(dst,f,ctx.get(src,f)) end
+  function ctx.find(r,test)
+    while r do if test(nodes.tag(r)) then return r end; r=ctx.next(r) end
     return r
   end
-  function c.is(r,at) return text.equal(r[0x12] or '',state.assets:string(at)) end
-  function c.set_literal(r,f,at) r[f]=state.assets:string(at) end
-  function c.reading(r,at) r.text=state.assets:string(at) end
-  function c.b6D(r,n) return (c.get(r,0x6D) >> n) & 1 end
-  function c.t7(i) return agreement.run(state,c.E(i),c.e0(i),i) end
-  return c
+  function ctx.is(r,at) return text.equal(r and r.source or '',state.assets:string(at)) end
+  function ctx.set_literal(r,f,at) if r then r[f]=state.assets:string(at) end end
+  function ctx.reading(r,at) if r then r.text=state.assets:string(at) end end
+  function ctx.dictionary_bit(r,n) return (ctx.get(r,'dictionary_flags') >> n) & 1 end
+  function ctx.t7(i) return agreement.run(state,ctx.element(i),ctx.element(i).tag or 0,i) end
+  return ctx
 end
 
-local function is_tag(set) return function(t) return set:find(string.char(t), 1, true) ~= nil end end
+local function is_tag(set) return function(t) return set:find(t, 1, true) ~= nil end end
 -- The last record with tag 'V' (or `set`) in the list, else the list's last.
-local function last_of(c, i, set)
-  local r, found = c.first(i), c.last(i)
-  while not r.null do
-    if set:find(string.char(c.get(r, 0x0C)), 1, true) then found = r end
-    r = c.next(r)
+local function last_of(ctx, i, set)
+  local r, found = ctx.first(i), ctx.last(i)
+  while r do
+    if set:find(nodes.tag(r), 1, true) then found = r end
+    r = ctx.next(r)
   end
   return found
 end
 -- Prepositional/negation prefix written to +243 of a record or its auxiliary.
-local function prefix(c, r, with_aux, without_aux)
-  local a = c.aux(r)
-  if not a.null then c.set_literal(a, 0x243, with_aux) else c.set_literal(r, 0x243, without_aux) end
+local function prefix(ctx, r, with_aux, without_aux)
+  local a = ctx.aux(r)
+  if a then ctx.set_literal(a, 'prefix', with_aux) else ctx.set_literal(r, 'prefix', without_aux) end
 end
 -- Case after a verb whose code bit 1 of +6D is set (shared by several rules).
-local function verb_case(c, r)
-  if c.b6D(r, 1) ~= 0 then
-    if c.get(r, 0x72) == 0 and c.get(r, 0x77) == 2 then c.set(r, 0x76, 8)
-    elseif c.word(r, 0x85) == 0x35 then c.set(r, 0x76, 8)
-    else c.set(r, 0x76, 2) end
+local function verb_case(ctx, r)
+  if ctx.dictionary_bit(r, 1) ~= 0 then
+    if ctx.get(r, 'number') == 0 and ctx.get(r, 'gender') == 2 then ctx.set(r, 'case_mask', 8)
+    elseif ctx.get(r, 'paradigm') == 0x35 then ctx.set(r, 'case_mask', 8)
+    else ctx.set(r, 'case_mask', 2) end
   else
-    c.set(r, 0x76, 8)
+    ctx.set(r, 'case_mask', 8)
   end
 end
 
-local H = {}
+local handlers = {}
 
-H[1] = function(c, F, si, hit)
-  if c.e2(si) == 0x71 or c.e2(hit) == 0x71 then return end
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x0F) == 0x71 or c.get(F.r, 0x78) & 4 ~= 0 then return end
-  if c.e2(si) ~= 0x6B then
-    F.a = c.find(c.first(si), is_tag('NRS'))
-    if not F.a.null and c.get(F.a, 0x0F) ~= 0x71 and not F.r.null and c.get(F.a, 0x66) ~= 0 and
-       c.get(F.a, 0x76) == 0 then
-      local a = c.aux(F.r)
-      if not a.null then c.copy(a, F.a, 0x74); c.copy(a, F.a, 0x72); c.copy(a, F.a, 0x77) end
-      c.copy(F.r, F.a, 0x77); c.copy(F.r, F.a, 0x74); c.copy(F.r, F.a, 0x72)
+handlers[1] = function(ctx, frame, start, finish)
+  if ctx.element_class(start) == 'q' or ctx.element_class(finish) == 'q' then return end
+  frame.right = ctx.first(finish)
+  if not frame.right or nodes.character(frame.right, 'marker') == 'q' or ctx.get(frame.right, 'verb_flags') & values.verb_flags.imperative ~= 0 then return end
+  if ctx.element_class(start) ~= 'k' then
+    frame.cursor = ctx.find(ctx.first(start), is_tag('NRS'))
+    if frame.cursor and nodes.character(frame.cursor, 'marker') ~= 'q' and frame.right and ctx.get(frame.cursor, 'previous_tag') ~= 0 and
+       ctx.get(frame.cursor, 'case_mask') == 0 then
+      local a = ctx.aux(frame.right)
+      if a then ctx.copy(a, frame.cursor, 'person'); ctx.copy(a, frame.cursor, 'number'); ctx.copy(a, frame.cursor, 'gender') end
+      ctx.copy(frame.right, frame.cursor, 'gender'); ctx.copy(frame.right, frame.cursor, 'person'); ctx.copy(frame.right, frame.cursor, 'number')
     end
   end
-  if (not F.a.null and c.get(F.a, 0x0C) == 0x53 and c.get(F.a, 0x75) ~= 0) or
-     c.e0(si) == 0x6B or c.e0(si - 1) == 0x6B then
-    prefix(c, F.r, 0x4F66, 0x4F6A)
+  if (frame.cursor and nodes.tag(frame.cursor) == 'S' and ctx.get(frame.cursor, 'aspect') ~= 0) or
+     ctx.element_tag(start) == 'k' or ctx.element_tag(start - 1) == 'k' then
+    prefix(ctx, frame.right, 0x4F66, 0x4F6A)
   end
 end
 
-H[2] = function(c, F, si, hit)
-  if c.e2(si) == 0x71 then return end
-  F.e = c.first(si)
-  F.a = c.last(si)
-  while not F.e.null do
-    if c.get(F.e, 0x0C) == 0x56 then F.a = F.e end
-    F.e = c.next(F.e)
+handlers[2] = function(ctx, frame, start, finish)
+  if ctx.element_class(start) == 'q' then return end
+  frame.left = ctx.first(start)
+  frame.cursor = ctx.last(start)
+  while frame.left do
+    if nodes.tag(frame.left) == 'V' then frame.cursor = frame.left end
+    frame.left = ctx.next(frame.left)
   end
-  if F.a.null or c.get(F.a, 0x7A) ~= 0 then return end
-  if c.get(F.a, 0x68) & 0x3F ~= 0 and (c.get(F.a, 0x6E) >> 6) & 1 ~= 0 and
-     (c.e0(hit + 1) == 0x51 or c.e0(hit + 1) == 0x4A) then
-    F.e = c.find(c.first(hit), is_tag('N'))
-    if not F.e.null then c.set(F.e, 0x76, 4) end
+  if not frame.cursor or ctx.get(frame.cursor, 'passive') ~= 0 then return end
+  if ctx.get(frame.cursor, 'lookup_flags') & 0x3F ~= 0 and (ctx.get(frame.cursor, 'dictionary_frame') >> 6) & 1 ~= 0 and
+     (ctx.element_tag(finish + 1) == 'Q' or ctx.element_tag(finish + 1) == 'J') then
+    frame.left = ctx.find(ctx.first(finish), is_tag('N'))
+    if frame.left then ctx.set(frame.left, 'case_mask', 4) end
     return
   end
-  local index = hit
-  if c.e0(hit + 1) == 0x4E or c.e0(hit + 1) == 0x49 then
-    F.e = c.find(c.first(hit), is_tag('N'))
-    if not F.e.null then c.set(F.e, 0x76, 4) end
-    index = hit + 1
+  local index = finish
+  if ctx.element_tag(finish + 1) == 'N' or ctx.element_tag(finish + 1) == 'I' then
+    frame.left = ctx.find(ctx.first(finish), is_tag('N'))
+    if frame.left then ctx.set(frame.left, 'case_mask', 4) end
+    index = finish + 1
   end
-  F.r = c.find(c.first(index), is_tag('N'))
-  if F.r.null then return end
-  if c.get(F.a, 0x76) ~= 8 then c.copy(F.r, F.a, 0x76); return end
-  verb_case(c, F.r)
+  frame.right = ctx.find(ctx.first(index), is_tag('N'))
+  if not frame.right then return end
+  if ctx.get(frame.cursor, 'case_mask') ~= 8 then ctx.copy(frame.right, frame.cursor, 'case_mask'); return end
+  verb_case(ctx, frame.right)
 end
 
-H[3] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x0F) ~= 0 then return end
-  local case = c.get(F.r, 0x76)
-  if case ~= 8 and case ~= 0x20 then return end
-  if not (c.is(F.r, 0x4F6E) or c.is(F.r, 0x4F71) or c.is(F.r, 0x4F74)) then return end
-  F.a = c.first(si)
-  F.e = c.last(si)
-  while not F.a.null do
-    local t = c.get(F.a, 0x0C)
-    if t == 0x56 or t == 0x45 then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[3] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'marker') ~= 0 then return end
+  local case = ctx.get(frame.right, 'case_mask')
+  if case ~= 8 and case ~= values.case.prepositional then return end
+  if not (ctx.is(frame.right, 0x4F6E) or ctx.is(frame.right, 0x4F71) or ctx.is(frame.right, 0x4F74)) then return end
+  frame.cursor = ctx.first(start)
+  frame.left = ctx.last(start)
+  while frame.cursor do
+    local t = nodes.tag(frame.cursor)
+    if t == 'V' or t == 'E' then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
   end
-  if F.e.null then return end
-  c.set(F.r, 0x76, c.b6D(F.e, 6) ~= 0 and 0x20 or 8)
+  if not frame.left then return end
+  ctx.set(frame.right, 'case_mask', ctx.dictionary_bit(frame.left, 6) ~= 0 and 0x20 or 8)
 end
 
-H[4] = function(c, F, si, hit)
-  F.a = c.first(si)
-  F.e = c.last(si)
-  while not F.a.null do
-    if c.get(F.a, 0x0C) == 0x56 then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[4] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  frame.left = ctx.last(start)
+  while frame.cursor do
+    if nodes.tag(frame.cursor) == 'V' then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
   end
-  F.r = c.first(hit)
-  if F.r.null or F.e.null then return end
-  c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77)
-  if c.get(F.e, 0x7A) ~= 0 then return end
-  c.copy(F.r, F.e, 0x76)
+  frame.right = ctx.first(finish)
+  if not frame.right or not frame.left then return end
+  ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender')
+  if ctx.get(frame.left, 'passive') ~= 0 then return end
+  ctx.copy(frame.right, frame.left, 'case_mask')
 end
 
-H[5] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x74) ~= 0 then return end
-  c.t7(si)
-  F.a = c.find(c.first(si), is_tag('N'))
-  if not F.a.null then
-    c.set(F.r, 0x0F, c.get(F.r, 0x76))
-    c.copy(F.r, F.a, 0x76); c.copy(F.r, F.a, 0x72); c.copy(F.r, F.a, 0x77)
-    c.set(F.r, 0x74, 3)
+handlers[5] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'person') ~= 0 then return end
+  ctx.t7(start)
+  frame.cursor = ctx.find(ctx.first(start), is_tag('N'))
+  if frame.cursor then
+    ctx.set(frame.right, 'marker', ctx.get(frame.right, 'case_mask'))
+    ctx.copy(frame.right, frame.cursor, 'case_mask'); ctx.copy(frame.right, frame.cursor, 'number'); ctx.copy(frame.right, frame.cursor, 'gender')
+    ctx.set(frame.right, 'person', 3)
   end
   return 'skip'
 end
 
-H[6] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x72) end
+handlers[6] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'gender'); ctx.copy(frame.right, frame.left, 'number') end
 end
 
-H[7] = function(c, F, si, hit)
-  F.a = c.find(c.first(si), is_tag('NS'))
-  if F.a.null then return end
-  F.r = c.first(hit)
-  if F.r.null then return end
-  c.copy(F.r, F.a, 0x72); c.copy(F.r, F.a, 0x77)
-  c.set(F.r, 0x76, c.get(F.r, 0x0C) == 0x6C and 2 or 0)
+handlers[7] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.find(ctx.first(start), is_tag('NS'))
+  if not frame.cursor then return end
+  frame.right = ctx.first(finish)
+  if not frame.right then return end
+  ctx.copy(frame.right, frame.cursor, 'number'); ctx.copy(frame.right, frame.cursor, 'gender')
+  ctx.set(frame.right, 'case_mask', nodes.tag(frame.right) == 'l' and 2 or 0)
 end
 
-H[8] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.a = F.e
-  F.e = c.find(F.e, is_tag('V'))
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  local a = c.aux(F.r)
-  if not a.null then
-    c.copy(a, F.e, 0x74); c.copy(a, F.e, 0x72); c.copy(a, F.e, 0x77)
+handlers[8] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.cursor = frame.left
+  frame.left = ctx.find(frame.left, is_tag('V'))
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  local a = ctx.aux(frame.right)
+  if a then
+    ctx.copy(a, frame.left, 'person'); ctx.copy(a, frame.left, 'number'); ctx.copy(a, frame.left, 'gender')
   else
-    c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77)
+    ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender')
   end
-  c.copy(F.r, F.a, 0x72); c.copy(F.r, F.e, 0x78); c.copy(F.r, F.e, 0x7A); c.copy(F.r, F.e, 0x7B)
+  ctx.copy(frame.right, frame.cursor, 'number'); ctx.copy(frame.right, frame.left, 'verb_flags'); ctx.copy(frame.right, frame.left, 'passive'); ctx.copy(frame.right, frame.left, 'short_form')
 end
 
-H[9] = function(c, F, si, hit)
-  F.e = c.find(c.first(si), is_tag('V'))
-  if F.e.null then return end
-  F.r = c.NULL
-  if c.e2(hit) ~= 0x6B then
-    F.r = c.find(c.first(hit), is_tag('N'))
-    if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x76) end
+handlers[9] = function(ctx, frame, start, finish)
+  frame.left = ctx.find(ctx.first(start), is_tag('V'))
+  if not frame.left then return end
+  frame.right = nil
+  if ctx.element_class(finish) ~= 'k' then
+    frame.right = ctx.find(ctx.first(finish), is_tag('N'))
+    if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'case_mask') end
   end
-  if (not F.r.null and c.get(F.r, 0x0C) == 0x53 and c.get(F.r, 0x75) ~= 0) or c.e0(hit) == 0x6B then
-    prefix(c, F.e, 0x4F77, 0x4F7B)
+  if (frame.right and nodes.tag(frame.right) == 'S' and ctx.get(frame.right, 'aspect') ~= 0) or ctx.element_tag(finish) == 'k' then
+    prefix(ctx, frame.left, 0x4F77, 0x4F7B)
   end
 end
 
-H[10] = function(c, F, si, hit)
-  F.a = c.first(si)
-  F.e = c.last(si)
-  while not F.a.null do
-    if c.get(F.a, 0x0C) == 0x56 then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[10] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  frame.left = ctx.last(start)
+  while frame.cursor do
+    if nodes.tag(frame.cursor) == 'V' then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
   end
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  if c.get(F.r, 0x78) & 4 ~= 0 then return end
-  if c.get(F.e, 0x66) == 0x45 and c.get(F.r, 0x66) ~= 0x45 then return end
-  local a = c.aux(F.r)
-  if not a.null then
-    c.copy(a, F.e, 0x74); c.copy(a, F.e, 0x72); c.copy(a, F.e, 0x77)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  if ctx.get(frame.right, 'verb_flags') & values.verb_flags.imperative ~= 0 then return end
+  if nodes.character(frame.left, 'previous_tag') == 'E' and nodes.character(frame.right, 'previous_tag') ~= 'E' then return end
+  local a = ctx.aux(frame.right)
+  if a then
+    ctx.copy(a, frame.left, 'person'); ctx.copy(a, frame.left, 'number'); ctx.copy(a, frame.left, 'gender')
   else
-    c.copy(F.r, F.e, 0x78); c.copy(F.r, F.e, 0x7A); c.copy(F.r, F.e, 0x7B)
+    ctx.copy(frame.right, frame.left, 'verb_flags'); ctx.copy(frame.right, frame.left, 'passive'); ctx.copy(frame.right, frame.left, 'short_form')
   end
-  c.copy(F.r, F.e, 0x74); c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77)
+  ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender')
 end
 
-H[11] = function(c, F, si, hit)
-  F.a = c.first(si)
-  F.r = c.first(hit)
-  if not F.r.null and not F.a.null then
-    c.copy(F.r, F.a, 0x72); c.copy(F.r, F.a, 0x77); c.set(F.r, 0x76, 0x10)
-  end
-end
-
-H[12] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  if c.get(F.e, 0x75) ~= 0 then
-    if c.get(F.e, 0x75) == 1 then prefix(c, F.r, 0x4F7F, 0x4F83)
-    else c.set_literal(F.r, 0x243, 0x4F87) end
-  end
-  if c.get(F.r, 0x7A) ~= 0 then c.set(F.r, 0x77, 0) end
-end
-
-H[13] = function(c, F, si, hit)
-  F.a = c.first(si)
-  F.r = c.first(hit)
-  if not F.r.null and not F.a.null then
-    c.copy(F.r, F.a, 0x72); c.copy(F.r, F.a, 0x77); c.set(F.r, 0x7B, 1)
+handlers[11] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if frame.right and frame.cursor then
+    ctx.copy(frame.right, frame.cursor, 'number'); ctx.copy(frame.right, frame.cursor, 'gender'); ctx.set(frame.right, 'case_mask', values.case.instrumental)
   end
 end
 
-H[14] = function(c, F, si, hit)
-  F.a = c.first(si)
-  F.e = c.last(si)
-  while not F.a.null and not F.e.null do
-    local t = c.get(F.a, 0x0C)
-    if t == 0x56 or t == 0x59 then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[12] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  if ctx.get(frame.left, 'aspect') ~= 0 then
+    if ctx.get(frame.left, 'aspect') == 1 then prefix(ctx, frame.right, 0x4F7F, 0x4F83)
+    else ctx.set_literal(frame.right, 'prefix', 0x4F87) end
   end
-  if not F.e.null and c.get(F.e, 0x7A) ~= 0 then return end
-  F.r = c.first(hit)
-  if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x76) end
+  if ctx.get(frame.right, 'passive') ~= 0 then ctx.set(frame.right, 'gender', 0) end
 end
 
-H[15] = function(c, F, si, hit)
-  F.e = c.first(si)
-  if c.e2(hit) ~= 0x6B then
-    F.r = c.find(c.first(hit), is_tag('N'))
-    if not F.e.null and not F.r.null then
-      c.set(F.r, 0x76, (c.b6D(F.r, 1) ~= 0 or c.e0(hit) == 0x6B) and 2 or 8)
+handlers[13] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if frame.right and frame.cursor then
+    ctx.copy(frame.right, frame.cursor, 'number'); ctx.copy(frame.right, frame.cursor, 'gender'); ctx.set(frame.right, 'short_form', 1)
+  end
+end
+
+handlers[14] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  frame.left = ctx.last(start)
+  while frame.cursor and frame.left do
+    local t = nodes.tag(frame.cursor)
+    if t == 'V' or t == 'Y' then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
+  end
+  if frame.left and ctx.get(frame.left, 'passive') ~= 0 then return end
+  frame.right = ctx.first(finish)
+  if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'case_mask') end
+end
+
+handlers[15] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  if ctx.element_class(finish) ~= 'k' then
+    frame.right = ctx.find(ctx.first(finish), is_tag('N'))
+    if frame.left and frame.right then
+      ctx.set(frame.right, 'case_mask', (ctx.dictionary_bit(frame.right, 1) ~= 0 or ctx.element_tag(finish) == 'k') and 2 or 8)
     end
   end
-  if c.e0(si - 1) == 0x58 then
-    F.a = c.first(si - 1)
-    if not F.a.null then c.set_literal(F.a, 0x243, 0x4F8B) end
-  elseif not F.e.null then
-    c.set_literal(F.e, 0x243, 0x4F8F)
+  if ctx.element_tag(start - 1) == 'X' then
+    frame.cursor = ctx.first(start - 1)
+    if frame.cursor then ctx.set_literal(frame.cursor, 'prefix', 0x4F8B) end
+  elseif frame.left then
+    ctx.set_literal(frame.left, 'prefix', 0x4F8F)
   end
 end
 
-H[16] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.r.null then return end
-  local a = c.aux(F.r)
-  if not a.null then c.set(a, 0x74, 3); c.copy(a, F.e, 0x72); c.copy(a, F.e, 0x77) end
-  c.set(F.r, 0x74, 3); c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x72)
-  if c.get(F.r, 0x78) & 4 ~= 0 then c.set(F.r, 0x78, c.get(F.r, 0x78) & 0xFB) end
-end
-
-H[17] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if not F.e.null and (c.get(F.e, 0x73) ~= 0 or c.get(F.e, 0x74) == 0) then
-    F.r = c.find(F.r, is_tag('N'))
-    if not F.r.null then c.set(F.r, 0x76, 0x10) end
+local function agree_verb(ctx, frame, start, finish)
+  frame.left, frame.right = ctx.first(start), ctx.first(finish)
+  local source, target = frame.left, frame.right
+  if not target then return end
+  local function apply(word)
+    if not word then return end
+    word.person = 3
+    word.number = ctx.get(source, 'number')
+    word.gender = ctx.get(source, 'gender')
   end
-  if c.e0(si + 1) == 0x6B then
-    F.r = c.first(hit)
-    if not F.r.null then c.set_literal(F.r, 0x243, 0x4F93) end
-  end
-  if c.e0(si - 1) == 0x53 and not F.e.null and c.get(F.e, 0x73) == 0 then
-    F.e.text = ""
+  apply(target.aux)
+  apply(target)
+  local flags = ctx.get(target, 'verb_flags')
+  if flags & values.verb_flags.imperative ~= 0 then
+    target.verb_flags = flags & (values.byte_mask ~ values.verb_flags.imperative)
   end
 end
+handlers[16] = agree_verb
 
-H[18] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.find(c.first(hit), is_tag('A'))
-  if not F.e.null and not F.r.null then
-    if c.get(F.e, 0x74) == 0 then c.set(F.r, 0x76, 0x10); return end
-    if c.get(F.e, 0x73) ~= 0 then c.set(F.r, 0x76, 0x10) end
-    if c.get(F.e, 0x73) == 0 then
-      F.e.text = ""
+handlers[17] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if frame.left and (ctx.get(frame.left, 'tense') ~= 0 or ctx.get(frame.left, 'person') == 0) then
+    frame.right = ctx.find(frame.right, is_tag('N'))
+    if frame.right then ctx.set(frame.right, 'case_mask', values.case.instrumental) end
+  end
+  if ctx.element_tag(start + 1) == 'k' then
+    frame.right = ctx.first(finish)
+    if frame.right then ctx.set_literal(frame.right, 'prefix', 0x4F93) end
+  end
+  if ctx.element_tag(start - 1) == 'S' and frame.left and ctx.get(frame.left, 'tense') == 0 then
+    frame.left.text = ""
+  end
+end
+
+handlers[18] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.find(ctx.first(finish), is_tag('A'))
+  if frame.left and frame.right then
+    if ctx.get(frame.left, 'person') == 0 then ctx.set(frame.right, 'case_mask', values.case.instrumental); return end
+    if ctx.get(frame.left, 'tense') ~= 0 then ctx.set(frame.right, 'case_mask', values.case.instrumental) end
+    if ctx.get(frame.left, 'tense') == 0 then
+      frame.left.text = ""
     end
-    c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x72)
-    if c.get(F.r, 0x6D) & 1 ~= 0 and c.get(F.r, 0x76) ~= 0x10 and
-       (c.e0(si - 1) == 0x4E or c.e0(si - 1) == 0x23 or c.e0(si - 1) == 0x52) then
-      c.set(F.r, 0x7B, 1)
+    ctx.copy(frame.right, frame.left, 'gender'); ctx.copy(frame.right, frame.left, 'number')
+    if ctx.get(frame.right, 'dictionary_flags') & 1 ~= 0 and ctx.get(frame.right, 'case_mask') ~= values.case.instrumental and
+       (ctx.element_tag(start - 1) == 'N' or ctx.element_tag(start - 1) == '#' or ctx.element_tag(start - 1) == 'R') then
+      ctx.set(frame.right, 'short_form', 1)
     end
   end
-  if c.e0(si + 1) == 0x6B then
-    F.r = c.first(hit)
-    if not F.r.null then c.set_literal(F.r, 0x243, 0x4F97) end
+  if ctx.element_tag(start + 1) == 'k' then
+    frame.right = ctx.first(finish)
+    if frame.right then ctx.set_literal(frame.right, 'prefix', 0x4F97) end
   end
 end
 
-H[19] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x0F) ~= 0 then return end
-  if not (c.is(F.r, 0x4F9B) or c.is(F.r, 0x4F9E) or c.is(F.r, 0x4FA1)) then return end
-  F.a = c.first(si)
-  F.e = c.last(si)
-  while not F.a.null do
-    if c.get(F.a, 0x0C) == c.e0(si) then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[19] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'marker') ~= 0 then return end
+  if not (ctx.is(frame.right, 0x4F9B) or ctx.is(frame.right, 0x4F9E) or ctx.is(frame.right, 0x4FA1)) then return end
+  frame.cursor = ctx.first(start)
+  frame.left = ctx.last(start)
+  while frame.cursor do
+    if nodes.tag(frame.cursor) == ctx.element_tag(start) then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
   end
-  if F.e.null or F.r.null then return end
-  c.set(F.r, 0x76, c.b6D(F.e, 6) ~= 0 and 0x20 or 8)
+  if not frame.left or not frame.right then return end
+  ctx.set(frame.right, 'case_mask', ctx.dictionary_bit(frame.left, 6) ~= 0 and 0x20 or 8)
 end
 
-H[21] = function(c, F, si, hit)
-  F.a = c.first(si)
-  F.e = c.last(si)
-  while not F.a.null do
-    if c.get(F.a, 0x0C) == 0x56 then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[21] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  frame.left = ctx.last(start)
+  while frame.cursor do
+    if nodes.tag(frame.cursor) == 'V' then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
   end
-  F.r = c.first(hit)
-  if not F.e.null and not F.r.null then
-    c.copy(F.r, F.e, 0x74); c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77)
-  end
-end
-
-H[42] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  if c.get(F.e, 0x74) == 0 then c.set(F.r, 0x76, 0x10); return end
-  if c.get(F.e, 0x73) ~= 0 then c.set(F.r, 0x76, 0x10) end
-  c.copy(F.r, F.e, 0x77)
-end
-
-H[22] = function(c, F, si, hit)
-  F.a = c.first(si)
-  if c.e2(si) == 0x77 then F.a = c.find(F.a, is_tag('P')) end
-  F.a = c.find(F.a, is_tag('N'))
-  if F.a.null then return end
-  F.r = c.first(hit)
-  if F.r.null then return end
-  c.copy(F.r, F.a, 0x72); c.copy(F.r, F.a, 0x77)
-  c.set(F.r, 0x76, c.get(F.r, 0x0C) == 0x6C and 2 or 0)
-end
-
-H[23] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  c.copy(F.r, F.e, 0x74); c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x73)
-end
-
-H[24] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  c.copy(F.r, F.e, 0x74); c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77)
-end
-
-H[25] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x76) == 2 then return end
-  if c.get(F.r, 0x0F) ~= 0 then return end
-  if c.is(F.r, 0x4FA4) or c.is(F.r, 0x4FA7) or c.is(F.r, 0x4FAA) then c.set(F.r, 0x76, 0x20) end
-end
-
-H[26] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  if c.is(F.e, 0x4FAD) and c.get(F.e, 0x0F) == 0 then c.set(F.r, 0x76, 0x20)
-  else c.copy(F.r, F.e, 0x76) end
-  if c.get(F.r, 0x0F) == 0 then
-    F.r.text = " " .. (F.r.text or ""):sub(2)
+  frame.right = ctx.first(finish)
+  if frame.left and frame.right then
+    ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender')
   end
 end
 
-H[27] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.find(c.first(hit), is_tag('N'))
-  if F.e.null or F.r.null then return end
-  local t = c.get(F.e, 0x0C)
-  if t == 0x66 or (t == 0x79 and c.get(F.e, 0x75) ~= 0) then c.copy(F.r, F.e, 0x76)
-  else c.copy(F.e, F.r, 0x77) end
-  c.copy(F.e, F.r, 0x72)
+handlers[42] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  if ctx.get(frame.left, 'person') == 0 then ctx.set(frame.right, 'case_mask', values.case.instrumental); return end
+  if ctx.get(frame.left, 'tense') ~= 0 then ctx.set(frame.right, 'case_mask', values.case.instrumental) end
+  ctx.copy(frame.right, frame.left, 'gender')
 end
 
-H[28] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.find(c.first(hit), is_tag('N'))
-  if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x76) end
+handlers[22] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start)
+  if ctx.element_class(start) == 'w' then frame.cursor = ctx.find(frame.cursor, is_tag('P')) end
+  frame.cursor = ctx.find(frame.cursor, is_tag('N'))
+  if not frame.cursor then return end
+  frame.right = ctx.first(finish)
+  if not frame.right then return end
+  ctx.copy(frame.right, frame.cursor, 'number'); ctx.copy(frame.right, frame.cursor, 'gender')
+  ctx.set(frame.right, 'case_mask', nodes.tag(frame.right) == 'l' and 2 or 0)
 end
 
-H[29] = function(c, F, si, hit)
-  F.a = c.first(si + 1)
-  F.e = c.last(si + 1)
-  while not F.a.null do
-    if c.get(F.a, 0x0C) == 0x56 then F.e = F.a end
-    F.a = c.next(F.a)
+handlers[23] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender'); ctx.copy(frame.right, frame.left, 'tense')
+end
+
+handlers[24] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender')
+end
+
+handlers[25] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'case_mask') == 2 then return end
+  if ctx.get(frame.right, 'marker') ~= 0 then return end
+  if ctx.is(frame.right, 0x4FA4) or ctx.is(frame.right, 0x4FA7) or ctx.is(frame.right, 0x4FAA) then ctx.set(frame.right, 'case_mask', values.case.prepositional) end
+end
+
+handlers[26] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  if ctx.is(frame.left, 0x4FAD) and ctx.get(frame.left, 'marker') == 0 then ctx.set(frame.right, 'case_mask', values.case.prepositional)
+  else ctx.copy(frame.right, frame.left, 'case_mask') end
+  if ctx.get(frame.right, 'marker') == 0 then
+    frame.right.text = " " .. (frame.right.text or ""):sub(2)
   end
-  if c.get(F.e, 0x7A) == 0 then return end
-  F.r = c.find(c.first(hit), is_tag('N'))
-  if not F.e.null and not F.r.null then c.copy(F.e, F.r, 0x72); c.copy(F.e, F.r, 0x77) end
-  F.a = c.first(si)
-  if not F.a.null and c.get(F.r, 0x7A) ~= 0 then c.set(F.a, 0x76, 4) end
 end
 
-H[30] = function(c, F, si, hit)
-  if c.e2(hit) == 0x71 then return end
-  if c.e0(si) == 0x4F then F.e = c.find(c.first(si), is_tag('N')) else F.e = c.NULL end
-  F.r = c.first(hit)
-  if F.r.null then return end
-  local number = c.e0(si) == 0x4F and 0 or 1
-  local a = c.aux(F.r)
-  if not a.null then
-    c.set(a, 0x74, 3); c.set(a, 0x72, number)
-    if not F.e.null then c.copy(F.r, F.e, 0x77) end
+handlers[27] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.find(ctx.first(finish), is_tag('N'))
+  if not frame.left or not frame.right then return end
+  local t = nodes.tag(frame.left)
+  if t == 'f' or (t == 'y' and ctx.get(frame.left, 'aspect') ~= 0) then ctx.copy(frame.right, frame.left, 'case_mask')
+  else ctx.copy(frame.left, frame.right, 'gender') end
+  ctx.copy(frame.left, frame.right, 'number')
+end
+
+handlers[28] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.find(ctx.first(finish), is_tag('N'))
+  if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'case_mask') end
+end
+
+handlers[29] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start + 1)
+  frame.left = ctx.last(start + 1)
+  while frame.cursor do
+    if nodes.tag(frame.cursor) == 'V' then frame.left = frame.cursor end
+    frame.cursor = ctx.next(frame.cursor)
   end
-  c.set(F.r, 0x74, 3); c.set(F.r, 0x72, number)
-  if not F.e.null then c.copy(F.r, F.e, 0x77) end
-  if c.get(F.r, 0x78) & 4 ~= 0 then c.set(F.r, 0x78, c.get(F.r, 0x78) & 0xFB) end
+  if ctx.get(frame.left, 'passive') == 0 then return end
+  frame.right = ctx.find(ctx.first(finish), is_tag('N'))
+  if frame.left and frame.right then ctx.copy(frame.left, frame.right, 'number'); ctx.copy(frame.left, frame.right, 'gender') end
+  frame.cursor = ctx.first(start)
+  if frame.cursor and ctx.get(frame.right, 'passive') ~= 0 then ctx.set(frame.cursor, 'case_mask', 4) end
 end
 
-H[31] = function(c, F, si, hit)
-  c.t7(si)
-  F.r = c.first(hit)
-  F.e = c.find(c.first(si), is_tag('N'))
-  if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x76); c.set(F.r, 0x72, 1) end
+handlers[30] = function(ctx, frame, start, finish)
+  if ctx.element_class(finish) == 'q' then return end
+  if ctx.element_tag(start) == 'O' then frame.left = ctx.find(ctx.first(start), is_tag('N')) else frame.left = nil end
+  frame.right = ctx.first(finish)
+  if not frame.right then return end
+  local number = ctx.element_tag(start) == 'O' and 0 or 1
+  local a = ctx.aux(frame.right)
+  if a then
+    ctx.set(a, 'person', 3); ctx.set(a, 'number', number)
+    if frame.left then ctx.copy(frame.right, frame.left, 'gender') end
+  end
+  ctx.set(frame.right, 'person', 3); ctx.set(frame.right, 'number', number)
+  if frame.left then ctx.copy(frame.right, frame.left, 'gender') end
+  if ctx.get(frame.right, 'verb_flags') & values.verb_flags.imperative ~= 0 then ctx.set(frame.right, 'verb_flags', ctx.get(frame.right, 'verb_flags') & (values.byte_mask ~ values.verb_flags.imperative)) end
+end
+
+handlers[31] = function(ctx, frame, start, finish)
+  ctx.t7(start)
+  frame.right = ctx.first(finish)
+  frame.left = ctx.find(ctx.first(start), is_tag('N'))
+  if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'case_mask'); ctx.set(frame.right, 'number', 1) end
   return 'skip'
 end
 
-H[32] = function(c, F, si, hit)
-  F.a = c.first(si + 1)
-  if not F.a.null then c.set(F.a, 0x76, 8) end
+handlers[32] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(start + 1)
+  if frame.cursor then ctx.set(frame.cursor, 'case_mask', 8) end
 end
 
-H[33] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null then return end
-  c.set(F.r, 0x72, 1)
-  c.set(F.r, 0x76, c.get(F.r, 0x0C) == 0x6C and 2 or 0)
+handlers[33] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right then return end
+  ctx.set(frame.right, 'number', 1)
+  ctx.set(frame.right, 'case_mask', nodes.tag(frame.right) == 'l' and 2 or 0)
 end
 
-H[34] = function(c, F, si, hit)
-  F.a = c.find(c.first(si), is_tag('#'))
-  if F.a.null then return end
-  F.r = c.first(hit)
-  if F.r.null then return end
-  local a = c.aux(F.r)
-  if not a.null then c.copy(a, F.a, 0x74); c.copy(a, F.a, 0x72); c.copy(a, F.a, 0x77) end
-  c.copy(F.r, F.a, 0x77)
-  if c.get(F.r, 0x74) ~= 0 then c.set(F.a, 0x72, 0) end
-  c.copy(F.r, F.a, 0x72)
-  c.set(F.r, 0x74, 3)
-  if c.get(F.r, 0x78) & 4 ~= 0 then c.set(F.r, 0x78, c.get(F.r, 0x78) & 0xFB) end
+handlers[34] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.find(ctx.first(start), is_tag('#'))
+  if not frame.cursor then return end
+  frame.right = ctx.first(finish)
+  if not frame.right then return end
+  local a = ctx.aux(frame.right)
+  if a then ctx.copy(a, frame.cursor, 'person'); ctx.copy(a, frame.cursor, 'number'); ctx.copy(a, frame.cursor, 'gender') end
+  ctx.copy(frame.right, frame.cursor, 'gender')
+  if ctx.get(frame.right, 'person') ~= 0 then ctx.set(frame.cursor, 'number', 0) end
+  ctx.copy(frame.right, frame.cursor, 'number')
+  ctx.set(frame.right, 'person', 3)
+  if ctx.get(frame.right, 'verb_flags') & values.verb_flags.imperative ~= 0 then ctx.set(frame.right, 'verb_flags', ctx.get(frame.right, 'verb_flags') & (values.byte_mask ~ values.verb_flags.imperative)) end
 end
 
-H[35] = function(c, F, si, hit)
-  c.E(hit).class = 0x52
+handlers[35] = function(ctx, frame, start, finish)
+  ctx.element(finish).class = 0x52
 end
 
-H[36] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.find(c.first(hit), is_tag('A'))
-  if F.e.null or F.r.null then return end
-  c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x72)
-  if c.get(F.r, 0x6D) & 1 ~= 0 then c.set(F.r, 0x7B, 1) else c.set(F.r, 0x76, 0x10) end
+handlers[36] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.find(ctx.first(finish), is_tag('A'))
+  if not frame.left or not frame.right then return end
+  ctx.copy(frame.right, frame.left, 'gender'); ctx.copy(frame.right, frame.left, 'number')
+  if ctx.get(frame.right, 'dictionary_flags') & 1 ~= 0 then ctx.set(frame.right, 'short_form', 1) else ctx.set(frame.right, 'case_mask', values.case.instrumental) end
 end
 
-H[37] = function(c, F, si, hit)
-  F.a = c.first(hit)
-  if not F.a.null then c.set(F.a, 0x74, 3); c.set(F.a, 0x77, 1) end
+handlers[37] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(finish)
+  if frame.cursor then ctx.set(frame.cursor, 'person', 3); ctx.set(frame.cursor, 'gender', 1) end
 end
 
-H[39] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null then return end
-  if c.get(F.r, 0x0C) == 0x59 then
-    c.reading(F.r, 0x4FB0)
+handlers[39] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right then return end
+  if nodes.tag(frame.right) == 'Y' then
+    ctx.reading(frame.right, 0x4FB0)
   else
-    F.e = c.first(si)
-    if not F.e.null then c.copy(F.r, F.e, 0x74); c.copy(F.r, F.e, 0x72) end
+    frame.left = ctx.first(start)
+    if frame.left then ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number') end
   end
 end
 
-H[43] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.find(c.first(hit), is_tag('A'))
-  if F.e.null or F.r.null then return end
-  c.set(F.r, 0x76, 0x10); c.copy(F.r, F.e, 0x72)
+handlers[43] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.find(ctx.first(finish), is_tag('A'))
+  if not frame.left or not frame.right then return end
+  ctx.set(frame.right, 'case_mask', values.case.instrumental); ctx.copy(frame.right, frame.left, 'number')
 end
 
-H[44] = function(c, F, si, hit)
-  F.e = c.first(si)
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  c.copy(F.r, F.e, 0x74); c.copy(F.r, F.e, 0x72); c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x76)
+handlers[44] = function(ctx, frame, start, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number'); ctx.copy(frame.right, frame.left, 'gender'); ctx.copy(frame.right, frame.left, 'case_mask')
 end
 
-H[45] = function(c, F, si, hit)
-  F.r = c.find(c.first(hit), is_tag('N'))
-  if not F.r.null then c.set(F.r, 0x76, 0x10) end
+handlers[45] = function(ctx, frame, start, finish)
+  frame.right = ctx.find(ctx.first(finish), is_tag('N'))
+  if frame.right then ctx.set(frame.right, 'case_mask', values.case.instrumental) end
 end
 
-H[46] = function(c, F, si, hit)
-  F.a = c.first(hit)
-  if not F.a.null then
-    F.a.text = ""
+handlers[46] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(finish)
+  if frame.cursor then
+    frame.cursor.text = ""
   end
 end
 
-H[47] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x76) ~= 0 then return end
-  F.e = c.first(si)
-  if not F.e.null then c.copy(F.r, F.e, 0x76) end
+handlers[47] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'case_mask') ~= 0 then return end
+  frame.left = ctx.first(start)
+  if frame.left then ctx.copy(frame.right, frame.left, 'case_mask') end
 end
 
-H[48] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x76) ~= 0 then return end
-  if c.e2(si) == 0x77 then c.set(F.r, 0x76, 2); return end
-  F.e = c.find(c.first(si), is_tag('N'))
-  if not F.e.null then c.copy(F.r, F.e, 0x76) end
+handlers[48] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'case_mask') ~= 0 then return end
+  if ctx.element_class(start) == 'w' then ctx.set(frame.right, 'case_mask', 2); return end
+  frame.left = ctx.find(ctx.first(start), is_tag('N'))
+  if frame.left then ctx.copy(frame.right, frame.left, 'case_mask') end
 end
 
-H[49] = function(c, F, si, hit)
-  F.a = c.find(c.first(si), is_tag('N'))
-  if not F.a.null then c.set(F.a, 0x76, 4) end
+handlers[49] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.find(ctx.first(start), is_tag('N'))
+  if frame.cursor then ctx.set(frame.cursor, 'case_mask', 4) end
 end
 
-local function insert_element(c,at,tag,class,literal)
-  local node=nodes.word(c.state,tag,c.state.assets:string(literal))
-  if not node then return c.NULL end
-  node[0x0B]=3
-  constituents.insert(c.state,{tag=tag,class=class,next=node,last=node},at)
+local function insert_element(ctx,at,tag,class,literal)
+  local node=nodes.word(ctx.state,tag,ctx.state.assets:string(literal))
+  if not node then return nil end
+  node.reading_state=3
+  constituents.insert(ctx.state,{tag=tag,class=class,next=node,last=node},at)
   return node
 end
 
-H[53] = function(c,F,si,hit) F.a=insert_element(c,hit-2,0x4C,0x4B,0x4FB8) end
-H[54] = function(c,F,si,hit)
-  if c.e2(hit)==0x52 or c.e0(hit+1)==0x2A then return end
-  F.a=insert_element(c,hit,0x4C,0x4B,0x4FC2)
+handlers[53] = function(ctx,frame,start,finish) frame.cursor=insert_element(ctx,finish-2,0x4C,0x4B,0x4FB8) end
+handlers[54] = function(ctx,frame,start,finish)
+  if ctx.element_class(finish)=='R' or ctx.element_tag(finish+1)=='*' then return end
+  frame.cursor=insert_element(ctx,finish,0x4C,0x4B,0x4FC2)
 end
-H[55] = function(c,F,si,hit)
-  F.e=c.first(si)
-  if F.e.null then return end
+handlers[55] = function(ctx,frame,start,finish)
+  frame.left=ctx.first(start)
+  if not frame.left then return end
   local tag,literal=0x4C,0x4FD2
-  if c.get(F.e,0x68) & 0x3F == 1 and (c.get(F.e,0x6E) >> 6) & 1 ~=0 then tag,literal=0x4A,0x4FCC end
-  F.a=insert_element(c,hit-1,tag,0x4B,literal)
-  c.set(F.e,0x76,4)
+  if ctx.get(frame.left,'lookup_flags') & 0x3F == 1 and (ctx.get(frame.left,'dictionary_frame') >> 6) & 1 ~=0 then tag,literal=0x4A,0x4FCC end
+  frame.cursor=insert_element(ctx,finish-1,tag,0x4B,literal)
+  ctx.set(frame.left,'case_mask',4)
 end
-H[56] = function(c,F,si,hit)
-  F.e=c.find(c.first(si),is_tag('V'))
-  if F.e.null or c.get(F.e,0x68) & 0x3F == 0 then return end
-  local literal=c.get(F.e,0x68) & 0x3F == 1 and 0x4FDC or 0x4FE2
-  if literal==0x4FE2 then F.r=c.first(hit); if not F.r.null then c.set(F.r,0x73,1) end end
-  F.a=insert_element(c,hit-1,0x4A,0x4A,literal)
+handlers[56] = function(ctx,frame,start,finish)
+  frame.left=ctx.find(ctx.first(start),is_tag('V'))
+  if not frame.left or ctx.get(frame.left,'lookup_flags') & 0x3F == 0 then return end
+  local literal=ctx.get(frame.left,'lookup_flags') & 0x3F == 1 and 0x4FDC or 0x4FE2
+  if literal==0x4FE2 then frame.right=ctx.first(finish); if frame.right then ctx.set(frame.right,'tense',1) end end
+  frame.cursor=insert_element(ctx,finish-1,0x4A,0x4A,literal)
 end
-local function swap(c,i,j) constituents.swap(c.state,i,j) end
-local function retag(c,i,t) c.E(i).tag,c.state.tags[i]=t,t end
+local function swap(ctx,i,j) constituents.swap(ctx.state,i,j) end
+local function retag(ctx,i,t) ctx.element(i).tag,ctx.state.tags[i]=t,t end
 
-H[59] = function(c, F, si, hit)
-  F.a = c.first(hit - 1)
-  if not F.a.null and c.get(F.a, 0x0F) == 0x72 then swap(c, si, si + 1) end
-end
-
-H[60] = function(c, F, si, hit)
-  swap(c, si, si + c.rule.order)
+handlers[59] = function(ctx, frame, start, finish)
+  frame.cursor = ctx.first(finish - 1)
+  if frame.cursor and nodes.character(frame.cursor, 'marker') == 'r' then swap(ctx, start, start + 1) end
 end
 
-H[61] = function(c, F, si, hit)
-  swap(c, si, hit)
-  swap(c, si + 1, hit)
-  F.e = c.first(si)
-  F.r = c.first(si + 1)
-  if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x76) end
-  retag(c, si, 0x70)
+handlers[60] = function(ctx, frame, start, finish)
+  swap(ctx, start, start + ctx.rule.order)
 end
 
-H[62] = function(c, F, si, hit)
-  if c.e0(si - 1) == 0x70 then return end
-  F.e = c.find(c.first(si), is_tag('N'))
-  F.r = c.first(hit)
-  if F.e.null or F.r.null then return end
-  local frame = c.get(F.r, 0x6A) & 0x3F
-  if frame == 1 then c.set(F.e, 0x76, c.get(F.r, 0x79)); return end
-  if frame == 2 and c.e0(hit + 1) == 0x50 then
-    swap(c, si, hit + 1)
-    swap(c, si + 1, hit + 1)
-    retag(c, si, 0x70)
+handlers[61] = function(ctx, frame, start, finish)
+  swap(ctx, start, finish)
+  swap(ctx, start + 1, finish)
+  frame.left = ctx.first(start)
+  frame.right = ctx.first(start + 1)
+  if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'case_mask') end
+  retag(ctx, start, 0x70)
+end
+
+handlers[62] = function(ctx, frame, start, finish)
+  if ctx.element_tag(start - 1) == 'p' then return end
+  frame.left = ctx.find(ctx.first(start), is_tag('N'))
+  frame.right = ctx.first(finish)
+  if not frame.left or not frame.right then return end
+  local frame = ctx.get(frame.right, 'lookup_frame') & 0x3F
+  if frame == 1 then ctx.set(frame.left, 'case_mask', ctx.get(frame.right, 'governed_case')); return end
+  if frame == 2 and ctx.element_tag(finish + 1) == 'P' then
+    swap(ctx, start, finish + 1)
+    swap(ctx, start + 1, finish + 1)
+    retag(ctx, start, 0x70)
   end
 end
 
-H[63] = function(c, F, si, hit)
-  F.a = insert_element(c, si, 0x2A, 0x4B, 0x4FEA)
-  if not F.a.null then swap(c, si, hit) end
+handlers[63] = function(ctx, frame, start, finish)
+  frame.cursor = insert_element(ctx, start, 0x2A, 0x4B, 0x4FEA)
+  if frame.cursor then swap(ctx, start, finish) end
 end
 
-H[68] = function(c, F, si, hit)
-  F.e = c.find(c.first(si), is_tag('N'))
-  F.r = c.first(hit)
-  if not F.e.null and not F.r.null then c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x72) end
+handlers[68] = function(ctx, frame, start, finish)
+  frame.left = ctx.find(ctx.first(start), is_tag('N'))
+  frame.right = ctx.first(finish)
+  if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'gender'); ctx.copy(frame.right, frame.left, 'number') end
 end
 
-H[69] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if not F.r.null then c.set(F.r, 0x74, 3); c.set(F.r, 0x72, 1) end
+handlers[69] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if frame.right then ctx.set(frame.right, 'person', 3); ctx.set(frame.right, 'number', 1) end
 end
 
-H[70] = function(c, F, si, hit)
-  F.r = c.first(hit)
-  if F.r.null or c.get(F.r, 0x78) ~= 0 or c.get(F.r, 0x7A) ~= 0 then return end
-  F.a = c.find(c.first(si), is_tag('N'))
-  if F.a.null then return end
-  F.r = c.last(hit)
-  if not F.r.null then c.copy(F.a, F.r, 0x76) end
+handlers[70] = function(ctx, frame, start, finish)
+  frame.right = ctx.first(finish)
+  if not frame.right or ctx.get(frame.right, 'verb_flags') ~= 0 or ctx.get(frame.right, 'passive') ~= 0 then return end
+  frame.cursor = ctx.find(ctx.first(start), is_tag('N'))
+  if not frame.cursor then return end
+  frame.right = ctx.last(finish)
+  if frame.right then ctx.copy(frame.cursor, frame.right, 'case_mask') end
 end
 
 function syntax.run(state,root,terminator)
-  local c=context(state)
-  local F={a=c.NULL,e=c.NULL,r=c.NULL}
-  c.terminator=terminator
-  local si=1
-  while state.count-1>si do
+  local ctx=context(state)
+  local frame={} -- Frame values persist across selectors, as in the recovered scheduler.
+  ctx.terminator=terminator
+  local start=1
+  while state.count-1>start do
     local skipped=false
     for _,rule in ipairs(state.assets:rules(0x49E4)) do
-      local hit=matching.constituents(state,si,rule.pattern)
-      if hit~=0 then
-        c.rule=rule
-        local handler=H[rule.selector]
-        if handler and handler(c,F,si,hit)=='skip' then skipped=true; break end
+      local finish=matching.constituents(state,start,rule.pattern)
+      if finish~=0 then
+        ctx.rule=rule
+        local handler=handlers[rule.selector]
+        if handler and handler(ctx,frame,start,finish)=='skip' then skipped=true; break end
       end
     end
-    if not skipped then c.t7(si) end
-    si=si+1
+    if not skipped then ctx.t7(start) end
+    start=start+1
   end
   constituents.relink(state,root)
 end

@@ -4,19 +4,20 @@ local rules = require 'core.rules'
 local encoding = require 'core.encoding'
 
 local phrasing = {}
+local values = require 'core.grammar_values'
 
 -- LTPRO 108F:000F, file 142FF..1608F: the separate T4 function. It rebuilds the
 -- vector, rewrites N readings from cached-tag contexts, applies per-word
 -- sub-rules (node.rules, from `word pattern*$action` dictionary records), then
 -- runs its 9-byte-record rule table from position 0 with a rebuild after each
 -- removing match.
-local byte, tag, set, mark = nodes.byte, nodes.tag, nodes.set_tag, nodes.set_marker
+local number, tag, set, mark = nodes.number, nodes.tag, nodes.set_tag, nodes.set_marker
 local reading = nodes.has_reading
-local function same_word(n, literal) return (n[0x12] or ''):upper() == literal:upper() end
-local function same_text(n, literal) return (n[0x11C] or ''):upper() == literal:upper() end
-local function perfective(n) return (byte(n, 0x6A) >> 6) & 1 end
-local function perfective68(n) return (byte(n, 0x68) >> 6) & 1 end
-local function frame(n) return byte(n, 0x68) & 0x3F end
+local function same_word(n, literal) return (n.source or ''):upper() == literal:upper() end
+local function same_text(n, literal) return (n.reading or ''):upper() == literal:upper() end
+local function perfective(n) return (number(n, 'lookup_frame') >> 6) & 1 end
+local function perfective68(n) return (number(n, 'lookup_flags') >> 6) & 1 end
+local function frame(n) return number(n, 'lookup_flags') & 0x3F end
 local function has(s, c) return c ~= '' and s:find(c, 1, true) ~= nil end
 -- 0000:3DB0 folds a-z; the ctype test at DS:BF77 bit 0C is an ASCII letter.
 local function ascii_letter(c) return c ~= '' and c:match('^[A-Za-z]') ~= nil end
@@ -28,6 +29,561 @@ local KOLICHESTVO = encoding.encode('количество')
 local BYT = encoding.encode('быть')
 local PRIVYKSHI = encoding.encode('привыкши')
 local OBYCHNO = encoding.encode('обычно')
+
+-- Selector IDs belong to the recovered rule data; handlers describe Lua edits.
+local handlers = {}
+
+handlers[1] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if not reading(head, 'P') and number(head, 'marker') ~= 0x67 then match.new_boundary('t', '|', match.node(match.last - 1)) end
+  exit = 'advance_past_match'
+  return exit
+end
+
+handlers[2] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  if not (tag(head) == 'N' and number(head, 'marker') ~= 0x67) then
+    if tag(tail) == 'P' then match.new_boundary('^', '^', match.node(match.last - 2))
+    else match.new_boundary('|', '|', match.node(match.last - 1)) end
+  end
+  exit = 'advance_past_match'
+  return exit
+end
+
+handlers[3] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.seek_up(match.first, match.last, 'E'))
+  if number(n, 'short_form') == 0 then set(n, 'F'); n.aspect, n.passive = 0, 1; match.rebuild() end
+  exit = 'advance_past_match'
+  return exit
+end
+
+handlers[4] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  set(head, 'J')
+  local n = match.node(match.seek_up(match.first + 1, match.last, 'E'))
+  n.aspect, n.passive, n.short_form = 1, 1, 1; mark(n, 'n')
+  match.rebuild(); exit = 'stop_rule'
+  return exit
+end
+
+handlers[5] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  if number(head, 'marker') == 0x77 then exit = 'advance_past_match'
+  elseif number(tail, 'number') ~= 0 then head.reading = KOLICHESTVO; exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[6] = function(match)
+  local exit = 'replace'
+  match.node(match.last - 1).tense = 1; exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[7] = function(match)
+  local tail = match.tail
+  local exit, at = 'replace', nil
+  if not tail.aux then
+    if number(tail, 'previous_tag') ~= 0x47 then
+      local n = match.node(match.first + 1)
+      for _, f in ipairs({'aspect', 'tense', 'passive', 'short_form', 'verb_flags'}) do tail[f] = number(n, f) end
+    end
+    if number(tail, 'short_form') ~= 0 then tail.tense = 1 end
+  end
+  exit, at = 'advance_to', match.last - 2
+  return exit, at
+end
+
+handlers[8] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'marker') == 0x6E and not has('AM,*', tag(match.node(match.first - 1))) then set(head, 'F') end
+  match.rebuild(); exit = 'advance_two'
+  return exit
+end
+
+handlers[9] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.last - 1)
+  if number(n, 'marker') ~= 0x6E then
+    set(n, 'V'); n.verb_flags = number(n, 'verb_flags') | 1; n.aspect, n.person, n.passive = 1, 3, 0
+    match.rebuild()
+  end
+  exit = 'stop_rule'
+  return exit
+end
+
+handlers[10] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  head.passive, head.aspect = 1, 1
+  if number(head, 'marker') == 0x6E then
+    if has('&,C*', tag(match.node(match.first - 1))) and has('NA#?', tag(match.node(match.first + 1))) then set(head, 'A') end
+    match.rebuild()
+  end
+  exit = 'advance_two'
+  return exit
+end
+
+local function replace_and_stop()
+  return 'replace_and_stop'
+end
+handlers[11] = replace_and_stop
+
+local function stop_unmarked_participle(match)
+  local position = match.seek_up(match.first, match.last - 1, 'E')
+  if nodes.character(match.node(position), 'marker') ~= 'n' then return 'stop_rule' end
+  return 'replace'
+end
+handlers[12] = stop_unmarked_participle
+
+local function set_perfective(match)
+  match.tail.aspect = values.aspect.perfective
+  return 'stop_rule'
+end
+handlers[13] = set_perfective
+
+local function set_perfective_if_flagged(match)
+  if number(match.head, 'verb_flags') & values.verb_flags.conditional ~= 0 then
+    match.tail.aspect = values.aspect.perfective
+  end
+  return 'stop_rule'
+end
+handlers[14] = set_perfective_if_flagged
+
+local function inherit_tense(match)
+  local source, target = match.head, match.tail
+  local tense = source.tense or values.tense.present
+  if tense ~= values.tense.present and number(target, 'passive') == 0 then
+    target.tense = tense
+    if tense == values.tense.future then target.aspect = values.aspect.perfective end
+    if tag(target) == 'X' and not same_text(target, '-') then target.reading = BYT end
+  end
+  return 'advance_past_match'
+end
+handlers[15] = inherit_tense
+
+local function require_past_tense(match)
+  if number(match.head, 'tense') ~= values.tense.past then return 'stop_rule' end
+  return 'replace'
+end
+handlers[16] = require_past_tense
+
+local function resolve_gerund_nouns(match)
+  local position = 1
+  while position < match.last - 1 and tag(match.vector[position]) ~= '*' do
+    local word = match.node(position)
+    if tag(word) == 'G' and reading(word, 'N') then
+      set(word, 'N')
+      mark(word, 'g')
+    end
+    position = position + 1
+  end
+  match.rebuild()
+  return 'stop_rule'
+end
+handlers[17] = resolve_gerund_nouns
+handlers[45] = resolve_gerund_nouns
+
+handlers[18] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if match.first == 1 then set(head, ' ')
+  else
+    local c = (head.source or ''):sub(1, 1)
+    if (c == 'i' or c == 'I') and number(head, 'tense') == 0 then head.reading = '-'; head.reading_state = 3 end
+  end
+  exit = 'advance_two'
+  return exit
+end
+
+handlers[19] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  tail.passive, tail.aspect, tail.person, tail.tense = 0, 1, 3, 2; exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[20] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  if not same_word(tail, 'year') then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[21] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  head.case_mask = 0x10; exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[22] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if tag(head) == 'E' and has('C,J', tag(match.node(match.first - 1))) then exit = 'advance_past_match' else head.aspect = 0 end
+  return exit
+end
+
+handlers[23] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  tail.reading = ''; exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[24] = function(match)
+  local exit = 'replace'
+  local k = match.last - 1
+  while k > match.first and tag(match.vector[k]) ~= 'E' do k = k - 1 end
+  local n = match.node(k)
+  if perfective68(n) == 0 then exit = 'advance_past_match'
+  else n.passive = 0; n.lookup_frame = number(n, 'lookup_frame') & 0xC0; exit = 'replace_and_stop' end
+  return exit
+end
+
+handlers[25] = function(match)
+  local exit = 'replace'
+  local k = match.last - 1
+  while k > match.first and tag(match.vector[k]) ~= 'c' do k = k - 1 end
+  if tag(match.node(k)) == 'c' then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[26] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  tail.aspect, tail.tense = 1, 1; exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[27] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  head.number = 1
+  return exit
+end
+
+handlers[28] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.last - 1); n.aspect, n.tense, n.short_form, n.passive = 1, 1, 1, 1
+  exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[29] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  if number(tail, 'person') == 0 then
+    if tag(match.node(match.last - 1)) ~= 'K' then tail.aspect = 1 end
+    tail.verb_flags = number(tail, 'verb_flags') | 4
+  end
+  exit = 'stop_rule'
+  return exit
+end
+
+handlers[30] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.last - 1)
+  if number(n, 'verb_flags') ~= 1 and number(n, 'passive') == 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[31] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  head.case_mask = number(tail, 'governed_case'); exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[32] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  local moved, before, previous = match.node(match.last - 1), match.node(match.last - 2), match.node(match.first - 1)
+  before.next = moved.next
+  moved.next = head
+  previous.next = moved
+  set(head, '+')
+  match.count = match.rebuild(); exit = 'advance_past_match'
+  return exit
+end
+
+handlers[33] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'aspect') == 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[34] = function(match)
+  local exit = 'replace'
+  if number(match.node(match.first + 1), 'marker') ~= 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[35] = function(match)
+  local exit = 'replace'
+  local k = match.last
+  while k > match.first and tag(match.vector[k]) ~= 'd' do k = k - 1 end
+  local n = match.node(k)
+  if reading(n, 'A') and number(n, 'aspect') == 0 then exit = 'replace_and_stop' else exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[36] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  tail.aspect = 1
+  return exit
+end
+
+handlers[37] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'marker') == 0x67 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[39] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'aspect') == 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[40] = function(match)
+  local exit = 'replace'
+  if number(match.node(match.last - 1), 'marker') ~= 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[41] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  if number(head, 'marker') ~= 0 or not same_word(tail, 'year') then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[42] = function(match)
+  local tail = match.tail
+  local exit = 'replace'
+  tail.lookup_flags = (number(tail, 'lookup_flags') & 0xC0) | 1; exit = 'replace_and_stop'
+  return exit
+end
+
+handlers[43] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  if frame(head) ~= 0 then
+    tail.aspect = 1
+    if frame(head) == 2 then tail.tense = 1 end
+    set(match.node(match.last - 1), ' ')
+  end
+  exit = 'stop_rule'
+  return exit
+end
+
+handlers[44] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if frame(head) == 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[46] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.seek_up(match.first, match.last, 'G'))
+  if number(n, 'marker') ~= 0x6E then exit = 'advance_past_match'
+  else set(n, 'N'); mark(n, 'g'); match.rebuild(); exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[47] = function(match)
+  local exit = 'replace'
+  local k = match.last
+  while k >= match.first and tag(match.vector[k]) ~= 'G' do k = k - 1 end
+  if k ~= match.first then local n = match.node(k); set(n, 'N'); mark(n, 'g') end
+  match.rebuild(); exit = 'stop_rule'
+  return exit
+end
+
+handlers[48] = function(match)
+  local head = match.head
+  local exit, at = 'replace', nil
+  local k = match.first
+  while k < match.last and tag(match.node(k + 1)) ~= '*' do
+    local n = match.node(k)
+    if tag(n) == 'E' then n.passive, n.aspect = 1, 1; mark(n, 'n') end
+    if has('C,', tag(n)) and tag(head) == 'E' then set(n, '&') end
+    k = k + 1
+  end
+  match.rebuild(); exit, at = 'advance_to', match.last - 1
+  return exit, at
+end
+
+handlers[49] = function(match)
+  local exit, at = 'replace', nil
+  local k = match.first + 1
+  while k < match.last do
+    local n = match.node(k)
+    if has('C,', tag(n)) then
+      local following = match.node(k + 1)
+      if not (tag(following) == 'E' and number(following, 'marker') ~= 0x6E) then set(n, '&') end
+    end
+    k = k + 1
+  end
+  match.rebuild(); exit, at = 'advance_to', match.last - 1
+  return exit, at
+end
+
+handlers[50] = function(match)
+  local exit = 'replace'
+  if tag(match.node(match.last - 1)) ~= ',' then
+    local k = match.first + 1
+    while match.last - 1 > k do
+      local n = match.node(k)
+      if has('C,', tag(n)) then
+        local after, before = tag(match.node(k + 1)), tag(match.node(k - 1))
+        if not (after == 'P' or after == 'E' or before == 'E' or after == 'F' or before == 'F'
+          or after == 'k' or after == 'Q') then set(n, '&') end
+      end
+      k = k + 1
+    end
+    match.rebuild()
+  end
+  exit = 'stop_rule'
+  return exit
+end
+
+handlers[51] = function(match)
+  local tail = match.tail
+  local exit, at = 'replace', nil
+  if tag(tail) == '*' then
+    local k = match.first + 1
+    while match.last - 1 > k and tag(match.vector[k]) ~= '*' do
+      local n = match.node(k)
+      if has('C,', tag(n)) and tag(match.node(k + 1)) ~= 'P' then set(n, '&') end
+      k = k + 1
+    end
+    match.rebuild(); exit = 'stop_rule'
+  else
+    local width = 1
+    if has('VXYU', tag(tail)) then width, match.last = 3, match.last - 1 end
+    if match.last - width - match.first < 3 or (tag(match.node(match.last)) == ',' and match.first < 2) then
+      exit, at = 'advance_to', match.last - 1
+    else
+      local k = match.first + 2
+      while match.last - width > k do
+        local n = match.node(k)
+        if has('C,', tag(n)) then
+          local after, before = tag(match.node(k + 1)), tag(match.node(k - 1))
+          if not (has('PC,GQT', after) or before == 'D' or after == 'F' or before == 'F') then set(n, '&') end
+        end
+        k = k + 1
+      end
+      match.rebuild(); exit, at = 'advance_to', match.last - 1
+    end
+  end
+  return exit, at
+end
+
+handlers[53] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.seek_up(match.first, match.last, 'N'))
+  local text = n.reading or ''
+  if ascii_letter(text:sub(1, 1)) or not reading(n, 'A') or number(n, 'number') ~= 0 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[54] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  if tag(head) == 'P' and same_word(head, 'of') then exit = 'advance_past_match'
+  else
+    local n = match.node(match.seek_up(match.first, match.last, 'N'))
+    if reading(n, 'A') and number(n, 'number') == 0 and number(tail, 'number') ~= 0 then n.number = 1
+    else exit = 'advance_past_match' end
+  end
+  return exit
+end
+
+handlers[55] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'marker') ~= 0x3D then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[56] = function(match)
+  local exit = 'replace'
+  match.node(match.last - 1).short_form = 1; exit = 'advance_past_match'
+  return exit
+end
+
+handlers[57] = function(match)
+  local exit = 'replace'
+  if perfective(match.node(match.first + 1)) ~= 0 then match.node(match.last - 1).reading = '' end
+  exit = 'stop_rule'
+  return exit
+end
+
+handlers[58] = function(match)
+  local exit = 'replace'
+  local n = match.node(match.seek_up(match.first + 2, match.last, ','))
+  if tag(n) == ',' then set(n, ';'); match.rebuild() end
+  exit = 'advance_past_match'
+  return exit
+end
+
+handlers[60] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'previous_tag') ~= 0x45 then
+    local k = match.first + 1
+    while k < match.last and tag(match.vector[k]) ~= '*' do
+      local n = match.node(k)
+      if tag(n) == 'E' and not has(',C+', tag(match.node(k - 1))) then mark(n, 'n') end
+      k = k + 1
+    end
+  end
+  match.rebuild(); exit = 'advance_past_match'
+  return exit
+end
+
+handlers[61] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  if number(head, 'marker') == 0x77 then exit = 'advance_past_match' end
+  return exit
+end
+
+handlers[62] = function(match)
+  local head = match.head
+  local exit = 'replace'
+  head.case_mask = 4
+  return exit
+end
+
+handlers[66] = function(match)
+  local head, tail = match.head, match.tail
+  local exit = 'replace'
+  if number(head, 'marker') == 0x3D or tag(head) == 'R' then
+    tail.aspect = 0
+    local following = assert(head.next, 'missing native next record')
+    if number(following, 'verb_flags') == 1 then
+      tail.person = 0; tail.verb_flags = number(tail, 'verb_flags') | 8
+      following.tense = 1; following.reading = PRIVYKSHI; set(following, 'V')
+      following.short_form, following.paradigm = 1, 0
+    else
+      following.reading = OBYCHNO; set(following, 'D'); tail.person = 3; head.tense = 0
+    end
+  else exit = 'advance_past_match' end
+  return exit
+end
 
 function phrasing.run(root, options)
   options = options or {}
@@ -56,16 +612,16 @@ function phrasing.run(root, options)
   while count - 3 >= di do
     local n = V(di)
     local step = 1
-    if (byte(n, 0x0F) == 0 or (byte(n, 0x0F) == 0x67 and tag(V(di - 1)) ~= 'p'))
-      and byte(n, 0x0F) ~= 0x25 and byte(n, 0x72) == 0 then
+    if (number(n, 'marker') == 0 or (number(n, 'marker') == 0x67 and tag(V(di - 1)) ~= 'p'))
+      and number(n, 'marker') ~= 0x25 and number(n, 'number') == 0 then
       local context = state.tags:sub(di + 1)
       if context:sub(1, 2) == 'NN' or context:sub(1, 3) == 'NAN' or context:sub(1, 3) == 'NdN'
         or context:sub(1, 3) == 'NHN' or context:sub(1, 3) == 'N-N' then
-        local text = n[0x11C] or ''
+        local text = n.reading or ''
         if text:find('A.', 1, true) or (reading(n, 'A') and not ascii_letter(text:sub(1, 1))) then
           set(n, 'A'); set_cache(di, 'A')
           if cache(di + 1) == 'A' then step = 3 end
-        elseif byte(n, 0x0F) ~= 0x67 then step = 4 end
+        elseif number(n, 'marker') ~= 0x67 then step = 4 end
       end
     end
     di = di + step
@@ -79,8 +635,8 @@ function phrasing.run(root, options)
   di = 1
   while count - 1 > di do
     local head = V(di)
-    local skip = byte(head, 0x0E) ~= 0x57 or not head.rules or #head.rules == 0
-      or byte(head, 0x0F) == 0x77 or byte(head, 0x0F) == 0x57 or tag(head) == 'g'
+    local skip = number(head, 'kind') ~= 0x57 or not head.rules or #head.rules == 0
+      or number(head, 'marker') == 0x77 or number(head, 'marker') == 0x57 or tag(head) == 'g'
     if not skip then
       local best, chosen = 0x200, nil
       for index, rule in ipairs(head.rules) do
@@ -103,43 +659,43 @@ function phrasing.run(root, options)
         events[#events + 1] = {sub_rule = true, first = di, last = best, pattern = chosen.pattern, selector = selector}
         local apply = true
         if selector == '1' then
-          local n = V(best - 1); n[0x75], n[0x7A], n[0x73] = 0, 0, 0
+          local n = V(best - 1); n.aspect, n.passive, n.tense = 0, 0, 0
         elseif selector == '2' then
-          if byte(tail, 0x72) == 0 then apply = false end
-        elseif selector == '3' then head[0x75] = 1
+          if number(tail, 'number') == 0 then apply = false end
+        elseif selector == '3' then head.aspect = 1
         elseif selector == '4' then
-          if tag(V(di - 1)) == '*' then head[0x74] = 1 end
+          if tag(V(di - 1)) == '*' then head.person = 1 end
           if tag(head) == 'G' then set(head, 'V') end
         elseif selector == '5' then
-          set(head, ' '); tail[0x76], tail[0x73] = 8, 1; tail[0x78] = byte(tail, 0x78) | 2
-        elseif selector == '6' then head[0x76] = 4
+          set(head, ' '); tail.case_mask, tail.tense = 8, 1; tail.verb_flags = number(tail, 'verb_flags') | 2
+        elseif selector == '6' then head.case_mask = 4
         elseif selector == '7' then mark(tail, 'n')
         elseif selector == '8' then
-          tail[0x11C] = ''
-          if tag(tail) == 'P' then tail[0x76] = 4 end
+          tail.reading = ''
+          if tag(tail) == 'P' then tail.case_mask = 4 end
         elseif selector == '9' then
           if tag(V(di - 1)) ~= 'X' then apply = false end
-        elseif selector == 'a' then tail[0x75], tail[0x7A] = 1, 1
-        elseif selector == 'c' then head[0x78] = byte(head, 0x78) | 2
-        elseif selector == 'f' then head[0x0B] = 0
+        elseif selector == 'a' then tail.aspect, tail.passive = 1, 1
+        elseif selector == 'c' then head.verb_flags = number(head, 'verb_flags') | 2
+        elseif selector == 'f' then head.reading_state = 0
         elseif selector == 'g' then mark(tail, 'g')
-        elseif selector == 'h' then tail[0x75] = 1
+        elseif selector == 'h' then tail.aspect = 1
         elseif selector == 'n' then
           if tag(head) == 'N' then apply = false end
-        elseif selector == 'r' then head[0x7A], head[0x73] = 0, 0
+        elseif selector == 'r' then head.passive, head.tense = 0, 0
         end
         if apply then
           local c = action:sub(1, 1)
           if c == ' ' then removed = 1 end
           if c == '?' or c == '@' then action = action:sub(2)
           elseif c ~= '' and not cyrillic(c) then
-            head[0x66] = head[0x0C]; set(head, c); set_cache(di, c)
+            head.previous_tag = head.tag; set(head, c); set_cache(di, c)
             action = action:sub(2)
           end
-          if tag(head) == 'N' and byte(head, 0x66) == 0x47 then mark(head, 'g')
-          elseif byte(head, 0x0F) ~= 0x6E then mark(head, 'w') end
-          if byte(tail, 0x0F) ~= 0x67 then mark(tail, 'w') end
-          if action ~= '' then head[0x11C] = action end
+          if tag(head) == 'N' and number(head, 'previous_tag') == 0x47 then mark(head, 'g')
+          elseif number(head, 'marker') ~= 0x6E then mark(head, 'w') end
+          if number(tail, 'marker') ~= 0x67 then mark(tail, 'w') end
+          if action ~= '' then head.reading = action end
           if tail_action and tail_action ~= '' then
             sub_result = matching.replace(vector, di + 1, best, chosen.pattern, tail_action, state)
           end
@@ -167,303 +723,39 @@ function phrasing.run(root, options)
         local head, tail = V(di), V(last)
         events[#events + 1] = {rule = index, handler = handler, first = di, last = last}
         if options.on_match then options.on_match(events[#events], vector, count, state.tags) end
-        -- Exits: 'default' = 1600B replacement; 'skip' = 149FE; 'finish' =
-        -- 15DF0 (flag cleared, no replacement); 'finish_default' = 14CCD;
-        -- 'step2' = 15171; 'at' = 15C46 (di = value, then advance).
-        local exit, at = 'default', nil
-        local function seek_up(from, limit, c)
-          local k = from
-          while k < limit and tag(vector[k]) ~= c do k = k + 1 end
-          return k
+        local match = {
+          first = di, last = last, count = count, vector = vector,
+          head = head, tail = tail, node = V,
+        }
+        function match.new_boundary(...)
+          new_boundary(...)
+          match.vector, match.count = vector, count
         end
-        if handler == 1 then
-          if not reading(head, 'P') and byte(head, 0x0F) ~= 0x67 then new_boundary('t', '|', V(last - 1)) end
-          exit = 'skip'
-        elseif handler == 2 then
-          if not (tag(head) == 'N' and byte(head, 0x0F) ~= 0x67) then
-            if tag(tail) == 'P' then new_boundary('^', '^', V(last - 2))
-            else new_boundary('|', '|', V(last - 1)) end
-          end
-          exit = 'skip'
-        elseif handler == 3 then
-          local n = V(seek_up(di, last, 'E'))
-          if byte(n, 0x7B) == 0 then set(n, 'F'); n[0x75], n[0x7A] = 0, 1; rebuild() end
-          exit = 'skip'
-        elseif handler == 4 then
-          set(head, 'J')
-          local n = V(seek_up(di + 1, last, 'E'))
-          n[0x75], n[0x7A], n[0x7B] = 1, 1, 1; mark(n, 'n')
-          rebuild(); exit = 'finish'
-        elseif handler == 5 then
-          if byte(head, 0x0F) == 0x77 then exit = 'skip'
-          elseif byte(tail, 0x72) ~= 0 then head[0x11C] = KOLICHESTVO; exit = 'skip' end
-        elseif handler == 6 then
-          V(last - 1)[0x73] = 1; exit = 'finish_default'
-        elseif handler == 7 then
-          if not tail.aux then
-            if byte(tail, 0x66) ~= 0x47 then
-              local n = V(di + 1)
-              for _, f in ipairs({0x75, 0x73, 0x7A, 0x7B, 0x78}) do tail[f] = byte(n, f) end
-            end
-            if byte(tail, 0x7B) ~= 0 then tail[0x73] = 1 end
-          end
-          exit, at = 'at', last - 2
-        elseif handler == 8 then
-          if byte(head, 0x0F) == 0x6E and not has('AM,*', tag(V(di - 1))) then set(head, 'F') end
-          rebuild(); exit = 'step2'
-        elseif handler == 9 then
-          local n = V(last - 1)
-          if byte(n, 0x0F) ~= 0x6E then
-            set(n, 'V'); n[0x78] = byte(n, 0x78) | 1; n[0x75], n[0x74], n[0x7A] = 1, 3, 0
-            rebuild()
-          end
-          exit = 'finish'
-        elseif handler == 10 then
-          head[0x7A], head[0x75] = 1, 1
-          if byte(head, 0x0F) == 0x6E then
-            if has('&,C*', tag(V(di - 1))) and has('NA#?', tag(V(di + 1))) then set(head, 'A') end
-            rebuild()
-          end
-          exit = 'step2'
-        elseif handler == 11 then
-          exit = 'finish_default'
-        elseif handler == 12 then
-          local k = di
-          while last - 1 > k and tag(vector[k]) ~= 'E' do k = k + 1 end
-          if byte(V(k), 0x0F) ~= 0x6E then exit = 'finish' end
-        elseif handler == 13 then
-          tail[0x75] = 1; exit = 'finish'
-        elseif handler == 14 then
-          if byte(head, 0x78) & 2 ~= 0 then tail[0x75] = 1 end
-          exit = 'finish'
-        elseif handler == 15 then
-          if byte(head, 0x73) ~= 0 and byte(tail, 0x7A) == 0 then
-            tail[0x73] = byte(head, 0x73)
-            if byte(head, 0x73) == 2 then tail[0x75] = 1 end
-            if tag(tail) == 'X' and not same_text(tail, '-') then tail[0x11C] = BYT end
-          end
-          exit = 'skip'
-        elseif handler == 16 then
-          if byte(head, 0x73) ~= 1 then exit = 'finish' end
-        elseif handler == 17 or handler == 45 then
-          local k = 1
-          while last - 1 > k and tag(vector[k]) ~= '*' do
-            local n = V(k)
-            if tag(n) == 'G' and reading(n, 'N') then set(n, 'N'); mark(n, 'g') end
-            k = k + 1
-          end
-          rebuild(); exit = 'finish'
-        elseif handler == 18 then
-          if di == 1 then set(head, ' ')
-          else
-            local c = (head[0x12] or ''):sub(1, 1)
-            if (c == 'i' or c == 'I') and byte(head, 0x73) == 0 then head[0x11C] = '-'; head[0x0B] = 3 end
-          end
-          exit = 'step2'
-        elseif handler == 19 then
-          tail[0x7A], tail[0x75], tail[0x74], tail[0x73] = 0, 1, 3, 2; exit = 'finish_default'
-        elseif handler == 20 then
-          if not same_word(tail, 'year') then exit = 'skip' end
-        elseif handler == 21 then
-          head[0x76] = 0x10; exit = 'finish_default'
-        elseif handler == 22 then
-          if tag(head) == 'E' and has('C,J', tag(V(di - 1))) then exit = 'skip' else head[0x75] = 0 end
-        elseif handler == 23 then
-          tail[0x11C] = ''; exit = 'finish_default'
-        elseif handler == 24 then
-          local k = last - 1
-          while k > di and tag(vector[k]) ~= 'E' do k = k - 1 end
-          local n = V(k)
-          if perfective68(n) == 0 then exit = 'skip'
-          else n[0x7A] = 0; n[0x6A] = byte(n, 0x6A) & 0xC0; exit = 'finish_default' end
-        elseif handler == 25 then
-          local k = last - 1
-          while k > di and tag(vector[k]) ~= 'c' do k = k - 1 end
-          if tag(V(k)) == 'c' then exit = 'skip' end
-        elseif handler == 26 then
-          tail[0x75], tail[0x73] = 1, 1; exit = 'finish_default'
-        elseif handler == 27 then
-          head[0x72] = 1
-        elseif handler == 28 then
-          local n = V(last - 1); n[0x75], n[0x73], n[0x7B], n[0x7A] = 1, 1, 1, 1
-          exit = 'finish_default'
-        elseif handler == 29 then
-          if byte(tail, 0x74) == 0 then
-            if tag(V(last - 1)) ~= 'K' then tail[0x75] = 1 end
-            tail[0x78] = byte(tail, 0x78) | 4
-          end
-          exit = 'finish'
-        elseif handler == 30 then
-          local n = V(last - 1)
-          if byte(n, 0x78) ~= 1 and byte(n, 0x7A) == 0 then exit = 'skip' end
-        elseif handler == 31 then
-          head[0x76] = byte(tail, 0x79); exit = 'finish_default'
-        elseif handler == 32 then
-          local moved, before, previous = V(last - 1), V(last - 2), V(di - 1)
-          before.next = moved.next
-          moved.next = head
-          previous.next = moved
-          set(head, '+')
-          count = rebuild(); exit = 'skip'
-        elseif handler == 33 then
-          if byte(head, 0x75) == 0 then exit = 'skip' end
-        elseif handler == 34 then
-          if byte(V(di + 1), 0x0F) ~= 0 then exit = 'skip' end
-        elseif handler == 35 then
-          local k = last
-          while k > di and tag(vector[k]) ~= 'd' do k = k - 1 end
-          local n = V(k)
-          if reading(n, 'A') and byte(n, 0x75) == 0 then exit = 'finish_default' else exit = 'skip' end
-        elseif handler == 36 then
-          tail[0x75] = 1
-        elseif handler == 37 then
-          if byte(head, 0x0F) == 0x67 then exit = 'skip' end
-        elseif handler == 39 then
-          if byte(head, 0x75) == 0 then exit = 'skip' end
-        elseif handler == 40 then
-          if byte(V(last - 1), 0x0F) ~= 0 then exit = 'skip' end
-        elseif handler == 41 then
-          if byte(head, 0x0F) ~= 0 or not same_word(tail, 'year') then exit = 'skip' end
-        elseif handler == 42 then
-          tail[0x68] = (byte(tail, 0x68) & 0xC0) | 1; exit = 'finish_default'
-        elseif handler == 43 then
-          if frame(head) ~= 0 then
-            tail[0x75] = 1
-            if frame(head) == 2 then tail[0x73] = 1 end
-            set(V(last - 1), ' ')
-          end
-          exit = 'finish'
-        elseif handler == 44 then
-          if frame(head) == 0 then exit = 'skip' end
-        elseif handler == 46 then
-          local n = V(seek_up(di, last, 'G'))
-          if byte(n, 0x0F) ~= 0x6E then exit = 'skip'
-          else set(n, 'N'); mark(n, 'g'); rebuild(); exit = 'skip' end
-        elseif handler == 47 then
-          local k = last
-          while k >= di and tag(vector[k]) ~= 'G' do k = k - 1 end
-          if k ~= di then local n = V(k); set(n, 'N'); mark(n, 'g') end
-          rebuild(); exit = 'finish'
-        elseif handler == 48 then
-          local k = di
-          while k < last and tag(V(k + 1)) ~= '*' do
-            local n = V(k)
-            if tag(n) == 'E' then n[0x7A], n[0x75] = 1, 1; mark(n, 'n') end
-            if has('C,', tag(n)) and tag(head) == 'E' then set(n, '&') end
-            k = k + 1
-          end
-          rebuild(); exit, at = 'at', last - 1
-        elseif handler == 49 then
-          local k = di + 1
-          while k < last do
-            local n = V(k)
-            if has('C,', tag(n)) then
-              local following = V(k + 1)
-              if not (tag(following) == 'E' and byte(following, 0x0F) ~= 0x6E) then set(n, '&') end
-            end
-            k = k + 1
-          end
-          rebuild(); exit, at = 'at', last - 1
-        elseif handler == 50 then
-          if tag(V(last - 1)) ~= ',' then
-            local k = di + 1
-            while last - 1 > k do
-              local n = V(k)
-              if has('C,', tag(n)) then
-                local after, before = tag(V(k + 1)), tag(V(k - 1))
-                if not (after == 'P' or after == 'E' or before == 'E' or after == 'F' or before == 'F'
-                  or after == 'k' or after == 'Q') then set(n, '&') end
-              end
-              k = k + 1
-            end
-            rebuild()
-          end
-          exit = 'finish'
-        elseif handler == 51 then
-          if tag(tail) == '*' then
-            local k = di + 1
-            while last - 1 > k and tag(vector[k]) ~= '*' do
-              local n = V(k)
-              if has('C,', tag(n)) and tag(V(k + 1)) ~= 'P' then set(n, '&') end
-              k = k + 1
-            end
-            rebuild(); exit = 'finish'
-          else
-            local width = 1
-            if has('VXYU', tag(tail)) then width, last = 3, last - 1 end
-            if last - width - di < 3 or (tag(V(last)) == ',' and di < 2) then
-              exit, at = 'at', last - 1
-            else
-              local k = di + 2
-              while last - width > k do
-                local n = V(k)
-                if has('C,', tag(n)) then
-                  local after, before = tag(V(k + 1)), tag(V(k - 1))
-                  if not (has('PC,GQT', after) or before == 'D' or after == 'F' or before == 'F') then set(n, '&') end
-                end
-                k = k + 1
-              end
-              rebuild(); exit, at = 'at', last - 1
-            end
-          end
-        elseif handler == 53 then
-          local n = V(seek_up(di, last, 'N'))
-          local text = n[0x11C] or ''
-          if ascii_letter(text:sub(1, 1)) or not reading(n, 'A') or byte(n, 0x72) ~= 0 then exit = 'skip' end
-        elseif handler == 54 then
-          if tag(head) == 'P' and same_word(head, 'of') then exit = 'skip'
-          else
-            local n = V(seek_up(di, last, 'N'))
-            if reading(n, 'A') and byte(n, 0x72) == 0 and byte(tail, 0x72) ~= 0 then n[0x72] = 1
-            else exit = 'skip' end
-          end
-        elseif handler == 55 then
-          if byte(head, 0x0F) ~= 0x3D then exit = 'skip' end
-        elseif handler == 56 then
-          V(last - 1)[0x7B] = 1; exit = 'skip'
-        elseif handler == 57 then
-          if perfective(V(di + 1)) ~= 0 then V(last - 1)[0x11C] = '' end
-          exit = 'finish'
-        elseif handler == 58 then
-          local n = V(seek_up(di + 2, last, ','))
-          if tag(n) == ',' then set(n, ';'); rebuild() end
-          exit = 'skip'
-        elseif handler == 60 then
-          if byte(head, 0x66) ~= 0x45 then
-            local k = di + 1
-            while k < last and tag(vector[k]) ~= '*' do
-              local n = V(k)
-              if tag(n) == 'E' and not has(',C+', tag(V(k - 1))) then mark(n, 'n') end
-              k = k + 1
-            end
-          end
-          rebuild(); exit = 'skip'
-        elseif handler == 61 then
-          if byte(head, 0x0F) == 0x77 then exit = 'skip' end
-        elseif handler == 62 then
-          head[0x76] = 4
-        elseif handler == 66 then
-          if byte(head, 0x0F) == 0x3D or tag(head) == 'R' then
-            tail[0x75] = 0
-            local following = assert(head.next, 'missing native next record')
-            if byte(following, 0x78) == 1 then
-              tail[0x74] = 0; tail[0x78] = byte(tail, 0x78) | 8
-              following[0x73] = 1; following[0x11C] = PRIVYKSHI; set(following, 'V')
-              following[0x7B], following[0x85] = 1, 0
-            else
-              following[0x11C] = OBYCHNO; set(following, 'D'); tail[0x74] = 3; head[0x73] = 0
-            end
-          else exit = 'skip' end
+        function match.rebuild()
+          local live_count = rebuild()
+          match.vector = vector
+          return live_count
         end
-        if exit == 'default' or exit == 'finish_default' then
+        function match.seek_up(from, limit, wanted)
+          local position = from
+          while position < limit and tag(vector[position]) ~= wanted do
+            position = position + 1
+          end
+          return position
+        end
+        local apply = handlers[handler]
+        local exit, at = 'replace', nil
+        if apply then exit, at = apply(match) end
+        last, count = match.last, match.count
+        if exit == 'replace' or exit == 'replace_and_stop' then
           if action then removed = matching.replace(vector, di, last, pattern, action, state) end
           if removed ~= 0 then count = rebuild(); removed = 0 end
           di = di + 1
-          if exit == 'finish_default' then continue = false end
-        elseif exit == 'skip' then di = last + 1
-        elseif exit == 'finish' then di = di + 1; continue = false
-        elseif exit == 'step2' then di = di + 2
-        elseif exit == 'at' then di = at + 1
+          if exit == 'replace_and_stop' then continue = false end
+        elseif exit == 'advance_past_match' then di = last + 1
+        elseif exit == 'stop_rule' then di = di + 1; continue = false
+        elseif exit == 'advance_two' then di = di + 2
+        elseif exit == 'advance_to' then di = at + 1
         end
       end
     end

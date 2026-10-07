@@ -2,6 +2,7 @@ local layout = require 'core.record_layout'
 local nodes = require 'core.nodes'
 local transliteration = require 'core.transliteration'
 local text = require 'core.text'
+local prefixes = require 'core.prefixes'
 
 local lexicon = {}
 
@@ -717,6 +718,11 @@ local function decode(dictionary,records,index,options)
   local derived, lookup_error
   if not value then
     derived, lookup_error=lexicon.lookup(dictionary,source,options)
+    if not derived and options.prefixes then
+      derived, node.derivation_prefix=prefixes.lookup(options.prefixes,source,function(stem)
+        return lexicon.lookup(dictionary,stem,options)
+      end)
+    end
     if derived and derived.record then
       value=derived.record.value
       node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()

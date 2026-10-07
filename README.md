@@ -48,6 +48,13 @@ their components while retaining the separator. A compound containing a bare
 derivational noun ending (such as `foo-ness` or `ment/foo`) stays intact as an
 unknown noun. This is an intentional Lua feature policy, not DOS output parity.
 
+Prefix analysis loads `ERPREFIX.PRE` from the asset directory when present.
+Exact entries win; otherwise the longest prefix with a recognized stem is used.
+Stem morphology runs before the translated prefix is attached. `re` uses a
+separate word; other prefixes join the stem. Disabled `*` rows are ignored.
+Use `--prefixes FILE` / API `prefixes = path_or_bytes` to supply data, or
+`--no-prefixes` / `prefixes = false` to disable this fallback.
+
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,

@@ -12,6 +12,7 @@ local syntax = require 'core.syntax'
 local generation = require 'core.generation'
 local output = require 'core.output'
 local encoding = require 'core.encoding'
+local prefixes = require 'core.prefixes'
 
 local engine = {}
 
@@ -45,6 +46,9 @@ end
 
 function engine.run(input, options)
   options = options or {}
+  local configured = options
+  options = {}
+  for key, value in pairs(configured) do options[key] = value end
   assert(type(input) == 'string', 'input sentence must be a UTF-8 string')
   local data = options.data_dir or 'LTGOLD'
   local executable = options.executable or (data .. '/LTPRO.EXE')
@@ -53,6 +57,18 @@ function engine.run(input, options)
 
   local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
   local state = engine.new_state(executable, rus_source)
+  if options.prefixes ~= false then
+    if type(options.prefixes) == 'string' then
+      options.prefixes = prefixes.from_bytes(engine.read_asset(options.prefixes, 'ERPREFIX.PRE'))
+      assert(#options.prefixes > 0, 'ERPREFIX.PRE is unreadable or contains no active prefix rows')
+    elseif options.prefixes == nil then
+      local file = io.open(data .. '/ERPREFIX.PRE', 'rb')
+      if file then
+        options.prefixes = prefixes.from_bytes(file:read('*a'))
+        file:close()
+      end
+    end
+  end
   local dict = lexicon.from_bytes(dic_bytes)
   local analyzed = lexicon.analyze(dict, encoding.encode(input), options)
 
@@ -96,6 +112,13 @@ function engine.run(input, options)
     stages.T8=true
     generation.run(state,analyzed.root)
     stages.generation=true
+  end
+  local prefixed=analyzed.root.next
+  while prefixed do
+    if prefixed.derivation_prefix and (prefixed.text or '') ~= '' then
+      prefixed.text=prefixed.derivation_prefix .. prefixed.text
+    end
+    prefixed=prefixed.next
   end
   local result,alternatives=output.sentence(state,analyzed.root)
   result=result:gsub('^ ','')

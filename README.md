@@ -35,8 +35,8 @@ assert(text == 'Он - в доме.')
 state. Options `executable`, `dictionary`, and `russian` accept paths or raw bytes.
 Option `transliterate = false` corresponds to LTPRO’s `/L-`: bare `=`
 readings remain empty, while `%` still transliterates. Each call builds fresh mutable state. Diagnostic state exposes `root` (the Lua
-record list), `elements`, `tags`, `stages`, and `output` (CP866 text). Unsupported
-lexical branches raise errors.
+record list), `elements`, `tags`, `stages`, and `output` (CP866 text).
+Malformed directives and invalid callback selections raise descriptive errors.
 
 Duplicate dictionary keys retain file order; the first entry wins by default.
 API callers can set `dictionary_entry = function(key, entries) return index end`
@@ -97,16 +97,20 @@ also retired. Original binary names remain in research tooling for provenance.
 
 ## Verification and limits
 
-The recovered engine matches the **77 original + 20 holdout + 26 lexical-macro captured inputs**.
-That establishes corpus parity, not universal equivalence. The `=` and `%` lexical macros,
-contextual transliteration, and dictionary redirects are ported. Some suffix
-fallback branches and inline input directives remain unsupported; this
-is a single-sentence API. See [testing](TESTING.md) for reproducible checks and
-[research evidence](reference/LTPRO_CLI_REPORT.md) for capture details.
+Development targets the translator's features using ordinary Lua records and
+strings. Exact DOS output, memory behavior, and undocumented binary switches
+are not a completion requirement. This remains a rule-based translator: broader
+language quality and arbitrary multi-sentence input are outside issue #3's scope.
+
+The standard suite covers the public features above, including lexical analysis
+of all 8,940 supplied multiword `W` phrase entries. That inventory check guards
+against analyzer failures; it does not establish translation quality for every
+phrase. The historical **77 original + 20 holdout + 26 lexical-macro captures**
+remain unchanged as research evidence. See [testing](TESTING.md) for the feature
+checks and optional historical comparisons.
 
 ```sh
 sh test/run_all.sh
-python3 tools/ltpro_pipeline_probe.py
 ```
 
 The test suite uses the original assets. Python is needed only for research

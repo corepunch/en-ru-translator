@@ -11,6 +11,9 @@ snapshot or native executable execution.
 |---|---|
 | `engine` | Asset loading, sentence state, stage orchestration and public API |
 | `lexicon` | Dictionary index, suffix candidates, lexical readings, phrases and tokenization |
+| `prefixes` | Prefix data loading and longest recognized-stem fallback |
+| `phrase_patterns` | Phrase gap captures and reading alternatives |
+| `directives` | Protected text spans and list-formatting sections |
 | `grammar` | Cleanup and the T1–T3 grammatical passes |
 | `phrasing` | T4 phrases, per-word rules and final grammatical resolution |
 | `matching` | Shared lexical/constituent pattern interpreter and replacement actions |
@@ -53,6 +56,13 @@ and immutable dictionary lines. Morphology returns a string or `nil`; output
 collects string fragments. There is no mutable byte-memory layer, pointer
 arithmetic, native allocator or shared scratch buffer. Captured record decoding
 is confined to `tools/ltpro_records.lua` for the early-stage differential probes.
+
+Prefix derivation leaves the stem reading available for morphology and attaches
+the translated prefix afterward, including alternative meanings. Domain selection
+reorders readings before morphology. Protected spans keep their literal output
+and bypass lexical lookup and output capitalization. List directives compose
+independent sentence/item states and join the results with tabs and newlines.
+The optional glossary is rendered without modifying generated records.
 
 Morphology reads the initialized EXE tables directly. There is no second set of
 Lua morphology tables or parallel string-based inflection implementation.

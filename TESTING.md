@@ -7,12 +7,28 @@ supplied unpacked `LTGOLD/LTPRO.EXE`, `BASE.DIC`, and `BASE.RUS`.
 
 ```sh
 sh test/run_all.sh
+```
+
+This is the required feature regression suite; it does not require DOSBox or
+memory-operation parity. New feature expectations describe the documented Lua
+behavior. Existing captured expectations remain useful regressions, not a demand
+that new features reproduce every DOS quirk.
+
+Coverage includes meanings output, suffixes and compounds, prefix derivation,
+duplicate-entry callbacks, lexical class alternatives, phrase captures and W
+selectors, domain preferences, protected/transliterated text, list directives,
+and API/CLI integration. `phrase_inventory_test.lua` also analyzes 8,940 multiword
+W entries (using `cat` for gaps) to catch unsupported branches. It checks safe
+analysis, not linguistic correctness of every generated sentence.
+
+## Optional historical comparisons
+
+```sh
 python3 tools/ltpro_pipeline_probe.py
 python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/holdout_cases.json --reference test/ltpro/holdout_reference.json
 python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/macro_cases.json --reference test/ltpro/macro_reference.json
 ```
 
-The shell runner executes the Lua module tests and CLI integration checks.
 The Python probe verifies asset/input/raw-output hashes before comparing the
 single engine against the 77 original, 20 holdout and 26 lexical-macro captured inputs. It never
 silently recaptures expected output. The old parser/compiler tests and custom
@@ -72,6 +88,8 @@ New full-program references require DOSBox-X and `tools/ltpro_capture.py`.
 [Corpus provenance](test/ltpro/README.md) documents the capture profile and assets.
 Keep expected outputs and original assets unchanged during refactoring. Corpus
 parity does not establish support for every historical grammar or lexical path.
+Intentional differences introduced by the Lua feature policies should be assessed
+against those policies; do not change stored captures to hide them.
 
 `macros_test.lua` audits all 5,801 literal dictionary entries containing `=` or
 `%`, including phrase readings and redirects. The reading probe checks 2,784

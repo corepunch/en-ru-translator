@@ -116,6 +116,9 @@ def main():
         segment = int(args.segment, 16) if args.segment else None
         for off, hexbytes, mn, ops in rows:
             so = f'{segment:04X}:{off - HEADER - segment * 16:04X} ' if segment is not None else ''
+            # Capstone reports near targets in load-image coordinates.
+            if (mn.startswith('j') or mn in ('loop', 'call')) and re.match(r'^0x[0-9a-f]+$', ops):
+                ops = f'{int(ops, 16) + HEADER:05X}'
             print(f'{off:05X} {so}{hexbytes:<16} {mn} {ops}')
 
 

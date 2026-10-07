@@ -29,8 +29,12 @@ instrumented image, printing every boundary), `tools/ltpro_trace.py`
 | `108F` | T4 function `000F` | `0x142F0` |
 | `1279` | reorder `000D` | `0x1619D` |
 | `12DC` | cleanup `0005`; grammar caller `033A` | `0x167C0` |
-| `1313` | rebuild `000E`, replacement `01B4`, matcher `0A67`, swap `12DF`, T7 function `1364`, T7 table select `0CDE/0CE8` | `0x16D30` |
-| `151F` | post-reorder per-record pass `2740`, its helper `2029` | `0x18BF0` |
+| `1313` | rebuild `000E`, replacement `01B4`, matcher `0A67`, swap `12DF`, T7 function `1364` (called only as `1449:0004`) | `0x16B30` |
+| `151F` | numeric/reading pass `2740`; reading choice `2029`, `0C03`; phrase expansion `056E`; code parsing `028B`, `000F` | `0x18BF0` |
+| `1449` | alias of `1313`'s paragraph range: T7 is `1449:0004` | `0x17E90` |
+| `1FCD` | BASE.RUS lookup: `1031` list, `007F` search, `057B` next line | `0x236D0` |
+| `043A` | BASE.RUS index: `074D` block offset, `0850` block length | `0x07DA0` |
+| `1E71` | morphology `02AC/0420/05FB/0977/0CDC`; ending replacement `0BA0`, suffix matches `006F` | `0x22110` |
 | `17AA` | `1D31`, fifth driver stage | `0x1B4A0` |
 | `1986` | T8 `000E` | `0x1D260` |
 | `1C3D` | constituent matcher `0135`, constituent builder `05C5`, constituent rule pass `1B3F` | `0x1FDD0` |
@@ -44,10 +48,10 @@ instrumented image, printing every boundary), `tools/ltpro_trace.py`
 0A4F:3B12 (root)                 lexical analysis
 12DC:033A (root, terminator)     grammar: 0E1F:0009 T1-T3; if it returned 1 -> 108F:000F T4;
                                  if DI != 0 -> 1279:000D reorder
-151F:2740 (root)                 numeric agreement flags; helper 151F:2029 for records with +0B > 1
-1C3D:1B3F (root, terminator)     builds the constituent array, then a 21-selector rule pass
-1986:000E (root, terminator)     T8
-17AA:1D31 (root, terminator)     per word record with +0B > 1 (generation side; unexplored)
+151F:2740 (root)                 numbers; reading choice 151F:2029 -> 0C03 for records with +0B > 1
+1C3D:1B3F (root, terminator)     constituent builder 05C5, then the 21-selector rule pass (calls T7)
+1986:000E (root, terminator)     T8: per position all rules, then T7 (1449:0004); relink 1C3D:1A97
+17AA:1D31 (root, terminator)     generation 17AA:0475 per word record with +0B > 1 and its alternatives
 near 0687:7427 (file 0xAE27)     output (unexplored)
 ```
 
@@ -242,12 +246,39 @@ chain.
   T4 selectors 0 4 8 10 11 14 15 18 29 37 49 50 51 53 60 and three sub-rule
   applications; everything else is covered only by generated fixtures.
 
+## Post-reorder stages (ported 2026-10-06)
+
+Ported to Lua on a byte-level memory model (`core/ltpro/memory.lua`) and
+verified against native code run from full DOS memory snapshots; see
+`reference/LTPRO_HANDOVER.md`. Facts needed by later work:
+
+- More record fields: `+89` alternative count, `+8B` strdup'ed first
+  `{annotation}`, `+8F/+91` next alternative record (a 26Bh-byte clone,
+  numbered at `+8`), `+67..+6A`/`+6D..+70` BASE.RUS paradigm code bytes,
+  `+6C` Russian entry tag, `+243` preposition/negation prefix text.
+  Records are `calloc(1, 26Bh)` (not 282h); `DS:C574` counts them (limit `DS:044D`).
+- Constituent array: far pointer `DS:C7FA`, `calloc(42h, 12)`, count
+  `DS:C7FE`, tags `DS:C7B6`; element `+0` tag, `+2` class, `+4/+8` first/last
+  record. Bytes `+1/+3` are never written by the builder and never read.
+- Globals: `DS:484D`/`DS:4887` tag buffers, `DS:C7B4` reading length,
+  `DS:4840` far pointer to a 2-byte save area, `DS:C8B4` Russian dictionary
+  list head, `BCF4/C8CC` last matching dictionary, `BCE8` read size (800h),
+  `C8E0` lookup error, `C806/C808` suffix match array, `CA24` strtok state,
+  `BDA8..BDB0` tokenizer (2104:008C) state, `44E8` far pointer to "`~<[!".
+- Profile flags read by these stages: `BB9E` (0), `BBA0` (0), `BBA2` (0,
+  domain filter), `BBB4` (0), `BBB6` (1, meanings list), `BBB8` (0), `BBBA` (1).
+- BASE.RUS stays open on DOS handle 5 (binary); lookups lseek and read 800h
+  chunks through an index of `[32 rows][33 columns]` file offsets.
+- Native garbage that is observable: `043A:0850` reads an uninitialized
+  local holding the CS that the INT 21h inside lseek pushed (the library
+  load segment, 822h in DOSBox-X).
+- Heap: Borland far heap, first/last/rover at `CS:1A6A/1A6C/1A6E` of the
+  library segment; growth through `sbrk`/`__brk` and INT 21h 4Ah.
+
 ## What remains unexplored
 
-`151F:2029` (0x717 bytes, called for records with `+0B > 1`), the
-constituent builder `1C3D:05C5` and its 12-byte records, the constituent
-rule pass `1C3D:1B3F` (table `0x2B73C`), T8 `1986:000E` beyond its matcher,
-`17AA:1D31`, the output routine, the lexical analyzer beyond exact words
+Generation `17AA:1D31`/`0475` and morphology `1E71:0CDC` on the memory
+model, the output routine `0687:7427` and appendix `0687:6A38/72C0`, the lexical analyzer beyond exact words
 (`0A4F:3B12`: multi-word phrases, suffixes `0x26EC6`, prefixes
 `ERPREFIX.PRE`, unknown words, annotations `{}`, macros `=`/`%`), and whether
 later stages read the stale `C5AE` after reorder.

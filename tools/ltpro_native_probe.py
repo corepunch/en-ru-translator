@@ -26,9 +26,10 @@ class Machine:
         self.md = Cs(CS_ARCH_X86, CS_MODE_16)
         self.md.detail = True
         self.cache = {}
-        self.zf = self.sf = self.of = self.cf = False
+        self.zf = self.sf = self.of = self.cf = self.pf = self.af = self.df = False
         self.steps = 0
         self.before_instruction = None
+        self.current = None
         self.heap_next = 0xB0000
         self.allocations = []
         self.calloc_failure = False
@@ -82,6 +83,9 @@ class Machine:
     def flags(self, a, b, value, bits, subtraction=False):
         mask=(1<<bits)-1; sign=1<<(bits-1); value &= mask
         self.zf=value==0; self.sf=bool(value & sign)
+        # Parity and auxiliary carry only matter where FLAGS are pushed (INT,
+        # PUSHF) and later read back as stack garbage.
+        self.pf=bin(value&0xff).count('1')%2==0; self.af=bool((a^b^value)&0x10)
         self.cf=a<b if subtraction else a+b>mask
         self.of=bool(((a^b) if subtraction else ~(a^b)) & (a^value) & sign)
 
@@ -158,6 +162,7 @@ class Machine:
             assert self.steps<1000000,'instruction limit'
             self.reg('ip',self.reg('ip')+ins.size)
             op=ins.operands; m=ins.mnemonic
+            self.current=ins
             if m=='mov': self.set(ins,op[0],self.get(ins,op[1]))
             elif m=='push': self.push(self.get(ins,op[0]))
             elif m=='pop': self.set(ins,op[0],self.pop())
@@ -171,17 +176,23 @@ class Machine:
                 value={'add':lambda:a+b,'sub':lambda:a-b,'cmp':lambda:a-b,'xor':lambda:a^b,
                        'or':lambda:a|b,'test':lambda:a&b,'and':lambda:a&b}[m]()
                 self.flags(a,b,value,bits,m in ('sub','cmp'))
-                if m in ('xor','or','test','and'):self.of=self.cf=False
+                if m in ('xor','or','test','and'):self.of=self.cf=self.af=False
                 if m not in ('cmp','test'):self.set(ins,op[0],value)
             elif m in ('inc','dec'):
                 a=self.get(ins,op[0]);delta=1 if m=='inc' else -1
                 carry=self.cf;self.flags(a,1,a+delta,op[0].size*8,m=='dec');self.cf=carry
                 self.set(ins,op[0],a+delta)
             elif m=='shl':
-                a,n=self.get(ins,op[0]),self.get(ins,op[1]);self.set(ins,op[0],a<<n)
+                a,n=self.get(ins,op[0]),self.get(ins,op[1]);bits=op[0].size*8;self.set(ins,op[0],a<<n)
+                if n:
+                    self.cf=bool((a<<n)>>bits&1);self.sf=bool(self.get(ins,op[0])>>(bits-1)&1)
+                    self.pf=bin(self.get(ins,op[0])&0xff).count('1')%2==0;self.af=False
                 self.zf=self.get(ins,op[0])==0
             elif m=='shr':
-                a,n=self.get(ins,op[0]),self.get(ins,op[1]);self.set(ins,op[0],a>>n)
+                a,n=self.get(ins,op[0]),self.get(ins,op[1]);bits=op[0].size*8;self.set(ins,op[0],a>>n)
+                if n:
+                    self.cf=bool(a>>(n-1)&1);self.sf=False
+                    self.pf=bin(self.get(ins,op[0])&0xff).count('1')%2==0;self.af=False
                 self.zf=self.get(ins,op[0])==0
             elif m=='imul' and len(op)==1:
                 signed=lambda v:v-65536 if v&0x8000 else v
@@ -200,6 +211,7 @@ class Machine:
                     self.reg('cs',segment);self.reg('ip',offset)
             elif m=='retf':
                 self.reg('ip',self.pop());self.reg('cs',self.pop())
+                if op:self.reg('sp',self.reg('sp')+op[0].imm)
             elif m=='loop':
                 self.reg('cx',self.reg('cx')-1)
                 if self.reg('cx'):self.reg('ip',self.get(ins,op[0]))
@@ -209,7 +221,123 @@ class Machine:
                            'jge':self.sf==self.of,'jb':self.cf,'jbe':self.cf or self.zf,
                            'ja':not self.cf and not self.zf,'jae':not self.cf}[m]
                 if condition:self.reg('ip',self.get(ins,op[0]))
-            else:raise AssertionError(f'unsupported {key}: {ins.mnemonic} {ins.op_str}')
+            elif not self.extended(ins,op,m):raise AssertionError(f'unsupported {key}: {ins.mnemonic} {ins.op_str}')
+
+    def flag_word(self):
+        # DOSBox-X reports IOPL 3 and NT in real mode, with IF set.
+        return (int(self.cf)|0x2|(int(self.pf)<<2)|(int(self.af)<<4)|(int(self.zf)<<6)|(int(self.sf)<<7)|
+                0x200|(int(self.df)<<10)|(int(self.of)<<11)|0x7000)
+
+    def set_flag_word(self, f):
+        self.cf,self.pf,self.af,self.zf=bool(f&1),bool(f&4),bool(f&0x10),bool(f&0x40)
+        self.sf,self.df,self.of=bool(f&0x80),bool(f&0x400),bool(f&0x800)
+
+    def extended(self, ins, op, m):
+        """Instructions met beyond the grammar passes (later stages, library code)."""
+        signed=lambda v,bits:v-(1<<bits) if v&(1<<(bits-1)) else v
+        if m=='xchg':
+            a,b=self.get(ins,op[0]),self.get(ins,op[1]);self.set(ins,op[0],b);self.set(ins,op[1],a)
+        elif m in ('neg','not'):
+            a=self.get(ins,op[0]);bits=op[0].size*8
+            if m=='neg':
+                self.flags(0,a,-a,bits,True);self.cf=a!=0;self.set(ins,op[0],-a)
+            else:self.set(ins,op[0],~a)
+        elif m in ('sar','rcl','rcr','rol','ror') or (m in ('shl','shr') and False):
+            a,n=self.get(ins,op[0]),self.get(ins,op[1]);bits=op[0].size*8;mask=(1<<bits)-1
+            for _ in range(n&31):
+                if m=='sar':self.cf=bool(a&1);a=(signed(a,bits)>>1)&mask
+                elif m=='rol':self.cf=bool(a>>(bits-1)&1);a=((a<<1)|self.cf)&mask
+                elif m=='ror':self.cf=bool(a&1);a=(a>>1)|(self.cf<<(bits-1))
+                elif m=='rcl':c=self.cf;self.cf=bool(a>>(bits-1)&1);a=((a<<1)|c)&mask
+                else:c=self.cf;self.cf=bool(a&1);a=(a>>1)|(c<<(bits-1))
+            self.set(ins,op[0],a)
+            if m=='sar':self.zf=a==0;self.sf=bool(a>>(bits-1)&1)
+        elif m in ('cwd','cdq'):self.reg('dx',0xffff if self.reg('ax')&0x8000 else 0)
+        elif m in ('cbw','cwde'):self.reg('ax',self.reg('al')|(0xff00 if self.reg('al')&0x80 else 0))
+        elif m in ('mul','imul','div','idiv') and len(op)==1:
+            bits=op[0].size*8;b=self.get(ins,op[0])
+            if bits==8:
+                if m in ('mul','imul'):
+                    a=self.reg('al');v=signed(a,8)*signed(b,8) if m=='imul' else a*b;self.reg('ax',v)
+                    self.cf=self.of=(v>>8)&0xff not in ((0,) if m=='mul' else ((0,0xff) if v&0x80 else (0,)))
+                else:
+                    a=self.reg('ax')
+                    if m=='div':q,r=divmod(a,b)
+                    else:
+                        x,y=signed(a,16),signed(b,8);q=abs(x)//abs(y)*(1 if (x<0)==(y<0) else -1);r=x-q*y
+                    self.reg('al',q);self.reg('ah',r)
+            else:
+                if m=='mul':
+                    v=self.reg('ax')*b;self.reg('ax',v);self.reg('dx',v>>16);self.cf=self.of=bool(v>>16)
+                elif m=='imul':
+                    v=signed(self.reg('ax'),16)*signed(b,16);self.reg('ax',v);self.reg('dx',v>>16)
+                    self.cf=self.of=not -32768<=v<=32767
+                else:
+                    a=(self.reg('dx')<<16)|self.reg('ax')
+                    if m=='div':q,r=divmod(a,b)
+                    else:
+                        x,y=signed(a,32),signed(b,16);q=abs(x)//abs(y)*(1 if (x<0)==(y<0) else -1);r=x-q*y
+                    self.reg('ax',q);self.reg('dx',r)
+        elif m=='imul' and len(op)==3:
+            v=signed(self.get(ins,op[1]),16)*signed(op[2].imm&0xffff,16);self.set(ins,op[0],v)
+            self.cf=self.of=not -32768<=v<=32767
+        elif m in ('adc','sbb'):
+            a,b=self.get(ins,op[0]),self.get(ins,op[1]);bits=op[0].size*8;c=int(self.cf)
+            if m=='adc':
+                v=a+b+c;self.flags(a,b,v,bits);self.cf=v>(1<<bits)-1
+            else:
+                v=a-b-c;self.flags(a,b,v,bits,True);self.cf=a<b+c
+            self.set(ins,op[0],v)
+        elif m in ('js','jns','jo','jno','jcxz','jp','jnp'):
+            condition={'js':self.sf,'jns':not self.sf,'jo':self.of,'jno':not self.of,
+                       'jcxz':self.reg('cx')==0}[m]
+            if condition:self.reg('ip',self.get(ins,op[0]))
+        elif m=='cld':self.df=False
+        elif m=='std':self.df=True
+        elif m in ('clc','stc','cmc'):self.cf={'clc':False,'stc':True,'cmc':not self.cf}[m]
+        elif m in ('nop','cli','sti'):pass
+        elif m=='lds':
+            pointer=self.read(self.address(ins,op[1]),4)
+            self.set(ins,op[0],pointer&0xffff);self.reg('ds',pointer>>16)
+        elif m in ('ret','retn'):
+            self.reg('ip',self.pop())
+            if op:self.reg('sp',self.reg('sp')+op[0].imm)
+        elif m=='pushf':self.push(self.flag_word())
+        elif m=='popf':self.set_flag_word(self.pop())
+        elif m=='lahf':self.reg('ah',self.flag_word()&0xff)
+        elif m=='sahf':self.set_flag_word((self.flag_word()&0xff00)|self.reg('ah'))
+        elif m.startswith(('rep','movs','stos','lods','cmps','scas')):
+            return self.string(ins,m)
+        else:return False
+        return True
+
+    def string(self, ins, m):
+        parts=m.split();prefix=parts[0] if len(parts)>1 else None;base=parts[-1]
+        size=2 if base.endswith('w') else 1;step=-size if getattr(self,'df',False) else size
+        source_segment=self.reg('ds')
+        if ins.operands:
+            for o in ins.operands:
+                if o.type==3 and o.mem.segment and ins.reg_name(o.mem.base) in ('si',):
+                    source_segment=self.reg(ins.reg_name(o.mem.segment))
+        while True:
+            if prefix and self.reg('cx')==0:break
+            si=source_segment*16+self.reg('si');di=self.reg('es')*16+self.reg('di')
+            if base.startswith('movs'):self.write(di,size,self.read(si,size))
+            elif base.startswith('stos'):self.write(di,size,self.reg('ax' if size==2 else 'al'))
+            elif base.startswith('lods'):self.reg('ax' if size==2 else 'al',self.read(si,size))
+            elif base.startswith('cmps'):
+                a,b=self.read(si,size),self.read(di,size);self.flags(a,b,a-b,size*8,True)
+            elif base.startswith('scas'):
+                a,b=self.reg('ax' if size==2 else 'al'),self.read(di,size);self.flags(a,b,a-b,size*8,True)
+            else:return False
+            if base[:4] in ('movs','lods','cmps'):self.reg('si',self.reg('si')+step)
+            if base[:4] in ('movs','stos','cmps','scas'):self.reg('di',self.reg('di')+step)
+            if not prefix:break
+            self.reg('cx',self.reg('cx')-1)
+            if base[:4] in ('cmps','scas'):
+                if prefix in ('repe','repz') and not self.zf:break
+                if prefix in ('repne','repnz') and self.zf:break
+        return True
 
     def fixture(self, fields):
         addresses=[0x80000+i*0x200 for i in range(len(fields))]

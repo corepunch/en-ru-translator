@@ -13,3 +13,9 @@ harness pitfalls are in [the native map](reference/LTPRO_NATIVE_MAP.md).
 `tools/ltpro_disasm.py` prints a range as a condensed listing with frame
 names; `tools/ltpro_rawtrace.py` runs one input through the instrumented
 image when changing hook sites.
+
+`tools/ltpro_lift.py SEG:OFF` condenses a function into pseudo-code (frame
+slots, `ptr->field`, calls with arguments, fused compare/branch, switch
+cases); `tools/ltpro_callgraph.py SEG:OFF` lists a routine's static call
+closure with sizes. Post-reorder verification tools are listed in
+[the handover](reference/LTPRO_HANDOVER.md).

@@ -1,23 +1,28 @@
 # Architecture
 
 `init.lua` is the command-line shell; `core.engine` is the single translation API.
-The engine loads original assets, creates fresh state and invokes the stages:
+The engine loads original assets, creates fresh Lua state and invokes the stages:
 
 ```text
 UTF-8 → CP866 → lexical lookup → grammar → phrasing → reorder
-    → serialize nodes → senses → constituents/agreement → syntax
-    → Russian generation → output → UTF-8
+    → senses → constituents/agreement → syntax → Russian generation
+    → output → UTF-8
 ```
 
-Modules return tables of functions. Grammar operates on ordinary linked Lua
-tables; later stages use the byte memory model where aliasing, string mutation
-and wrapped far pointers affect observable results. `matching` shares one pattern
-interpreter across table and memory representations. Stage scheduling remains
-explicit because cached tags and live tags can intentionally differ.
+Every stage operates on linked Lua records and owned strings. Auxiliary records
+retain ordinary table identity. Constituents hold record lists and a separate
+tag cache. Stage scheduling remains explicit because cached and live tags can
+intentionally differ. There is no emulated address space, DOS heap, far-pointer
+arithmetic, node serialization or shared string scratch buffer.
+
+`assets` decodes read-only rule and morphology tables from the original EXE.
+`russian` indexes immutable BASE.RUS entries. Numeric record keys remain field
+identifiers shared with the earlier grammar code; they do not address memory.
+Native capture decoding lives in the research tools.
 
 See [pipeline and module ownership](docs/pipeline.md), [dictionary formats](docs/dictionary.md),
 [morphology](docs/paradigms.md), [rule semantics](docs/rules.md), and [verification](TESTING.md).
 
-Keep runtime dependencies limited to Lua. Preserve rule order and CP866 byte
-semantics. Use native differential probes when changing pointer, buffer, cache
-or scheduling behavior; successful extraction alone does not prove equivalence.
+Keep runtime dependencies limited to Lua. Preserve rule order, CP866 text,
+linguistic state, and captured output. Differential probes compare those results;
+DOS allocation addresses and dead-buffer writes are not part of the Lua API.

@@ -1,11 +1,12 @@
 # Translator development
 
-The duplicate parser/compiler and custom overlay path have been retired. The
-single engine lives in `core/`, grouped by function; see [the pipeline](docs/pipeline.md).
+The duplicate parser/compiler, custom overlay path, byte-memory runtime and DOS
+heap emulation have been retired. The single engine lives in `core/` and uses
+Lua records and strings throughout; see [the pipeline](docs/pipeline.md).
 
-Further reduction should preserve native evidence while addressing the remaining
-lexical gaps: unsupported suffix derivations, macros and inline directives.
-Memory-backed stages still depend on pointer identity and shared buffers. Migrate
-those only with differential tests covering the affected writes and scheduling.
+Further work should address the remaining lexical gaps: unsupported suffix
+derivations, macros and inline directives. Preserve rule order and explicit
+cache refreshes, and verify changes against native morphology and captured
+sentence outputs.
 
 Historical porting work and original addresses remain under `reference/`.

@@ -1,3 +1,4 @@
+local captured = require 'tools.ltpro_records'
 local nodes = require 'core.nodes'
 local grammar = require 'core.grammar'
 local function unhex(s) return (s:gsub('%x%x',function(x) return string.char(tonumber(x,16)) end)) end
@@ -28,7 +29,7 @@ for _,case in ipairs(fixtures) do
   for _,record in ipairs(case.before) do
     records[#records+1] = {offset=record.pointer[1],segment=record.pointer[2],bytes=unhex(record.raw_hex)}
   end
-  local root = nodes.from_records(records)
+  local root = captured.from_records(records)
   local differences = {}
   local matched=0
   local allocated=0

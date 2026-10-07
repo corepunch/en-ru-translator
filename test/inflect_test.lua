@@ -1,12 +1,9 @@
 -- Expected byte strings were checked against the original 8086 functions.
 local engine = require 'core.engine'
 local generation = require 'core.generation'
-local memory = require 'core.memory'
-local m = engine.new_memory('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
+local state = engine.new_state('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
 local function form(kind, id, word, ...)
-  m:write_string(0xD000, 0, word .. '\0')
-  local s, o = generation[kind .. '_form'](m, id, 0xD000, 0, ...)
-  if not memory.null(s, o) then return m:cstring(s, o) end
+  return generation[kind .. '_form'](state, id, word, ...)
 end
 local encode = require('core.encoding').encode
 local function check(actual, expected)

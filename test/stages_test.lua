@@ -1,3 +1,4 @@
+local captured = require 'tools.ltpro_records'
 local nodes = require 'core.nodes'
 local lexicon = require 'core.lexicon'
 local grammar = require 'core.grammar'
@@ -68,12 +69,12 @@ local function raw(next_offset,next_segment)
   return data:sub(1,12)..'N'..data:sub(14)
 end
 local record=raw(0,0)
-local root,vector,count=nodes.from_records({
+local root,vector,count=captured.from_records({
   {offset=16,segment=0x8000,bytes=record},
   {offset=0,segment=0x8001,bytes=record},
 })
 assert(count==2 and root.next==vector[0] and vector[0]==vector[1])
-assert(not pcall(nodes.from_records,{{offset=0,segment=0x8000,bytes=raw(16,0x9000)}}))
+assert(not pcall(captured.from_records,{{offset=0,segment=0x8000,bytes=raw(16,0x9000)}}))
 local pool={limit=1}
 local boundary=assert(nodes.boundary('j','|',pool))
 assert(boundary[0x0C]==0x6A and boundary[0x0D]==0x7C and boundary[0x0E]==0x44)

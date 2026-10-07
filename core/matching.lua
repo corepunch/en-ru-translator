@@ -1,6 +1,4 @@
-local memory = require 'core.memory'
 local matching = {}
-local linear = memory.linear
 local delimiters = '`~<[!'
 local function has(s, c) return c ~= '' and s:find(c, 1, true) ~= nil end
 local function upper(s) return (s:gsub('[a-z]', string.upper)) end
@@ -15,8 +13,7 @@ local function plain_run(pattern, p)
   return pattern:sub(first, p - 1)
 end
 
--- One pattern interpreter, with views for table nodes and native memory.
--- Views keep live tags separate from cached spans and preserve tokenizer writes.
+-- One pattern interpreter; views keep live tags separate from cached spans.
 local function match_pattern(pattern, start, view)
   local lexical = view.word ~= nil
   local function run(i, p)
@@ -140,40 +137,30 @@ function matching.match_constituents(tags, start, pattern, current_tags)
   })
 end
 
-local function memory_view(m, cache, pseg, poff)
-  return {
+-- Post-grammar matching permits the sentinel tag and keeps cached spans
+-- independent of live tags. Tokenization is local to each pattern.
+function matching.words(vector, start, pattern, tags)
+  return match_pattern(pattern, start, {
     null_matches = true,
-    cache = function(i) return m:cstring(m.ds, (cache + i) & 0xFFFF) end,
-    token = function(p)
-      local token = ''
-      local ds, doff = m:far(linear(m.ds, 0x44E8))
-      memory.gettoken(m, pseg, (poff + p - 1) & 0xFFFF, ds, doff, function(value) token = value end)
-      return token
+    tag = function(i) return string.char(vector[i] and vector[i][0x0C] or 0) end,
+    cache = function(i) return tags:sub(i + 1) end,
+    word = function(i, value) return word(vector[i], value) end,
+    text = function(i, value) return has(field(vector[i], 0x11C), value) end,
+  })
+end
+
+function matching.constituents(state, start, pattern)
+  return match_pattern(pattern, start, {
+    null_matches = true, skip_alternatives = true,
+    tag = function(i) return string.char(state.elements[i] and state.elements[i].tag or 0) end,
+    cache = function(i)
+      local chars = {}
+      while state.tags[i] and state.tags[i] ~= 0 do
+        chars[#chars + 1] = string.char(state.tags[i]); i = i + 1
+      end
+      return table.concat(chars)
     end,
-  }
-end
-
-function matching.match_memory(m, vector, start, pseg, poff)
-  local view = memory_view(m, 0xC5AE, pseg, poff)
-  local function record(i)
-    local entry = assert(vector[i], 'lexical matcher read beyond the native vector')
-    return entry[1], entry[2]
-  end
-  local function text(i, at)
-    local seg, off = record(i)
-    return m:cstring(seg, (off + at) & 0xFFFF)
-  end
-  view.tag = function(i) return string.char(m:u8(linear(record(i)) + 0x0C)) end
-  view.word = function(i, value) return upper(text(i, 0x12)) == upper(value) or text(i, 0x9C) == value end
-  view.text = function(i, value) return has(text(i, 0x11C), value) end
-  return match_pattern(m:cstring(pseg, poff), start, view)
-end
-
-function matching.match_memory_constituents(m, aseg, aoff, start, pseg, poff)
-  local view = memory_view(m, 0xC7B6, pseg, poff)
-  view.skip_alternatives = true
-  view.tag = function(i) return string.char(m:u8(linear(aseg, (aoff + i * 12) & 0xFFFF))) end
-  return match_pattern(m:cstring(pseg, poff), start, view)
+  })
 end
 
 local function russian(byte) return byte and ((byte > 0x7F and byte < 0xB0) or (byte > 0xDF and byte < 0xF2)) end

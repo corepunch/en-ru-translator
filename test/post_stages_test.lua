@@ -1,53 +1,39 @@
--- Self-contained checks of the post-reorder runtime pieces (no assets needed).
--- Full verification against native code: tools/ltpro_post_chain.py,
--- tools/ltpro_function_probe.py and tools/ltpro_post_fuzz.py (see
--- reference/LTPRO_HANDOVER.md).
-local memory = require 'core.memory'
-local DS = 0x2AF7
-local m = memory.new()
-m.ds = DS
-m.library_segment = DS - 0x22D5
-
--- Far pointers keep their segment:offset form; offsets wrap at 64K.
-m:set_far(0x100, 0x1234, 0xFFFF)
-local s, o = m:far(0x100)
-assert(s == 0x1234 and o == 0xFFFF and m:far_linear(0x100) == 0x1234 * 16 + 0xFFFF)
-m:write_string(0x2000, 0, 'abc\0')
-assert(m:cstring(0x2000, 0) == 'abc')
-local ss, so = m:strchr(0x2000, 0, 0)
-assert(ss == 0x2000 and so == 3, 'strchr finds the terminator')
-assert(select(2, m:strrchr(0x2000, 0, 0x62)) == 1)
-
--- CP866 letter classes (211E:113A/115A/117F).
-assert(memory.is_upper_cyrillic(0x80) and memory.is_upper_cyrillic(0xF0) and not memory.is_upper_cyrillic(0xA0))
-assert(memory.is_lower_cyrillic(0xA0) and memory.is_lower_cyrillic(0xF1) and not memory.is_lower_cyrillic(0xF2))
-assert(memory.is_cyrillic(0xAF) and not memory.is_cyrillic(0xB0))
-assert(memory.ctype(0x37) == 2 and memory.ctype(0x41) == 0x14 and memory.ctype(0xA0) == 0)
-
--- 2104:0002 suffix test and 2104:008C tokenizer state in DS:BDA8..BDB0.
-m:write_string(0x3000, 0, 'word\0' .. 'rd\0')
-assert(memory.ends_with(m, 0x3000, 0, 4, 0x3000, 5) == 2)
-assert(memory.ends_with(m, 0x3000, 0, 1, 0x3000, 5) == 0)
-m:write_string(0x3100, 0, '<AB>NV`x`\0' .. '`~<[!\0')
-local token
-local ts, to = memory.gettoken(m, 0x3100, 4, 0x3100, 10, function(t) token = t end)
-assert(token == 'NV' and ts == 0x3100 and to == 4)
-assert(m:u16(memory.linear(DS, 0xBDB0)) == 2)
-assert(select(2, m:far(memory.linear(DS, 0xBDAC))) == 6)
-
--- Borland qsort keeps native tie order: sorting (length, index) pairs by
--- descending length, as 1E71:0BA0 does; expected order from the original
--- code run in the 8086 harness.
-local pairs = {{2,0},{3,1},{2,2},{1,3},{3,4},{2,5},{3,6},{1,7}}
-for i, p in ipairs(pairs) do
-  m:set16(memory.linear(DS, 0xC808 + 4 * (i - 1)), p[1])
-  m:set16(memory.linear(DS, 0xC80A + 4 * (i - 1)), p[2])
+local text = require 'core.text'
+local nodes = require 'core.nodes'
+local senses = require 'core.senses'
+local constituents = require 'core.constituents'
+local matching = require 'core.matching'
+assert(text.is_upper_cyrillic(0x80) and text.is_upper_cyrillic(0xF0) and not text.is_upper_cyrillic(0xA0))
+assert(text.is_lower_cyrillic(0xA0) and text.is_lower_cyrillic(0xF1) and not text.is_lower_cyrillic(0xF2))
+assert(text.is_cyrillic(0xAF) and not text.is_cyrillic(0xB0))
+assert(text.digit(0x37) and text.alpha(0x41) and not text.alpha(0xA0))
+assert(text.ends('word','rd') and not text.ends('word','rd',1))
+local a,b,c=nodes.new('N'),nodes.new('V'),nodes.new('A')
+local state={count=3,elements={[0]={tag=42,next=a,last=a},[1]={tag=86,next=b,last=b},[2]={tag=65,next=c,last=c}},tags={[0]=42,[1]=86,[2]=65}}
+constituents.swap(state,1,2)
+assert(state.elements[1].next==c and state.tags[1]==65)
+local d=nodes.new('L')
+assert(constituents.insert(state,{tag=76,next=d,last=d},1)==4)
+local root={}
+constituents.relink(state,root)
+assert(root.next==a and a.next==d and d.next==c and c.next==b and not b.next)
+assert(matching.constituents(state,1,'LA')==2)
+-- Cached spans and live tags must remain independent.
+state.elements[2].tag=78
+assert(matching.constituents(state,1,'LN')==2)
+assert(state.tags[2]==65)
+local r=nodes.new('Q')
+assert(senses.parse_code(r,string.char(0x90,0x84)..'12word')=='word')
+assert(r[0x76]==4 and r[0x72]==1 and r[0x75]==2)
+r.text='first'; r.alternative={text='old'}
+local clone=senses.clone(r,'second')
+clone.text='changed'
+assert(r.text=='first' and not clone.alternative and not clone.next)
+local numbers={}
+for _,value in ipairs({'1','11','2','12','22','5'}) do
+  numbers[#numbers+1]={[0x0E]=0x57,[0x0C]=0x48,[0x87]=#value,[0x12]=value}
 end
-memory.qsort(m, DS, 0xC808, #pairs, 4, function(mm, seg, a, b)
-  local v = (mm:u16(memory.linear(seg, b)) - mm:u16(memory.linear(seg, a))) & 0xFFFF
-  return v >= 0x8000 and v - 0x10000 or v
-end)
-local got = {}
-for i = 0, #pairs - 1 do got[#got + 1] = m:u16(memory.linear(DS, 0xC80A + 4 * i)) end
-assert(table.concat(got, ',') == '4,1,6,5,2,0,3,7', table.concat(got, ','))
+senses.numeric_pass({},nodes.link(numbers))
+assert(nodes.byte(numbers[1],0x72)==0 and numbers[2][0x72]==1)
+assert(nodes.byte(numbers[3],0x72)==0 and numbers[4][0x72]==1 and nodes.byte(numbers[5],0x72)==0 and numbers[6][0x72]==1)
 print('post_stages_test: passed')

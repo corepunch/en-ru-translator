@@ -9,13 +9,13 @@ snapshot or native executable execution.
 
 | Module | Responsibility |
 |---|---|
-| `engine` | Asset loading, initial memory, stage orchestration and public API |
+| `engine` | Asset loading, sentence state, stage orchestration and public API |
 | `lexicon` | Dictionary index, suffix candidates, lexical readings, phrases and tokenization |
 | `grammar` | Cleanup and the T1–T3 grammatical passes |
 | `phrasing` | T4 phrases, per-word rules and final grammatical resolution |
 | `matching` | Shared lexical/constituent pattern interpreter and replacement actions |
 | `reorder` | T5/T6 swaps, guard predicates, T7 table and endpoint selection |
-| `nodes` | Table records, links, vectors, native-memory rebuild and serialization |
+| `nodes` | Table records, links, vectors and record construction |
 | `senses` | Russian reading selection, phrase expansion and numeral pass |
 | `constituents` | Constituent construction and T7 scheduling |
 | `agreement` | T7 agreement handlers |
@@ -23,29 +23,33 @@ snapshot or native executable execution.
 | `russian` | Indexed Russian dictionary search and ending substitutions |
 | `generation` | Noun/adjective/verb/participle/pronoun forms and word generation |
 | `output` | Sentence formatting and alternative meanings |
-| `memory` | Byte access, far pointers, native strings and runtime helpers |
-| `heap` | Native allocation and record lifecycle |
+| `assets` | Read-only EXE rule, literal and morphology decoding |
+| `text` | CP866 character classes and string operations |
 | `encoding` | CP866 / UTF-8 boundary |
 | `rules` | Extracted grammar data |
 
 ## Representation and scheduling
 
-Early stages use ordinary Lua tables and references. Numeric fields retain the
-recovered byte offsets so captures can be compared without lossy conversion.
+All stages use ordinary Lua tables and references. Numeric field identifiers
+retain the recovered names used by the grammar code, while words are complete
+numbers and text values are strings. `nodes.prepare(root)` initializes owned
+reading strings in the existing graph after reordering; it preserves auxiliary
+record identity without copying or serializing records.
+
 `nodes.rebuild(root)` returns a compact vector, live count and `{tags = ...}` cache.
-Each pass decides when to adopt those values: some native handlers retain an
-older count or cache after mutating nodes.
+Each pass decides when to adopt those values: some handlers retain an older
+count or cache after mutating nodes. Constituents own sub-lists through `next`
+and `last`; the syntax pass relinks them into the sentence.
 
-`matching` has one interpreter with views for table nodes, lexical memory records,
-plain constituent tags and constituent memory records. A view supplies live tags,
-cached spans and optional lexical tests. Memory views also preserve tokenizer
-scratch writes. T5/T6 use literal tag sequences and sequential swaps.
+`matching` has one interpreter with views for lexical records and constituent
+tags. A view supplies live tags, cached spans and optional lexical tests.
+T5/T6 use literal tag sequences and sequential swaps.
 
-`nodes.serialize` converts table identity into native heap pointers, including
-shared auxiliary nodes and unnamed captured bytes. Later stages rely on aliased
-pointers, 16-bit offset wrapping, in-place NUL insertion and shared scratch
-buffers. This memory representation remains necessary for byte-level parity;
-removing it requires new native evidence, not just matching visible strings.
+Sense selection uses local string positions, independent alternative records,
+and immutable dictionary lines. Morphology returns a string or `nil`; output
+collects string fragments. There is no mutable byte-memory layer, pointer
+arithmetic, native allocator or shared scratch buffer. Captured record decoding
+is confined to `tools/ltpro_records.lua` for the early-stage differential probes.
 
 Morphology reads the initialized EXE tables directly. There is no second set of
 Lua morphology tables or parallel string-based inflection implementation.

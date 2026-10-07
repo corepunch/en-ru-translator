@@ -37,16 +37,18 @@ row plus seeded edge cases. Stage probes compare captured records, pointer
 identity, tags and caches, not just text. Python tools may require Capstone;
 see their `--help` for fixture selection and larger generated suites.
 
-For local DOS snapshots in `.cache/ltpro-memtrace`:
+The byte-memory and allocator probes (`ltpro_function_probe`, `ltpro_post_chain`,
+`ltpro_post_fuzz`, `ltpro_heap_fuzz`, and `ltpro_output_probe`) were retired with
+that runtime. They compared allocation addresses and memory writes that no longer
+exist. Historical reports in `reference/` describe that earlier implementation;
+Git history retains the probes. The 8086 harness and snapshot capture tools remain
+available for native research, and morphology still compares production Lua
+string results directly with the original instructions.
 
-```sh
-python3 tools/ltpro_post_chain.py
-python3 tools/ltpro_function_probe.py 1C3D:0135 --words 5 --limit 200
-```
-
-The chain defaults to the T8 boundary. Later boundaries require corresponding
-snapshots; an absent boundary is missing evidence, not a passing test. Some
-machine bookkeeping and stack ranges are explicitly excluded by the probe.
+The Lua suite covers shared auxiliary records, alternative independence, record
+limits, constituent relinking, cached versus live tags, dictionary lookup,
+inflection failure and output capitalization. Corpus and native morphology
+fixtures remain unchanged.
 
 ## Extraction and capture
 

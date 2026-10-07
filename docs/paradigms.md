@@ -5,18 +5,16 @@
 The engine reads morphology tables from the initialized data segment of the
 unpacked executable; there are no separately maintained Lua copies.
 
-The form functions accept a memory model, table ID, source segment/offset and
-native grammatical arguments. They return a segment/offset pair, or `(0, 0)`
-when no form exists:
+The form functions accept sentence state, table ID, a CP866 string and
+grammatical arguments. They return a new string, or `nil` when no form exists:
 
 ```lua
 local engine = require 'core.engine'
 local generation = require 'core.generation'
 local encoding = require 'core.encoding'
-local m = engine.new_memory('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
-m:write_string(0xD000, 0, encoding.encode('дом') .. '\0')
-local segment, offset = generation.noun_form(m, 0, 0xD000, 0, 1, 0, 1)
-assert(encoding.decode(m:cstring(segment, offset)) == 'дома')
+local state = engine.new_state('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
+local result = generation.noun_form(state, 0, encoding.encode('дом'), 1, 0, 1)
+assert(encoding.decode(result) == 'дома')
 ```
 
 `noun_form` and `adjective_form` take gender, plural and case arguments;
@@ -28,9 +26,9 @@ case-index details.
 
 Table rows contain a byte count to cut and a far pointer to space-separated
 endings. `=` preserves the form and `-` rejects it. Operations count CP866 bytes.
-Results share the DS:C858 scratch buffer, including writes on failed attempts
-and bytes beyond the first NUL; callers must copy text if they need to keep it.
-Original spelling quirks are retained for compatibility.
+Results are independent immutable strings. Failed forms return `nil` without
+changing the input or a previous result. Original spelling and ending-selection
+quirks are retained through direct string operations.
 
 `tools/ltpro_morphology_probe.py` exercises every recovered table row and seeded
 edge cases against the original instructions, using these production functions.

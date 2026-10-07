@@ -1,64 +1,32 @@
 local matching = require 'core.matching'
-local memory = require 'core.memory'
 local constituents = require 'core.constituents'
 local agreement = require 'core.agreement'
-local heap = require 'core.heap'
-
+local nodes = require 'core.nodes'
+local text = require 'core.text'
 local syntax = {}
 
--- LTPRO T8 (1986:000E, file 0x1D26E): agreement between constituents.
---
--- For every constituent position si from 1, each rule of the T8 table
--- (DS:49E4; 8-byte records: pattern far pointer, word, selector 1-70) is
--- matched with the constituent matcher (1C3D:0135) and its handler run;
--- then T7 (1449:0004) runs inside constituent si. Afterwards the
--- constituents' record lists are chained back into one list (1C3D:1A97).
---
--- The handlers keep three record pointers in their frame (natively at
--- BP-0A, BP-0E and BP-12) that persist from one handler to the next within
--- one T8 call; a few handlers read one without setting it first. They start
--- as null here (natively: stack contents left by earlier calls).
-local linear = memory.linear
-
-local RULES = 0x49E4
-
-local function context(m)
-  local ds = m.ds
-  local aseg, aoff = m:far(linear(ds, 0xC7FA))
-  local c = {m = m, ds = ds, aseg = aseg, aoff = aoff}
-  local function ref(seg, off)
-    return {seg = seg, off = off, at = linear(seg, off), null = memory.null(seg, off)}
-  end
-  c.ref = ref
-  c.NULL = ref(0, 0)
-  function c.E(i) return linear(aseg, (aoff + i * 12) & 0xFFFF) end
-  function c.e0(i) return m:u8(c.E(i)) end
-  function c.e2(i) return m:u8(c.E(i) + 2) end
-  function c.first(i) return ref(m:far(c.E(i) + 4)) end
-  function c.last(i) return ref(m:far(c.E(i) + 8)) end
-  function c.next(r) return ref(m:far(r.at)) end
-  function c.aux(r) return ref(m:far(r.at + 0x62)) end
-  function c.get(r, f) return m:u8(r.at + f) end
-  function c.set(r, f, v) m:set8(r.at + f, v) end
-  function c.copy(dst, src, f) m:set8(dst.at + f, m:u8(src.at + f)) end
-  function c.word(r, f) return m:u16(r.at + f) end
-  function c.find(r, test)
-    while not r.null do
-      if test(c.get(r, 0x0C)) then return r end
-      r = c.next(r)
-    end
+local function context(state)
+  local c={state=state,NULL={null=true}}
+  function c.E(i) return state.elements[i] or {} end
+  function c.e0(i) return c.E(i).tag or 0 end
+  function c.e2(i) return c.E(i).class or 0 end
+  function c.first(i) return c.E(i).next or c.NULL end
+  function c.last(i) return c.E(i).last or c.NULL end
+  function c.next(r) return r.next or c.NULL end
+  function c.aux(r) return r.aux or c.NULL end
+  c.get=nodes.byte
+  function c.set(r,f,v) if not r.null then r[f]=v end end
+  function c.copy(dst,src,f) c.set(dst,f,c.get(src,f)) end
+  c.word=c.get
+  function c.find(r,test)
+    while not r.null do if test(c.get(r,0x0C)) then return r end; r=c.next(r) end
     return r
   end
-  function c.is(r, literal) return m:stricmp(r.seg, (r.off + 0x12) & 0xFFFF, ds, literal) == 0 end
-  function c.strcpy_ds(r, field, literal) m:strcpy(r.seg, (r.off + field) & 0xFFFF, ds, literal) end
-  function c.reading(r, literal)
-    local s, o = m:far(r.at + 0x98)
-    m:strcpy(s, o, ds, literal)
-  end
-  function c.b6D(r, n) return (c.get(r, 0x6D) >> n) & 1 end
-  function c.t7(i)
-    return agreement.run(m, aseg, (aoff + i * 12 + 4) & 0xFFFF, c.e0(i), i, aseg, aoff)
-  end
+  function c.is(r,at) return text.equal(r[0x12] or '',state.assets:string(at)) end
+  function c.set_literal(r,f,at) r[f]=state.assets:string(at) end
+  function c.reading(r,at) r.text=state.assets:string(at) end
+  function c.b6D(r,n) return (c.get(r,0x6D) >> n) & 1 end
+  function c.t7(i) return agreement.run(state,c.E(i),c.e0(i),i) end
   return c
 end
 
@@ -75,7 +43,7 @@ end
 -- Prepositional/negation prefix written to +243 of a record or its auxiliary.
 local function prefix(c, r, with_aux, without_aux)
   local a = c.aux(r)
-  if not a.null then c.strcpy_ds(a, 0x243, with_aux) else c.strcpy_ds(r, 0x243, without_aux) end
+  if not a.null then c.set_literal(a, 0x243, with_aux) else c.set_literal(r, 0x243, without_aux) end
 end
 -- Case after a verb whose code bit 1 of +6D is set (shared by several rules).
 local function verb_case(c, r)
@@ -257,7 +225,7 @@ H[12] = function(c, F, si, hit)
   if F.e.null or F.r.null then return end
   if c.get(F.e, 0x75) ~= 0 then
     if c.get(F.e, 0x75) == 1 then prefix(c, F.r, 0x4F7F, 0x4F83)
-    else c.strcpy_ds(F.r, 0x243, 0x4F87) end
+    else c.set_literal(F.r, 0x243, 0x4F87) end
   end
   if c.get(F.r, 0x7A) ~= 0 then c.set(F.r, 0x77, 0) end
 end
@@ -293,9 +261,9 @@ H[15] = function(c, F, si, hit)
   end
   if c.e0(si - 1) == 0x58 then
     F.a = c.first(si - 1)
-    if not F.a.null then c.strcpy_ds(F.a, 0x243, 0x4F8B) end
+    if not F.a.null then c.set_literal(F.a, 0x243, 0x4F8B) end
   elseif not F.e.null then
-    c.strcpy_ds(F.e, 0x243, 0x4F8F)
+    c.set_literal(F.e, 0x243, 0x4F8F)
   end
 end
 
@@ -318,11 +286,10 @@ H[17] = function(c, F, si, hit)
   end
   if c.e0(si + 1) == 0x6B then
     F.r = c.first(hit)
-    if not F.r.null then c.strcpy_ds(F.r, 0x243, 0x4F93) end
+    if not F.r.null then c.set_literal(F.r, 0x243, 0x4F93) end
   end
   if c.e0(si - 1) == 0x53 and not F.e.null and c.get(F.e, 0x73) == 0 then
-    local s, o = c.m:far(F.e.at + 0x98)
-    c.m:set8(linear(s, o), 0)
+    F.e.text = ""
   end
 end
 
@@ -333,8 +300,7 @@ H[18] = function(c, F, si, hit)
     if c.get(F.e, 0x74) == 0 then c.set(F.r, 0x76, 0x10); return end
     if c.get(F.e, 0x73) ~= 0 then c.set(F.r, 0x76, 0x10) end
     if c.get(F.e, 0x73) == 0 then
-      local s, o = c.m:far(F.e.at + 0x98)
-      c.m:set8(linear(s, o), 0)
+      F.e.text = ""
     end
     c.copy(F.r, F.e, 0x77); c.copy(F.r, F.e, 0x72)
     if c.get(F.r, 0x6D) & 1 ~= 0 and c.get(F.r, 0x76) ~= 0x10 and
@@ -344,7 +310,7 @@ H[18] = function(c, F, si, hit)
   end
   if c.e0(si + 1) == 0x6B then
     F.r = c.first(hit)
-    if not F.r.null then c.strcpy_ds(F.r, 0x243, 0x4F97) end
+    if not F.r.null then c.set_literal(F.r, 0x243, 0x4F97) end
   end
 end
 
@@ -423,8 +389,7 @@ H[26] = function(c, F, si, hit)
   if c.is(F.e, 0x4FAD) and c.get(F.e, 0x0F) == 0 then c.set(F.r, 0x76, 0x20)
   else c.copy(F.r, F.e, 0x76) end
   if c.get(F.r, 0x0F) == 0 then
-    local s, o = c.m:far(F.r.at + 0x98)
-    c.m:set8(linear(s, o), 0x20)
+    F.r.text = " " .. (F.r.text or ""):sub(2)
   end
 end
 
@@ -509,7 +474,7 @@ H[34] = function(c, F, si, hit)
 end
 
 H[35] = function(c, F, si, hit)
-  c.m:set8(c.E(hit) + 2, 0x52)
+  c.E(hit).class = 0x52
 end
 
 H[36] = function(c, F, si, hit)
@@ -558,8 +523,7 @@ end
 H[46] = function(c, F, si, hit)
   F.a = c.first(hit)
   if not F.a.null then
-    local s, o = c.m:far(F.a.at + 0x98)
-    c.m:set8(linear(s, o), 0)
+    F.a.text = ""
   end
 end
 
@@ -583,69 +547,36 @@ H[49] = function(c, F, si, hit)
   if not F.a.null then c.set(F.a, 0x76, 4) end
 end
 
--- Insert a constituent holding one new record (tag `tag`, text at DS:`text`)
--- at array position `at`. The element is built in T8's frame: bytes 1 and 3
--- are stack contents natively (not modeled; 0 here; never read).
-local function insert_element(c, at, tag, class, text)
-  local m = c.m
-  local nseg, noff = heap.new_record(m, 0, 0, ((text >> 8) << 8) | tag, c.ds, text)
-  if memory.null(nseg, noff) then return c.NULL end
-  m:set8(linear(nseg, noff) + 0x0B, 3)
-  m:set_far(linear(nseg, noff), 0, 0)
-  local bytes = string.char(tag, 0, class, 0) .. string.pack('<I2I2I2I2', noff, nseg, noff, nseg)
-  local count_at = linear(c.ds, 0xC7FE)
-  m:set16(count_at, constituents.insert(m, c.aseg, c.aoff, bytes, at, m:u16(count_at)))
-  return c.ref(nseg, noff)
+local function insert_element(c,at,tag,class,literal)
+  local node=nodes.word(c.state,tag,c.state.assets:string(literal))
+  if not node then return c.NULL end
+  node[0x0B]=3
+  constituents.insert(c.state,{tag=tag,class=class,next=node,last=node},at)
+  return node
 end
 
-H[53] = function(c, F, si, hit)
-  F.a = insert_element(c, hit - 2, 0x4C, 0x4B, 0x4FB8)
+H[53] = function(c,F,si,hit) F.a=insert_element(c,hit-2,0x4C,0x4B,0x4FB8) end
+H[54] = function(c,F,si,hit)
+  if c.e2(hit)==0x52 or c.e0(hit+1)==0x2A then return end
+  F.a=insert_element(c,hit,0x4C,0x4B,0x4FC2)
 end
-
-H[54] = function(c, F, si, hit)
-  if c.e2(hit) == 0x52 or c.e0(hit + 1) == 0x2A then return end
-  F.a = insert_element(c, hit, 0x4C, 0x4B, 0x4FC2)
-end
-
-H[55] = function(c, F, si, hit)
-  F.e = c.first(si)
+H[55] = function(c,F,si,hit)
+  F.e=c.first(si)
   if F.e.null then return end
-  local tag, text = 0x4C, 0x4FD2
-  if c.get(F.e, 0x68) & 0x3F == 1 and (c.get(F.e, 0x6E) >> 6) & 1 ~= 0 then tag, text = 0x4A, 0x4FCC end
-  local nseg, noff = heap.new_record(c.m, 0, 0, ((text >> 8) << 8) | tag, c.ds, text)
-  F.a = c.ref(nseg, noff)
-  c.set(F.e, 0x76, 4)
-  if F.a.null then return end
-  c.m:set8(F.a.at + 0x0B, 3)
-  c.m:set_far(F.a.at, 0, 0)
-  local bytes = string.char(tag, 0, 0x4B, 0) .. string.pack('<I2I2I2I2', noff, nseg, noff, nseg)
-  local count_at = linear(c.ds, 0xC7FE)
-  c.m:set16(count_at, constituents.insert(c.m, c.aseg, c.aoff, bytes, hit - 1, c.m:u16(count_at)))
+  local tag,literal=0x4C,0x4FD2
+  if c.get(F.e,0x68) & 0x3F == 1 and (c.get(F.e,0x6E) >> 6) & 1 ~=0 then tag,literal=0x4A,0x4FCC end
+  F.a=insert_element(c,hit-1,tag,0x4B,literal)
+  c.set(F.e,0x76,4)
 end
-
-H[56] = function(c, F, si, hit)
-  F.e = c.find(c.first(si), is_tag('V'))
-  if F.e.null or c.get(F.e, 0x68) & 0x3F == 0 then return end
-  local text = 0x4FE2
-  if c.get(F.e, 0x68) & 0x3F == 1 then
-    text = 0x4FDC
-  end
-  local nseg, noff = heap.new_record(c.m, 0, 0, ((text >> 8) << 8) | 0x4A, c.ds, text)
-  F.a = c.ref(nseg, noff)
-  if text == 0x4FE2 then
-    F.r = c.first(hit)
-    if not F.r.null then c.set(F.r, 0x73, 1) end
-  end
-  if F.a.null then return end
-  c.m:set8(F.a.at + 0x0B, 3)
-  c.m:set_far(F.a.at, 0, 0)
-  local bytes = string.char(0x4A, 0, 0x4A, 0) .. string.pack('<I2I2I2I2', noff, nseg, noff, nseg)
-  local count_at = linear(c.ds, 0xC7FE)
-  c.m:set16(count_at, constituents.insert(c.m, c.aseg, c.aoff, bytes, hit - 1, c.m:u16(count_at)))
+H[56] = function(c,F,si,hit)
+  F.e=c.find(c.first(si),is_tag('V'))
+  if F.e.null or c.get(F.e,0x68) & 0x3F == 0 then return end
+  local literal=c.get(F.e,0x68) & 0x3F == 1 and 0x4FDC or 0x4FE2
+  if literal==0x4FE2 then F.r=c.first(hit); if not F.r.null then c.set(F.r,0x73,1) end end
+  F.a=insert_element(c,hit-1,0x4A,0x4A,literal)
 end
-
-local function swap(c, i, j) constituents.swap(c.m, c.aseg, c.aoff, i, j) end
-local function retag(c, i, t) c.m:set8(c.E(i), t); c.m:set8(linear(c.ds, (0xC7B6 + i) & 0xFFFF), t) end
+local function swap(c,i,j) constituents.swap(c.state,i,j) end
+local function retag(c,i,t) c.E(i).tag,c.state.tags[i]=t,t end
 
 H[59] = function(c, F, si, hit)
   F.a = c.first(hit - 1)
@@ -653,7 +584,7 @@ H[59] = function(c, F, si, hit)
 end
 
 H[60] = function(c, F, si, hit)
-  swap(c, si, si + c.m:s16(linear(c.ds, c.rule + 4)))
+  swap(c, si, si + c.rule.order)
 end
 
 H[61] = function(c, F, si, hit)
@@ -704,31 +635,24 @@ H[70] = function(c, F, si, hit)
   if not F.r.null then c.copy(F.a, F.r, 0x76) end
 end
 
--- 1986:000E. `root` is the record list head; `terminator` the driver's SI.
-function syntax.run(m, root_seg, root_off, terminator)
-  local c = context(m)
-  local F = {a = c.NULL, e = c.NULL, r = c.NULL}
-  c.terminator = terminator
-  c.root_seg, c.root_off = root_seg, root_off
-  local count_at = linear(c.ds, 0xC7FE)
-  local si = 1
-  while m:s16(count_at) - 1 > si do
-    local rule = RULES
-    local skipped = false
-    while not memory.null(m:far(linear(c.ds, rule))) do
-      local pseg, poff = m:far(linear(c.ds, rule))
-      local hit = matching.match_memory_constituents(m, c.aseg, c.aoff, si, pseg, poff)
-      if hit ~= 0 then
-        c.rule = rule
-        local handler = H[m:u16(linear(c.ds, rule + 6))]
-        if handler and handler(c, F, si, hit) == 'skip' then skipped = true; break end
+function syntax.run(state,root,terminator)
+  local c=context(state)
+  local F={a=c.NULL,e=c.NULL,r=c.NULL}
+  c.terminator=terminator
+  local si=1
+  while state.count-1>si do
+    local skipped=false
+    for _,rule in ipairs(state.assets:rules(0x49E4)) do
+      local hit=matching.constituents(state,si,rule.pattern)
+      if hit~=0 then
+        c.rule=rule
+        local handler=H[rule.selector]
+        if handler and handler(c,F,si,hit)=='skip' then skipped=true; break end
       end
-      rule = rule + 8
     end
     if not skipped then c.t7(si) end
-    si = si + 1
+    si=si+1
   end
-  constituents.relink(m, root_seg, root_off, c.aseg, c.aoff, m:u16(count_at))
+  constituents.relink(state,root)
 end
-
 return syntax

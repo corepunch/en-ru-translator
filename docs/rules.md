@@ -475,7 +475,7 @@ instruction checks and captured stage/corpus comparisons.
 |---|---|
 | [Generated grammar](../core/rules.lua) and [binary reader](../demo/ltpro_binary.lua) | Exact records, table membership, actions and metadata. |
 | Supplied `LTGOLD/dic.txt`, Appendix 1 and dictionary examples | Historical grammatical code meanings; local ignored source, not a complete rule-language specification. |
-| [Native lexical matcher](../core/matching.lua), [replacement](../core/matching.lua), and [T8 matcher](../core/matching.lua) | Shared production interpreter for table and memory views. |
+| [Native lexical matcher](../core/matching.lua), [replacement](../core/matching.lua), and [T8 matcher](../core/matching.lua) | Shared production interpreter for lexical records and constituent tags. |
 | [Native reorder](../core/reorder.lua) and [guard helpers](../core/reorder.lua) | Recovered reorder behavior, T7 table selection and endpoint direction. |
 | [Executable evidence](../reference/LTPRO_EVIDENCE.asm) | Selected original instructions supporting the current audit. |
 | [Matcher/replacement instructions](../reference/LTPRO_MATCHER_EVIDENCE.asm) | Original routines, string-comparison helpers, and CP866 byte classifier used for the new ports. |

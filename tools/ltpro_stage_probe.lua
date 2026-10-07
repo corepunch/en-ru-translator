@@ -1,3 +1,4 @@
+local captured = require 'tools.ltpro_records'
 local nodes = require 'core.nodes'
 local grammar = require 'core.grammar'
 local phrasing = require 'core.phrasing'
@@ -38,7 +39,7 @@ for _,case in ipairs(fixtures) do
   for _,record in ipairs(case.before) do
     records[#records+1] = {offset=record.pointer[1],segment=record.pointer[2],bytes=unhex(record.raw_hex)}
   end
-  local root, imported = nodes.from_records(records)
+  local root, imported = captured.from_records(records)
   for i,record in ipairs(case.before) do
     if record.rules and #record.rules>0 then
       local list={}

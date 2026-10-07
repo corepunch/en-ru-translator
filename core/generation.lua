@@ -1,157 +1,102 @@
-local memory = require 'core.memory'
-
+local text = require 'core.text'
+local nodes = require 'core.nodes'
 local generation = {}
-
--- Memory-model morphology, 1E71:02AC/0420/05FB/0977/0CDC.
--- These preserve all writes to the shared DS:C858 buffer,
--- including failed forms and bytes beyond its terminating NUL.
-local linear, null = memory.linear, memory.null
-local RESULT = 0xC858
-local function signed(n) n = n & 0xFFFF; return n >= 0x8000 and n - 0x10000 or n end
-local function put(m, s, o, n, c) m:set8(linear(s, (o + n) & 0xFFFF), c) end
-local function append(m, s, o, text)
-  m:write_string(s, (o + m:strlen(s, o)) & 0xFFFF, text .. '\0')
+local function signed(n) n=n & 0xFFFF; return n >= 0x8000 and n-0x10000 or n end
+local function reflexive(a, word, length)
+  return length > 2 and (text.ends(word,a:indirect(0x630C),length) or text.ends(word,a:indirect(0x6310),length))
 end
-local function cat(m, offset) m:strcat(m.ds, RESULT, m.ds, offset) end
-local function catptr(m, offset) m:strcat(m.ds, RESULT, m:far(linear(m.ds, offset))) end
-local function ends(m, s, o, n, offset)
-  return memory.ends_with(m, s, o, n, m.ds, offset) ~= 0
-end
-local function reflexive(m, s, o, n)
-  return n > 2 and (memory.ends_with(m, s, o, n, m:far(linear(m.ds, 0x630C))) == 2 or
-    memory.ends_with(m, s, o, n, m:far(linear(m.ds, 0x6310))) == 2)
-end
-
-local function build(m, id, s, o, length, tableoff, index)
-  local row = linear(m.ds, (tableoff + id * 6) & 0xFFFF)
-  local cut = signed(length - m:u16(row))
-  if cut > 0 then
-    local text = m:cstring(s, o):sub(1, cut)
-    m:write_string(m.ds, RESULT, text .. string.rep('\0', cut - #text) .. '\0')
-  else m:strcpy(m.ds, RESULT, s, o) end
-  local rs, ro = m:far(row + 2)
-  for _ = 1, math.max(0, index) do
-    rs, ro = m:strchr(rs, ro, 0x20)
-    if null(rs, ro) then return false end
-    ro = (ro + 1) & 0xFFFF
+local function slot(value,index)
+  local i=1
+  for _=1,math.max(0,index) do
+    local space=value:find(' ',i,true)
+    if not space then return nil end
+    i=space+1
   end
-  local marker = m:u8(linear(rs, ro))
-  if marker == 0x2D then return false end
-  if marker ~= 0x3D then
-    if cut == 0 then put(m, m.ds, RESULT, 0, 0) end
-    local es, eo = m:strchr(rs, ro, 0x20)
-    if null(es, eo) then m:strcat(m.ds, RESULT, rs, ro)
-    else
-      local n = (eo - ro) & 0xFFFF
-      append(m, m.ds, RESULT, m:cstring(rs, ro):sub(1, n))
-      put(m, m.ds, RESULT, length + n, 0)
-    end
+  local finish=value:find(' ',i,true)
+  return value:sub(i,finish and finish-1 or #value), finish ~= nil
+end
+local function build(a,id,word,length,tableoff,index)
+  local trim,endings=a:paradigm(tableoff,id)
+  local cut=signed(length-trim)
+  local ending,followed=slot(endings,index)
+  if not ending or ending:sub(1,1)=='-' then return nil end
+  local result=cut > 0 and word:sub(1,cut) or word
+  if ending:sub(1,1)~='=' then
+    if cut==0 then result='' end
+    result=result..ending
+    -- A followed ending is limited by the original stem-length argument.
+    if followed then result=result:sub(1,length+#ending) end
   end
-  return true
+  return result
 end
-
-function generation.noun_form(m, id, s, o, gender, plural, case)
-  local tableoff = gender == 0 and 0x55A6 or gender == 2 and 0x5450 or 0x5238
-  local index = signed(case + (plural ~= 0 and 6 or 0)) - 1
-  if not build(m, id, s, o, m:strlen(s, o), tableoff, index) then return 0, 0 end
-  return m.ds, RESULT
+function generation.noun_form(state,id,word,gender,plural,case)
+  return build(state.assets,id,word,#word,gender==0 and 0x55A6 or gender==2 and 0x5450 or 0x5238,
+    signed(case+(plural~=0 and 6 or 0))-1)
 end
-
-function generation.adjective_form(m, id, s, o, gender, plural, case)
-  local length = m:strlen(s, o)
-  local refl = id ~= 14 and reflexive(m, s, o, length)
-  local tableoff = gender == 0 and 0x580C or gender == 2 and 0x5770 or 0x56D4
-  if not build(m, id, s, o, length - (refl and 2 or 0), tableoff,
-    signed(case + (plural ~= 0 and 6 or 0))) then return 0, 0 end
-  if refl then catptr(m, 0x630C) end
-  return m.ds, RESULT
+function generation.adjective_form(state,id,word,gender,plural,case)
+  local a=state.assets
+  local refl=id~=14 and reflexive(a,word,#word)
+  local result=build(a,id,word,#word-(refl and 2 or 0),gender==0 and 0x580C or gender==2 and 0x5770 or 0x56D4,
+    signed(case+(plural~=0 and 6 or 0)))
+  return result and result..(refl and a:indirect(0x630C) or '')
 end
-
-function generation.verb_form(m, id, s, o, aspect, flags, person, plural, past, gender)
-  local length, index = m:strlen(s, o)
-  if flags & 4 ~= 0 then index, past = 6, 0
-  elseif past == 1 then index = 7
-  elseif person == 0 then m:strcpy(m.ds, RESULT, s, o); return m.ds, RESULT
-  else index = signed(person - 1 + (plural ~= 0 and 3 or 0)) end
-  local refl = reflexive(m, s, o, length)
-  if not build(m, id, s, o, length - (refl and 2 or 0), aspect == 1 and 0x5E90 or 0x5A50, index) then
-    return 0, 0
-  end
-  if past == 1 then
-    local n = m:strlen(m.ds, RESULT)
-    if (gender ~= 1 or plural ~= 0) and
-      (ends(m, m.ds, RESULT, n, 0xB983) or ends(m, m.ds, RESULT, n, 0xB987)) then
-      put(m, m.ds, RESULT, n - 2, m:u8(linear(m.ds, (RESULT + n - 1) & 0xFFFF)))
-      n = n - 1; put(m, m.ds, RESULT, n, 0)
-    elseif ends(m, m.ds, RESULT, n, 0xB98B) then
-      n = n - 1; put(m, m.ds, RESULT, n, 0)
-    end
-    if m:u8(linear(m.ds, (RESULT + n - 1) & 0xFFFF)) ~= 0xAB and (gender ~= 1 or plural == 1) then cat(m, 0xB98E) end
-    if plural ~= 0 then cat(m, 0xB990)
-    elseif gender == 2 then cat(m, 0xB992)
-    elseif gender == 0 then cat(m, 0xB994) end
+function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gender)
+  local a,index=state.assets
+  if flags & 4 ~= 0 then index,past=6,0
+  elseif past==1 then index=7
+  elseif person==0 then return word
+  else index=signed(person-1+(plural~=0 and 3 or 0)) end
+  local refl=reflexive(a,word,#word)
+  local result=build(a,id,word,#word-(refl and 2 or 0),aspect==1 and 0x5E90 or 0x5A50,index)
+  if not result then return nil end
+  local function cat(at) result=result..a:string(at) end
+  if past==1 then
+    local n=#result
+    if (gender~=1 or plural~=0) and (text.ends(result,a:string(0xB983)) or text.ends(result,a:string(0xB987))) then
+      result=result:sub(1,n-2)..result:sub(n)
+    elseif text.ends(result,a:string(0xB98B)) then result=result:sub(1,-2) end
+    if result:byte(-1)~=0xAB and (gender~=1 or plural==1) then cat(0xB98E) end
+    if plural~=0 then cat(0xB990) elseif gender==2 then cat(0xB992) elseif gender==0 then cat(0xB994) end
   end
   if refl then
-    catptr(m, (index == 0 or index == 4 or index == 6 or (past == 1 and (gender ~= 1 or plural ~= 0))) and 0x6310 or 0x630C)
+    result=result..a:indirect((index==0 or index==4 or index==6 or (past==1 and (gender~=1 or plural~=0))) and 0x6310 or 0x630C)
   end
-  if past == 1 and flags & 2 ~= 0 then cat(m, 0xB996) end
-  if flags & 16 ~= 0 then cat(m, 0xB99A) end
-  return m.ds, RESULT
+  if past==1 and flags & 2 ~= 0 then cat(0xB996) end
+  if flags & 16 ~= 0 then cat(0xB99A) end
+  return result
 end
-
-function generation.participle_form(m, id, s, o, aspect, tag, passive, past)
-  local index = tag == 0x47 and 8 or past == 1 and (passive ~= 0 and 12 or 11) or (passive ~= 0 and 10 or 9)
-  local length = m:strlen(s, o)
-  local refl = passive == 0 and reflexive(m, s, o, length)
-  if not build(m, id, s, o, length - (refl and 2 or 0), aspect == 1 and 0x5E90 or 0x5A50, index) then return 0, 0 end
+function generation.participle_form(state,id,word,aspect,tag,passive,past)
+  local a=state.assets
+  local index=tag==0x47 and 8 or past==1 and (passive~=0 and 12 or 11) or (passive~=0 and 10 or 9)
+  local refl=passive==0 and reflexive(a,word,#word)
+  local result=build(a,id,word,#word-(refl and 2 or 0),aspect==1 and 0x5E90 or 0x5A50,index)
+  if not result then return nil end
   if refl then
-    if index == 8 and aspect ~= 0 then cat(m, 0xB99E) end
-    catptr(m, index == 8 and 0x6310 or 0x630C)
+    if index==8 and aspect~=0 then result=result..a:string(0xB99E) end
+    result=result..a:indirect(index==8 and 0x6310 or 0x630C)
   end
-  return m.ds, RESULT
+  return result
 end
-
--- 1E71:0CDC: pronouns are changed in place, not in the shared buffer.
-function generation.pronoun_form(m, s, o, person, gender, plural, case, prefix)
-  local length = m:strlen(s, o)
-  local cut, index = length
-  local first = m:u8(linear(s, o))
-  if person == 0 or first == 0xAD or first == 0xAA or first == 0xE7 or person > 3 then
-    index = 8
-    while true do
-      local rs, ro = m:far(linear(m.ds, (0x6344 + index * 4) & 0xFFFF))
-      if null(rs, ro) then return 0, 0 end
-      cut = memory.ends_with(m, s, o, length, rs, ro)
-      if cut ~= 0 then break end
-      index = index + 1
+function generation.pronoun_form(state,word,person,gender,plural,case,prefix)
+  local a,index,cut=state.assets,nil,#word
+  local first=word:byte() or 0
+  if person==0 or first==0xAD or first==0xAA or first==0xE7 or person>3 then
+    index=8
+    while a:word(0x6344+index*4)~=0 do
+      local ending=a:indirect(0x6344+index*4)
+      if text.ends(word,ending) then cut=#ending; break end
+      index=index+1
     end
-  elseif person == 1 then index = plural == 1 and 5 or 0
-  elseif person == 2 then index = plural == 1 and 6 or 1
-  else index = plural == 1 and 7 or gender == 2 and 4 or 2 end
-  if case ~= 0 then
-    length = (length - cut) & 0xFFFF
-    put(m, s, o, length, 0)
-    local rs, ro = m:far(linear(m.ds, (0x6314 + index * 4) & 0xFFFF))
-    if case ~= 5 and prefix ~= 0 and (index == 2 or index == 3 or index == 4 or index == 7) then
-      m:strcpy(s, o, m.ds, 0xBAB1); length = (length + 1) & 0xFFFF
-    end
-    for _ = 2, signed(case) do
-      rs, ro = m:strchr(rs, ro, 0x20)
-      if null(rs, ro) then return 0, 0 end
-      ro = (ro + 1) & 0xFFFF
-    end
-    local es, eo = m:strchr(rs, ro, 0x20)
-    if null(es, eo) then m:strcat(s, o, rs, ro)
-    else
-      local n = (eo - ro) & 0xFFFF
-      append(m, s, o, m:cstring(rs, ro):sub(1, n)); put(m, s, o, length + n, 0)
-    end
-  end
-  return s, o
+    if a:word(0x6344+index*4)==0 then return nil end
+  elseif person==1 then index=plural==1 and 5 or 0
+  elseif person==2 then index=plural==1 and 6 or 1
+  else index=plural==1 and 7 or gender==2 and 4 or 2 end
+  if case==0 then return word end
+  local result=word:sub(1,#word-cut)
+  if case~=5 and prefix~=0 and (index==2 or index==3 or index==4 or index==7) then result=a:string(0xBAB1) end
+  local ending=slot(a:indirect(0x6314+index*4),signed(case)-1)
+  return ending and result..ending
 end
-
--- LTPRO generation, 17AA:000A/0045/02E8/0475/1D31.
--- CP866 strings and native far pointers remain in the shared memory model.
 
 local NUMERAL_ENDINGS = {
   {0x4960, 13}, {0x4965, 6}, {0x496B, 16}, {0x496F, 0},
@@ -168,62 +113,34 @@ function generation.case(mask)
   return 0
 end
 
-local function record(m, s, o)
-  local p = linear(s, o)
-  local r = {s = s, o = o, p = p}
-  function r.b(n) return m:u8(p + n) end
-  function r.w(n) return m:s16(p + n) end
-  function r.set(n, v) m:set8(p + n, v) end
-  function r.word(n, v) m:set16(p + n, v) end
-  function r.ptr(n) return m:far(p + n) end
-  function r.text() return m:cstring(r.ptr(0x98)) end
-  function r.length() return m:strlen(r.ptr(0x98)) end
-  function r.put(n, c)
-    local ts, to = r.ptr(0x98)
-    m:set8(linear(ts, (to + n) & 0xFFFF), c)
-  end
-  function r.byte(n)
-    local ts, to = r.ptr(0x98)
-    return m:u8(linear(ts, (to + n) & 0xFFFF))
-  end
-  function r.ends(offset, n)
-    local ts, to = r.ptr(0x98)
-    return memory.ends_with(m, ts, to, n or r.length(), m.ds, offset) ~= 0
-  end
-  function r.cat(offset)
-    local ts, to = r.ptr(0x98); m:strcat(ts, to, m.ds, offset)
-  end
-  function r.copy(offset)
-    local ts, to = r.ptr(0x98); m:strcpy(ts, to, m.ds, offset)
-  end
-  function r.save(ts, to)
-    if null(ts, to) then return false end
-    m:strcpy(s, (o + 0x11C) & 0xFFFF, ts, to)
-    m:set_far(p + 0x98, s, (o + 0x11C) & 0xFFFF)
-    return true
-  end
-  function r.localize()
-    local ts, to = r.ptr(0x98)
-    if ts ~= s or to ~= (o + 0x11C) & 0xFFFF then r.save(ts, to) end
-  end
-  function r.valid() return r.w(0x85) >= 0 and r.w(0x85) < 0x7F end
+local function record(state,node)
+  local r={}
+  function r.b(f) return nodes.byte(node,f) end
+  function r.w(f) return signed(node[f] or 0) end
+  function r.set(f,v) node[f]=v end
+  r.word=r.set
+  function r.text() return node.text or '' end
+  function r.length() return #r.text() end
+  function r.put(i,c) node.text=text.put(r.text(),i,c) end
+  function r.byte(i) return text.byte(r.text(),i) end
+  function r.ends(at,n) return text.ends(r.text(),state.assets:string(at),n) end
+  function r.cat(at) node.text=r.text()..state.assets:string(at) end
+  function r.copy(at) node.text=state.assets:string(at) end
+  function r.save(value) if value==nil then return false end; node.text=value; return true end
+  function r.valid() return r.w(0x85)>=0 and r.w(0x85)<0x7F end
   function r.adjective()
-    local ts, to = r.ptr(0x98)
-    return r.save(generation.adjective_form(m, r.w(0x85), ts, to, r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
+    return r.save(generation.adjective_form(state,r.w(0x85),r.text(),r.b(0x77),r.b(0x72),generation.case(r.b(0x76))))
   end
-  function r.verb(id, aspect)
-    local ts, to = r.ptr(0x98)
-    return r.save(generation.verb_form(m, id or r.w(0x85), ts, to, aspect or r.b(0x75), r.b(0x78),
-      r.b(0x74), r.b(0x72), r.b(0x73), r.b(0x77)))
+  function r.verb(id,aspect)
+    return r.save(generation.verb_form(state,id or r.w(0x85),r.text(),aspect or r.b(0x75),r.b(0x78),r.b(0x74),
+      r.b(0x72),r.b(0x73),r.b(0x77)))
   end
   return r
 end
 
--- 17AA:0045: participle formation, then short form or adjective agreement.
-function generation.participle(m, s, o)
-  local r = record(m, s, o)
-  local ts, to = r.ptr(0x98)
-  if not r.save(generation.participle_form(m, r.w(0x85), ts, to, r.b(0x75), r.b(0x0C), r.b(0x7A), r.b(0x73))) then return end
+function generation.participle(state, node)
+  local r = record(state, node)
+  if not r.save(generation.participle_form(state, r.w(0x85), r.text(), r.b(0x75), r.b(0x0C), r.b(0x7A), r.b(0x73))) then return end
   local n = r.length()
   if r.b(0x7B) ~= 0 then
     if r.ends(0x48BC, n) then n = n - 2; r.put(n, 0) end
@@ -239,37 +156,24 @@ function generation.participle(m, s, o)
   end
 end
 
--- 17AA:02E8: pronoun helper; preserve the hyphenated tail across inflection.
-function generation.pronoun(m, s, o)
-  local r = record(m, s, o)
-  local ts, to = r.ptr(0x98)
-  local hs, ho = m:strchr(ts, to, 0x2D)
-  local tail
-  if not null(hs, ho) then tail = m:cstring(hs, ho); m:set8(linear(hs, ho), 0) end
-  local result_s, result_o
-  if r.ends(0x48C8) then
-    r.word(0x85, 6)
-    result_s, result_o = generation.adjective_form(m, 6, ts, to, r.b(0x77), r.b(0x72), generation.case(r.b(0x76)))
-    r.save(result_s, result_o)
-  else
-    result_s, result_o = generation.pronoun_form(m, ts, to, r.b(0x74), r.b(0x77), r.b(0x72), generation.case(r.b(0x76)), r.b(0x75))
-  end
-  if tail then
-    if not null(result_s, result_o) then
-      ts, to = r.ptr(0x98)
-      m:write_string(ts, (to + m:strlen(ts, to)) & 0xFFFF, tail .. '\0')
-    else m:set8(linear(hs, ho), 0x2D) end
-  end
+function generation.pronoun(state,node)
+  local r=record(state,node)
+  local stem,tail=r.text():match('^(.-)(%-.*)$')
+  stem=stem or r.text()
+  local result
+  if text.ends(stem,state.assets:string(0x48C8)) then
+    r.word(0x85,6)
+    result=generation.adjective_form(state,6,stem,r.b(0x77),r.b(0x72),generation.case(r.b(0x76)))
+  else result=generation.pronoun_form(state,stem,r.b(0x74),r.b(0x77),r.b(0x72),generation.case(r.b(0x76)),r.b(0x75)) end
+  if result then r.save(result..(tail or '')) end
 end
 
--- 17AA:0475: the tag switch. Return value is always 1, including no-op tags.
-function generation.word(m, s, o)
-  local r = record(m, s, o)
+function generation.word(state, node)
+  local r = record(state, node)
   local tag = r.b(0x0C)
   if tag == 0x4E then -- N
     if r.valid() and (r.b(0x72) ~= 0 or r.b(0x76) > 1) then
-      local ts, to = r.ptr(0x98)
-      r.save(generation.noun_form(m, r.w(0x85), ts, to, r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
+      r.save(generation.noun_form(state, r.w(0x85), r.text(), r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
     end
   elseif tag == 0x55 then -- U
     local n = r.length()
@@ -300,27 +204,19 @@ function generation.word(m, s, o)
   elseif tag == 0x59 then -- Y
     if r.ends(0x4914) then r.word(0x85, 0x28); r.verb() end
   elseif tag == 0x56 or tag == 0x76 then -- V/v
-    local ps, po = r.ptr(0x62)
-    if not null(ps, po) then
-      local partner = record(m, ps, po)
-      local ts, to = partner.ptr(0x98)
-      local n = 0
-      while true do
-        local c = m:u8(linear(ts, (to + n) & 0xFFFF))
-        if c == 0 then break end
-        if m:u8(linear(m.ds, 0xBF77 + c)) & 0x0C ~= 0 then
-          m:set8(linear(ts, (to + n) & 0xFFFF), 0); break
-        end
-        n = n + 1
+    if node.aux then
+      local partner = record(state, node.aux)
+      for i=0,partner.length()-1 do
+        if text.alpha(partner.byte(i)) then partner.put(i,0); break end
       end
       if partner.ends(0x4919, 4) and partner.b(0x78) & 8 == 0 then
         local subject = r.b(0x78) & 8 ~= 0 and r.b(0x75) == 0 and partner or r
-        partner.save(generation.verb_form(m, 0x39, ts, to, partner.b(0x75), subject.b(0x78), subject.b(0x74),
+        partner.save(generation.verb_form(state, 0x39, partner.text(), partner.b(0x75), subject.b(0x78), subject.b(0x74),
           subject.b(0x72), partner.b(0x73), subject.b(0x77)))
       end
     end
     if r.valid() then
-      if r.b(0x7A) ~= 0 and r.b(0x7B) ~= 0 then r.set(0x75, 1); generation.participle(m, s, o)
+      if r.b(0x7A) ~= 0 and r.b(0x7B) ~= 0 then r.set(0x75, 1); generation.participle(state, node)
       else
         if r.b(0x78) & 8 ~= 0 then r.set(0x74, 0) end
         r.verb()
@@ -328,18 +224,16 @@ function generation.word(m, s, o)
     end
   elseif tag == 0x47 then -- G
     if r.valid() then
-      local ts, to = r.ptr(0x98)
-      r.save(generation.participle_form(m, r.w(0x85), ts, to, r.b(0x75), 0x47, 0, 0))
+      r.save(generation.participle_form(state, r.w(0x85), r.text(), r.b(0x75), 0x47, 0, 0))
     end
   elseif tag == 0x41 then -- A
-    r.localize()
     if (r.b(0x7B) ~= 0 and r.b(0x66) == 0x41) or r.valid() then
       local original = r.b(0x66)
       if original == 0x45 or original == 0x56 or original == 0x46 or original == 0x65 or original == 0x47 then
         if original == 0x45 or original == 0x65 or original == 0x46 then
           r.set(0x7A, 1); if r.b(0x75) == 0 then r.set(0x73, 0) end
         end
-        generation.participle(m, s, o); return 1
+        generation.participle(state, node); return 1
       elseif r.b(0x7B) ~= 0 then
         local n = r.length() - 2
         r.put(n, 0)
@@ -360,11 +254,10 @@ function generation.word(m, s, o)
     if r.b(0x0F) == 0x61 and (r.b(0x73) == 1 or r.b(0x73) == 2) then
       local saved = r.text()
       if r.b(0x73) == 2 then
-        r.save(generation.adjective_form(m, 0, m.ds, 0x4948, r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
+        r.save(generation.adjective_form(state, 0, state.assets:string(0x4948), r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
       else r.copy(0x494E) end
       r.cat(0x4954)
-      local ts, to = r.ptr(0x98)
-      m:write_string(ts, (to + r.length()) & 0xFFFF, saved .. '\0')
+      node.text = r.text() .. saved
     end
   elseif tag == 0x4C or tag == 0x6C then -- L/l
     r.word(0x85, 0); r.adjective()
@@ -389,12 +282,11 @@ function generation.word(m, s, o)
       r.put(n - 1, 0)
     end
   elseif tag == 0x46 then -- F
-    local text = m:cstring(m.ds, 0x4894) .. r.text()
-    local ts, to = r.ptr(0x98); m:write_string(ts, to, text .. '\0')
+    node.text = state.assets:string(0x4894) .. r.text()
     if r.valid() then
       r.set(0x0C, 0x45); r.set(0x73, 0); r.set(0x75, 0)
       if r.b(0x66) == 0x45 or r.b(0x66) == 0x65 then r.set(0x7A, 1) end
-      generation.participle(m, s, o)
+      generation.participle(state, node)
     end
   elseif tag == 0x45 then -- E
     if r.valid() then
@@ -406,7 +298,7 @@ function generation.word(m, s, o)
         r.verb()
       else
         if r.b(0x75) == 0 then r.set(0x73, 0) end
-        generation.participle(m, s, o)
+        generation.participle(state, node)
       end
     end
   elseif tag == 0x4D or tag == 0x51 then -- M/Q
@@ -414,30 +306,20 @@ function generation.word(m, s, o)
       if r.b(0x72) == 0 and r.b(0x76) & 8 == 0 then
         r.word(0x85, 12); r.put(2, 0); r.adjective()
       end
-    else generation.pronoun(m, s, o) end
+    else generation.pronoun(state, node) end
   end
   return 1
 end
 
--- 17AA:1D31: skip the root boundary; optionally generate alternate readings.
-function generation.run(m, s, o)
-  while true do
-    s, o = m:far(linear(s, o))
-    if null(s, o) then break end
-    local r = record(m, s, o)
-    if r.b(0x0E) == 0x57 and r.b(0x0B) > 1 and r.b(0x0C) ~= 0x23 and r.b(0x0C) ~= 0x48 then
-      generation.word(m, s, o)
-      if m:u16(linear(m.ds, 0xBBB8)) ~= 0 and m:u16(linear(m.ds, 0xBBB6)) ~= 0 then
-        local as, ao = s, o
-        while true do
-          as, ao = m:far(linear(as, ao) + 0x8F)
-          if null(as, ao) then break end
-          generation.word(m, as, ao)
-        end
-      end
+function generation.run(state,root)
+  local node=root.next
+  while node do
+    local r=record(state,node)
+    if r.b(0x0E)==0x57 and r.b(0x0B)>1 and r.b(0x0C)~=0x23 and r.b(0x0C)~=0x48 then
+      generation.word(state,node)
     end
+    node=node.next
   end
   return 1
 end
-
 return generation

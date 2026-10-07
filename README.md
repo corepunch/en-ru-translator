@@ -30,15 +30,17 @@ assert(text == 'Он - в доме.')
 
 `translate` returns UTF-8 plus diagnostic state. `run` returns CP866 plus the same
 state. Options `executable`, `dictionary`, and `russian` accept paths or raw bytes.
-Each call builds fresh mutable state. Unsupported lexical branches raise errors.
+Each call builds fresh mutable state. Diagnostic state exposes `root` (the Lua
+record list), `elements`, `tags`, `stages`, and `output` (CP866 text). Unsupported
+lexical branches raise errors.
 
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,
 `phrasing`, `matching`, `reorder`, `senses`, `constituents`, `agreement`, `syntax`,
-`generation`, and `output`. `nodes` owns linked table records and serialization;
-`memory` and `heap` preserve native pointer and buffer behavior. `engine` loads
-assets and composes the stages. See [the pipeline](docs/pipeline.md).
+`generation`, and `output`. `nodes` owns linked Lua records; every stage uses
+ordinary tables and strings. `assets` decodes static EXE tables, and `engine`
+loads assets and composes the stages. See [the pipeline](docs/pipeline.md).
 
 The older parser/compiler, custom dictionary overlays and debug CLI were retired.
 `init.lua` always uses the recovered engine; the old `--ltpro` switch and

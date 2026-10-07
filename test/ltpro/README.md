@@ -5,11 +5,17 @@ DOSBox-X 2026.10.01 on 2026-10-06. Two complete runs produced identical output
 bytes for every case. All ten historical reference paragraphs were reproduced.
 
 The single Lua engine matches **77/77** inputs and **20/20** additional holdout
-inputs. The older 44/77 comparison files are retained as historical research
+inputs and **26/26** lexical-macro inputs. The older 44/77 comparison files are retained as historical research
 artifacts, not current results. See [testing](../../TESTING.md) for current commands.
+
+The macro corpus was captured twice on 2026-10-07 from the unchanged original
+assets; both runs produced identical bytes. It covers partial input, `=`/`%`,
+supplied spellings, compound names, single-word W readings and redirects.
 
 ## Files
 
+- `macro_cases.json` and `macro_reference.json`: the lexical-macro corpus with
+  full capture provenance and raw outputs.
 - `cases.json`: input sentences and categories; no hand-authored expected translations.
 - `reference.json`: raw output as CP866 hex, decoded translation paragraphs,
   hashes, emulator version, configuration, command arguments and capture time.

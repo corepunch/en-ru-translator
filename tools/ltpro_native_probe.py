@@ -133,8 +133,9 @@ class Machine:
             else:value=source+b'\0'
             self.mem[dest:dest+len(value)]=value
             self.reg('ax',self.read(sp,2));self.reg('dx',self.read(sp+2,2))
-        elif offset==0x3e97:
+        elif offset in (0x3e97,0x3f00):
             n=self.read(sp+8,2);a=self.cstring(ptr(0))[:n];b=self.cstring(ptr(4))[:n]
+            if offset==0x3f00: a,b=a.upper(),b.upper()
             self.reg('ax',(a>b)-(a<b))
         elif offset==0x1baa: pass  # free does not alter observable live-node fields
         elif offset==0x1951:

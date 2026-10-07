@@ -30,7 +30,8 @@ assert(text == 'Он - в доме.')
 
 `translate` returns UTF-8 plus diagnostic state. `run` returns CP866 plus the same
 state. Options `executable`, `dictionary`, and `russian` accept paths or raw bytes.
-Each call builds fresh mutable state. Diagnostic state exposes `root` (the Lua
+Option `transliterate = false` corresponds to LTPRO’s `/L-`: bare `=`
+readings remain empty, while `%` still transliterates. Each call builds fresh mutable state. Diagnostic state exposes `root` (the Lua
 record list), `elements`, `tags`, `stages`, and `output` (CP866 text). Unsupported
 lexical branches raise errors.
 
@@ -50,9 +51,10 @@ also retired. Original binary names remain in research tooling for provenance.
 
 ## Verification and limits
 
-The recovered engine matches the **77 original + 20 fresh captured sentences**.
-That establishes corpus parity, not universal equivalence. Lexical macros, some
-suffix fallback branches and inline input directives remain unsupported; this
+The recovered engine matches the **77 original + 20 holdout + 26 lexical-macro captured inputs**.
+That establishes corpus parity, not universal equivalence. The `=` and `%` lexical macros,
+contextual transliteration, and dictionary redirects are ported. Some suffix
+fallback branches and inline input directives remain unsupported; this
 is a single-sentence API. See [testing](TESTING.md) for reproducible checks and
 [research evidence](reference/LTPRO_CLI_REPORT.md) for capture details.
 

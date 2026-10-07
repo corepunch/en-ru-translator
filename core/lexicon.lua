@@ -1,4 +1,6 @@
 local nodes = require 'core.nodes'
+local transliteration = require 'core.transliteration'
+local text = require 'core.text'
 
 local lexicon = {}
 
@@ -242,7 +244,35 @@ local tag = nodes.tag
 local function has(s,c) return s:find(c,1,true) ~= nil end
 local cases = {[0x82]=8,[0x84]=4,[0x8F]=32,[0x90]=2,[0x92]=16}
 
-function lexicon.decode_reading(node, payload, options)
+local function macroText(source, value, options, previous)
+	local marker, supplied = value:sub(1, 1), value:sub(2)
+	if marker == "=" and options.transliterate == false then return supplied end
+	if supplied ~= "" and text.is_cyrillic(supplied:byte()) then return supplied end
+	-- 211E:0E82 returns without touching its destination for an empty source.
+	if source == "" then return previous or "" end
+	return transliteration.convert(source, marker == "=")
+end
+
+-- 0A4F:0B3C, 0CE1 and 14D6: = honors the transliteration setting; % always
+-- transliterates. A supplied Cyrillic spelling takes precedence over the source.
+local function writeReading(node, value, options, ordinaryReadings, macroSource)
+	local marker = value:sub(1, 1)
+	if marker ~= "=" and marker ~= "%" then
+		node[0x11C] = value
+		if ordinaryReadings then node[0x0B] = 3 end
+		return
+	end
+	-- Native phrase macros retain the joined source for output capitalization.
+	if macroSource then node[0x12] = macroSource end
+	if macroSource or node[0x0F] ~= 0x77 then node[0x11C] = macroText(macroSource or node[0x12] or "", value, options, node[0x11C]) end
+	if #value > 1 or options.transliterate ~= false or marker == "%" then
+		node[0x0B] = 3
+		if marker == "%" then node[0x0F] = 0x25 end
+	end
+	if marker == "=" then node[0x0F] = 0x3D end
+end
+
+function lexicon.decode_reading(node, payload, options, macroSource)
   options = options or {}
   local p=1
   local function digit(at)
@@ -276,8 +306,7 @@ function lexicon.decode_reading(node, payload, options)
     end
     node[0x74]=3
     local text=payload:sub(p)
-    assert(not text:match('^[=%%]'),'native lexical macros are not ported')
-    node[0x11C]=text
+    writeReading(node, text, options, false, macroSource)
     return p-1
   elseif has('XYx',t) then
     digit(0x73);digit(0x72);digit(0x74)
@@ -328,13 +357,12 @@ function lexicon.decode_reading(node, payload, options)
   t=tag(node)
   if not has('ekxjtudbiplyfgac',t) then node[0x0C]=t:upper():byte() end
   local text=payload:sub(p)
-  assert(text:sub(1,1)~='=' and text:sub(1,1)~='%', 'native lexical macros are not ported')
-  node[0x0B],node[0x11C]=3,text
+  writeReading(node, text, options, true, macroSource)
   return p-1
 end
 
 -- Literal-key branch of 0A4F:1713 and reading distribution in 0A4F:18F8.
--- Pattern keys, macros and record insertion markers require separate ports.
+-- Pattern keys and record insertion markers require separate ports.
 
 function lexicon.match_phrase(dictionary, records, index, key)
   local best,finish
@@ -354,7 +382,8 @@ function lexicon.match_phrase(dictionary, records, index, key)
   end
   return best,finish
 end
-function lexicon.apply_phrase(record, records, first, last)
+function lexicon.apply_phrase(record, records, first, last, options)
+  options = options or {}
   local value=record.value:match('^[^\\]*')
   local node=records[first]
   if value:sub(1,1)~='W' then
@@ -363,7 +392,12 @@ function lexicon.apply_phrase(record, records, first, last)
     if not (t:match('[VZ]') and nodes.tag(node):match('[EeGFh]')) then node[0x0C]=t:byte() end
     if nodes.tag(node)=='V' and node[0x12]:sub(-1)~="'" then node[0x72]=0 end
     node[0x0F]=0x77
-    lexicon.decode_reading(node,value:sub(2))
+    local source = {}
+    for index=first,last do table.insert(source, records[index][0x12]) end
+    local macroSource = table.concat(source, ' ')
+    -- Native phrase distribution prepares translated text before marking the
+    -- reading as phrase-owned (77), so the metadata decoder leaves it alone.
+    lexicon.decode_reading(node,value:sub(2),options,macroSource)
     for _=first+1,last do table.remove(records,first+1) end
     return first+1
   end
@@ -378,7 +412,6 @@ function lexicon.apply_phrase(record, records, first, last)
       stop=stop+1
     end
     local text=value:sub(pos,stop-1)
-    assert(not text:match('^[=%%]'),'native phrase macros are not ported')
     local nexttag=value:sub(stop,stop)
     if nexttag==' ' then nexttag='w' end
     if index>last then
@@ -409,6 +442,10 @@ function lexicon.apply_phrase(record, records, first, last)
         if text:match('^%d') then n[at]=tonumber(text:sub(1,1));text=text:sub(2) end
       end
     end
+    if text:match('^[=%%]') then
+      n[0x0F] = text:byte()
+      text = macroText(n[0x12] or '', text, options)
+    end
     n[0x0C],n[0x66],n[0x11C]=tag:byte(),tag:upper():byte(),text
     if (n[0x0F] or 0)==0 then n[0x0F]=0x77 end
     tag,pos=nexttag,stop+1
@@ -422,8 +459,8 @@ function lexicon.apply_phrase(record, records, first, last)
 end
 
 -- Lexical analyzer over CP866 strings and lossless dictionary data.
--- Ports literal lookup, phrase readings and a bounded tokenizer; unsupported
--- dictionary macro/expansion branches fail explicitly.
+-- Ports literal lookup, phrase readings, macros and a bounded tokenizer;
+-- unsupported pattern and suffix branches fail explicitly.
 
 -- 0A4F:1603 attaches up to ten `word pattern*$action` records to a word node:
 -- records whose first token matches the word and whose last star is followed
@@ -554,7 +591,7 @@ function lexicon.tokenize(input)
   return records,terminator and terminator:byte() or 0x0A,words
 end
 
-local function decode(dictionary,records,index)
+local function decode(dictionary,records,index,options)
   local node=records[index]
   local source=node[0x12]
 	while true do
@@ -568,6 +605,14 @@ local function decode(dictionary,records,index)
 		table.insert(records, index + 1, fresh)
 	end
   local matches=dictionary.by_key[source:lower()]
+  local aliases = {}
+  while matches and #matches == 1 and matches[1].value:sub(1,1) == '=' do
+    assert(not aliases[source:lower()], 'cyclic dictionary redirect: '..source)
+    aliases[source:lower()] = true
+    source = matches[1].value:sub(2)
+    node[0x12], node[0x87] = source, #source
+    matches = dictionary.by_key[source:lower()]
+  end
   local value,backref
   if matches then
     assert(#matches==1,'native duplicate lookup is not ported: '..source)
@@ -602,7 +647,7 @@ local function decode(dictionary,records,index)
     if #rules>0 then node.rules=rules end
   end
   if not phrase and backref then phrase,last=lexicon.match_phrase(dictionary,records,index,backref:lower()) end
-  if phrase then return lexicon.apply_phrase(phrase,records,index,last) end
+  if phrase then return lexicon.apply_phrase(phrase,records,index,last,options) end
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1][0x0D]~=0x2A then node[0x9C]='' end
@@ -620,19 +665,19 @@ local function decode(dictionary,records,index)
     end
   end
   if value then
-    assert(value:sub(1,1)~='W','native W word expansion is not ported: '..source)
-    lexicon.decode_reading(node,value:sub(2):match('^[^\\]*'))
+    lexicon.decode_reading(node,value:sub(2):match('^[^\\]*'),options)
 
   elseif nodes.tag(node)=='?' or nodes.tag(node)=='#' then node[0x74],node[0x77]=3,1 end
   return index+1
 end
 
-function lexicon.analyze(dictionary,input)
+function lexicon.analyze(dictionary,input,options)
+  options = options or {}
   local records,terminator,word_count=lexicon.tokenize(input)
   local i=1
   while i<=#records do
     if records[i][0x0E]==0x57 and (nodes.tag(records[i])=='?' or records[i][0x0B]==1) then
-      i=decode(dictionary,records,i)
+      i=decode(dictionary,records,i,options)
     else i=i+1 end
   end
   assert(#records<=512,'native lexical vector limit exceeded')

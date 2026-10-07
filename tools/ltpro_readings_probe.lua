@@ -5,7 +5,8 @@ for _,case in ipairs(cases) do
   local node={}
   for _,at in ipairs(fields) do node[at]=case.initial[at] or 0 end
   node[0x0C]=case.tag:byte()
-  local consumed=lexicon.decode_reading(node,case.payload)
+  node[0x12],node[0x11C]=case.source or '',case.translation or ''
+  local consumed=lexicon.decode_reading(node,case.payload,{transliterate=case.transliterate})
   local values={tostring(consumed)}
   for _,at in ipairs(fields) do values[#values+1]=tostring(node[at]) end
   values[#values+1]=(node[0x11C]:gsub('.',function(c)return string.format('%02x',c:byte())end))

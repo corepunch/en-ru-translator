@@ -61,7 +61,9 @@ assert(n[0x76]==8 and n[0x11C]==cp('Пвb'))
 local v=nodes.new('V',{[0x68]=0x80,[0x6A]=0x80,[0x0F]=0})
 assert(lexicon.decode_reading(v,cp('123делать'))==3)
 assert(v[0x68]==0xC1 and v[0x6A]==0x83 and v[0x76]==8)
-assert(not pcall(lexicon.decode_reading,n,'=macro'))
+n[0x12]='Aaron'
+assert(lexicon.decode_reading(n,'=')==0)
+assert(n[0x11C]==cp('Аарон') and n[0x0F]==0x3D and n[0x0B]==3)
 
 local function raw(next_offset,next_segment)
   local data=string.rep('\0',0x282)

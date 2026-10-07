@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-07T12:50:06.104732+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "9e39b30396cab0596cb31401feaab9cedde792c312909e42791ef2b67ef77e53",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "3a3a6b867fa28aaf0aaa46f9735fc834e814746142e343ca4b8592023e026a3b"
+  },
+  "input_cases_sha256": "b1fceebd0be61b6e7fe7ffec1230b328d750c0e933bff7f5968af5c2c4ddbe91",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 26,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "macro-000",
+      "input": "I'm doing th",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "9f20a4a5aba0ee20e20d0a",
+      "raw_sha256": "95981652a468a0b50bc4fcf509a4bd77cbf24683a9b255c17b3fa86f599f7eb0",
+      "translation": "Я делаю т"
+    },
+    {
+      "id": "macro-001",
+      "input": "th.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "e22e0d0a",
+      "raw_sha256": "804a343849ddbae234813dfcc0e4e5f7bff3ffc1f71519e1fc40e355339ac350",
+      "translation": "т."
+    },
+    {
+      "id": "macro-002",
+      "input": "ab.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "a0a12e0d0a",
+      "raw_sha256": "633d745c5b80e126a9c84e27dfbe59592f1b6c5abcaf0c06c24d759133498895",
+      "translation": "аб."
+    },
+    {
+      "id": "macro-003",
+      "input": "Aaron.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "80a0e0aead2e0d0a",
+      "raw_sha256": "f5b591b1af559a81e1405ae21d471a30c3f70fc54dc6980f2f006c5a0a0b368b",
+      "translation": "Аарон."
+    },
+    {
+      "id": "macro-004",
+      "input": "Abalone.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "80a1a0abaeada52e0d0a",
+      "raw_sha256": "a59eaad3a5eeeb1be65f050c50bec93d330a671c9491eee021a9ad36434e90bf",
+      "translation": "Абалоне."
+    },
+    {
+      "id": "macro-005",
+      "input": "Ivanova.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "88a2a0adaea2a02e0d0a",
+      "raw_sha256": "7a15d99f5520b851f2e1c633a497e791ab42a22966f37c8375db85088df12a8f",
+      "translation": "Иванова."
+    },
+    {
+      "id": "macro-006",
+      "input": "Vadim.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "82a0a4a8ac2e0d0a",
+      "raw_sha256": "68f2687fff5c7f85c9d4c8694edd735c55fc270b0eeffa4132b3b42a03c34710",
+      "translation": "Вадим."
+    },
+    {
+      "id": "macro-007",
+      "input": "Staros.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "91e2a0e0aee12e0d0a",
+      "raw_sha256": "e22d7b470deb8431f6284a21975410125ff0c4b911d9b0362f6d89f0f34e64db",
+      "translation": "Старос."
+    },
+    {
+      "id": "macro-008",
+      "input": "Lada.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "8ba0a4a02e0d0a",
+      "raw_sha256": "f25fece5dcec5474f267911817a604280e28c9fc410785c2ee472aeb6473efd8",
+      "translation": "Лада."
+    },
+    {
+      "id": "macro-009",
+      "input": "Welch.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "93edabece1aaa8a92e0d0a",
+      "raw_sha256": "6005faa90a3309ccafeac82a18fbd5cec2424bd5a5343f55d1724fe5075a0372",
+      "translation": "Уэльский."
+    },
+    {
+      "id": "macro-010",
+      "input": "Albert Lea.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "80abeca1a5e0e2208ba82e0d0a",
+      "raw_sha256": "f0e24ff31c3ddd5e0980d911dd4705e1835a25e7a4f6d07ccb63ba3483c4a81a",
+      "translation": "Альберт Ли."
+    },
+    {
+      "id": "macro-011",
+      "input": "Allen town.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "80ababa5ad20e2a0e3ad2e0d0a",
+      "raw_sha256": "6d07220ec31e0445d0f3a30e967e0de0ff3737aa4eccb4ca0206af0348998a13",
+      "translation": "Аллен таун."
+    },
+    {
+      "id": "macro-012",
+      "input": "O'Fallon.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "3d2e0d0a",
+      "raw_sha256": "505793bcc45f7afc66a30bfb903aaf4def186662dfab633a36a128fc979c5d51",
+      "translation": "=."
+    },
+    {
+      "id": "macro-013",
+      "input": "Ppg.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "3de7a0e1e2a5a920ada020a3e0a0acac2e0d0a",
+      "raw_sha256": "30776b61e96f1dbfe408b1c1913176e86d067f34dea73db5259cca628fb7ada7",
+      "translation": "=частей на грамм."
+    },
+    {
+      "id": "macro-014",
+      "input": "Robin-hood.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "3de0aea1a8ad20a3e3a42e0d0a",
+      "raw_sha256": "ebdfb71bb99c6ebbe482b9e097a1cd993035a7f61e0158902458d3d15fda095a",
+      "translation": "=робин гуд."
+    },
+    {
+      "id": "macro-015",
+      "input": "Sco.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "3de1a0ade2a020aae0e3a720aeafa5e0eda9e8ad2e0d0a",
+      "raw_sha256": "83e4c8c1a5baa447cf0c9388f41fe2fcad0a8e9d99c297627325194413921b43",
+      "translation": "=санта круз оперэйшн."
+    },
+    {
+      "id": "macro-016",
+      "input": "Sept-lles.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "3d2e0d0a",
+      "raw_sha256": "505793bcc45f7afc66a30bfb903aaf4def186662dfab633a36a128fc979c5d51",
+      "translation": "=."
+    },
+    {
+      "id": "macro-017",
+      "input": "Weaselly.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "93a8e1a5ababa82e0d0a",
+      "raw_sha256": "81533c30229627464d51e17450c632b1c1577a6afc4d91bf1584e027dd50ecf7",
+      "translation": "Уиселли."
+    },
+    {
+      "id": "macro-018",
+      "input": "Narvskiy.",
+      "group": "lexical-macros",
+      "raw_cp866_hex": "8da0e0a2e1aaa8a92e0d0a",
+      "raw_sha256": "fb2137fc947e5492b140ae45b6b874803beb86590a89a6c7e7e140d465576d81",
+      "translation": "Нарвский."
+    },
+    {
+      "id": "macro-019",
+      "group": "lexical-macros",
+      "input": "ABC television.",
+      "raw_cp866_hex": "80818a20e2a8aba5a2a8a6ad2e0d0a",
+      "raw_sha256": "9001577a3ebb4c0d2c70ac550b50fdf4cb714e6d17f8b7ca972a967b85e28da6",
+      "translation": "АБК тилевижн."
+    },
+    {
+      "id": "macro-020",
+      "group": "lexical-macros",
+      "input": "Alexander city.",
+      "raw_cp866_hex": "85a9aba5aae1a0ada4a5e020e1a0a9e2a82e0d0a",
+      "raw_sha256": "340c8206a7f310a1d1b8b7abbd5f08b6cc42bfa95aad53b3433edac1ce7ed064",
+      "translation": "Ейлександер сайти."
+    },
+    {
+      "id": "macro-021",
+      "group": "lexical-macros",
+      "input": "Ash land.",
+      "raw_cp866_hex": "9de8aba5ada42e0d0a",
+      "raw_sha256": "aa2246acbe603c5a440f4ae53989608571e57254a0e91f9d2e7ee1b86134ca81",
+      "translation": "Эшленд."
+    },
+    {
+      "id": "macro-022",
+      "group": "lexical-macros",
+      "input": "Bandar seri begawan.",
+      "raw_cp866_hex": "81a0ada4a0e020e1a5e0a820a1a5a3aea0ad2e0d0a",
+      "raw_sha256": "6b632758da77da220461d73a005e8c9c0e098c21b3bd666e102a2fead1327901",
+      "translation": "Бандар сери бегоан."
+    },
+    {
+      "id": "macro-023",
+      "group": "lexical-macros",
+      "input": "Cape town.",
+      "raw_cp866_hex": "8aa5a9afe2a0e3ad2e0d0a",
+      "raw_sha256": "9b9e3a406113724ec222a2afd9c5dfc345458e831560598b2cc54c0c3c17cc42",
+      "translation": "Кейптаун."
+    },
+    {
+      "id": "macro-024",
+      "group": "lexical-macros",
+      "input": "abc television.",
+      "raw_cp866_hex": "a0a1aa20e2a8aba5a2a8a6ad2e0d0a",
+      "raw_sha256": "2ad37f2f1653ed34d3a402bbb51bcf7c056a76203f3f2c9b756e32f18bdb9332",
+      "translation": "абк тилевижн."
+    },
+    {
+      "id": "macro-025",
+      "group": "lexical-macros",
+      "input": "Bel Air.",
+      "raw_cp866_hex": "81858b209d902e0d0a",
+      "raw_sha256": "1903a766bbc424fc8a01c46029f493d0a99c7beb3069827565f52abbe2c6aa64",
+      "translation": "БЕЛ ЭР."
+    }
+  ]
+}

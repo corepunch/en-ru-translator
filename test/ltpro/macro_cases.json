@@ -1,0 +1,132 @@
+[
+  {
+    "id": "macro-000",
+    "input": "I'm doing th",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-001",
+    "input": "th.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-002",
+    "input": "ab.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-003",
+    "input": "Aaron.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-004",
+    "input": "Abalone.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-005",
+    "input": "Ivanova.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-006",
+    "input": "Vadim.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-007",
+    "input": "Staros.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-008",
+    "input": "Lada.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-009",
+    "input": "Welch.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-010",
+    "input": "Albert Lea.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-011",
+    "input": "Allen town.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-012",
+    "input": "O'Fallon.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-013",
+    "input": "Ppg.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-014",
+    "input": "Robin-hood.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-015",
+    "input": "Sco.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-016",
+    "input": "Sept-lles.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-017",
+    "input": "Weaselly.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-018",
+    "input": "Narvskiy.",
+    "group": "lexical-macros"
+  },
+  {
+    "id": "macro-019",
+    "group": "lexical-macros",
+    "input": "ABC television."
+  },
+  {
+    "id": "macro-020",
+    "group": "lexical-macros",
+    "input": "Alexander city."
+  },
+  {
+    "id": "macro-021",
+    "group": "lexical-macros",
+    "input": "Ash land."
+  },
+  {
+    "id": "macro-022",
+    "group": "lexical-macros",
+    "input": "Bandar seri begawan."
+  },
+  {
+    "id": "macro-023",
+    "group": "lexical-macros",
+    "input": "Cape town."
+  },
+  {
+    "id": "macro-024",
+    "group": "lexical-macros",
+    "input": "abc television."
+  },
+  {
+    "id": "macro-025",
+    "group": "lexical-macros",
+    "input": "Bel Air."
+  }
+]

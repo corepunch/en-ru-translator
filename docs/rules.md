@@ -482,5 +482,5 @@ instruction checks and captured stage/corpus comparisons.
 | [LTPRO comparison](../reference/LTPRO_COMPARISON.md) | Binary identities, differences, verified ports and remaining parity gaps. |
 
 The production engine composes these stages. Remaining gaps include unsupported
-lexical macros, suffix paths and unused embedded-alternative matcher paths.
+some suffix paths and unused embedded-alternative matcher paths.
 Corpus parity is bounded evidence, not proof of complete translation equivalence.

@@ -54,7 +54,7 @@ function engine.run(input, options)
   local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
   local state = engine.new_state(executable, rus_source)
   local dict = lexicon.from_bytes(dic_bytes)
-  local analyzed = lexicon.analyze(dict, encoding.encode(input))
+  local analyzed = lexicon.analyze(dict, encoding.encode(input), options)
 
   local stages = {}
   stages.lexical_word_count = analyzed.word_count or 0

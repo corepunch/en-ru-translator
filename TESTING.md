@@ -9,11 +9,12 @@ supplied unpacked `LTGOLD/LTPRO.EXE`, `BASE.DIC`, and `BASE.RUS`.
 sh test/run_all.sh
 python3 tools/ltpro_pipeline_probe.py
 python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/holdout_cases.json --reference test/ltpro/holdout_reference.json
+python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/macro_cases.json --reference test/ltpro/macro_reference.json
 ```
 
 The shell runner executes the Lua module tests and CLI integration checks.
 The Python probe verifies asset/input/raw-output hashes before comparing the
-single engine against the 77 original and 20 fresh captured sentences. It never
+single engine against the 77 original, 20 holdout and 26 lexical-macro captured inputs. It never
 silently recaptures expected output. The old parser/compiler tests and custom
 cat/mat expectation were retired with that implementation; native references
 remain unchanged.
@@ -21,6 +22,8 @@ remain unchanged.
 ## Native differential probes
 
 ```sh
+python3 tools/ltpro_readings_probe.py
+python3 tools/ltpro_transliteration_probe.py
 python3 tools/ltpro_matcher_probe.py
 python3 tools/ltpro_replacement_probe.py
 python3 tools/ltpro_constituent_probe.py
@@ -67,3 +70,10 @@ New full-program references require DOSBox-X and `tools/ltpro_capture.py`.
 [Corpus provenance](test/ltpro/README.md) documents the capture profile and assets.
 Keep expected outputs and original assets unchanged during refactoring. Corpus
 parity does not establish support for every historical grammar or lexical path.
+
+`macros_test.lua` audits all 5,801 literal dictionary entries containing `=` or
+`%`, including phrase readings and redirects. The reading probe checks 2,784
+native decoder cases. The transliteration probe checks 39,054 contextual/casing
+cases against 211E:003A/0E82, including seeded strings. Single-word W readings
+keep their native literal `=` behavior; phrase W macros materialize spellings.
+The macro corpus includes the unfinished `I'm doing th` that exposed the gap.

@@ -12,6 +12,9 @@ def original(image,case,cache):
     m=Machine(image);m.cache=cache;m.r.update(cs=0xA4F,ip=0xC0F)
     for at in FIELDS: m.write(0x80000+at,1,case['initial'].get(str(at),0))
     m.write(0x8000C,1,ord(case['tag']))
+    m.write(0x22d50+0xBBAE,2,int(case.get('transliterate',True)))
+    for at,value in [(0x80012,case.get('source','')), (0x8011C,case.get('translation',''))]:
+        data=value.encode('cp866')+b'\0';m.mem[at:at+len(data)]=data
     data=case['payload'].encode('cp866')+b'\0';m.mem[0xD0100:0xD0100+len(data)]=data
     for value in reversed([0,0xD000,0x100,0xD000,0,0x8000]): m.push(value)
     m.push(0xFFFF);m.push(0xFFFF);m.run()
@@ -26,6 +29,13 @@ def main():
             for _ in range(3):
                 initial={str(at):rng.randrange(256) for at in FIELDS}
                 cases.append({'tag':tag,'payload':payload,'initial':initial})
+    for tag in ['#','N','A','D','V']:
+        for payload in ['=','%','=имя','%имя','=ignored','%ignored']:
+            for transliterate in [False,True]:
+                for marker in [0,0x77]:
+                    for source in ['Aaron','ABC','Ivanova','th','']:
+                        cases.append({'tag':tag,'payload':payload,'initial':{'11':1,'15':marker},
+                                      'source':source,'translation':'kept','transliterate':transliterate})
     cache={};expected=[original(image,case,cache) for case in cases]
     with tempfile.TemporaryDirectory(prefix='ltpro-readings-') as directory:
         path=Path(directory)/'fixtures.lua';path.write_text('return '+lua_value(cases))

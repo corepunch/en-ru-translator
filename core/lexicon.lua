@@ -3,6 +3,7 @@ local nodes = require 'core.nodes'
 local transliteration = require 'core.transliteration'
 local text = require 'core.text'
 local prefixes = require 'core.prefixes'
+local directives = require 'core.directives'
 
 local lexicon = {}
 
@@ -640,7 +641,6 @@ end
 -- trailing punctuation becomes boundary records. Internal hyphens stay in
 -- the word until dictionary analysis has had a chance to recognize them.
 function lexicon.tokenize(input)
-  assert(not input:find('[{}]'), 'native inline input directives are not ported')
   local records={boundary('*',0x2A)}
   local quoted=input:match("([.!?])['\"]%s*$")
   if quoted then input=input:gsub("['\"]%s*$",'') end
@@ -652,13 +652,21 @@ function lexicon.tokenize(input)
     end
   end
   local words=0
-  for position,chunk in input:gmatch('()([^%s]+)') do
+  for _, item in ipairs(directives.chunks(input)) do
+    local position,chunk=item.position,item.text
+    if item.literal then
+      local n=word(chunk,position-1)
+      n.tag,n.counted_word,n.literal,n.source,n.source_length=0x23,false,chunk,chunk,#chunk
+      n.literal_joined=item.joined
+      if item.joined then n.separator=1 end
+      records[#records+1]=n
+    else
     local leading=false
     while chunk~='' and chunk:sub(1,1):match('[%p]') and not chunk:sub(1,1):match('[._?]') do
       local c=chunk:sub(1,1)
       if (c=='#' or c=='/') and chunk:sub(2,2):match('%a') then break end
       if c=='`' then c="'" end
-      local n=boundary(c,leading and 0 or 0x20,position-1)
+      local n=boundary(c,(leading or item.joined) and 0 or 0x20,position-1)
       n.marker=0x20
       records[#records+1]=n;leading=true
       chunk=chunk:sub(2);position=position+1
@@ -672,6 +680,7 @@ function lexicon.tokenize(input)
       end
       if chunk~='' then
         local n=word(chunk,position-1)
+        if item.joined then n.separator=1 end
         records[#records+1]=n
         if n.counted_word then
           words=words+1
@@ -679,6 +688,7 @@ function lexicon.tokenize(input)
         end
       end
       for c in tail:gmatch('.') do records[#records+1]=boundary(c,0) end
+    end
     end
   end
   records[#records+1]=boundary('*',0x2A)
@@ -786,7 +796,7 @@ function lexicon.analyze(dictionary,input,options)
   local records,terminator,word_count=lexicon.tokenize(input)
   local i=1
   while i<=#records do
-    if records[i].kind==0x57 and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then
+    if records[i].kind==0x57 and not records[i].literal and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then
       i=decode(dictionary,records,i,options)
     else i=i+1 end
   end

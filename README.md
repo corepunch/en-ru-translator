@@ -60,6 +60,12 @@ dictionary's `инф)` subject label. Other readings remain available as alterna
 without a matching label, dictionary order is unchanged. Domain preferences
 apply within the grammatical reading selected for each word.
 
+Inline `{~text~}` spans preserve their contents verbatim, including spaces and
+case; `{~=text~}` spans transliterate their contents. Each span is one opaque
+record, so its contents bypass dictionary lookup and output capitalization.
+Spans must close with `~}` and cannot nest. Legacy list-layout directives are
+not part of this single-sentence interface and report a clear error.
+
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,

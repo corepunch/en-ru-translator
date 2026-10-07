@@ -61,6 +61,8 @@ function output.sentence(state,root)
         local c=b('source'); emit(' '..(c~=0 and string.char(c) or ''))
       elseif delimiter~=0x2A and delimiter~=0x5E and delimiter~=0x7C and b('source')~=0 then emit(string.char(b('source'))) end
       if b('marker')~=0 and r.next and get(r.next,'kind')==0x57 then r.next.separator=0x20 end
+    elseif r.literal then
+      emit((r.literal_joined and '' or ' ') .. r.literal)
     else
       if b('tag')~=0x3F then
         local partner=r.aux

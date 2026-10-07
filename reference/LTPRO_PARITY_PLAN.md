@@ -31,10 +31,15 @@ The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementat
   15 cases without corpus regressions. An additional 16-case capitalization
   matrix matches two identical native runs. This is not full-file or universal parity.
 
-Next: port the remaining analyzer/lookup branches (multi-word phrases, suffix
+- The post-reorder driver stages (numeric/reading pass, constituents with
+  T7, T8) are ported on a memory model; the Lua chain reproduces the DOS
+  memory after T8 for all 77 inputs and matches native code on mutation
+  fuzzing. Details: [handover](LTPRO_HANDOVER.md).
+
+Next: generation (`17AA:1D31`) and output (`0687:7427`) on the same memory
+model, and in parallel the remaining analyzer/lookup branches (multi-word phrases, suffix
 and prefix analysis, unknown words, annotations) so real input reaches the
-native passes, then capture and port the post-reorder driver stages
-(`151F:2740`, `1C3D:1B3F`, T8 `1986:000E`, `17AA:1D31`, and T7 `1313:1364`). Unobserved branches, global allocation state, later generation and
+native passes, then join the node-table and memory-model representations. Unobserved branches, global allocation state, later generation and
 document/file output remain explicit gaps. The production pipeline still uses
 the legacy parser and later passes; the native T1–T4 ports are development
 entry points. No milestone

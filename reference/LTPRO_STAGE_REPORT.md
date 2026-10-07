@@ -10,6 +10,14 @@ output-file formatting is not yet implemented in Lua.
 Addresses, frames, fields and harness pitfalls from this work are consolidated
 in [the native map](LTPRO_NATIVE_MAP.md).
 
+**Update (later the same day):** the post-reorder stages — the numeric and
+reading pass `151F:2740`, the constituent stage `1C3D:1B3F`, T7 `1449:0004`
+and T8 `1986:000E` — are ported on a byte-level memory model and reproduce
+the DOS memory after T8 for all 77 corpus inputs, and native results on
+randomized inputs. See [the handover](LTPRO_HANDOVER.md) for verification,
+modeled native quirks, gaps and the remaining work (generation, output,
+lexical analyzer).
+
 ## Executable evidence
 
 `tools/ltpro_trace.py` instruments disposable copies of the frozen LTPRO image.

@@ -38,6 +38,11 @@ readings remain empty, while `%` still transliterates. Each call builds fresh mu
 record list), `elements`, `tags`, `stages`, and `output` (CP866 text). Unsupported
 lexical branches raise errors.
 
+Duplicate dictionary keys retain file order; the first entry wins by default.
+API callers can set `dictionary_entry = function(key, entries) return index end`
+to choose a different entry. This also applies to redirects and suffix stems;
+the dictionary records are preserved and should be treated as read-only.
+
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,

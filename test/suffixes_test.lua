@@ -90,7 +90,9 @@ assert(result.candidate == 'busy' and result.native_suffix == 'ier' and result.f
 
 local duplicate = lexicon.from_bytes('book*Zкнига\nbook*Nкнижка\n')
 result, reason = lexicon.lookup(duplicate, 'books')
-assert(result == nil and reason == 'duplicate dictionary key: book')
+assert(result.record == duplicate.records[1] and reason == nil)
+result = assert(lexicon.lookup(duplicate, 'books', {dictionary_entry = function() return 2 end}))
+assert(result.record == duplicate.records[2])
 
 -- E and G try the unmodified truncated stem before the native auxiliary-e
 -- form; doubled consonants instead reduce once and preserve the repeated byte.

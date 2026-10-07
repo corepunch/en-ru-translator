@@ -92,11 +92,12 @@ local function ascii_lower(text)
   return (text:gsub("[A-Z]", function(c) return string.char(c:byte() + 32) end))
 end
 
-local function lookup(dictionary, key)
+local function lookup(dictionary, key, options)
   local records = dictionary.by_key[ascii_lower(key)]
   if not records then return nil end
-  if #records ~= 1 then return nil, "duplicate dictionary key: " .. key end
-  return records[1]
+  local index = options and options.dictionary_entry and options.dictionary_entry(key, records) or 1
+  assert(type(index) == 'number' and records[index], 'invalid dictionary entry selection: ' .. key)
+  return records[index]
 end
 
 local suffix_fields
@@ -232,10 +233,10 @@ end
 -- no applicable native ending, or (nil, reason) for a recognized but
 -- unsupported/ambiguous branch. Result.payload excludes a dictionary backref;
 -- callers must apply result.backref only when their native context allows it.
-function lexicon.lookup(dictionary, source)
+function lexicon.lookup(dictionary, source, options)
   assert(type(source) == "string" and source ~= "", "suffix lookup needs a source word")
   local word = ascii_lower(source)
-  local exact, exact_error = lookup(dictionary, word)
+  local exact, exact_error = lookup(dictionary, word, options)
   if exact then return decode_record(exact, source, word, nil, true) end
   if exact_error then return nil, exact_error end
 
@@ -243,7 +244,7 @@ function lexicon.lookup(dictionary, source)
     if #word > #row.ending and word:sub(-#row.ending) == row.ending then
       local choices = row.transform == "class" and class_candidates(word, row) or candidates(word, row)
       for _, candidate in ipairs(choices) do
-        local record, err = lookup(dictionary, candidate)
+        local record, err = lookup(dictionary, candidate, options)
         if err then return nil, err end
         if record then
           return decode_record(record, source, candidate, row, false)
@@ -687,19 +688,18 @@ local function decode(dictionary,records,index,options)
 		if kind == "X" then fresh.marker = 0x27 end
 		table.insert(records, index + 1, fresh)
 	end
-  local matches=dictionary.by_key[source:lower()]
+  local entry=lookup(dictionary,source,options)
   local aliases = {}
-  while matches and #matches == 1 and matches[1].value:sub(1,1) == '=' do
+  while entry and entry.value:sub(1,1) == '=' do
     assert(not aliases[source:lower()], 'cyclic dictionary redirect: '..source)
     aliases[source:lower()] = true
-    source = matches[1].value:sub(2)
+    source = entry.value:sub(2)
     node.source, node.source_length = source, #source
-    matches = dictionary.by_key[source:lower()]
+    entry = lookup(dictionary,source,options)
   end
   local value,backref
-  if matches then
-    assert(#matches==1,'native duplicate lookup is not ported: '..source)
-    value=matches[1].value
+  if entry then
+    value=entry.value
     local initial=value:sub(1,1)
     node.reading_state,node.tag,node.previous_tag=initial=='#' and 0 or 1,initial:byte(),initial:upper():byte()
     backref=value:match('\\(.*)')
@@ -707,7 +707,7 @@ local function decode(dictionary,records,index,options)
   end
   local derived, lookup_error
   if not value then
-    derived, lookup_error=lexicon.lookup(dictionary,source)
+    derived, lookup_error=lexicon.lookup(dictionary,source,options)
     if derived and derived.record then
       value=derived.record.value
       node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()

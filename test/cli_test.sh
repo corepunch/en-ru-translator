@@ -8,6 +8,8 @@ expected='Он - в доме.'
 [ "$(printf '%s' 'He is in the house.' | lua init.lua --data=LTGOLD)" = "$expected" ]
 [ "$(lua init.lua --exe LTGOLD/LTPRO.EXE --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'He is in the house.')" = "$expected" ]
 lua init.lua --help > "$scratch/help"
+lua init.lua --meanings 'I agree.' > "$scratch/meanings"
+rg -q 'agree' "$scratch/meanings"
 for option in --ltpro --debug --dict; do
   if lua init.lua "$option" 'Two books.' > "$scratch/out" 2> "$scratch/error"; then
     echo "Unexpectedly accepted retired option: $option" >&2

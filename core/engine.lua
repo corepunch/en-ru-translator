@@ -109,6 +109,12 @@ function engine.run(input, options)
   state.text,state.output=encoding.decode(result),result
   state.dictionary,state.lexical,state.root=dict,analyzed,analyzed.root
   state.stages,state.alternatives=stages,alternatives
+  if options.meanings then
+    state.meanings = output.meanings(state, analyzed.root)
+    state.meanings_text = encoding.decode(state.meanings)
+    if state.meanings ~= '' then result = result .. '\n\n' .. state.meanings end
+    state.text,state.output=encoding.decode(result),result
+  end
   return result,state
 end
 

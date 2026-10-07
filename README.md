@@ -19,6 +19,9 @@ lua init.lua --exe /path/to/LTPRO.EXE --dic /path/to/BASE.DIC --rus /path/to/BAS
 
 Input and output are UTF-8. Pass one sentence per invocation. `--help` lists
 options; `--` ends option parsing. Options also accept `--name=value`.
+Use `--meanings` (API: `meanings = true`) to append the meanings glossary.
+The API also exposes it as `state.meanings_text` (UTF-8) and `state.meanings`
+(CP866); sentence-only output remains the default.
 
 ## Lua API
 

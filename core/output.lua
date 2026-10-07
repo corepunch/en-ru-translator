@@ -143,8 +143,8 @@ function output.meanings(state,root)
     if get(r,'kind')==0x57 and (r.alternative or r.annotation) then
       local source=(r.source or ''):lower()
       chunks[#chunks+1]=string.format(a:string(0x5CE),a:word(0x042B)+count,source)
-      r.text=(r.text or ''):gsub('^,',''):gsub('^ ','')
-      chunks[#chunks+1]=r.annotation and string.format(a:string(0x5D9),r.annotation,r.text) or string.format(a:string(0x5E1),r.text)
+      local reading=(r.text or ''):gsub('^,',''):gsub('^ ','')
+      chunks[#chunks+1]=r.annotation and string.format(a:string(0x5D9),r.annotation,reading) or string.format(a:string(0x5E1),reading)
       local alt=r.alternative
       while alt do
         local value=output.reading(alt.text)

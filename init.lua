@@ -8,6 +8,7 @@ local usage = [[Usage: lua init.lua [--data DIR] [--exe FILE] [--dic FILE] [--ru
 
 Input and output are UTF-8. The translator accepts one sentence;
 it does not split multiple sentences. Asset options accept paths.
+--meanings appends a glossary of alternative meanings and annotations.
 ]]
 
 local options, words = {}, {}
@@ -24,6 +25,9 @@ while i <= #arg do
     os.exit(0)
   elseif not end_options and key == '--' then
     end_options = true
+    i = i + 1
+  elseif not end_options and key == '--meanings' then
+    options.meanings = true
     i = i + 1
   elseif not end_options and asset_options[key] then
     local value = arg[i + 1]

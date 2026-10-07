@@ -1,0 +1,102 @@
+[
+  {
+    "id": "holdout-001",
+    "group": "holdout",
+    "input": "I have books."
+  },
+  {
+    "id": "holdout-002",
+    "group": "holdout",
+    "input": "The organizations work."
+  },
+  {
+    "id": "holdout-003",
+    "group": "holdout",
+    "input": "They defined a rule."
+  },
+  {
+    "id": "holdout-004",
+    "group": "holdout",
+    "input": "The legally defined terms."
+  },
+  {
+    "id": "holdout-005",
+    "group": "holdout",
+    "input": "He studies English."
+  },
+  {
+    "id": "holdout-006",
+    "group": "holdout",
+    "input": "The dogs run."
+  },
+  {
+    "id": "holdout-007",
+    "group": "holdout",
+    "input": "Boxes are open."
+  },
+  {
+    "id": "holdout-008",
+    "group": "holdout",
+    "input": "He stopped."
+  },
+  {
+    "id": "holdout-009",
+    "group": "holdout",
+    "input": "He is running."
+  },
+  {
+    "id": "holdout-010",
+    "group": "holdout",
+    "input": "Fish meal is good."
+  },
+  {
+    "id": "holdout-011",
+    "group": "holdout",
+    "input": "The letter of credit is valid."
+  },
+  {
+    "id": "holdout-012",
+    "group": "holdout",
+    "input": "She cannot work."
+  },
+  {
+    "id": "holdout-013",
+    "group": "holdout",
+    "input": "BUYER-SELLER."
+  },
+  {
+    "id": "holdout-014",
+    "group": "holdout",
+    "input": "They said, \"Go.\""
+  },
+  {
+    "id": "holdout-015",
+    "group": "holdout",
+    "input": "This is a nice book."
+  },
+  {
+    "id": "holdout-016",
+    "group": "holdout",
+    "input": "What is this?"
+  },
+  {
+    "id": "holdout-017",
+    "group": "holdout",
+    "input": "We will deliver the goods tomorrow."
+  },
+  {
+    "id": "holdout-018",
+    "group": "holdout",
+    "input": "A book was on the table."
+  },
+  {
+    "id": "holdout-019",
+    "group": "holdout",
+    "input": "They are in the house."
+  },
+  {
+    "id": "holdout-020",
+    "group": "holdout",
+    "input": "Stop."
+  }
+]

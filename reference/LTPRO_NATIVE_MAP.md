@@ -282,7 +282,9 @@ verified against native code run from full DOS memory snapshots; see
 Generation, sentence output, appendix and sentence cleanup now have memory-model
 ports; see [the generation report](LTPRO_GENERATION_REPORT.md). Earlier output
 addresses in this map accidentally used load-image offsets as segment offsets.
-The document/file writer, startup state, the lexical analyzer beyond exact words
-(`0A4F:3B12`: multi-word phrases, suffixes `0x26EC6`, prefixes
-`ERPREFIX.PRE`, unknown words, annotations `{}`, macros `=`/`%`), and whether
-later stages read the stale `C5AE` after reorder.
+The snapshot-free CLI now connects the lexical and grammar ports to generation
+and output; see [the CLI report](LTPRO_CLI_REPORT.md). Remaining lexical work
+includes pattern-key phrases, unported suffix/prefix and contraction families,
+macros `=`/`%`, duplicate lookup and additional W selectors. General sentence
+segmentation and some downstream stack-sensitive branches remain unverified.
+DOS UI and exact file formatting are outside the requested CLI scope.

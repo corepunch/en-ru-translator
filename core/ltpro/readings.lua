@@ -7,7 +7,6 @@ local cases = {[0x82]=8,[0x84]=4,[0x8F]=32,[0x90]=2,[0x92]=16}
 
 function readings.decode(node, payload, options)
   options = options or {}
-  assert(tag(node)~='#', 'native unknown-word reading decoder is not ported')
   local p=1
   local function digit(at)
     local b=payload:byte(p)
@@ -30,7 +29,20 @@ function readings.decode(node, payload, options)
     end
   end
   local t=tag(node)
-  if has('XYx',t) then
+  if t=='#' then
+    if payload:sub(p,p)=='#' then p=p+1 end
+    local saved=node[0x72] or 0
+    if digit(0x72) and saved~=0 then node[0x72]=saved end
+    if not digit(0x77) then
+      local gender=({[0xAC]=1,[0xA6]=2,[0xE1]=0})[payload:byte(p)]
+      if gender~=nil then node[0x77]=gender;p=p+1 end
+    end
+    node[0x74]=3
+    local text=payload:sub(p)
+    assert(not text:match('^[=%%]'),'native lexical macros are not ported')
+    node[0x11C]=text
+    return p-1
+  elseif has('XYx',t) then
     digit(0x73);digit(0x72);digit(0x74)
     if t=='Y' then node[0x76]=8 end
   elseif t=='y' then digit(0x75);node[0x76]=2
@@ -70,7 +82,7 @@ function readings.decode(node, payload, options)
     else
       b=payload:byte(p)
       if t=='E' and ((node[0x6A] or 0)&0x3F)==1 and b and b>0x81 and b<0x93 then
-        if cases[b] then node[0x76]=cases[b] end
+        if cases[b] then node[0x79]=cases[b] end
         p=p+1
       end
       if t=='F' then node[0x0F],node[0x0C]=0x6E,0x45 end

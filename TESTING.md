@@ -81,7 +81,21 @@ python3 tools/ltpro_post_chain.py --cache .cache/ltpro-output --until meanings
 Only the memory trace command launches DOSBox-X. Old captures lack the output
 and meanings boundaries and must be refreshed for the longer chain. The chain
 matches all 77 DOS transitions in each of two fresh captures; production paragraph
-parity remains 44/77 because lexical analysis and startup/integration are incomplete.
+parity of the older default translator remains 44/77. The snapshot-free `--ltpro`
+path now passes 77/77 plus a new 20/20 capture set; see below.
+
+## Snapshot-free native CLI
+
+```sh
+python3 tools/ltpro_pipeline_probe.py
+python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/holdout_cases.json --reference test/ltpro/holdout_reference.json
+```
+
+Expected: **77/77** and **20/20**, zero errors. These start with raw text and the
+original assets, never snapshots. Both verify native capture provenance before
+comparing exact translated text. See [the CLI report](reference/LTPRO_CLI_REPORT.md)
+for the single-sentence scope and remaining analyzer gaps. The new Lua module tests
+are included automatically by `test/run_all.sh`.
 
 ## Fresh LTPRO compatibility corpus
 
@@ -159,7 +173,7 @@ Reference files are in `LTGOLD/refs/`.
 - Native reader, reorder, inflection, encoding, utilities, parser, token-stream, and paradigm tests pass.
 - `test/translator_test.lua` fails its old custom `The cat sat on the mat.` expectation after removing unsupported rules. The expected string has not been replaced with the current incorrect output; `./test/run_all.sh` therefore exits nonzero.
 - `demo/compare.lua`: `Passed 25/25` on current branch.
-- Fresh DOSBox-X corpus: **44/77 match**, 33 differ, zero runtime errors. Two complete
+- Older default translator, fresh DOSBox-X corpus: **44/77 match**, 33 differ, zero runtime errors. Two complete
   runs produced identical output bytes. All ten historical paragraphs were reproduced.
 - `lua demo/compare_ltpro.lua --cached`: `PASS=5 FAIL=5 MISSING=0`, improved from 3/10,
   using historical captures and original dictionaries; these ten cases are also
@@ -171,7 +185,7 @@ Reference files are in `LTGOLD/refs/`.
   production parser integration or full-program parity.
 - Native stage corpus: all 77 instrumented output files match the original bytes
   on both runs. The new T1 port matches 77 sentence-stage fixtures and 36 native
-  match events. Lexical vertical slices match 2/2; reading metadata matches 1,377/1,377.
+  match events. Lexical snapshots including subrules match 75/75; reading metadata matches 2,184/2,184.
 - T1 controlled-node instruction fixtures: 648/648, covering every selector,
   allocation/link edits and limit/failure paths. Selector 8 is selected synthetically;
   it has no supplied T1 rule. These are local behavior checks.

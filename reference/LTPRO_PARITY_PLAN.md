@@ -1,6 +1,6 @@
 # Plan for LTPRO parity
 
-Status: in progress, 2026-10-06. This is project research
+Status: CLI corpus parity achieved; broader parity in progress, 2026-10-07. This is project research
 documentation, not agent instructions. It supersedes the execution plan in the
 historical [PLAN.md](PLAN.md), while preserving those notes as evidence to recheck.
 
@@ -36,13 +36,12 @@ The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementat
   memory after T8 for all 77 inputs and matches native code on mutation
   fuzzing. Details: [handover](LTPRO_HANDOVER.md).
 
-Generation, sentence output, meanings and cleanup are now ported on the memory
-model. The downstream Lua chain matches 77/77 DOS cases on two captures; see the
-[generation report](LTPRO_GENERATION_REPORT.md). Production paragraph parity is
-still 44/77. Next: the full lexical analyzer, standalone startup state and the
-node-table/memory bridge; then the document/file lifecycle and broader coverage.
-The native development path still relies on snapshots and is not the production
-translator. No milestone below is complete merely because its current corpus passes.
+The snapshot-free native CLI now matches **77/77** original inputs and **20/20**
+new native captures. Lexical fields and subrules match all 75 single-sentence
+snapshots. Asset initialization and the node/memory bridge are implemented; see
+[the CLI report](LTPRO_CLI_REPORT.md). The measurements above describe earlier
+stage work and the older default translator. No milestone is universally complete
+merely because its current corpus passes.
 
 ## Objective and completion contract
 
@@ -56,19 +55,16 @@ assets and `/I INPUT /O OUTPUT /F- /B- /N` profile recorded in
 [the reference corpus](../test/ltpro/README.md). This fixes configuration drift;
 it does not redefine all other program modes as already supported.
 
-There are two completion milestones:
+The clarified target is **CLI translation text parity**: UTF-8 text in, translated
+text out, preserving native capitalization, punctuation, spacing and inline
+alternatives. DOS UI, process startup emulation, exact document/file formats,
+wrapping and CRLF are outside the requested scope. Runtime table/heap initialization
+is an implementation dependency and is now provided without snapshots.
 
-1. **Translation-engine parity for the frozen profile:** identical CP866 output
-   files, including the separate meanings appendix, capitalization, punctuation,
-   spaces, wrapping, and line endings. Exercise complete documents as well as
-   individual sentences, including state carried between sentences.
-2. **LTPRO compatibility across supported modes:** enumerate command/configuration
-   options and dictionary-loading modes from the executable, then verify each
-   supported mode and its observable file/error behavior. Any omitted mode or
-   unsupported input boundary remains an explicit gap in an unqualified parity claim.
-
-Keep the public UTF-8 translation API as a wrapper around the compatible byte-level
-engine. Its paragraph output is a separate API contract from an LTPRO output file.
+The 77-case and new 20-case sets pass completely. Remaining analyzer branches,
+general sentence segmentation and applicable translation profiles still require
+verification before an unqualified all-input parity claim. Keep the public UTF-8
+translation API around the compatible byte-level engine.
 DOS hardware, UI, and process timing are not translation-engine outputs. Failures
 involving malformed input, memory limits, or unstable native behavior need an
 explicit contract based on measurements; do not silently discard failing cases.

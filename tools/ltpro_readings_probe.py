@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from ltpro_native_probe import Machine,lua_value
 
-FIELDS=(0x0B,0x0C,0x0F,0x66,0x68,0x6A,0x72,0x73,0x74,0x75,0x76,0x77,0x78)
+FIELDS=(0x0B,0x0C,0x0F,0x66,0x68,0x6A,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79)
 
 def original(image,case,cache):
     m=Machine(image);m.cache=cache;m.r.update(cs=0xA4F,ip=0xC0F)
@@ -21,8 +21,8 @@ def original(image,case,cache):
 def main():
     image=Path('LTGOLD/LTPRO.EXE').read_bytes();rng=random.Random(1993)
     cases=[]
-    for tag in 'ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz':
-        for payload in ['слово','0слово','123слово','9999слово','ВПвb','Рпредлог','Бпрефикс','Пслово','Тслово']:
+    for tag in '#ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz':
+        for payload in ['слово','0слово','123слово','9999слово','ВПвb','Рпредлог','Бпрефикс','Пслово','Тслово','001Рслово','001Дслово','001Вслово','001Тслово','001Пслово']:
             for _ in range(3):
                 initial={str(at):rng.randrange(256) for at in FIELDS}
                 cases.append({'tag':tag,'payload':payload,'initial':initial})

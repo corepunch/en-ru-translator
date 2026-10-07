@@ -1,12 +1,11 @@
-local dictionary=require 'core.ltpro.dictionary'
-local lexical=require 'core.ltpro.lexical'
+local lexicon = require 'core.lexicon'
 local fixtures=dofile(assert(arg[1]))
 local file=assert(io.open(arg[2] or 'LTGOLD/BASE.DIC','rb'))
-local loaded=dictionary.from_bytes(file:read('*a'));file:close()
+local loaded=lexicon.from_bytes(file:read('*a'));file:close()
 local passed,failed=0,0
 for _,case in ipairs(fixtures) do
   local differences={}
-  local ok,state=pcall(lexical.analyze,loaded,case.input)
+  local ok,state=pcall(lexicon.analyze,loaded,case.input)
   if not ok then differences[1]=tostring(state)
   else
     if state.tags~=case.cache then differences[#differences+1]='tag cache '..state.tags..' / '..case.cache end

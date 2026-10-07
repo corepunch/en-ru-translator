@@ -8,6 +8,7 @@ import collections
 import json
 import re
 import struct
+import subprocess
 from pathlib import Path
 from capstone import Cs,CS_ARCH_X86,CS_MODE_16
 from capstone.x86 import X86_OP_IMM,X86_OP_MEM
@@ -63,7 +64,7 @@ def main():
     image=Path('LTGOLD/LTPRO.EXE').read_bytes()
     stages=json.loads(Path('test/ltpro/stages.json').read_text())
     events=[(case['id'],stage) for case in stages['cases'] for stage in case['snapshots'] if stage['stage']=='T1-match']
-    source=Path('core/ltpro/dispatch.lua').read_text()
+    source=subprocess.check_output(['lua', 'demo/extract_dispatch.lua'], text=True)
     families=[];all_targets=set();selector_count=0
     for name,body in re.findall(r'\["([^"\n]+)"\] = \{(.*?)\n  \},',source,re.S):
         lower,upper,table,count,size=FAMILIES[name]

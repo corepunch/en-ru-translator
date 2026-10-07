@@ -1,5 +1,8 @@
 # LTPRO / LTGOLD comparison — 2026-10-06
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 The production translator is **not yet one-to-one** with either executable.
 Recovered grammar and morphology data now match LTPRO. Isolated Lua ports of
 reordering and four morphology helpers pass instruction-level comparisons against
@@ -69,9 +72,9 @@ alternate adjective table. All **43/43 suffix records** match. Five custom rules
 were removed: the `mat` rewrite, `[NR]EP -> .1`, and existential permutations
 `yTAAND`, `yTAND`, `yTND`. The custom `.1` replacement behavior was also removed.
 
-`core/ltpro/dispatch.lua` records 410 selector-to-address entries. These are
+`demo/extract_dispatch.lua` records 410 selector-to-address entries. These are
 table-specific handler selectors, not priorities or universal constituent types.
-`core/ltpro/guards.lua` implements the T7 class switch: A selects the alternate
+`core/reorder.lua` implements the T7 class switch: A selects the alternate
 table, 18 other classes select the main table, and other inputs select neither.
 This selection helper is not yet integrated into the legacy parser.
 
@@ -106,7 +109,7 @@ These arrays are followed by other pointer arrays, not zero sentinels.
 | Perfective verbs | `0x2C5E0` | `0x568E2` | 113 |
 
 All **431/431 records** match between binaries and the generated
-`core/ltpro/morphology.lua`. Nouns were already correct. Adjective suffixes were
+`core/generation.lua`. Nouns were already correct. Adjective suffixes were
 correct but lost their cut field; 36 entries do not cut two bytes. The imperfective
 list skipped placeholders, shifted indices, and eventually included unrelated
 spelling patterns. It is regenerated with all placeholders and cut lengths.
@@ -120,7 +123,7 @@ adjective and imperfective cuts. Its higher-level behavior remains legacy code.
 
 ### Reorder pass
 
-`core/ltpro/reorder.lua` ports LTPRO `0x1619D` / LTGOLD `0x1CAD8`, including vector
+`core/reorder.lua` ports LTPRO `0x1619D` / LTGOLD `0x1CAD8`, including vector
 construction, 13 handler predicates, one 56-rule T5/T6 scan, exact tag matching,
 first eligible match, span advancement, swaps, linked-node updates, and cleanup.
 `nodes.lua` retains numeric field offsets for state whose full meaning is unknown.
@@ -136,7 +139,7 @@ Sparse token metadata is shifted and swapped alongside tokens.
 
 ### Morphology helpers
 
-`core/ltpro/inflect.lua` ports these functions with CP866 input and output:
+`core/generation.lua` ports these functions with CP866 input and output:
 
 | Helper | LTPRO | LTGOLD |
 |---|---:|---:|
@@ -180,9 +183,9 @@ Evidence: [grammar instructions](LTPRO_EVIDENCE.asm) and
 
 | Module | Original entry | Differential cases | Executed instructions |
 |---|---|---:|---:|
-| `core/ltpro/matcher.lua` | `1313:0A67`, file `0x17597` | 4,780/4,780 | 1,168,859 |
-| `core/ltpro/replacement.lua` | `1313:01B4`, file `0x16CE4` | 2,048/2,048 | 599,068 |
-| `core/ltpro/constituent_matcher.lua` | `1C3D:0135`, file `0x1FF05` | 1,403/1,403 | 201,460 |
+| `core/matching.lua` | `1313:0A67`, file `0x17597` | 4,780/4,780 | 1,168,859 |
+| `core/matching.lua` | `1313:01B4`, file `0x16CE4` | 2,048/2,048 | 599,068 |
+| `core/matching.lua` | `1C3D:0135`, file `0x1FF05` | 1,403/1,403 | 201,460 |
 
 These are isolated LTPRO checks, not full translation or LTGOLD grammar checks.
 The fixtures cover all 563 lexical-pattern records and 83 T8 records, including

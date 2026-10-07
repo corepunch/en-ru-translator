@@ -1,124 +1,64 @@
-local dbg = require "core.dbg"
-local dictionary_store = require "dictionary_store"
-local translator = require "core.translator"
+#!/usr/bin/env lua
+-- UTF-8 command-line boundary for the single-sentence translator.
+package.path = './?.lua;./?/init.lua;' .. package.path
 
--- The entry point is an imperative shell: it owns configuration, files, CLI
--- arguments, stdout, and exit status while translation remains in modules.
-local input_sentence = "You are standing in an open field west of a white house, with a boarded front door."
-local ltpro_mode = false
-local ltpro_options, input_words = {}, {}
+local engine = require 'core.engine'
+local usage = [[Usage: lua init.lua [--data DIR] [--exe FILE] [--dic FILE] [--rus FILE] [sentence]
+       printf '%s' 'English sentence.' | lua init.lua [asset options]
 
-local function load_config(path)
-  local file = io.open(path, "r")
-  if not file then return end
-  for line in file:lines() do
-    line = line:match("^%s*(.-)%s*$") or ""
-    if line ~= "" and line:sub(1, 1) ~= "#" and line:sub(1, 1) ~= ";" then
-      local key, value = line:match("^(%w+)%s*=%s*(.+)$")
-      if key == "diag" then
-        for category in value:gmatch("[^,%s]+") do dbg.enable(category) end
-      elseif key == "diag_file" then
-        dbg.set_file(value)
-      elseif key == "debug" then
-        dbg.set_level(tonumber(value) or 1)
-      end
-    end
-  end
-  file:close()
-end
+Input and output are UTF-8. The translator accepts one sentence;
+it does not split multiple sentences. Asset options accept paths.
+]]
 
-local overlay_dicts = {}
-for _, value in ipairs(arg or {}) do
-  if value == "--ltpro" then ltpro_mode = true end
-end
-
-local function set_ltpro_asset(option, value)
-  assert(value and value ~= "", "missing value after " .. option)
-  if option == "--data" then ltpro_options.data_dir = value
-  elseif option == "--exe" then ltpro_options.executable = value
-  elseif option == "--dic" then ltpro_options.dictionary = value
-  elseif option == "--rus" then ltpro_options.russian = value end
-end
-
-local args = arg or {}
+local options, words = {}, {}
+local asset_options = {
+  ['--data'] = 'data_dir', ['--exe'] = 'executable',
+  ['--dic'] = 'dictionary', ['--rus'] = 'russian',
+}
+local end_options = false
 local i = 1
-while i <= #args do
-  local value = args[i]
-  if value == "--debug" then
-    dbg.set_level(1)
-  elseif value:match("^%-%-debug=(%d+)$") then
-    dbg.set_level(tonumber(value:match("^%-%-debug=(%d+)$")))
-  elseif value:match("^%-%-diag=(.+)$") then
-    for category in value:match("^%-%-diag=(.+)$"):gmatch("[^,%s]+") do dbg.enable(category) end
-  elseif value:match("^%-%-diag%-file=(.+)$") then
-    dbg.set_file(value:match("^%-%-diag%-file=(.+)$"))
-  elseif value:match("^%-%-config=(.+)$") then
-    load_config(value:match("^%-%-config=(.+)$"))
-  elseif value:match("^%-%-dict=(.+)$") then
-    table.insert(overlay_dicts, value:match("^%-%-dict=(.+)$"))
-  elseif value == "--ltpro" then
-    ltpro_mode = true
-  elseif value == "--help" or value == "-h" then
-    io.write("Usage: lua init.lua [legacy options] [sentence]\n",
-      "       lua init.lua --ltpro [--data DIR] [--exe FILE] [--dic FILE] [--rus FILE] [sentence]\n",
-      "The LTPRO path translates one sentence. With no sentence argument it reads stdin.\n")
+while i <= #arg do
+  local key = arg[i]
+  if not end_options and (key == '--help' or key == '-h') then
+    io.write(usage)
     os.exit(0)
-  elseif ltpro_mode and (value == "--data" or value == "--exe" or value == "--dic" or value == "--rus") then
+  elseif not end_options and key == '--' then
+    end_options = true
     i = i + 1
-    set_ltpro_asset(value, args[i])
-  elseif ltpro_mode and value:match("^%-%-[^=]+=") then
-    local option, asset = value:match("^(%-%-[^=]+)=(.*)$")
-    assert(option == "--data" or option == "--exe" or option == "--dic" or option == "--rus",
-      "unknown LTPRO option: " .. option)
-    set_ltpro_asset(option, asset)
-  elseif value:sub(1, 2) ~= "--" then
-    input_sentence = value
-    input_words[#input_words + 1] = value
-  end
-  i = i + 1
-end
-
-if ltpro_mode then
-  assert(#overlay_dicts == 0,
-    "--dict overlays are supported by the legacy path; use --dic with --ltpro")
-  local input = table.concat(input_words, " ")
-  if input == "" then input = io.stdin:read("*a") or "" end
-  local pipeline = require "core.ltpro.pipeline"
-  local ok, output = pcall(pipeline.translate, input, ltpro_options)
-  if not ok then
-    io.stderr:write(tostring(output), "\n")
-    os.exit(1)
-  end
-  print(output)
-  os.exit(0)
-end
-
-_G.TRANSLATOR_DEBUG = dbg.level > 0
-dbg.log(1, "Debug level:", dbg.level)
-
-local english, russian = dictionary_store.load(nil, nil, table.unpack(overlay_dicts))
-
--- Load overlay .RUS files for domain-specific paradigm data
--- Convention: for each overlay DIC, check if a matching RUS file exists
-local overlay_rus = {}
-for _, dict_path in ipairs(overlay_dicts) do
-  local rus_path = dict_path:gsub("%.DIC$", ".RUS"):gsub("%.dic$", ".rus")
-  if rus_path ~= dict_path then
-    local f = io.open(rus_path, "r")
-    if f then
-      f:close()
-      overlay_rus[#overlay_rus+1] = rus_path
-    end
+  elseif not end_options and asset_options[key] then
+    local value = arg[i + 1]
+    assert(value and value ~= '', 'missing value after ' .. key)
+    options[asset_options[key]] = value
+    i = i + 2
+  elseif not end_options and key:match('^%-%-[^=]+=') then
+    local option, value = key:match('^(%-%-[^=]+)=(.*)$')
+    assert(asset_options[option], 'unknown option: ' .. option)
+    assert(value ~= '', 'missing value after ' .. option)
+    options[asset_options[option]] = value
+    i = i + 1
+  elseif not end_options and key:sub(1, 1) == '-' then
+    io.stderr:write('Unknown option: ', key, '\n', usage)
+    os.exit(2)
+  else
+    words[#words + 1] = key
+    i = i + 1
   end
 end
-if #overlay_rus > 0 then
-  dictionary_store.load_overlay_rus(russian, table.unpack(overlay_rus))
+
+local input
+if #words > 0 then
+  input = table.concat(words, ' ')
+else
+  input = io.stdin:read('*a') or ''
+end
+if not input:match('%S') then
+  io.stderr:write(usage)
+  os.exit(2)
 end
 
-local engine = translator.new(english, russian)
-local output, err = engine:translate(input_sentence)
-if not output then
-  io.stderr:write(tostring(err), "\n")
+local ok, result = pcall(engine.translate, input, options)
+if not ok then
+  io.stderr:write(tostring(result), '\n')
   os.exit(1)
 end
-print(output)
+io.write(result, '\n')

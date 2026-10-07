@@ -1,5 +1,8 @@
 # LTPRO generation and output — 2026-10-07
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 This continues [issue #3](https://github.com/corepunch/en-ru-translator/issues/3)
 after the T5–T8 port. Generation, sentence text, the meanings appendix and
 sentence-memory cleanup now run in Lua on the native memory model. The production
@@ -68,7 +71,7 @@ heap or semantic DS bytes were added to the exclusions.
 From repository root, with the original assets, Lua, Python/Capstone and DOSBox-X:
 
 ```sh
-lua test/ltpro_generation_test.lua
+lua test/generation_test.lua
 python3 tools/ltpro_function_probe.py 17AA:1D31 --words 2 --stages generation
 python3 tools/ltpro_function_probe.py 1E71:05FB --words 9 --stages generation
 python3 tools/ltpro_function_probe.py 1E71:02AC --words 6 --stages generation

@@ -1,5 +1,8 @@
 # LTPRO parity handover — updated 2026-10-07
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 This records where the native-parity port stands after the post-reorder
 stages (T5–T8) were completed, how it is verified, and what remains before
 an LTPRO output file can be produced by Lua alone. Addresses and data
@@ -25,7 +28,7 @@ The driver `0687:05D5` runs, per sentence:
 | Sentence cleanup | `0687:0A50` | `records.clear` | native comparison in 200 mutated chains |
 
 The post-reorder ports run on a byte-level model of DOS memory
-(`core/ltpro/memory.lua`): far pointers keep their segment:offset form,
+(`core/memory.lua`): far pointers keep their segment:offset form,
 strings are split in place, records are allocated by a port of the Borland
 heap at the native addresses, and BASE.RUS is read through emulated DOS
 handle 5. Running the Lua numeric, constituent and T8 stages back to back
@@ -69,7 +72,7 @@ Lua is then compared with that native code:
 | `tools/ltpro_post_fuzz.py` | randomized record tags/fields, constituent elements and dictionary readings; native harness vs Lua on all non-stack memory |
 | `tools/ltpro_heap_fuzz.py` | random malloc/calloc/free sequences vs the native heap |
 | `tools/ltpro_coverage.py` | native instruction coverage of each stage over the corpus |
-| `test/ltpro_post_stages_test.lua` | asset-free unit checks (memory model, tokenizer state, qsort tie order) |
+| `test/post_stages_test.lua` | asset-free unit checks (memory model, tokenizer state, qsort tie order) |
 
 Function-level results on the corpus (all pass): `151F:0B6B` 300,
 `043A:074D/0850` 187, `1FCD:007F/057B/1031` 185–187, `151F:028B` 86,
@@ -106,7 +109,7 @@ python3 tools/ltpro_post_chain.py
 python3 tools/ltpro_function_probe.py 1986:000E --words 3
 python3 tools/ltpro_post_fuzz.py --start numeric --stages constituent T8 --cases 300
 python3 tools/ltpro_heap_fuzz.py
-lua test/ltpro_post_stages_test.lua
+lua test/post_stages_test.lua
 ```
 
 ## Native behaviour that the ports reproduce deliberately
@@ -166,7 +169,7 @@ The last routine frees sentence memory; it does not wrap output files.
 
 ## Snapshot-free CLI continuation — 2026-10-07
 
-The new `lua init.lua --ltpro` entry matches **77/77 original outputs and 20/20
+The new `lua init.lua` entry matches **77/77 original outputs and 20/20
 new captures**, starting with raw input. Static tables, heap and BASE.RUS index
 come from assets through `initialize.lua`; `bridge.lua` connects node tables to
 memory records. Lexical comparisons now include subrules and match 75/75

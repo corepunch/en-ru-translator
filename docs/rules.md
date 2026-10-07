@@ -11,17 +11,16 @@ The examples below distinguish four kinds of evidence:
   (CP866), especially Appendix 1.
 - **Native:** behavior recovered from executable instructions. The isolated reorder
   implementation has also been checked against original instructions in both binaries.
-- **Lua:** behavior of the current production parser/compiler; it can be an approximation.
+- **Lua:** behavior implemented by the recovered Lua engine.
 - **Unresolved:** a spelling or use is known, but its complete native meaning is not.
 
 The current baseline is **LTPRO**. The native matcher/replacement ports described
-below are isolated modules; the production translator still uses the legacy parser. LTGOLD differs in one recovered grammar record;
+below share `core.matching` and run in the production engine. LTGOLD differs in one recovered grammar record;
 see [the comparison and evidence](../reference/LTPRO_COMPARISON.md). This reference
 supersedes the older syntax and “flag” explanations previously in this file.
 
 Jump to: [worked example](#start-here-what-does-zvn---nn-mean),
 [native semantics](#verified-native-matching-and-replacement),
-[legacy patterns](#pattern-notation-for-the-general-matcher),
 [tags](#grammatical-tag-dictionary), [actions](#replacementaction-notation),
 [symbols](#punctuation-and-symbols-what-they-do-not-mean),
 [reordering](#reordering-t5t6-digits-are-sequential-swaps),
@@ -93,7 +92,7 @@ use the original convention.
 
 ### Lexical matching: T1–T4, cleanup and T7
 
-[The lexical matcher port](../core/ltpro/matcher.lua) implements the notation used
+[The lexical matcher port](../core/matching.lua) implements the notation used
 by the recovered tables. The executable's routine is at file offset `0x17597`.
 
 | Pattern | Confirmed operation |
@@ -108,7 +107,7 @@ by the recovered tables. The executable's routine is at file offset `0x17597`.
 | `<DA>[VN]` | Locate the first cached tag in the anchor class, then check the intervening tags against D/A. |
 | ``<D>`word` `` | Locate the first node matching the lexical word test; check intervening cached tags against D. |
 | `<D>!text!` | Locate the first node whose text contains `text)`; check intervening cached tags against D. |
-| `<$>V` | Locate the anchor without restricting the intervening tags. This is implemented by the native port, unlike the legacy parser. |
+| `<$>V` | Locate the anchor without restricting the intervening tags. The search uses the cached tag string. |
 | `<>V` | An empty span class also imposes no intervening-tag restriction in this native routine. |
 | `~<D>V` | Intervening tags must exclude D, and the span **must not be empty**. |
 | Bare `$` | Try the remainder of the pattern at the current position recursively; if it fails, skip one node and try the remainder once more. It is not an arbitrary-length wildcard. |
@@ -135,7 +134,7 @@ states in which it differs from the nodes can be reproduced.
 
 ### Native replacement actions
 
-[The replacement port](../core/ltpro/replacement.lua) implements file offset
+[The replacement port](../core/matching.lua) implements file offset
 `0x16CE4`. Its return value indicates whether a space action requested subsequent
 vector compaction. A space does not remove the node immediately.
 
@@ -165,11 +164,10 @@ These operations establish what the bytes do, but not every linguistic role of t
 resulting internal tags. For example, confirming that `^` writes a tag byte does
 not establish all downstream constituent behavior attached to that state.
 
-### T8 has a different matcher
+### T8 uses a constituent view
 
-[The T8 port](../core/ltpro/constituent_matcher.lua), file offset `0x1FF05`, reads
-12-byte constituent records and a separate tag cache at `DS:C7B6`. It is not the
-lexical-node matcher. Classes, span anchors, negation and literal boundary tags
+[The T8 port](../core/matching.lua), file offset `0x1FF05`, reads
+12-byte constituent records and a separate tag cache at `DS:C7B6`. The shared interpreter uses a constituent view here. Classes, span anchors, negation and literal boundary tags
 have corresponding behavior, but `.` accepts one constituent and preserves pending
 negation; bare `$` is an ordinary tag test. `[$]` is also an ordinary class there.
 None of the 83 recovered T8 patterns contains a lexical-word test.
@@ -185,75 +183,7 @@ The executable also contains paths for lexical alternatives **inside** `[]` or
 `<>`; none of the 702 extracted records uses them. Those paths have extra-slot or
 loop-bound dependencies that are not yet modeled. The ports reject these extensions
 explicitly. Malformed patterns, native buffer overflows and arbitrary uninitialized
-memory are outside the tested input contract. Full handler semantics and integration
-with the native analyzer/compiler remain unfinished.
-
-## Pattern notation for the general matcher
-
-**The remainder of this section describes the legacy production parser.** Use
-the native section above as the LTPRO contract. This table describes the current Lua
-implementation. It is **not** a specification of all native edge cases. T5/T6 use
-a different, literal-tag matcher, described below.
-
-| Notation | How to read it | Example |
-|---|---|---|
-| `N` | One token matching tag N. | `AN` matches adjective then noun. |
-| `[VN]` | One token matching any listed class. No ranges or regular-expression escapes. | `Z[VN]` matches Z followed by V or N. |
-| `<D>` | A span of zero or more D tokens, consumed as needed to reach the following pattern. | `N<D>V` can cover `N V`, `N D V`, or `N D D V`. |
-| `<DK,>` | The span may contain any mixture of the listed classes. The comma is a member, not a list separator. | `N<DK,>V` permits D, K, and comma tokens between N and V. |
-| `~N` | Negate the next match atom. | `~N` accepts a present token that does not match N. |
-| `~[VN]` | One token matching neither listed class. | It is not “anything other than the two-token sequence VN.” |
-| `~<VXY>` | A span whose consumed tokens do not match V, X, or Y. | Used to search across intervening material while excluding verb classes. |
-| `*` | Zero-width sentence/stream boundary in the Lua matcher: start or after the last token. | `*Z[?#]*` requires a complete two-token stream in Lua. |
-| Backticks | A lexical English-word test. | `` `if` `` and `` `then` `` constrain words rather than just grammatical classes. |
-| Other ordinary characters | Token classes or punctuation, unless the native matcher gives them special handling. | `N-N` is noun, hyphen, noun. |
-
-The examples with spaced tags are diagrams, not strings to paste into a ruleset.
-Do not add formatting spaces to a pattern; spaces are not ignored by the Lua reader.
-
-### `[]` versus `<>`, step by step
-
-```text
-Pattern       Input tags       Reading
-N[D]V         N D V            One D is required.
-N[D]V         N V              Fails: the required D is missing.
-N<D>V         N V              The D span can be empty.
-N<D>V         N D D V          The span can cover both D tokens.
-N<D>V         N A V            Fails at this starting position: A is not D or V.
-N[DV]         N D              One D-or-V token follows N.
-N[DV]         N V              The other alternative also matches.
-```
-
-These examples assume unambiguous tokens and a match starting at the shown N.
-A rule without boundary tests may match only part of a longer stream.
-
-### Limits of the current Lua pattern engine
-
-The span notation resembles a small regular-expression language, but the Lua
-implementation is **not a general regex engine**:
-
-- It starts an angle-bracket span with zero consumed tokens and installs one
-  fallback that can consume eligible tokens when a subsequent match fails.
-  A later span replaces that fallback; arbitrary backtracking is not implemented.
-- Its matching and position-collection paths differ on some failed class/literal
-  matches. Trailing spans and boundaries also have edge cases. Do not infer a
-  complete regex contract from the simple examples above.
-- A backticked word is currently tested by equality with the dictionary's packed
-  lexical value. It is not a reliable test of original source spelling after
-  earlier rules have changed that token.
-- `*` inside a class such as `[,*]` goes through class matching, not the standalone
-  boundary branch. Native boundary behavior still needs a complete port.
-- `<$>` appears frequently in native rules, but the Lua implementation treats `$`
-  as a class member there; it does **not** implement it as an arbitrary-token
-  wildcard. The verified native port implements the separate `$` operations described above.
-  Empty `<>` is also not implemented as the native unrestricted span here.
-- `!` is a native matcher operator, not a fully implemented Lua operator.
-  The native pattern `NI!мес!` exists and searches `+0x11C` for `мес)`.
-  It is not an instruction to insert “мес”.
-
-Native matcher dispatch confirms special paths for `!`, `$`, `<`, `[`, backtick,
-and `~`. Their recovered contracts are now implemented in isolated native modules,
-but still need to be integrated into the production parser.
+memory are outside the tested input contract. Corpus coverage does not establish every handler branch or every lexical path.
 
 ## Grammatical tag dictionary
 
@@ -337,31 +267,9 @@ regular-expression replacement string and not a newly generated tag string.
 An entire `[VN]` consumes one instruction; a backticked payload is one instruction.
 Boundary/span atoms use alignment instructions. Literal spaces in actions matter.
 
-The following is the **current Lua behavior**. Compare it with the native-action table above: the production parser has not yet
-been switched to the new node-based replacement routine.
-
-| Action | Lua behavior | Caution |
-|---|---|---|
-| `N`, `V`, `A`, etc. | Request that lexical reading through the tag resolver. | Not arbitrary retagging or creation of missing dictionary forms. |
-| `.` | Leave this token unchanged. | Explicit keep operation. |
-| `@` | Resolve using the matched pattern operand/class; used as alignment for standalone `*`. | Often looks like “keep”, but can select a reading from a class. Not interchangeable with `.` everywhere. |
-| `$` | Alignment for an angle-bracket span; otherwise a keep operation in Lua. | Not a numbered capture or a regex `$1` reference. Native span semantics are incomplete. |
-| A literal space | Suppress this token; silent tokens are subsequently removed. | Legacy exception: an `X2…` future auxiliary becomes `q`. |
-| Backticked payload | Replace the current token with the payload, encoded to CP866. | Not insertion of an extra token. Include the needed tag in the payload. |
-| `j` | Replace with a silent clause marker `j`. | Native tag writes and downstream structural effects are not fully reproduced here. |
-| `\|` | Replace with separator token `\|`. | Structural, not an alternation operator. |
-| `&` | Ask for the C reading. | This does not recreate all native conjunction state. |
-| `#` | Restore a designation using saved source spelling, prefixed with `#`. | Relevant to an article-like “a” used as a designator. |
-| `^` | Currently keep/no-op. | Native replacement writes tag ^; downstream structural behavior remains incomplete here. |
-| `=`, `;` | Currently keep/no-op. | Native replacement writes these tag bytes; they are not equality or instruction separators. |
-| Digits | Sequential swaps **in the T5/T6 reorder pass only**. | Not capture references or general rewrite instructions. |
-| Other punctuation | Falls through to lexical-tag selection in Lua. | Presence in an action is not proof Lua synthesizes that punctuation correctly. |
-
-A short action can intentionally leave the remaining matched context untouched.
-For example, the real T2 rule `Z[bY{]` → `N` supplies one instruction for a two-token
-pattern: it requests N for Z, while the second token is only context in Lua.
-An absent action, `nil`, and an empty string must not be assumed to mean “this rule
-has no effect”: the native handler can still perform work.
+The verified native-action table above describes the shared production replacement
+routine. A short action may leave trailing matched context untouched. An absent
+action does not imply an inert rule: its handler can still mutate state.
 
 ### Real rewrite examples
 
@@ -410,8 +318,7 @@ meaning; the payload alone is not a complete specification of the rule.
 
 The pattern covers three positions: opening parenthesis, designation, closing
 parenthesis. It is not an optional group. The action contains three characters
-representing requested structural changes; the legacy Lua resolver does not fully
-implement the native brace-marker transformation.
+representing structural changes applied by the native replacement routine.
 
 ## Punctuation and symbols: what they do not mean
 
@@ -476,7 +383,7 @@ Similarly, the real T6 `NN` → `2` swaps two nouns. A short digit string does n
 delete the remaining positions. T6 `A-N` has an empty action string plus handler
 `0x2D`; absence of swaps does not make that record inert.
 
-The isolated [native reorder port](../core/ltpro/reorder.lua) includes the recovered
+The [native reorder implementation](../core/reorder.lua) includes the recovered
 handler predicates and state updates. The production parser still adapts packed
 Lua lexical strings and W phrases approximately. For example, native handler 2
 changes the final tag to A and still performs the swaps; the legacy W adaptation
@@ -523,7 +430,7 @@ Binary layouts, useful when extending extraction:
 - T7/T8: pattern far pointer (4 bytes), scalar (2 bytes), handler (2 bytes).
   The scalar is not an action pointer.
 
-The [dispatch data](../core/ltpro/dispatch.lua) records selector-to-code addresses.
+The [dispatch data](../demo/extract_dispatch.lua) records selector-to-code addresses.
 It is not a dictionary of fully implemented handler meanings. Storing a handler
 ID on a Lua token likewise does not execute the native handler.
 
@@ -553,22 +460,14 @@ or final endings by itself; those require handler state and morphology.
 Useful checks from the repository root:
 
 ```sh
-lua demo/audit_rules.lua                 # Compare extracted data with LTPRO.
-lua init.lua "Your example." --debug=2   # Inspect current Lua behavior.
-lua demo/compare.lua                     # Stored Lua behavior regression.
-lua demo/compare_ltpro.lua --cached       # Compare historical executable captures.
-python3 tools/ltpro_compare.py            # Compare 77 fresh executable captures.
-./test/run_all.sh                        # Standard tests; known failure described below.
+lua demo/audit_rules.lua
+sh test/run_all.sh
+python3 tools/ltpro_pipeline_probe.py
 ```
 
-As of 2026-10-06, extraction passes 702/702 records, the Lua sentence regression
-passes 25/25, and the historical executable comparison matches 5/10 sentences.
-The [fresh DOSBox-X corpus](../test/ltpro/README.md) matches 29/77, with 48 differences
-and no runtime errors; two runs reproduced identical native output for every input.
-The standard runner still fails the old custom “The cat sat on the mat.” expectation.
-Do not replace a reference with current output merely to make a test pass, or use
-extraction success as proof of execution parity. See [TESTING.md](../TESTING.md)
-for the current limitations and isolated native-instruction checks.
+Do not replace references with current output to make tests pass. Extraction
+success does not prove execution parity; see [testing](../TESTING.md) for native
+instruction checks and captured stage/corpus comparisons.
 
 ## Evidence and remaining work
 
@@ -576,16 +475,12 @@ for the current limitations and isolated native-instruction checks.
 |---|---|
 | [Generated grammar](../core/rules.lua) and [binary reader](../demo/ltpro_binary.lua) | Exact records, table membership, actions and metadata. |
 | Supplied `LTGOLD/dic.txt`, Appendix 1 and dictionary examples | Historical grammatical code meanings; local ignored source, not a complete rule-language specification. |
-| [Current parser](../core/parser.lua) and [compiler](../core/compiler.lua) | What the production Lua implementation does today. |
-| [Native lexical matcher](../core/ltpro/matcher.lua), [replacement](../core/ltpro/replacement.lua), and [T8 matcher](../core/ltpro/constituent_matcher.lua) | New isolated ports of native grammar operations; production integration is unfinished. |
-| [Native reorder](../core/ltpro/reorder.lua) and [guard helpers](../core/ltpro/guards.lua) | Recovered reorder behavior, T7 table selection and endpoint direction. |
+| [Native lexical matcher](../core/matching.lua), [replacement](../core/matching.lua), and [T8 matcher](../core/matching.lua) | Shared production interpreter for table and memory views. |
+| [Native reorder](../core/reorder.lua) and [guard helpers](../core/reorder.lua) | Recovered reorder behavior, T7 table selection and endpoint direction. |
 | [Executable evidence](../reference/LTPRO_EVIDENCE.asm) | Selected original instructions supporting the current audit. |
 | [Matcher/replacement instructions](../reference/LTPRO_MATCHER_EVIDENCE.asm) | Original routines, string-comparison helpers, and CP866 byte classifier used for the new ports. |
 | [LTPRO comparison](../reference/LTPRO_COMPARISON.md) | Binary identities, differences, verified ports and remaining parity gaps. |
 
-The main missing pieces are native lexical/constituent state construction, the
-remaining handler bodies, orchestration and integration into the production pipeline,
-plus the unused embedded-alternative matcher paths. Matching/replacement primitives
-now have instruction-tested ports; this does not establish complete translation parity. Internal
-classes marked unresolved above should be documented further when those routines
-are decoded, rather than assigned meanings from their letter shapes.
+The production engine composes these stages. Remaining gaps include unsupported
+lexical macros, suffix paths and unused embedded-alternative matcher paths.
+Corpus parity is bounded evidence, not proof of complete translation equivalence.

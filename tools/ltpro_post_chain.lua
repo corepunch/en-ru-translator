@@ -1,12 +1,12 @@
 -- Lua side of ltpro_post_chain.py: run the post-reorder stage ports.
-local memory = require 'core.ltpro.memory'
-local senses = require 'core.ltpro.senses'
-local constituents = require 'core.ltpro.constituents'
-local seventh = require 'core.ltpro.seventh_pass'
-local eighth = require 'core.ltpro.eighth_pass'
-local generation = require 'core.ltpro.generation'
-local output = require 'core.ltpro.output'
-local records = require 'core.ltpro.records'
+local memory = require 'core.memory'
+local senses = require 'core.senses'
+local constituents = require 'core.constituents'
+local agreement = require 'core.agreement'
+local syntax = require 'core.syntax'
+local generation = require 'core.generation'
+local output = require 'core.output'
+local heap = require 'core.heap'
 local spec = dofile(arg[1])
 local f = assert(io.open(spec.memory, 'rb')); local base = f:read('a'); f:close()
 local r = assert(io.open(spec.rus, 'rb')); local rus = r:read('a'); r:close()
@@ -17,8 +17,8 @@ local off, seg = spec.root[1], spec.root[2]
 local alternatives
 for _, stage in ipairs(spec.stages) do
   if stage == 'numeric' then senses.numeric_pass(m, seg, off)
-  elseif stage == 'constituent' then constituents.pass(m, seg, off, spec.si, seventh.run)
-  elseif stage == 'T8' then eighth.run(m, seg, off, spec.si)
+  elseif stage == 'constituent' then constituents.pass(m, seg, off, spec.si, agreement.run)
+  elseif stage == 'T8' then syntax.run(m, seg, off, spec.si)
   elseif stage == 'generation' then generation.run(m, seg, off)
   elseif stage == 'output' then
     local s, o = m:far(memory.linear(m.ds, 0xC58C))
@@ -31,7 +31,7 @@ for _, stage in ipairs(spec.stages) do
       output.meanings(m, seg, off, s, o)
       m:set16(ds + 0x042B, m:u16(ds + 0x042B) + assert(alternatives))
     end
-  elseif stage == 'cleanup' then records.clear(m, seg, off)
+  elseif stage == 'cleanup' then heap.clear_records(m, seg, off)
   else error('unknown stage: ' .. tostring(stage)) end
 end
 local bytes = {}

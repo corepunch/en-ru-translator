@@ -1,7 +1,7 @@
 local encoding = require "core.encoding"
 
 -- This shell is deliberately limited to transport concerns; conversion logic
--- remains reusable through require("encoding").
+-- remains reusable through require("core.encoding").
 local mode = arg[1]
 if mode ~= "encode" and mode ~= "decode" then
   io.stderr:write("usage: lua bin/encoding.lua encode|decode [text]\n")

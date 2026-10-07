@@ -5,7 +5,7 @@ The code is a sequence of CP866 bytes encoding grammatical information.
 
 See [Pipeline](pipeline.md) for how dictionaries are loaded.
 
-**Source:** Extracted from `LTGOLD.EXE` via `extract.py` and `load.lua`. Format
+**Source:** Extracted from `LTGOLD.EXE` via binary extraction. Format
 documented in `SAR2BI/DIC.DOC` (SARMA DIC format, CP866 encoded, in Russian).
 Additional notes in `LTGOLD/README.CYR` and `LTGOLD/NEWLTGE.DOC`.
 
@@ -257,29 +257,13 @@ respond to*ZWVотвечатьPВна/N.WNответPВна
 The `.` before `W` marks that the following phrase code applies to the English input
 classification, not the Russian output.
 
-### What load.lua currently handles vs. not
+### Current loader
 
-`load.lua` parses `.DIC` files with `split(line, '*')` and stores the raw code string
-in `en_ru[word].__lex`. Multi-word entries are stored as nested tables.
-
-| Feature | Status |
-|---------|--------|
-| Simple entries (`word*Vtranslation`) | **Handled** |
-| Multi-word entries (`turn off*Vtranslation`) | **Handled** (nested table) |
-| Multiple readings (`Z` ambiguity) | **Partial** — raw string stored, parser reads it |
-| `W` compound phrases | **Not parsed** — W-block extraction is commented out |
-| `\base_form` back-references | **Not resolved** — stored as raw string |
-| Preposition case letters (`PР`, `PВ`) | **Not extracted** — stored in raw string |
-| `#` proper noun gender/number | **Not extracted** |
-| `;` multiple meanings | **Not split** — first meaning used by `find()` in parser |
-| `/` phrase-end separator | **Not handled** |
-| `.` English-side marker | **Not handled** |
-| `~` wildcard in phrases | **Not handled** |
-
-An agent adding new dictionary entries only needs to follow the text format above;
-`load.lua` will store the raw code string and the parser will use it as-is. For
-`W`-phrase and case-government features to work correctly, `load.lua` would need
-to be extended to extract those sub-fields.
+`core.lexicon.from_bytes` builds an ordered record list and a case-insensitive key
+index. `analyze` performs lookup, supported suffix fallback, phrase matching and
+reading decoding into linked table nodes. Dictionary syntax described above is
+historical; it is not a promise that every macro or derivation is supported.
+Unsupported paths raise explicit errors. Custom overlay merging has been retired.
 
 ## BASE.RUS (Russian) Code Format
 
@@ -292,54 +276,18 @@ code bytes encode grammatical properties used during compilation.
 |------|------|---------|
 | `byte(1)` | — | Part-of-speech tag (first char of grammatical code) |
 | `byte(2)` | — | Flags: `0x80` = adjective paradigm in byte(3), else in byte(4); `&2` = aspect flag |
-| `byte(3)` | `&3` | Gender (0=male, 1=female, 2=neutral) OR adjective paradigm ID |
+| `byte(3)` | `&3` | Gender (0=neuter, 1=masculine, 2=feminine) OR adjective paradigm ID |
 | `byte(3)` | `&0x4` | Plural flag (noun) |
 | `byte(4)` | `&~0x80` | Paradigm ID (noun declension or verb conjugation pattern) |
 | `bytes(5+)` | — | Additional stems (e.g. perfective verb stem at byte 6+) |
 
-### Key Access Patterns in `compiler.lua`
+### Runtime access
 
-```lua
--- Noun gender
-e.gender = compiler.base[word]:byte(3) & 3
-
--- Noun paradigm ID
-paradigm_id = compiler.base[word]:byte(4) & ~0x80
-
--- Verb aspect
-is_perfective = compiler.base[word]:byte(2) & 2
-
--- Adjective paradigm selection
-if compiler.base[word]:byte(2) == 0x80 then
-  paradigm_id = compiler.base[word]:byte(3)
-else
-  paradigm_id = compiler.base[word]:byte(4)
-end
-```
-
-### Gender Values
-
-`byte(3)&3` from `BASE.RUS` entry:
-- 0 = male
-- 1 = female
-- 2 = neutral
-
-### Paradigm ID Selection
-
-For nouns: always `byte(4)&~0x80`
-
-For adjectives: depends on `byte(2)`:
-- If `byte(2) == 0x80`: paradigm ID is in `byte(3)`
-- Otherwise: paradigm ID is in `byte(4)`
-
-The `adj()` function in compiler.lua also falls back to `find_adjective()` which
-matches the adjective's ending against known male adjective forms to determine
-the paradigm.
-
-<!-- TODO: Document full byte layout of BASE.RUS entries.
-     Verify byte(3) gender values — are 0/1/2/3 mapped correctly?
-     Understand the adjective paradigm selection logic (byte(2)==0x80).
-     Document the extra stem bytes (5+) for verbs with different perfective forms. -->
+`core.russian` searches the indexed BASE.RUS image; `core.senses` and
+`core.generation` decode metadata and select forms. Native gender arguments are
+0=neuter, 1=masculine, 2=feminine. See [morphology](paradigms.md) for the production
+form API and the [native map](../reference/LTPRO_NATIVE_MAP.md) for record fields.
+The older `compiler.base` table API no longer exists.
 
 ## Data Files
 
@@ -359,7 +307,7 @@ the paradigm.
 
 **CP866** (DOS Cyrillic) is used throughout. The translation engine stores all
 grammatical tags and dictionary entries as raw CP866 bytes internally. UTF-8
-conversion is only done for display via `utils.decode()`.
+conversion is only done for display via `encoding.decode()`.
 
 Key CP866 ranges:
 - `0x80-0x9F` — А-Я (uppercase)

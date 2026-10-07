@@ -1,9 +1,7 @@
-local nodes = require 'core.ltpro.nodes'
-local first_pass = require 'core.ltpro.first_pass'
-local second_pass = require 'core.ltpro.second_pass'
-local third_pass = require 'core.ltpro.third_pass'
-local fourth_pass = require 'core.ltpro.fourth_pass'
-local reorder = require 'core.ltpro.reorder'
+local nodes = require 'core.nodes'
+local grammar = require 'core.grammar'
+local phrasing = require 'core.phrasing'
+local reorder = require 'core.reorder'
 local encoding = require 'core.encoding'
 local function unhex(s) return (s:gsub('%x%x',function(x) return string.char(tonumber(x,16)) end)) end
 local fixtures = dofile(assert(arg[1]))
@@ -58,7 +56,7 @@ for _,case in ipairs(fixtures) do
     end
   end
   local ok, result = pcall(function()
-    if case.normalize then first_pass.run(root,{terminator=0x2E,rules={}}) end
+    if case.normalize then grammar.first(root,{terminator=0x2E,rules={}}) end
     if case.stage=='reorder' then
       local vector,count,rebuilt=reorder.apply(root)
       local tags={}
@@ -67,20 +65,20 @@ for _,case in ipairs(fixtures) do
       return {vector=vector,count=count,tags=table.concat(tags),events={}}
     end
     if case.stage=='T4' then
-      if case.normalize then first_pass.run(root,{terminator=0x2E,rules={}}) end
+      if case.normalize then grammar.first(root,{terminator=0x2E,rules={}}) end
       -- Boundary records take the emulator's allocation addresses, in order.
       local allocated=0
       local boundaries={allocate=function()
         allocated=allocated+1
         return {native_address=assert(case.allocations and case.allocations[allocated],'unexpected native allocation')}
       end}
-      return fourth_pass.run(root,{rules=rules,boundaries=boundaries})
+      return phrasing.run(root,{rules=rules,boundaries=boundaries})
     end
     if case.stage=='T3' then
-      if case.normalize then second_pass.run(root,{count=#case.before,rules={}}) end
-      return third_pass.run(root,{count=#case.before,rules=rules,terminator=case.terminator})
+      if case.normalize then grammar.second(root,{count=#case.before,rules={}}) end
+      return grammar.third(root,{count=#case.before,rules=rules,terminator=case.terminator})
     end
-    return second_pass.run(root,{count=#case.before,rules=rules})
+    return grammar.second(root,{count=#case.before,rules=rules})
   end)
   if not ok then differences[#differences+1] = tostring(result)
   else

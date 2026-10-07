@@ -1,212 +1,70 @@
 # en-ru-translator
 
-A Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator (LinguaTech Systems, 1992).
+A pure Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator
+(LinguaTech Systems, 1992). One engine handles lexical analysis, grammar,
+Russian morphology and output. The original EXE supplies static data; Lua runs
+the translation code without DOSBox or process snapshots.
 
-Compatibility work is tracked in [the binary comparison](reference/LTPRO_COMPARISON.md).
-The snapshot-free native CLI (`--ltpro`) now matches **77/77** original inputs and
-**20/20** newly captured inputs. It runs the recovered lexical, grammar, morphology
-and output stages directly in Lua. The EXE supplies static tables only.
-See the [CLI report](reference/LTPRO_CLI_REPORT.md) for commands and remaining
-analyzer limits. These results establish corpus parity, not universal equivalence.
-The older default translator remains at 44/77; use `--ltpro` for the native path.
-Native stage work and remaining gates are recorded in the
-[parity plan](reference/LTPRO_PARITY_PLAN.md) and [stage report](reference/LTPRO_STAGE_REPORT.md);
-addresses, frames, record fields and harness mechanics are consolidated in the
-[native map](reference/LTPRO_NATIVE_MAP.md).
+## Run
 
-## Requirements
-
-Lua 5.3+ (uses bitwise operators `>>`, `&`).
-
-## Usage
+Requires Lua 5.3+ and the supplied unpacked `LTPRO.EXE`, `BASE.DIC`, and `BASE.RUS`
+in `LTGOLD/` (original assets are not tracked).
 
 ```sh
-# Native LTPRO path — UTF-8 sentence in, translated text out
-lua init.lua --ltpro "She can speak Russian."
-printf '%s' "Two books." | lua init.lua --ltpro
-
-# Older translator with custom dictionary/debug support
 lua init.lua "She can speak Russian."
+printf '%s' "Two books." | lua init.lua
+lua init.lua --data /path/to/assets "The door is open."
+lua init.lua --exe /path/to/LTPRO.EXE --dic /path/to/BASE.DIC --rus /path/to/BASE.RUS "Two books."
+```
 
-# Full debug trace: rule firings, token dump, compiler state
-lua init.lua "She can speak Russian." --debug
+Input and output are UTF-8. Pass one sentence per invocation. `--help` lists
+options; `--` ends option parsing. Options also accept `--name=value`.
 
-# Translate from stdin
-echo "The door is open." | lua init.lua
+## Lua API
 
-# Encode/decode CP866 ↔ UTF-8
+```lua
+local engine = require 'core.engine'
+local text, state = engine.translate('He is in the house.', {data_dir = 'LTGOLD'})
+assert(text == 'Он - в доме.')
+```
+
+`translate` returns UTF-8 plus diagnostic state. `run` returns CP866 plus the same
+state. Options `executable`, `dictionary`, and `russian` accept paths or raw bytes.
+Each call builds fresh mutable state. Unsupported lexical branches raise errors.
+
+## Structure
+
+The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,
+`phrasing`, `matching`, `reorder`, `senses`, `constituents`, `agreement`, `syntax`,
+`generation`, and `output`. `nodes` owns linked table records and serialization;
+`memory` and `heap` preserve native pointer and buffer behavior. `engine` loads
+assets and composes the stages. See [the pipeline](docs/pipeline.md).
+
+The older parser/compiler, custom dictionary overlays and debug CLI were retired.
+`init.lua` always uses the recovered engine; the old `--ltpro` switch and
+`core.ltpro.*` namespace are removed. Historical overlay files in `data/` remain
+as reference material and are not loaded. The overlay editing utilities were
+also retired. Original binary names remain in research tooling for provenance.
+
+## Verification and limits
+
+The recovered engine matches the **77 original + 20 fresh captured sentences**.
+That establishes corpus parity, not universal equivalence. Lexical macros, some
+suffix fallback branches and inline input directives remain unsupported; this
+is a single-sentence API. See [testing](TESTING.md) for reproducible checks and
+[research evidence](reference/LTPRO_CLI_REPORT.md) for capture details.
+
+```sh
+sh test/run_all.sh
+python3 tools/ltpro_pipeline_probe.py
+```
+
+The test suite uses the original assets. Python is needed only for research
+probes, and DOSBox-X only when capturing new executable references.
+
+CP866 conversion is also available as a Unix filter:
+
+```sh
 printf 'Привет' | lua bin/encoding.lua encode > greeting.cp866
 lua bin/encoding.lua decode < greeting.cp866
 ```
-
-## How it works
-
-`--ltpro` uses `core/ltpro/pipeline.lua`; its native stages and limitations are
-described in the [CLI report](reference/LTPRO_CLI_REPORT.md). The older default
-pipeline below is retained for existing APIs, diagnostics and overlays.
-
-```
-Input (English)
-  → Tokenize    — look up each word in BASE.DIC; unknown words get tag #
-  → Parse       — apply extracted grammar through the legacy T1–T8 pipeline
-  → Compile     — inflect tokens into Russian using BASE.RUS + paradigms.lua
-  → Output (Russian)
-```
-
-T1–T4 rewrite grammatical tags (clause structure, VP chains, idioms).
-T5–T6 reorder tokens for Russian word order.
-T7–T8 annotate constituent boundaries used by the compiler for case/inflection.
-
-## Adding a word
-
-Dictionary entries live in `data/BASE.DIC` (one word per line, CP866 encoded).
-The format is `english_word*CODES` where CODES encodes grammatical class and Russian translation(s).
-
-**Simple entries:**
-
-```
-economy*Nэкономика;экономия     noun — multiple meanings separated by ;
-economize*Vэкономить            verb
-economic*Aэкономический         adjective
-quickly*Dбыстро                 adverb
-```
-
-**Ambiguous entries** (word is both verb and noun, for example):
-
-```
-answer*ZотвечатьNответ          Z = V-N-A ambiguity: verb first, then N and/or A
-work*ZработатьNработаAрабочий   all three roles
-```
-
-**Multi-word phrases** are written as a single entry with spaces:
-
-```
-turn off*Vвыключать
-in spite of*Pнесмотря на
-```
-
-The loader (`core/load.lua`) indexes multi-word entries into a nested trie, so `"turn off"` is
-looked up as `en_ru["turn"]["off"].__lex`.
-
-**-ing / -ed forms** that differ from the base: add a back-reference with `\base_form` so the
-system resolves other forms from the infinitive entry rather than listing them again:
-
-```
-interesting*GинтересоватьсяAинтересный\interest
-crossed*Eпересекать\cross
-```
-
-After editing `BASE.DIC`, no recompilation is needed — the file is parsed at startup.
-
-## Adding a rule
-
-Rules live in `core/rules.lua`. Each rule is one line inside one of the 8 `table.insert` blocks:
-
-```lua
-{ flags, "PATTERN", "REPLACEMENT" },
-```
-
-- **flags** — constituent-type index (0x00–0x3F); use 0x00 for a plain rewrite rule
-- **PATTERN** — sequence of tag matchers (see below)
-- **REPLACEMENT** — one character per matched position
-
-### Pattern syntax
-
-| Element | Matches |
-|---------|---------|
-| `N` | A single noun token |
-| `[NZ]` | One token whose tag is N or Z |
-| `<KD>` | Zero or more tokens whose tag is K or D (lazy) |
-| `<$>` | Zero or more of any token |
-| `~Z` | A token that is NOT Z |
-| `` `be` `` | The exact English word "be" |
-| `*` | Sentence boundary (start or end) |
-
-Common tags: `Z`=ambiguous V/N/A, `N`=noun, `V`=verb, `A`=adjective, `P`=preposition,
-`X`=aux be, `U`=modal, `K`=not, `G`=gerund, `E`=past participle, `R`=pronoun.
-Full tag table: [docs/rules.md](docs/rules.md).
-
-### Replacement syntax
-
-| Element | Effect |
-|---------|--------|
-| `N` | Resolve token to noun form |
-| `V` | Resolve to verb form |
-| `@` | Apply transform using the matched pattern character |
-| `$` | Keep the `<>` captured span unchanged |
-| `.` | Keep token unchanged |
-| `' '` (space) | Suppress token (no output) |
-
-**Example — resolve a Z-ambiguous token to noun:**
-
-```lua
-{ 0x00, "~<UVXY>Z", "N" },   -- if no modal/aux before it, Z is a noun
-```
-
-**Example — suppress the article before a proper noun:**
-
-```lua
-{ 0x00, "T#", " ." },        -- T (article) + # (unknown) → suppress T, keep #
-```
-
-Rules are applied left-to-right across the token stream. Add your rule to the appropriate
-pass table: T1–T4 for tag rewrites, T5–T6 for word-order reordering. The rule tables run
-in order T1 → T2 → … → T8, so a tag set by T2 is visible to T3.
-
-## Testing
-
-Read `TESTING.md` for the complete and current test workflow.
-
-Quick run:
-
-```sh
-./test/run_all.sh
-```
-
-This runs unit tests in `test/*_test.lua` and the sentence-level regression suite in
-`demo/compare.lua` with no DOSBox/LTPRO dependency.
-
-Compatibility checks against LTGOLD reference outputs are documented in `TESTING.md`
-and use `LTGOLD/test_compare.sh`.
-
-## Project layout
-
-```
-init.lua                 CLI entry point
-dictionary_store.lua     Loads BASE.DIC / BASE.RUS for the core
-core/
-  translator.lua         Public translation API (tokenize → parse → compile)
-  parser.lua             Rule application engine
-  rules.lua              702 extracted grammar records (including guards and cleanup)
-  compiler.lua           Russian inflection and output generation
-  paradigms.lua          Noun / adjective / verb declension tables
-  load.lua               Dictionary file parser (CP866 trie)
-  utils.lua              Tokenization, CP866 ↔ UTF-8, token inspection
-  encoding.lua           Pure CP866 ↔ UTF-8 module
-bin/
-  encoding.lua           Unix stdin/stdout adapter for encoding
-data/
-  BASE.DIC               English → grammatical codes + Russian translations
-  BASE.RUS               Russian stems → morphological data
-  BUSINESS.DIC           Business vocabulary supplement
-  COMPUTER.DIC           Computer vocabulary supplement
-debug/
-  T1.txt … T8.txt        Annotated binary dumps of all 8 rule tables
-docs/                    Reference documentation
-  pipeline.md            Stage-by-stage pipeline walkthrough
-  rules.md               Rule-language reference, examples, and known limits
-  dictionary.md          BASE.DIC / BASE.RUS binary format
-  paradigms.md           Morphological inflection tables
-  tools.md               Python reverse-engineering tools
-work/                    Active research notes (reverse-engineering in progress)
-LTGOLD/                  Original DOS binaries + test harness
-```
-
-## Further reading
-
-- [docs/case-study-zork.md](docs/case-study-zork.md) — worked example: diagnosing errors, adding vocabulary, adding rules
-- [docs/rules.md](docs/rules.md) — pattern/action examples, tag and symbol glossary, handler metadata, and unresolved native behavior
-- [docs/dictionary.md](docs/dictionary.md) — full BASE.DIC / BASE.RUS binary format
-- [docs/pipeline.md](docs/pipeline.md) — detailed stage-by-stage walkthrough
-- [ARCHITECTURE.md](ARCHITECTURE.md) — system overview and debug flags
-- [DISASSEMBLY.md](DISASSEMBLY.md) — binary research notes and current LTPRO comparison

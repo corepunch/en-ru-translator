@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Random malloc/calloc/strdup/free sequences: native heap code vs core/ltpro/heap.lua.
+"""Random malloc/calloc/strdup/free sequences: native heap code vs core/heap.lua.
 
 Starts from a cached DOS snapshot (its live heap included), runs the same
 seeded operation sequence through the original library routines in the 8086

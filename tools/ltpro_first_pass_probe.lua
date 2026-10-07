@@ -1,5 +1,5 @@
-local nodes = require 'core.ltpro.nodes'
-local first_pass = require 'core.ltpro.first_pass'
+local nodes = require 'core.nodes'
+local grammar = require 'core.grammar'
 local function unhex(s) return (s:gsub('%x%x',function(x) return string.char(tonumber(x,16)) end)) end
 local fixtures = dofile(assert(arg[1]))
 local passed, failed = 0, 0
@@ -37,7 +37,7 @@ for _,case in ipairs(fixtures) do
     allocated=allocated+1
     return {native_address=assert(case.allocations[allocated])}
   end}
-  local ok, result = pcall(first_pass.run,root,{terminator=case.terminator,rules=case.rules,boundaries=boundaries,on_match=function(event,vector,count,cache)
+  local ok, result = pcall(grammar.first,root,{terminator=case.terminator,rules=case.rules,boundaries=boundaries,on_match=function(event,vector,count,cache)
     matched=matched+1
     local expected=case.events and case.events[matched]
     if not expected then differences[#differences+1]='unexpected match event';return end

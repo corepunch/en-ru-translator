@@ -1,6 +1,6 @@
 -- Compare independently located native blocks; LTGOLD.dat is not used as an oracle.
 local binary = require "demo.ltpro_binary"
-local utils = require "core.utils"
+local encoding = require "core.encoding"
 local pro = binary.read(arg[1] or "LTGOLD/LTPRO.EXE")
 local gold = binary.read(arg[2] or "LTGOLD/LTGOLD.EXE")
 local total, differences = 0, 0
@@ -15,8 +15,8 @@ for i, layout in ipairs(binary.layouts) do
        record.action ~= rhs.action or record.endpoint_order ~= rhs.endpoint_order then
       count = count + 1
       print(string.format('%s[%d] differs: LTPRO @0x%X / LTGOLD @0x%X', layout.name, j - 1, record.address, rhs.address))
-      print('  LTPRO: ' .. utils.decode(record.pattern, false) .. ' -> ' .. utils.decode(record.action or '', false))
-      print('  LTGOLD: ' .. utils.decode(rhs.pattern, false) .. ' -> ' .. utils.decode(rhs.action or '', false))
+      print('  LTPRO: ' .. encoding.decode(record.pattern, false) .. ' -> ' .. encoding.decode(record.action or '', false))
+      print('  LTGOLD: ' .. encoding.decode(rhs.pattern, false) .. ' -> ' .. encoding.decode(rhs.action or '', false))
     end
   end
   total, differences = total + #a, differences + count

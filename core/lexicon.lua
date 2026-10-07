@@ -461,6 +461,50 @@ local function word(source, position)
   return nodes.new(tag,fields)
 end
 
+-- LTPRO DS:0930..09C0, in original order: ending, inserted word, kind,
+-- selector. Selector 3 restricts 's to pronouns; 4 and 2 are whole words.
+local contractions = {
+	{ "let's", "us", "M", 4 },
+	{ "'s", "is", "X", 3 },
+	{ "n't", "not", "K", 0 },
+	{ "'ll", "will", "X", 0 },
+	{ "'d", "would", "X", 1 },
+	{ "'m", "am", "T", 0 },
+	{ "'re", "are", "T", 0 },
+	{ "'ve", "have", "X", 0 },
+	{ "cannot", "not", "K", 2 },
+}
+-- DS:09E4 pronouns and DS:0BD1..0BEE exceptions in 0A4F:047B.
+local contractedIs = { i = true, you = true, he = true, she = true,
+	it = true, we = true, they = true, there = true, here = true,
+	what = true, that = true, who = true }
+local negativeStems = { ca = "can", wo = "will", sha = "shall" }
+
+local function contraction(source)
+	local lower = source:lower()
+	for _, row in ipairs(contractions) do
+		local ending, inserted, kind, selector = table.unpack(row)
+		local stem
+		if selector == 4 or selector == 2 then
+			if lower == ending then stem = source:sub(1, 3) end
+		elseif #source > #ending and lower:sub(-#ending) == ending then
+			stem = source:sub(1, -#ending - 1)
+		end
+		if stem and (selector ~= 3 or contractedIs[stem:lower()]) then
+			-- Native negatives retain can's n and restore will/shall before
+			-- inserting not (0A4F:063C..0706).
+			if ending == "n't" then
+				local irregular = negativeStems[stem:lower()]
+				if irregular then
+					stem = stem == stem:upper() and irregular:upper()
+						or stem:sub(1, 1) .. irregular:sub(2)
+				end
+			end
+			return stem, inserted, kind
+		end
+	end
+end
+
 -- Input splitting from 0687:1B93: whitespace separates chunks, leading and
 -- trailing punctuation becomes boundary records. Internal hyphens stay in
 -- the word until dictionary analysis has had a chance to recognize them.
@@ -513,13 +557,16 @@ end
 local function decode(dictionary,records,index)
   local node=records[index]
   local source=node[0x12]
-  -- 0A4F:047B, DS:09C0: the literal `cannot` ending has selector 2,
-  -- forcing a three-byte stem and inserting a fresh `not` record.
-  if source:lower()=='cannot' then
-    source=source:sub(1,3)
-    node[0x12],node[0x87]=source,3
-    table.insert(records,index+1,word('not',0))
-  end
+	while true do
+		local stem, inserted, kind = contraction(source)
+		if not stem then break end
+		source = stem
+		node[0x12], node[0x87] = source, #source
+		local fresh = word(inserted, 0)
+		fresh[0x0B], fresh[0x0C], fresh[0x66] = 1, kind:byte(), kind:byte()
+		if kind == "X" then fresh[0x0F] = 0x27 end
+		table.insert(records, index + 1, fresh)
+	end
   local matches=dictionary.by_key[source:lower()]
   local value,backref
   if matches then

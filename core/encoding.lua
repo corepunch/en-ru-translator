@@ -18,6 +18,9 @@ local utf8_to_cp866 = {}
 for byte, character in pairs(cp866_to_utf8) do utf8_to_cp866[character] = byte end
 
 function encoding.encode(text)
+	-- Smart apostrophes from native keyboards have no CP866 representation.
+	-- Consume the whole UTF-8 glyph before the byte-oriented lexical pipeline.
+	text = text:gsub("’", "'"):gsub("‘", "'")
   local result, i = {}, 1
   while i <= #text do
     local byte = text:byte(i)

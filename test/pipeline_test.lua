@@ -7,6 +7,10 @@ local function bytes(path)
 end
 
 local cases = {
+	{"I'm testing this.", 'Я тестирую это.'},
+	{'I’m testing this.', 'Я тестирую это.'},
+	{'I‘m testing this.', 'Я тестирую это.'},
+	{"I'M TESTING THIS.", 'Я ТЕСТИРУЮ ЭТО.'},
   {'He is in the house.', 'Он - в доме.'},
   {'If he comes then I go.', 'Если он приходит тогда Я иду.'},
   {'EXHIBIT A.', 'ПОКАЖИТЕ A.'},

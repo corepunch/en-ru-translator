@@ -61,4 +61,36 @@ function records.new(m, pseg, poff, tag, tseg, toff)
   return seg, off
 end
 
+-- 0687:0A50 (file ACC0): release sentence records, alternatives and owned
+-- strings, then reset the list with 2269:0442. The root itself is retained.
+function records.clear(m, seg, off)
+  local root = linear(seg, off)
+  local s, o = m:far(root)
+  local function release(p)
+    local fs, fo = m:far(p)
+    if not memory.null(fs, fo) then heap.free(m, fs, fo) end
+  end
+  while not memory.null(s, o) do
+    local p = linear(s, o)
+    if m:u8(p + 0x0E) == 0x57 then
+      local as, ao = m:far(p + 0x8F)
+      while not memory.null(as, ao) do
+        local ap = linear(as, ao)
+        local ns, no = m:far(ap + 0x8F)
+        release(ap + 0x8B); heap.free(m, as, ao)
+        as, ao = ns, no
+      end
+      local ps, po = m:far(p + 0x62)
+      if not memory.null(ps, po) then
+        release(linear(ps, po) + 0x94); heap.free(m, ps, po)
+      end
+      release(p + 0x94); release(p + 0x8B)
+    end
+    local ns, no = m:far(p)
+    heap.free(m, s, o); s, o = ns, no
+  end
+  m:set_far(root, 0, 0)
+  m:set_far(root + 4, seg, off)
+end
+
 return records

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Capture full conventional-memory snapshots at the post-reorder driver boundaries.
 
-The sentence driver 0687:066C calls, in a straight line, the grammar caller
+The sentence driver 0687:05D5 calls, in a straight line, the grammar caller
 (T1-T4 and reorder), 151F:2740, 1C3D:1B3F, T8 1986:000E and 17AA:1D31 before
 its output call. Each hook below sits on the argument pushes that precede one
 of those calls (or, for `generation`, on the output preparation after the
-last), so it observes the state left by the preceding stage. Every hook writes
+last). Output and meanings hooks capture the two output buffers before cleanup.
+Every hook writes
 the whole first 640 KiB of memory plus the driver's BP, SP, SS and DS to
 TRACE.BIN. The 8086 harness can then run the native stage from exactly the
 state DOS had, including heap records, globals, open-file state and the
@@ -38,6 +39,8 @@ SITES = [
     (4, 'T8', 0xA90F, bytes.fromhex('56ff760cff760a')),
     # Also the target of the driver's skip when lexical analysis produced nothing.
     (5, 'generation', 0xA91E, bytes.fromhex('c41e8cc526c60700')),
+    (6, 'output', 0xA93C, bytes.fromhex('8946fe833eb6bb00')),
+    (7, 'meanings', 0xA970, bytes.fromhex('ff760cff760a')),
 ]
 HEADER = struct.Struct('<4s6H')
 

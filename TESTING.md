@@ -62,6 +62,27 @@ python3 tools/ltpro_fourth_pass_native_probe.py --variants 2 --full-table 8
 The captures in `test/ltpro/stages.json` come from `tools/ltpro_trace.py`,
 which needs DOSBox-X and the frozen assets.
 
+## Native generation and output
+
+The generation/output ports use the same memory model as the post-reorder stages.
+See [the generation report](reference/LTPRO_GENERATION_REPORT.md) for the full
+command matrix and the remaining end-to-end gaps. Quick checks:
+
+```sh
+lua test/ltpro_generation_test.lua
+python3 tools/ltpro_function_probe.py 17AA:1D31 --words 2 --stages generation
+python3 tools/ltpro_output_probe.py
+python3 tools/ltpro_output_probe.py --function meanings
+python3 tools/ltpro_output_probe.py --function cleanup
+python3 tools/ltpro_memtrace.py --cache .cache/ltpro-output
+python3 tools/ltpro_post_chain.py --cache .cache/ltpro-output --until meanings
+```
+
+Only the memory trace command launches DOSBox-X. Old captures lack the output
+and meanings boundaries and must be refreshed for the longer chain. The chain
+matches all 77 DOS transitions in each of two fresh captures; production paragraph
+parity remains 44/77 because lexical analysis and startup/integration are incomplete.
+
 ## Fresh LTPRO compatibility corpus
 
 Compare the current translator with the 77 captured executable outputs:

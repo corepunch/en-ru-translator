@@ -32,6 +32,7 @@ FIELDS = {0x0B: [1, 2, 3, 4], 0x0F: [0, 0, 0, 0x77, 0x57, 0x6E, 0x71, 0x72, 0x3D
           0x78: [0, 1, 4, 8, 5], 0x79: [0, 2, 4, 8], 0x7A: [0, 1], 0x7B: [0, 1]}
 STAGE_INDEX = {after: index for index, (_, _, after, _) in enumerate(STAGES)}
 BEFORE = {after: before for before, _, after, _ in STAGES}
+OUTPUT_ROUTINES = {'output': (0x0687, 0x0BB7), 'meanings': (0x0687, 0x01C8), 'cleanup': (0x0687, 0x0A50)}
 
 
 ELEMENT_TAGS = b'NAVEGFPDJRXYUBbIOHQSLWkpxyfrlu#?*,C|^t=:;&iM'
@@ -85,6 +86,7 @@ def mutate(snapshot, rng, rate, elements=False, texts=False):
 def native(snapshot, stages, files, executed=None):
     """Run native stages in order from one snapshot; returns final memory."""
     current = snapshot
+    alternatives = None
     for name in stages:
         machine = SnapshotMachine(current, files)
         if executed is not None:
@@ -93,8 +95,25 @@ def native(snapshot, stages, files, executed=None):
                 return False
             machine.before_instruction = observe
         offset, segment, si = driver_arguments(current)
-        _, routine, _, with_si = STAGES[STAGE_INDEX[name]]
-        machine.call(routine, *((offset, segment, si) if with_si else (offset, segment)))
+        if name in OUTPUT_ROUTINES:
+            ds = snapshot['ds'] * 16
+            if name == 'output':
+                out_o, out_s = struct.unpack_from('<HH', machine.mem, ds + 0xC58C)
+                machine.write(out_s * 16 + out_o, 1, 0)
+                machine.call(OUTPUT_ROUTINES[name], offset, segment, out_o, out_s)
+                alternatives = machine.reg('ax')
+            elif name == 'meanings':
+                word = lambda a: struct.unpack_from('<H', machine.mem, ds + a)[0]
+                if word(0xBBB6) and (word(0xBBB4) or word(0xBBBA)):
+                    if alternatives is None: raise ValueError('meanings must follow output')
+                    out_o, out_s = struct.unpack_from('<HH', machine.mem, ds + 0xC598)
+                    machine.call(OUTPUT_ROUTINES[name], offset, segment, out_o, out_s)
+                    machine.write(ds + 0x042B, 2, (word(0x042B) + alternatives) & 0xFFFF)
+            else:
+                machine.call(OUTPUT_ROUTINES[name], offset, segment)
+        else:
+            _, routine, _, with_si = STAGES[STAGE_INDEX[name]]
+            machine.call(routine, *((offset, segment, si) if with_si else (offset, segment)))
         # Keep the driver's frame for the next stage: SP/BP are restored by the
         # harness call; carry the registers the hook recorded.
         current = dict(current, memory=bytes(machine.mem[:MEMORY]))
@@ -135,6 +154,7 @@ def main():
                 expected = native(snapshot, args.stages, files, executed)
             except Exception as error:
                 skipped += 1
+                if skipped <= args.show: print(f'#{number} {name}: native skipped: {error!r}', flush=True)
                 continue
             memory_file = directory / 'memory.bin'
             memory_file.write_bytes(snapshot['memory'])
@@ -166,7 +186,8 @@ def main():
         image = open('LTGOLD/LTPRO.EXE', 'rb').read()
         md = Cs(CS_ARCH_X86, CS_MODE_16)
         for name in args.stages:
-            _, (segment, offset), _, _ = STAGES[STAGE_INDEX[name]]
+            if name in OUTPUT_ROUTINES: segment, offset = OUTPUT_ROUTINES[name]
+            else: _, (segment, offset), _, _ = STAGES[STAGE_INDEX[name]]
             queue, done = [(segment, offset)], set()
             print(f'== coverage {name}')
             while queue:

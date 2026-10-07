@@ -10,6 +10,7 @@ Input and output are UTF-8. The translator accepts one sentence;
 it does not split multiple sentences. Asset options accept paths.
 --meanings appends a glossary of alternative meanings and annotations.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
+--domain LABEL prefers readings with that dictionary domain label (e.g. инф).
 ]]
 
 local options, words = {}, {}
@@ -17,6 +18,7 @@ local asset_options = {
   ['--data'] = 'data_dir', ['--exe'] = 'executable',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
   ['--prefixes'] = 'prefixes',
+  ['--domain'] = 'domain',
 }
 local end_options = false
 local i = 1

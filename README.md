@@ -55,6 +55,11 @@ separate word; other prefixes join the stem. Disabled `*` rows are ignored.
 Use `--prefixes FILE` / API `prefixes = path_or_bytes` to supply data, or
 `--no-prefixes` / `prefixes = false` to disable this fallback.
 
+`--domain инф` (API: `domain = 'инф'`) prefers a reading marked with the
+dictionary's `инф)` subject label. Other readings remain available as alternatives;
+without a matching label, dictionary order is unchanged. Domain preferences
+apply within the grammatical reading selected for each word.
+
 ## Structure
 
 The flat `core/` directory groups code by functionality: `lexicon`, `grammar`,

@@ -57,6 +57,10 @@ function engine.run(input, options)
 
   local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
   local state = engine.new_state(executable, rus_source)
+  if options.domain then
+    assert(type(options.domain) == 'string' and options.domain ~= '', 'domain must be a nonempty string')
+    state.domain=encoding.encode(options.domain)
+  end
   if options.prefixes ~= false then
     if type(options.prefixes) == 'string' then
       options.prefixes = prefixes.from_bytes(engine.read_asset(options.prefixes, 'ERPREFIX.PRE'))

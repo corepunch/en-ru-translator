@@ -463,6 +463,33 @@ function senses.select(state, original, r, alt, wtag, wflag)
 end
 
 -- Select a tagged reading and split its alternatives and annotations.
+local function domain_reading(value)
+  local label, rest = value:match('^([^%(%)%;{}%s]+)%)(.*)$')
+  if label and #label <= 5 then return label, rest end
+  return nil, value
+end
+
+local function prefer_domain(state, r, primary_domain)
+  if not state.domain then return end
+  local readings, selected = {}, nil
+  local current = r
+  while current do
+    local domain, value = domain_reading(current.text or '')
+    domain = current == r and primary_domain or current.domain or domain
+    readings[#readings + 1] = {text=value, annotation=current.annotation, domain=domain}
+    if domain == state.domain and not selected then selected=#readings end
+    current=current.alternative
+  end
+  if not selected then return end
+  local chosen=table.remove(readings,selected)
+  table.insert(readings,1,chosen)
+  current=r
+  for _, reading in ipairs(readings) do
+    current.text,current.annotation,current.domain=reading.text,reading.annotation,reading.domain
+    current=current.alternative
+  end
+end
+
 function senses.choose(state,r)
   local value=r.text
   local t=get(r,'tag')
@@ -494,6 +521,7 @@ function senses.choose(state,r)
     q=q+1
   end
   r.text=value:sub(p,q-1)
+  local primary_domain=domain_reading(r.text:gsub('^[A-Za-z#]%.?', ''):gsub('^%.', ''))
   senses.skip_prefix(r)
   local wflag=(value:byte(p-1)==0x57) and 1 or 0
   local wtag=r.text:byte() or 0
@@ -522,12 +550,14 @@ function senses.choose(state,r)
       local rest=value:sub(i+1)
       if rest~='' then
         local clone=senses.clone(r,rest)
+        clone.domain=domain_reading(rest)
         clone[8]=get(r,'alternative_count'); last.alternative=clone
         last,current=clone,clone
         start=current.text:find('[;{/]')
       else break end
     else current.text=value:sub(1,cut-1); break end
   end
+  prefer_domain(state,r,primary_domain)
   senses.select(state,r,r,unmarked,wtag,wflag)
   return 1
 end

@@ -14,9 +14,9 @@ assert(output.reading('Wabc#literal#ignored')=='   literal')
 assert(output.reading('W{literal}ignored')=='literal')
 assert(output.reading('plain')=='plain')
 assert(not pcall(output.reading,'W{unterminated'))
-local boundary={[9]=2,[0x0E]=0x44,[0x0D]=0x2A}
-local word={[0x0E]=0x57,[0x0B]=2,[0x0C]=0x4E,[0x12]='CAT',text='\xAA\xAE\xE2e'}
-local punct={[0x0E]=0x44,[0x0D]=0x2E,[0x12]='.'}
+local boundary={[9]=2,kind=0x44,separator=0x2A}
+local word={kind=0x57,reading_state=2,tag=0x4E,source='CAT',text='\xAA\xAE\xE2e'}
+local punct={kind=0x44,separator=0x2E,source='.'}
 local result,count=output.sentence(state,nodes.link({boundary,word,punct}))
 assert(count==0 and result==' \x8A\x8E\x92e.')
 assert(word.text=='\x8A\x8E\x92e')

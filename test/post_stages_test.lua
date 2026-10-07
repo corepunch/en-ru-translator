@@ -24,16 +24,36 @@ assert(matching.constituents(state,1,'LN')==2)
 assert(state.tags[2]==65)
 local r=nodes.new('Q')
 assert(senses.parse_code(r,string.char(0x90,0x84)..'12word')=='word')
-assert(r[0x76]==4 and r[0x72]==1 and r[0x75]==2)
+assert(r.case_mask==4 and r.number==1 and r.aspect==2)
 r.text='first'; r.alternative={text='old'}
 local clone=senses.clone(r,'second')
 clone.text='changed'
 assert(r.text=='first' and not clone.alternative and not clone.next)
 local numbers={}
 for _,value in ipairs({'1','11','2','12','22','5'}) do
-  numbers[#numbers+1]={[0x0E]=0x57,[0x0C]=0x48,[0x87]=#value,[0x12]=value}
+  numbers[#numbers+1]={kind=0x57,tag=0x48,source_length=#value,source=value}
 end
 senses.numeric_pass({},nodes.link(numbers))
-assert(nodes.byte(numbers[1],0x72)==0 and numbers[2][0x72]==1)
-assert(nodes.byte(numbers[3],0x72)==0 and numbers[4][0x72]==1 and nodes.byte(numbers[5],0x72)==0 and numbers[6][0x72]==1)
+assert(nodes.number(numbers[1],'number')==0 and numbers[2].number==1)
+assert(nodes.number(numbers[3],'number')==0 and numbers[4].number==1 and nodes.number(numbers[5],'number')==0 and numbers[6].number==1)
+-- Tag spelling controls constituent boundaries: E becomes a main verb after a
+-- noun, while the lowercase r/v tags retain their distinct native categories.
+local function build(tags)
+  local records = {}
+  for i = 1, #tags do
+    local tag = tags:sub(i, i)
+    records[i] = nodes.new(tag, {separator = tag == '*' and string.byte('*') or 0,
+      passive = tag == 'E' and 1 or 0})
+  end
+  local state = {}
+  state.count = constituents.build(state, nodes.link(records))
+  return state, records
+end
+local built, words = build('*NE*')
+assert(built.count == 4 and nodes.tag(words[3]) == 'V' and words[3].passive == 0)
+assert(built.elements[2].class == string.byte('Y'))
+built, words = build('*rv*')
+assert(built.count == 4 and nodes.tag(words[2]) == 'r' and nodes.tag(words[3]) == 'v')
+assert(built.elements[1].class == string.byte('W') and built.elements[2].class == string.byte('Y'))
+
 print('post_stages_test: passed')

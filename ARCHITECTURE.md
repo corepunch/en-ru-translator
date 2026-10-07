@@ -16,9 +16,17 @@ intentionally differ. There is no emulated address space, DOS heap, far-pointer
 arithmetic, node serialization or shared string scratch buffer.
 
 `assets` decodes read-only rule and morphology tables from the original EXE.
-`russian` indexes immutable BASE.RUS entries. Numeric record keys remain field
-identifiers shared with the earlier grammar code; they do not address memory.
-Native capture decoding lives in the research tools.
+`russian` indexes immutable BASE.RUS entries. Word records use named properties such as `source`, `reading`, `tense`, `person`,
+`gender`, `case_mask`, and `verb_flags`. `record_layout` maps native offsets at
+fixture and packed dictionary decoding boundaries. Uninterpreted captured bytes
+remain available to the research tools; production grammar uses named fields.
+
+Phrasing selectors dispatch to Lua functions. Their return values describe the
+scheduler action (`replace`, `stop_rule`, `advance_past_match`, and so on), while
+the scheduler owns traversal and cache refresh. Syntax uses `nil` for missing
+records and keeps its working frame between selectors. Constituent construction
+compares literal tag letters; the matcher boundary retains numeric tag storage.
+`grammar_values` names the recovered case masks, tenses, aspects, and known flags.
 
 See [pipeline and module ownership](docs/pipeline.md), [dictionary formats](docs/dictionary.md),
 [morphology](docs/paradigms.md), [rule semantics](docs/rules.md), and [verification](TESTING.md).

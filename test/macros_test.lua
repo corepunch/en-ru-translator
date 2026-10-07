@@ -10,23 +10,23 @@ for _, marker in ipairs({ "=", "%" }) do
 	for _, enabled in ipairs({ true, false }) do
 		for _, source in ipairs({ "Aaron", "ABC", "th", "" }) do
 			for _, supplied in ipairs({ "", "имя", "ignored" }) do
-				local node = nodes.new("N", { [0x12] = source, [0x0B] = 1, [0x11C] = "kept" })
+				local node = nodes.new("N", { source = source, reading_state = 1, reading = "kept" })
 				lexicon.decode_reading(node, cp(marker .. supplied), { transliterate = enabled })
 				local expected
 				if marker == "=" and not enabled then expected = cp(supplied)
 				elseif supplied == "имя" then expected = cp(supplied)
 				elseif source == "" then expected = "kept"
 				else expected = transliteration.convert(source, marker == "=") end
-				assert(node[0x11C] == expected)
-				assert(node[0x0F] == marker:byte())
-				assert(node[0x0B] == ((enabled or marker == "%" or supplied ~= "") and 3 or 1))
+				assert(node.reading == expected)
+				assert(node.marker == marker:byte())
+				assert(node.reading_state == ((enabled or marker == "%" or supplied ~= "") and 3 or 1))
 			end
 		end
 	end
 end
-local phraseOwned = nodes.new("N", { [0x12] = "Aaron", [0x0F] = 0x77, [0x11C] = "prepared" })
+local phraseOwned = nodes.new("N", { source = "Aaron", marker = 0x77, reading = "prepared" })
 lexicon.decode_reading(phraseOwned, "=")
-assert(phraseOwned[0x11C] == "prepared" and phraseOwned[0x0F] == 0x3D)
+assert(phraseOwned.reading == "prepared" and phraseOwned.marker == 0x3D)
 
 -- Native 211E:003A/0E82 outputs, including contextual and unusual rules.
 for source, expected in pairs({
@@ -50,12 +50,12 @@ for _, record in ipairs(dictionary.records) do
 end
 assert(audited == 5801, "macro inventory changed; audit new entries")
 local redirected = lexicon.analyze(dictionary, "Welch.")
-assert(redirected.vector[1][0x12] == "welsh")
-assert(redirected.vector[1][0x11C] == cp("уэльский"))
+assert(redirected.vector[1].source == "welsh")
+assert(redirected.vector[1].reading == cp("уэльский"))
 local compound = lexicon.analyze(dictionary, "Allen town.")
-assert(compound.vector[1][0x11C] == cp("аллен") and compound.vector[2][0x11C] == cp("таун"))
-assert(compound.vector[1][0x0F] == 0x3D and compound.vector[2][0x0F] == 0x77)
+assert(compound.vector[1].reading == cp("аллен") and compound.vector[2].reading == cp("таун"))
+assert(compound.vector[1].marker == 0x3D and compound.vector[2].marker == 0x77)
 local joined = lexicon.analyze(dictionary, "Bel Air.").vector[1]
-assert(joined[0x12] == "Bel Air" and joined[0x11C] == cp("бел эр"))
-assert(joined[0x87] == 3 and joined[0x0F] == 0x3D)
+assert(joined.source == "Bel Air" and joined.reading == cp("бел эр"))
+assert(joined.source_length == 3 and joined.marker == 0x3D)
 print("macros_test: passed (5801 dictionary entries)")

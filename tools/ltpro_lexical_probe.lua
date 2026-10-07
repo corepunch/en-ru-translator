@@ -1,3 +1,4 @@
+local layout = require 'core.record_layout'
 local lexicon = require 'core.lexicon'
 local fixtures=dofile(assert(arg[1]))
 local file=assert(io.open(arg[2] or 'LTGOLD/BASE.DIC','rb'))
@@ -15,7 +16,7 @@ for _,case in ipairs(fixtures) do
       if not actual then break end
       local raw=(expected.raw_hex:gsub('%x%x',function(x)return string.char(tonumber(x,16))end))
       local function field(at)
-        if (actual[at] or 0)~=raw:byte(at+1) then differences[#differences+1]=string.format('node %d +%02X %d/%d',i,at,actual[at] or 0,raw:byte(at+1)) end
+        if (actual[layout.key(at)] or 0)~=raw:byte(at+1) then differences[#differences+1]=string.format('node %d +%02X %d/%d',i,at,actual[layout.key(at)] or 0,raw:byte(at+1)) end
       end
       for _,at in ipairs({0x0C,0x0D,0x0E,0x0F}) do field(at) end
       if raw:byte(0x0F)==0x57 then
@@ -30,15 +31,15 @@ for _,case in ipairs(fixtures) do
           end
         end
         for _,at in ipairs({0x10,0x87}) do
-          if (actual[at] or 0)~=string.unpack('<I2',raw,at+1) then differences[#differences+1]=string.format('node %d word +%02X',i,at) end
+          if (actual[layout.key(at)] or 0)~=string.unpack('<I2',raw,at+1) then differences[#differences+1]=string.format('node %d word +%02X',i,at) end
         end
         for _,at in ipairs({0x9C,0x11C}) do
-          if (actual[at] or '')~=raw:sub(at+1,assert(raw:find('\0',at+1,true))-1) then
+          if (actual[layout.key(at)] or '')~=raw:sub(at+1,assert(raw:find('\0',at+1,true))-1) then
             differences[#differences+1]=string.format('node %d text +%02X',i,at)
           end
         end
       elseif i==1 then field(0x09) end
-      if actual[0x12]~=raw:sub(0x13,assert(raw:find('\0',0x13,true))-1) then
+      if actual.source~=raw:sub(0x13,assert(raw:find('\0',0x13,true))-1) then
         differences[#differences+1]=string.format('node %d source',i)
       end
     end

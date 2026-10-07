@@ -1,3 +1,4 @@
+local layout = require 'core.record_layout'
 local captured = {}
 
 -- Import captured records without treating unnamed bytes as disposable padding.
@@ -11,10 +12,10 @@ function captured.from_records(records)
       local raw = assert(record.bytes)
       assert(#raw >= 0x26B, 'truncated native lexical record')
       node = {raw=raw, native_address=address}
-      for at = 0, #raw - 1 do node[at] = raw:byte(at + 1) end
-      for _, at in ipairs({0x12,0x9C,0x11C,0x243}) do
+      for at = 0, #raw - 1 do node[layout.key(at)] = raw:byte(at + 1) end
+      for _, at in ipairs({0x12,0x9C,0x11C,0x21B,0x243}) do
         local stop = assert(raw:find('\0',at+1,true), 'unterminated native lexical string')
-        node[at] = raw:sub(at+1,stop-1)
+        node[layout.key(at)] = raw:sub(at+1,stop-1)
       end
       addresses[address] = node
     else

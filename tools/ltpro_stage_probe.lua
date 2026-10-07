@@ -1,3 +1,4 @@
+local layout = require 'core.record_layout'
 local captured = require 'tools.ltpro_records'
 local nodes = require 'core.nodes'
 local grammar = require 'core.grammar'
@@ -19,11 +20,11 @@ local function compare(vector,expected,differences,prefix)
     end
     local raw=unhex(record.raw_hex)
     for _,at in ipairs({0x0B,0x0C,0x0D,0x0E,0x0F,0x66,0x68,0x6A,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7A,0x7B}) do
-      if (actual[at] or 0)~=raw:byte(at+1) then differences[#differences+1]=string.format('%s node %d +%02X %d/%d',prefix,i,at,actual[at] or 0,raw:byte(at+1)) end
+      if (actual[layout.key(at)] or 0)~=raw:byte(at+1) then differences[#differences+1]=string.format('%s node %d +%02X %d/%d',prefix,i,at,actual[layout.key(at)] or 0,raw:byte(at+1)) end
     end
     for _,at in ipairs({0x12,0x9C,0x11C,0x243}) do
       local stop=assert(raw:find('\0',at+1,true))
-      if (actual[at] or '')~=raw:sub(at+1,stop-1) then differences[#differences+1]=string.format('%s node %d string +%02X',prefix,i,at) end
+      if (actual[layout.key(at)] or '')~=raw:sub(at+1,stop-1) then differences[#differences+1]=string.format('%s node %d string +%02X',prefix,i,at) end
     end
     local aux_offset,aux_segment=string.unpack('<I2I2',raw,0x63)
     local aux=aux_segment*16+aux_offset
@@ -61,7 +62,7 @@ for _,case in ipairs(fixtures) do
     if case.stage=='reorder' then
       local vector,count,rebuilt=reorder.apply(root)
       local tags={}
-      for i=0,count-1 do tags[#tags+1]=string.char(vector[i][0x0C]) end
+      for i=0,count-1 do tags[#tags+1]=string.char(vector[i].tag) end
       if not rebuilt then tags={case.before_cache} end
       return {vector=vector,count=count,tags=table.concat(tags),events={}}
     end

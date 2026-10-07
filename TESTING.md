@@ -37,7 +37,9 @@ python3 tools/ltpro_fourth_pass_probe.py
 Matcher probes compare controlled inputs with original 8086 functions. The
 morphology probe calls the same generator used by production, across every table
 row plus seeded edge cases. Stage probes compare captured records, pointer
-identity, tags and caches, not just text. Python tools may require Capstone;
+identity, tags and caches, not just text. Fixture adapters map native offsets to
+the named runtime fields through `core.record_layout`; they retain offsets in
+diagnostic messages so mismatches can still be located in captured evidence. Python tools may require Capstone;
 see their `--help` for fixture selection and larger generated suites.
 
 The byte-memory and allocator probes (`ltpro_function_probe`, `ltpro_post_chain`,

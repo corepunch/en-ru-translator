@@ -7,11 +7,11 @@ local base = lexicon.from_bytes(file:read('*a'))
 file:close()
 
 local fixtures = {
-  { id = 'case-060', source = 'books', candidate = 'book', tag = 'Z', suffix = 's', fields = {[0x72]=1,[0x74]=3} },
+  { id = 'case-060', source = 'books', candidate = 'book', tag = 'Z', suffix = 's', fields = {number=1,person=3} },
   { id = 'case-061', source = 'books', candidate = 'book', tag = 'Z', suffix = 's' },
   { id = 'case-070', source = 'books', candidate = 'book', tag = 'Z', suffix = 's' },
   { id = 'case-014', source = 'organizations', candidate = 'organization', tag = 'N', suffix = 's' },
-  { id = 'case-013', source = 'defined', candidate = 'define', tag = 'E', suffix = 'ed', fields = {[0x73]=1,[0x76]=8} },
+  { id = 'case-013', source = 'defined', candidate = 'define', tag = 'E', suffix = 'ed', fields = {tense=1,case_mask=8} },
   { id = 'case-014', source = 'legally', candidate = 'legal', tag = 'D', suffix = 'ly' },
   { id = 'case-018', source = 'supersedes', candidate = 'supersede', tag = 'V', suffix = 'es' },
   { id = 'case-024', source = 'walked', candidate = 'walked', tag = 'E', exact = true, backref = 'walk' },
@@ -29,7 +29,7 @@ for _, fixture in ipairs(fixtures) do
   assert(result.native_suffix == fixture.suffix, fixture.id .. ' native suffix')
   assert(result.backref == fixture.backref, fixture.id .. ' backref: ' .. tostring(result.backref))
   for offset, value in pairs(fixture.fields or {}) do
-    assert(result.fields[offset] == value, fixture.id .. ' field +' .. string.format('%02X', offset))
+    assert(result.fields[offset] == value, fixture.id .. ' field ' .. offset)
   end
 end
 
@@ -65,9 +65,9 @@ assert(result.candidate == 'make' and result.native_suffix == 'ing')
 -- hyphenated source is split. buyer-seller reaches `er/A` and sets +0F/+73.
 local attempt = assert(lexicon.attempt_fields('buyer-seller'))
 assert(attempt.ending == 'er' and attempt.selector == 'A')
-assert(attempt.fields[0x0F] == 0x61 and attempt.fields[0x73] == 1)
+assert(attempt.fields.marker == 0x61 and attempt.fields.tense == 1)
 attempt = assert(lexicon.attempt_fields('fastest'))
 assert(attempt.ending == 'est' and attempt.selector == 'A')
-assert(attempt.fields[0x0F] == 0x61 and attempt.fields[0x73] == 2)
+assert(attempt.fields.marker == 0x61 and attempt.fields.tense == 2)
 
 print('suffixes_test: passed')

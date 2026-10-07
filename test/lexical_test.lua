@@ -8,24 +8,24 @@ local function analyze(text,tags)
   return state.vector
 end
 local v=analyze('The Letter of Credit shall allow for partial shipments and partial payment.','*TNXVANCAN*')
-assert(v[2][0x12]=='Letter' and v[2][0x0F]==0x77 and encoding.decode(v[2][0x11C])=='аккредитив')
+assert(v[2].source=='Letter' and v[2].marker==0x77 and encoding.decode(v[2].reading)=='аккредитив')
 v=analyze("I'm testing this.",'*RXGS*')
-assert(v[1][0x12]=='I' and v[1][0x87]==1 and v[1][0x10]==0)
-assert(v[2][0x12]=='am' and v[2][0x10]==0)
+assert(v[1].source=='I' and v[1].source_length==1 and v[1].source_position==0)
+assert(v[2].source=='am' and v[2].source_position==0)
 local intact=lexicon.analyze(dict,"O'Neil John's book.")
-assert(intact.vector[1][0x12]=="O'Neil" and intact.vector[2][0x12]=="John's")
+assert(intact.vector[1].source=="O'Neil" and intact.vector[2].source=="John's")
 v=analyze('There is no book.','*yZ*')
-assert(v[1][0x75]==1 and v[1][0x76]==2)
+assert(v[1].aspect==1 and v[1].case_mask==2)
 v=analyze('He cannot go.','*RUKV*')
-assert(v[2][0x12]=='can' and v[2][0x10]==3 and v[3][0x12]=='not' and v[3][0x10]==0)
+assert(v[2].source=='can' and v[2].source_position==3 and v[3].source=='not' and v[3].source_position==0)
 v=analyze('He works.','*RV*')
-assert(v[2][0x9C]=='work ')
+assert(v[2].lookup=='work ')
 v=analyze('If he comes then I go.','*JRVDRV*')
-assert(v[3][0x9C]=='')
+assert(v[3].lookup=='')
 v=analyze('Two books.','*IZ*')
-assert(v[2][0x9C]=='book' and v[2][0x72]==1 and v[2][0x74]==3)
+assert(v[2].lookup=='book' and v[2].number==1 and v[2].person==3)
 v=analyze('"Fish meal", seller said.','*"AN",NE*')
-assert(v[2][0x0B]==2 and v[3][0x0B]==2 and v[2][0x0F]==0x77)
+assert(v[2].reading_state==2 and v[3].reading_state==2 and v[2].marker==0x77)
 v=analyze('making them.','*GM*')
 local inherited=false
 for _,rule in ipairs(v[1].rules or {}) do
@@ -33,9 +33,9 @@ for _,rule in ipairs(v[1].rules or {}) do
 end
 assert(inherited,'backreference subrules must reach T4')
 local unknown=lexicon.analyze(dict,'ABC-123.')
-assert(unknown.word_count==0 and unknown.tags=='*#*' and unknown.vector[1][0x12]=='ABC-123')
+assert(unknown.word_count==0 and unknown.tags=='*#*' and unknown.vector[1].source=='ABC-123')
 -- Native E001+case stores the object's case at +79, preserving +76=8.
-local n={[0x0C]=string.byte('E'),[0x0B]=1,[0x66]=string.byte('E')}
+local n={tag=string.byte('E'),reading_state=1,previous_tag=string.byte('E')}
 lexicon.decode_reading(n,encoding.encode('001Рслово'))
-assert(n[0x76]==8 and n[0x79]==2 and encoding.decode(n[0x11C])=='слово')
+assert(n.case_mask==8 and n.governed_case==2 and encoding.decode(n.reading)=='слово')
 print('lexical_test: passed')

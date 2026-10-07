@@ -1,3 +1,4 @@
+local layout = require 'core.record_layout'
 local nodes = require 'core.nodes'
 local transliteration = require 'core.transliteration'
 local text = require 'core.text'
@@ -120,11 +121,11 @@ local function decode_record(record, source, candidate, row, exact)
 
   local fields = {}
   if row and row.selector == "Z13" then
-    fields[0x72], fields[0x74] = 1, 3
+    fields.number, fields.person = 1, 3
   elseif row and row.selector == "G8" then
-    fields[0x76] = 8
+    fields.case_mask = 8
   elseif row and row.selector == "E" then
-    fields[0x73], fields[0x76] = 1, 8
+    fields.tense, fields.case_mask = 1, 8
   end
 
   return {
@@ -215,12 +216,12 @@ function lexicon.attempt_fields(source)
     if #word > #row.ending and word:sub(-#row.ending) == row.ending then
       local fields = {}
       if row.selector == "A" then
-        fields[0x0F] = 0x61
+        fields.marker = 0x61
         local last, before_last = word:sub(-1), word:sub(-2, -2)
         if last == "r" and (before_last == "e" or before_last == "u") then
-          fields[0x73] = 1
+          fields.tense = 1
         elseif word:sub(-2) == "st" then
-          fields[0x73] = 2
+          fields.tense = 2
         end
       end
       return { ending = row.ending, selector = row.selector, fields = fields }
@@ -258,18 +259,18 @@ end
 local function writeReading(node, value, options, ordinaryReadings, macroSource)
 	local marker = value:sub(1, 1)
 	if marker ~= "=" and marker ~= "%" then
-		node[0x11C] = value
-		if ordinaryReadings then node[0x0B] = 3 end
+		node.reading = value
+		if ordinaryReadings then node.reading_state = 3 end
 		return
 	end
 	-- Native phrase macros retain the joined source for output capitalization.
-	if macroSource then node[0x12] = macroSource end
-	if macroSource or node[0x0F] ~= 0x77 then node[0x11C] = macroText(macroSource or node[0x12] or "", value, options, node[0x11C]) end
+	if macroSource then node.source = macroSource end
+	if macroSource or node.marker ~= 0x77 then node.reading = macroText(macroSource or node.source or "", value, options, node.reading) end
 	if #value > 1 or options.transliterate ~= false or marker == "%" then
-		node[0x0B] = 3
-		if marker == "%" then node[0x0F] = 0x25 end
+		node.reading_state = 3
+		if marker == "%" then node.marker = 0x25 end
 	end
-	if marker == "=" then node[0x0F] = 0x3D end
+	if marker == "=" then node.marker = 0x3D end
 end
 
 function lexicon.decode_reading(node, payload, options, macroSource)
@@ -277,85 +278,85 @@ function lexicon.decode_reading(node, payload, options, macroSource)
   local p=1
   local function digit(at)
     local b=payload:byte(p)
-    if b and b>=48 and b<=57 then node[at]=b-48; p=p+1; return true end
+    if b and b>=48 and b<=57 then node[layout.key(at)]=b-48; p=p+1; return true end
     return false
   end
   local function paradigm(at)
     local b=payload:byte(p)
     if b and b>=48 and b<=57 then
       local value=b-48
-      node[at]=((node[at] or 0)&0x80)|value|((value&1)<<6)
+      node[layout.key(at)]=((node[layout.key(at)] or 0)&0x80)|value|((value&1)<<6)
       p=p+1
     end
   end
   local function aspect()
     local b=payload:byte(p)
     if b and b>=48 and b<=57 then
-      node[0x6A]=((node[0x6A] or 0)&0xBF)|(((b-48)&1)<<6)
+      node.lookup_frame=((node.lookup_frame or 0)&0xBF)|(((b-48)&1)<<6)
       p=p+1
     end
   end
   local t=tag(node)
   if t=='#' then
     if payload:sub(p,p)=='#' then p=p+1 end
-    local saved=node[0x72] or 0
-    if digit(0x72) and saved~=0 then node[0x72]=saved end
-    if not digit(0x77) then
+    local saved=node.number or 0
+    if digit('number') and saved~=0 then node.number=saved end
+    if not digit('gender') then
       local gender=({[0xAC]=1,[0xA6]=2,[0xE1]=0})[payload:byte(p)]
-      if gender~=nil then node[0x77]=gender;p=p+1 end
+      if gender~=nil then node.gender=gender;p=p+1 end
     end
-    node[0x74]=3
+    node.person=3
     local text=payload:sub(p)
     writeReading(node, text, options, false, macroSource)
     return p-1
   elseif has('XYx',t) then
-    digit(0x73);digit(0x72);digit(0x74)
-    if t=='Y' then node[0x76]=8 end
-  elseif t=='y' then digit(0x75);node[0x76]=2
-  elseif t=='d' then digit(0x75);digit(0x73)
+    digit('tense');digit('number');digit('person')
+    if t=='Y' then node.case_mask=8 end
+  elseif t=='y' then digit('aspect');node.case_mask=2
+  elseif t=='d' then digit('aspect');digit('tense')
   elseif has('MRr',t) then
-    digit(0x72);digit(0x74);digit(0x77)
-    if t=='M' then node[0x76]=2 end
-  elseif has('OS',t) then digit(0x72);digit(0x75);digit(0x77);node[0x74]=3
+    digit('number');digit('person');digit('gender')
+    if t=='M' then node.case_mask=2 end
+  elseif has('OS',t) then digit('number');digit('aspect');digit('gender');node.person=3
   elseif has('PQfp',t) then
     local b=payload:byte(p)
     if b and b>0x81 and b<0x93 then
-      if cases[b] then node[0x76]=cases[b] end
+      if cases[b] then node.case_mask=cases[b] end
       p=p+1
     end
-  elseif t=='I' then digit(0x72)
+  elseif t=='I' then digit('number')
   elseif t=='U' then
-    digit(0x73);digit(0x78);node[0x76],node[0x74]=8,3
-  elseif t=='J' then digit(0x73);digit(0x75)
-  elseif t=='N' then digit(0x75)
-  elseif t=='n' then digit(0x75);node[0x72]=1
-  elseif t=='a' then node[0x0F]=0x61
-  elseif t=='v' then paradigm(0x68);aspect();node[0x74],node[0x76]=3,8
-  elseif t=='z' then paradigm(0x68);aspect();node[0x72],node[0x74],node[0x76]=1,3,8
+    digit('tense');digit('verb_flags');node.case_mask,node.person=8,3
+  elseif t=='J' then digit('tense');digit('aspect')
+  elseif t=='N' then digit('aspect')
+  elseif t=='n' then digit('aspect');node.number=1
+  elseif t=='a' then node.marker=0x61
+  elseif t=='v' then paradigm('lookup_flags');aspect();node.person,node.case_mask=3,8
+  elseif t=='z' then paradigm('lookup_flags');aspect();node.number,node.person,node.case_mask=1,3,8
   elseif has('eEFGVZh',t) then
-    if t=='e' and node[0x0B]==1 and node[0x74]==3 then
-      node[0x0C],node[0x66]=0x56,0x56
+    if t=='e' and node.reading_state==1 and node.person==3 then
+      node.tag,node.previous_tag=0x56,0x56
     end
-    paradigm(0x68);aspect()
+    paradigm('lookup_flags');aspect()
     local b=payload:byte(p)
     if b and b>=48 and b<=57 then
-      node[0x6A]=((node[0x6A] or 0)&0xC0)|((b-48)&0x3F);p=p+1
+      node.lookup_frame=((node.lookup_frame or 0)&0xC0)|((b-48)&0x3F);p=p+1
     end
-    node[0x76]=8
+    node.case_mask=8
     t=tag(node)
-    if has('EehF',t) or node[0x66]==0x45 then node[0x73]=1 end
-    if t=='h' then node[0x0C],node[0x66]=0x56,0x56
+    if has('EehF',t) or node.previous_tag==0x45 then node.tense=1 end
+    if t=='h' then node.tag,node.previous_tag=0x56,0x56
     else
       b=payload:byte(p)
-      if t=='E' and ((node[0x6A] or 0)&0x3F)==1 and b and b>0x81 and b<0x93 then
-        if cases[b] then node[0x79]=cases[b] end
+      if t=='E' and ((node.lookup_frame or 0)&0x3F)==1 and b and b>0x81 and b<0x93 then
+        if cases[b] then node.governed_case=cases[b] end
         p=p+1
       end
-      if t=='F' then node[0x0F],node[0x0C]=0x6E,0x45 end
+      if t=='F' then node.marker,node.tag=0x6E,0x45 end
     end
   end
   t=tag(node)
-  if not has('ekxjtudbiplyfgac',t) then node[0x0C]=t:upper():byte() end
+  if not has('ekxjtudbiplyfgac',t) then node.tag=t:upper():byte() end
   local text=payload:sub(p)
   writeReading(node, text, options, true, macroSource)
   return p-1
@@ -373,7 +374,7 @@ function lexicon.match_phrase(dictionary, records, index, key)
       local matched=words[1]==key
       for j=2,#words do
         local n=records[index+j-1]
-        if not n or n[0x0E]~=0x57 or n[0x12]:lower()~=words[j] then matched=false;break end
+        if not n or n.kind~=0x57 or n.source:lower()~=words[j] then matched=false;break end
       end
       if matched and record.value:sub(1,1)~='$' and (not finish or index+#words-1>finish) then
         best,finish=record,index+#words-1
@@ -388,12 +389,12 @@ function lexicon.apply_phrase(record, records, first, last, options)
   local node=records[first]
   if value:sub(1,1)~='W' then
     local t=value:sub(1,1)
-    node[0x66]=t:upper():byte()
-    if not (t:match('[VZ]') and nodes.tag(node):match('[EeGFh]')) then node[0x0C]=t:byte() end
-    if nodes.tag(node)=='V' and node[0x12]:sub(-1)~="'" then node[0x72]=0 end
-    node[0x0F]=0x77
+    node.previous_tag=t:upper():byte()
+    if not (t:match('[VZ]') and nodes.tag(node):match('[EeGFh]')) then node.tag=t:byte() end
+    if nodes.tag(node)=='V' and node.source:sub(-1)~="'" then node.number=0 end
+    node.marker=0x77
     local source = {}
-    for index=first,last do table.insert(source, records[index][0x12]) end
+    for index=first,last do table.insert(source, records[index].source) end
     local macroSource = table.concat(source, ' ')
     -- Native phrase distribution prepares translated text before marking the
     -- reading as phrase-owned (77), so the metadata decoder leaves it alone.
@@ -402,7 +403,7 @@ function lexicon.apply_phrase(record, records, first, last, options)
     return first+1
   end
   local pos,tag=3,value:sub(2,2)
-  local oldtag,number=nodes.tag(node),node[0x72] or 0
+  local oldtag,number=nodes.tag(node),node.number or 0
   local index=first
   while index<=last or tag~='' do
     assert(tag~='' and tag:match('[ANnVvEhFebPCwX]'), 'native W phrase selector is not ported: '..tag)
@@ -415,39 +416,41 @@ function lexicon.apply_phrase(record, records, first, last, options)
     local nexttag=value:sub(stop,stop)
     if nexttag==' ' then nexttag='w' end
     if index>last then
-      local fresh=nodes.new(tag,{[0x0E]=0x57,[0x0F]=0x77,[0x12]='',[0x9C]='',
-        [0x85]=0xFF,[0x86]=0xFF,[0x87]=#text,[0x10]=0})
-      for at=0x68,0x7B do fresh[at]=0 end
+      local fresh=nodes.new(tag,{kind=0x57,marker=0x77,source='',lookup='',
+        paradigm=0xFF,paradigm_high=0xFF,source_length=#text,source_position=0})
+      for _, field in ipairs({'lookup_flags','lookup_paradigm','lookup_frame','dictionary_flags',
+        'dictionary_frame','dictionary_paradigm','dictionary_case','number','tense','person',
+        'aspect','case_mask','gender','verb_flags','governed_case','passive','short_form'}) do fresh[field]=0 end
       table.insert(records,index,fresh)
       last=index
     end
     local n=records[index]
-    n[0x0B]=2
-    if tag=='n' then n[0x72]=1;tag='N'
-    elseif tag=='v' then n[0x74]=3;tag='V'
+    n.reading_state=2
+    if tag=='n' then n.number=1;tag='N'
+    elseif tag=='v' then n.person=3;tag='V'
     elseif tag=='N' then
-      if text:match('^%d') then n[0x75]=tonumber(text:sub(1,1));text=text:sub(2) end
-      if number~=0 then n[0x72]=1 end
+      if text:match('^%d') then n.aspect=tonumber(text:sub(1,1));text=text:sub(2) end
+      if number~=0 then n.number=1 end
     elseif tag=='V' or tag=='E' then
       if oldtag=='G' or oldtag=='E' then
-        tag=oldtag;n[0x76]=8
-        if nodes.tag(n)=='E' then n[0x73]=1 end
-      elseif oldtag=='F' then tag='E';n[0x76],n[0x73],n[0x0F]=8,1,0x6E
-      elseif oldtag=='h' then n[0x76],n[0x73]=8,1 end
-    elseif tag=='h' then n[0x73]=1;tag='V'
-    elseif tag=='F' then tag='E';n[0x73],n[0x76],n[0x0F]=1,8,0x6E
+        tag=oldtag;n.case_mask=8
+        if nodes.tag(n)=='E' then n.tense=1 end
+      elseif oldtag=='F' then tag='E';n.case_mask,n.tense,n.marker=8,1,0x6E
+      elseif oldtag=='h' then n.case_mask,n.tense=8,1 end
+    elseif tag=='h' then n.tense=1;tag='V'
+    elseif tag=='F' then tag='E';n.tense,n.case_mask,n.marker=1,8,0x6E
     elseif tag=='e' and oldtag=='G' then tag=oldtag
     elseif tag=='X' then
-      for _,at in ipairs({0x73,0x72,0x74}) do
-        if text:match('^%d') then n[at]=tonumber(text:sub(1,1));text=text:sub(2) end
+      for _,at in ipairs({'tense','number','person'}) do
+        if text:match('^%d') then n[layout.key(at)]=tonumber(text:sub(1,1));text=text:sub(2) end
       end
     end
     if text:match('^[=%%]') then
-      n[0x0F] = text:byte()
-      text = macroText(n[0x12] or '', text, options)
+      n.marker = text:byte()
+      text = macroText(n.source or '', text, options)
     end
-    n[0x0C],n[0x66],n[0x11C]=tag:byte(),tag:upper():byte(),text
-    if (n[0x0F] or 0)==0 then n[0x0F]=0x77 end
+    n.tag,n.previous_tag,n.reading=tag:byte(),tag:upper():byte(),text
+    if (n.marker or 0)==0 then n.marker=0x77 end
     tag,pos=nexttag,stop+1
     if tag=='' then
       for _=index+1,last do table.remove(records,index+1) end
@@ -479,22 +482,24 @@ function lexicon.sub_rules(dictionary,word)
   return rules
 end
 local function boundary(tag, marker, position)
-  return nodes.new(tag,{[0x0D]=marker or 0,[0x0E]=0x44,[0x09]=0,
-    [0x10]=position or 0,[0x12]=tag,[0x9C]='',[0x11C]='',[0x66]=0})
+  return nodes.new(tag,{separator=marker or 0,kind=0x44,[0x09]=0,
+    source_position=position or 0,source=tag,lookup='',reading='',previous_tag=0})
 end
 
 local function word(source, position)
   local fields={}
-  for at=0x68,0x7B do fields[at]=0 end
-  fields[0x0B],fields[0x0D],fields[0x0E],fields[0x0F]=0,0,0x57,0
-  fields[0x12],fields[0x9C],fields[0x11C],fields[0x66]=source,'','',0
-  fields[0x10],fields[0x87],fields[0x85],fields[0x86]=position,#source,0xFF,0xFF
+  for _, field in ipairs({'lookup_flags','lookup_paradigm','lookup_frame','dictionary_flags',
+    'dictionary_frame','dictionary_paradigm','dictionary_case','number','tense','person',
+    'aspect','case_mask','gender','verb_flags','governed_case','passive','short_form'}) do fields[field]=0 end
+  fields.reading_state,fields.separator,fields.kind,fields.marker=0,0,0x57,0
+  fields.source,fields.lookup,fields.reading,fields.previous_tag=source,'','',0
+  fields.source_position,fields.source_length,fields.paradigm,fields.paradigm_high=position,#source,0xFF,0xFF
   local numeric=source:match('^[%d,]+$') ~= nil
   local tag=numeric and 'H' or source:match("^[A-Za-z'-]+$") and '?' or '#'
   fields.counted_word=tag=='?'
-  if tag=='#' then fields[0x74],fields[0x77]=3,1 end
+  if tag=='#' then fields.person,fields.gender=3,1 end
   -- 0687:0892 preserves the original length but bounds the source copy.
-  if #source>=0x28 then tag='#';fields[0x12]=source:sub(1,0x50) end
+  if #source>=0x28 then tag='#';fields.source=source:sub(1,0x50) end
   return nodes.new(tag,fields)
 end
 
@@ -565,7 +570,7 @@ function lexicon.tokenize(input)
       if (c=='#' or c=='/') and chunk:sub(2,2):match('%a') then break end
       if c=='`' then c="'" end
       local n=boundary(c,leading and 0 or 0x20,position-1)
-      n[0x0F]=0x20
+      n.marker=0x20
       records[#records+1]=n;leading=true
       chunk=chunk:sub(2);position=position+1
     end
@@ -593,15 +598,15 @@ end
 
 local function decode(dictionary,records,index,options)
   local node=records[index]
-  local source=node[0x12]
+  local source=node.source
 	while true do
 		local stem, inserted, kind = contraction(source)
 		if not stem then break end
 		source = stem
-		node[0x12], node[0x87] = source, #source
+		node.source, node.source_length = source, #source
 		local fresh = word(inserted, 0)
-		fresh[0x0B], fresh[0x0C], fresh[0x66] = 1, kind:byte(), kind:byte()
-		if kind == "X" then fresh[0x0F] = 0x27 end
+		fresh.reading_state, fresh.tag, fresh.previous_tag = 1, kind:byte(), kind:byte()
+		if kind == "X" then fresh.marker = 0x27 end
 		table.insert(records, index + 1, fresh)
 	end
   local matches=dictionary.by_key[source:lower()]
@@ -610,7 +615,7 @@ local function decode(dictionary,records,index,options)
     assert(not aliases[source:lower()], 'cyclic dictionary redirect: '..source)
     aliases[source:lower()] = true
     source = matches[1].value:sub(2)
-    node[0x12], node[0x87] = source, #source
+    node.source, node.source_length = source, #source
     matches = dictionary.by_key[source:lower()]
   end
   local value,backref
@@ -618,25 +623,25 @@ local function decode(dictionary,records,index,options)
     assert(#matches==1,'native duplicate lookup is not ported: '..source)
     value=matches[1].value
     local initial=value:sub(1,1)
-    node[0x0B],node[0x0C],node[0x66]=initial=='#' and 0 or 1,initial:byte(),initial:upper():byte()
+    node.reading_state,node.tag,node.previous_tag=initial=='#' and 0 or 1,initial:byte(),initial:upper():byte()
     backref=value:match('\\(.*)')
-    if backref then node[0x9C]=backref..' ' end
+    if backref then node.lookup=backref..' ' end
   end
   local derived
   if not value then
     derived=lexicon.lookup(dictionary,source)
     if derived then
       value=derived.record.value
-      node[0x0B],node[0x0C],node[0x66]=1,derived.tag:byte(),value:sub(1,1):upper():byte()
-      for at,v in pairs(derived.fields) do node[at]=v end
-      if derived.native_selector=='Z13' and derived.tag=='V' then node[0x72]=0 end
-      node[0x9C]=derived.candidate
+      node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()
+      for at,v in pairs(derived.fields) do node[layout.key(at)]=v end
+      if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
+      node.lookup=derived.candidate
     end
   end
   local phrase,last=lexicon.match_phrase(dictionary,records,index,source:lower())
   -- Subrules are collected while scanning possible following words, even
   -- when a literal phrase later wins. At a terminal boundary no scan occurs.
-  if records[index+1] and records[index+1][0x0D]~=0x2A then
+  if records[index+1] and records[index+1].separator~=0x2A then
     local rules=lexicon.sub_rules(dictionary,source)
     local base=backref or (derived and derived.candidate)
     if base and not phrase then
@@ -650,15 +655,15 @@ local function decode(dictionary,records,index,options)
   if phrase then return lexicon.apply_phrase(phrase,records,index,last,options) end
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.
-  if not derived and records[index+1] and records[index+1][0x0D]~=0x2A then node[0x9C]='' end
+  if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end
   if not value then
     local left,separator,right=source:match('^([^/-]+)([/-])(.+)$')
     if left then
       local attempt=lexicon.attempt_fields(source)
-      for at,v in pairs(attempt and attempt.fields or {}) do node[at]=v end
-      node[0x12],node[0x87]=left,#left
-      local delimiter=boundary(separator,0);delimiter[0x0F]=0x2F
-      if separator=='/' then node[0x0F]=0x2F end
+      for at,v in pairs(attempt and attempt.fields or {}) do node[layout.key(at)]=v end
+      node.source,node.source_length=left,#left
+      local delimiter=boundary(separator,0);delimiter.marker=0x2F
+      if separator=='/' then node.marker=0x2F end
       table.insert(records,index+1,delimiter)
       table.insert(records,index+2,word(right,0))
       return index
@@ -667,7 +672,7 @@ local function decode(dictionary,records,index,options)
   if value then
     lexicon.decode_reading(node,value:sub(2):match('^[^\\]*'),options)
 
-  elseif nodes.tag(node)=='?' or nodes.tag(node)=='#' then node[0x74],node[0x77]=3,1 end
+  elseif nodes.tag(node)=='?' or nodes.tag(node)=='#' then node.person,node.gender=3,1 end
   return index+1
 end
 
@@ -676,7 +681,7 @@ function lexicon.analyze(dictionary,input,options)
   local records,terminator,word_count=lexicon.tokenize(input)
   local i=1
   while i<=#records do
-    if records[i][0x0E]==0x57 and (nodes.tag(records[i])=='?' or records[i][0x0B]==1) then
+    if records[i].kind==0x57 and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then
       i=decode(dictionary,records,i,options)
     else i=i+1 end
   end

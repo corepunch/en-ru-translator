@@ -1,3 +1,4 @@
+local layout = require 'core.record_layout'
 local text = require 'core.text'
 local nodes = require 'core.nodes'
 local generation = {}
@@ -115,9 +116,9 @@ end
 
 local function record(state,node)
   local r={}
-  function r.b(f) return nodes.byte(node,f) end
-  function r.w(f) return signed(node[f] or 0) end
-  function r.set(f,v) node[f]=v end
+  function r.b(f) return nodes.number(node,f) end
+  function r.w(f) return signed(node[layout.key(f)] or 0) end
+  function r.set(f,v) node[layout.key(f)]=v end
   r.word=r.set
   function r.text() return node.text or '' end
   function r.length() return #r.text() end
@@ -127,31 +128,31 @@ local function record(state,node)
   function r.cat(at) node.text=r.text()..state.assets:string(at) end
   function r.copy(at) node.text=state.assets:string(at) end
   function r.save(value) if value==nil then return false end; node.text=value; return true end
-  function r.valid() return r.w(0x85)>=0 and r.w(0x85)<0x7F end
+  function r.valid() return r.w('paradigm')>=0 and r.w('paradigm')<0x7F end
   function r.adjective()
-    return r.save(generation.adjective_form(state,r.w(0x85),r.text(),r.b(0x77),r.b(0x72),generation.case(r.b(0x76))))
+    return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask'))))
   end
   function r.verb(id,aspect)
-    return r.save(generation.verb_form(state,id or r.w(0x85),r.text(),aspect or r.b(0x75),r.b(0x78),r.b(0x74),
-      r.b(0x72),r.b(0x73),r.b(0x77)))
+    return r.save(generation.verb_form(state,id or r.w('paradigm'),r.text(),aspect or r.b('aspect'),r.b('verb_flags'),r.b('person'),
+      r.b('number'),r.b('tense'),r.b('gender')))
   end
   return r
 end
 
 function generation.participle(state, node)
   local r = record(state, node)
-  if not r.save(generation.participle_form(state, r.w(0x85), r.text(), r.b(0x75), r.b(0x0C), r.b(0x7A), r.b(0x73))) then return end
+  if not r.save(generation.participle_form(state, r.w('paradigm'), r.text(), r.b('aspect'), r.b('tag'), r.b('passive'), r.b('tense'))) then return end
   local n = r.length()
-  if r.b(0x7B) ~= 0 then
+  if r.b('short_form') ~= 0 then
     if r.ends(0x48BC, n) then n = n - 2; r.put(n, 0) end
     n = r.length()
     r.put(n - (r.byte(n - 3) == 0xAD and 3 or 2), 0)
-    if r.b(0x72) ~= 0 then r.cat(0x48BF)
-    elseif r.b(0x77) == 2 then r.cat(0x48C1)
-    elseif r.b(0x77) == 0 then r.cat(0x48C3) end
+    if r.b('number') ~= 0 then r.cat(0x48BF)
+    elseif r.b('gender') == 2 then r.cat(0x48C1)
+    elseif r.b('gender') == 0 then r.cat(0x48C3) end
   else
     local c = r.byte(n - (r.ends(0x48C5, n) and 5 or 3))
-    r.word(0x85, (c == 0xE7 or c == 0xE8 or c == 0xE9) and 2 or 0)
+    r.word('paradigm', (c == 0xE7 or c == 0xE8 or c == 0xE9) and 2 or 0)
     r.adjective()
   end
 end
@@ -162,86 +163,86 @@ function generation.pronoun(state,node)
   stem=stem or r.text()
   local result
   if text.ends(stem,state.assets:string(0x48C8)) then
-    r.word(0x85,6)
-    result=generation.adjective_form(state,6,stem,r.b(0x77),r.b(0x72),generation.case(r.b(0x76)))
-  else result=generation.pronoun_form(state,stem,r.b(0x74),r.b(0x77),r.b(0x72),generation.case(r.b(0x76)),r.b(0x75)) end
+    r.word('paradigm',6)
+    result=generation.adjective_form(state,6,stem,r.b('gender'),r.b('number'),generation.case(r.b('case_mask')))
+  else result=generation.pronoun_form(state,stem,r.b('person'),r.b('gender'),r.b('number'),generation.case(r.b('case_mask')),r.b('aspect')) end
   if result then r.save(result..(tail or '')) end
 end
 
 function generation.word(state, node)
   local r = record(state, node)
-  local tag = r.b(0x0C)
+  local tag = r.b('tag')
   if tag == 0x4E then -- N
-    if r.valid() and (r.b(0x72) ~= 0 or r.b(0x76) > 1) then
-      r.save(generation.noun_form(state, r.w(0x85), r.text(), r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
+    if r.valid() and (r.b('number') ~= 0 or r.b('case_mask') > 1) then
+      r.save(generation.noun_form(state, r.w('paradigm'), r.text(), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
     end
   elseif tag == 0x55 then -- U
     local n = r.length()
     if r.ends(0x48CE, n) then
       local aspect = 0
-      if r.byte(0) ~= 0xE1 and r.b(0x75) == 1 then r.copy(0x48D3); aspect = 1 end
+      if r.byte(0) ~= 0xE1 and r.b('aspect') == 1 then r.copy(0x48D3); aspect = 1 end
       r.verb(0x5D, aspect)
     elseif r.ends(0x48D9, n) then
       r.put(n - 2, 0)
-      r.cat(r.b(0x72) ~= 0 and 0x48E0 or r.b(0x77) == 2 and 0x48E3 or r.b(0x77) == 1 and 0x48E6 or 0x48E9)
-      if r.b(0x78) & 2 ~= 0 then r.cat(0x48EC) end
-      if r.b(0x78) & 16 ~= 0 then r.cat(0x48F0) end
+      r.cat(r.b('number') ~= 0 and 0x48E0 or r.b('gender') == 2 and 0x48E3 or r.b('gender') == 1 and 0x48E6 or 0x48E9)
+      if r.b('verb_flags') & 2 ~= 0 then r.cat(0x48EC) end
+      if r.b('verb_flags') & 16 ~= 0 then r.cat(0x48F0) end
     end
   elseif tag == 0x58 or tag == 0x78 then -- X/x
-    if tag == 0x78 and r.b(0x0F) == 0x6B then return 1 end
+    if tag == 0x78 and r.b('marker') == 0x6B then return 1 end
     local n = r.length()
     if r.byte(n - 1) == 0xAE then
       r.put(n - 2, 0)
-      r.cat(r.b(0x72) ~= 0 and 0x48F4 or r.b(0x77) == 2 and 0x48F7 or r.b(0x77) == 1 and 0x48FA or 0x48FD)
-      if r.b(0x78) & 2 ~= 0 then r.cat(0x4900) end
-      if r.b(0x78) & 16 ~= 0 then r.cat(0x4904) end
-    elseif r.b(0x78) & 8 == 0 then
-      if r.ends(0x4908, 4) then r.word(0x85, 0x39)
-      elseif r.ends(0x490D) then r.set(0x75, 0); r.word(0x85, 0)
+      r.cat(r.b('number') ~= 0 and 0x48F4 or r.b('gender') == 2 and 0x48F7 or r.b('gender') == 1 and 0x48FA or 0x48FD)
+      if r.b('verb_flags') & 2 ~= 0 then r.cat(0x4900) end
+      if r.b('verb_flags') & 16 ~= 0 then r.cat(0x4904) end
+    elseif r.b('verb_flags') & 8 == 0 then
+      if r.ends(0x4908, 4) then r.word('paradigm', 0x39)
+      elseif r.ends(0x490D) then r.set(0x75, 0); r.word('paradigm', 0)
       else return 1 end
       r.verb()
     end
   elseif tag == 0x59 then -- Y
-    if r.ends(0x4914) then r.word(0x85, 0x28); r.verb() end
+    if r.ends(0x4914) then r.word('paradigm', 0x28); r.verb() end
   elseif tag == 0x56 or tag == 0x76 then -- V/v
     if node.aux then
       local partner = record(state, node.aux)
       for i=0,partner.length()-1 do
         if text.alpha(partner.byte(i)) then partner.put(i,0); break end
       end
-      if partner.ends(0x4919, 4) and partner.b(0x78) & 8 == 0 then
-        local subject = r.b(0x78) & 8 ~= 0 and r.b(0x75) == 0 and partner or r
-        partner.save(generation.verb_form(state, 0x39, partner.text(), partner.b(0x75), subject.b(0x78), subject.b(0x74),
-          subject.b(0x72), partner.b(0x73), subject.b(0x77)))
+      if partner.ends(0x4919, 4) and partner.b('verb_flags') & 8 == 0 then
+        local subject = r.b('verb_flags') & 8 ~= 0 and r.b('aspect') == 0 and partner or r
+        partner.save(generation.verb_form(state, 0x39, partner.text(), partner.b('aspect'), subject.b('verb_flags'), subject.b('person'),
+          subject.b('number'), partner.b('tense'), subject.b('gender')))
       end
     end
     if r.valid() then
-      if r.b(0x7A) ~= 0 and r.b(0x7B) ~= 0 then r.set(0x75, 1); generation.participle(state, node)
+      if r.b('passive') ~= 0 and r.b('short_form') ~= 0 then r.set(0x75, 1); generation.participle(state, node)
       else
-        if r.b(0x78) & 8 ~= 0 then r.set(0x74, 0) end
+        if r.b('verb_flags') & 8 ~= 0 then r.set(0x74, 0) end
         r.verb()
       end
     end
   elseif tag == 0x47 then -- G
     if r.valid() then
-      r.save(generation.participle_form(state, r.w(0x85), r.text(), r.b(0x75), 0x47, 0, 0))
+      r.save(generation.participle_form(state, r.w('paradigm'), r.text(), r.b('aspect'), 0x47, 0, 0))
     end
   elseif tag == 0x41 then -- A
-    if (r.b(0x7B) ~= 0 and r.b(0x66) == 0x41) or r.valid() then
-      local original = r.b(0x66)
+    if (r.b('short_form') ~= 0 and r.b('previous_tag') == 0x41) or r.valid() then
+      local original = r.b('previous_tag')
       if original == 0x45 or original == 0x56 or original == 0x46 or original == 0x65 or original == 0x47 then
         if original == 0x45 or original == 0x65 or original == 0x46 then
-          r.set(0x7A, 1); if r.b(0x75) == 0 then r.set(0x73, 0) end
+          r.set(0x7A, 1); if r.b('aspect') == 0 then r.set(0x73, 0) end
         end
         generation.participle(state, node); return 1
-      elseif r.b(0x7B) ~= 0 then
+      elseif r.b('short_form') ~= 0 then
         local n = r.length() - 2
         r.put(n, 0)
-        if r.b(0x72) ~= 0 then
+        if r.b('number') ~= 0 then
           if r.ends(0x491E, n) then r.put(n - 1, 0) end
           r.cat(0x4921)
-        elseif r.b(0x77) == 2 then r.cat(0x4923)
-        elseif r.b(0x77) == 0 then r.cat(0x4925)
+        elseif r.b('gender') == 2 then r.cat(0x4923)
+        elseif r.b('gender') == 0 then r.cat(0x4925)
         else
           if r.ends(0x4927, n) or r.ends(0x492A, n) then r.put(n - 1, 0); r.cat(0x492D) end
           if r.ends(0x4930, n) or r.ends(0x4933, n) or r.ends(0x4936, n) or r.ends(0x4939, n) then r.put(n - 1, 0); r.cat(0x493C) end
@@ -251,20 +252,20 @@ function generation.word(state, node)
         return 1
       else r.adjective() end
     end
-    if r.b(0x0F) == 0x61 and (r.b(0x73) == 1 or r.b(0x73) == 2) then
+    if r.b('marker') == 0x61 and (r.b('tense') == 1 or r.b('tense') == 2) then
       local saved = r.text()
-      if r.b(0x73) == 2 then
-        r.save(generation.adjective_form(state, 0, state.assets:string(0x4948), r.b(0x77), r.b(0x72), generation.case(r.b(0x76))))
+      if r.b('tense') == 2 then
+        r.save(generation.adjective_form(state, 0, state.assets:string(0x4948), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
       else r.copy(0x494E) end
       r.cat(0x4954)
       node.text = r.text() .. saved
     end
   elseif tag == 0x4C or tag == 0x6C then -- L/l
-    r.word(0x85, 0); r.adjective()
+    r.word('paradigm', 0); r.adjective()
   elseif tag == 0x53 then -- S
     if r.ends(0x4956) then
-      if r.b(0x77) == 2 then r.copy(0x495A)
-      elseif r.b(0x77) == 0 then r.copy(0x495D) end
+      if r.b('gender') == 2 then r.copy(0x495A)
+      elseif r.b('gender') == 0 then r.copy(0x495D) end
     end
   elseif tag == 0x49 or tag == 0x4F then -- I/O; native ordered suffix tests
     local id
@@ -274,9 +275,9 @@ function generation.word(state, node)
         if r.ends(ending[1]) then id = ending[2]; break end
       end
     end
-    if id then r.word(0x85, id); r.adjective() end
+    if id then r.word('paradigm', id); r.adjective() end
   elseif tag == 0x44 then -- D
-    if r.b(0x66) == 0x41 and r.b(0x0F) == 0 then
+    if r.b('previous_tag') == 0x41 and r.b('marker') == 0 then
       local n = r.length()
       r.put(n - 2, r.ends(0x49D4, (n - 2) & 0xFFFF) and 0xA8 or 0xAE)
       r.put(n - 1, 0)
@@ -285,26 +286,26 @@ function generation.word(state, node)
     node.text = state.assets:string(0x4894) .. r.text()
     if r.valid() then
       r.set(0x0C, 0x45); r.set(0x73, 0); r.set(0x75, 0)
-      if r.b(0x66) == 0x45 or r.b(0x66) == 0x65 then r.set(0x7A, 1) end
+      if r.b('previous_tag') == 0x45 or r.b('previous_tag') == 0x65 then r.set(0x7A, 1) end
       generation.participle(state, node)
     end
   elseif tag == 0x45 then -- E
     if r.valid() then
       local n = r.length()
       if r.ends(0x49D7, n) then r.set(0x7A, 0) end
-      if r.b(0x7B) ~= 0 and r.b(0x6D) & 8 ~= 0 then
+      if r.b('short_form') ~= 0 and r.b('dictionary_flags') & 8 ~= 0 then
         r.set(0x75, 0); r.set(0x78, 1); r.set(0x7A, 0); r.set(0x74, 3); r.set(0x73, 0); r.set(0x0C, 0x56)
         if not r.ends(0x49DA, n) then r.cat(0x49DD) end
         r.verb()
       else
-        if r.b(0x75) == 0 then r.set(0x73, 0) end
+        if r.b('aspect') == 0 then r.set(0x73, 0) end
         generation.participle(state, node)
       end
     end
   elseif tag == 0x4D or tag == 0x51 then -- M/Q
-    if r.b(0x66) == 0x53 and r.ends(0x49E0) then
-      if r.b(0x72) == 0 and r.b(0x76) & 8 == 0 then
-        r.word(0x85, 12); r.put(2, 0); r.adjective()
+    if r.b('previous_tag') == 0x53 and r.ends(0x49E0) then
+      if r.b('number') == 0 and r.b('case_mask') & 8 == 0 then
+        r.word('paradigm', 12); r.put(2, 0); r.adjective()
       end
     else generation.pronoun(state, node) end
   end
@@ -315,7 +316,7 @@ function generation.run(state,root)
   local node=root.next
   while node do
     local r=record(state,node)
-    if r.b(0x0E)==0x57 and r.b(0x0B)>1 and r.b(0x0C)~=0x23 and r.b(0x0C)~=0x48 then
+    if r.b('kind')==0x57 and r.b('reading_state')>1 and r.b('tag')~=0x23 and r.b('tag')~=0x48 then
       generation.word(state,node)
     end
     node=node.next

@@ -44,7 +44,7 @@ Thus the pattern covers two tokens, not three, and `NN` supplies two actions.
 The arrow is explanatory notation; it is not stored in the rule string.
 
 **Native behavior:** `Z V` or `Z N` matches, then both current tags become N.
-Each changed node saves its previous tag at offset `0x66`. The replacement routine
+Each changed node saves its previous tag in `previous_tag` (native offset `0x66`). The replacement routine
 does not search the dictionary or invent a noun translation: it changes state that
 later handlers and output routines interpret. A grammatical tag and the stored
 translation text are separate fields.

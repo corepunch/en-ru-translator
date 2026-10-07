@@ -82,7 +82,7 @@ function engine.run(input, options)
   local function count(node)
     if not node or seen[node] then return end
     seen[node]=true
-    if nodes.byte(node,0x0E)==0x57 then state.word_count=state.word_count+1 end
+    if nodes.number(node,'kind')==0x57 then state.word_count=state.word_count+1 end
     count(node.next); count(node.aux)
   end
   count(analyzed.root.next)

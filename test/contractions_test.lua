@@ -16,8 +16,8 @@ local function sources(text)
 	local result, words = {}, {}
 	for index = 0, state.count - 1 do
 		local node = state.vector[index]
-		if node[0x0E] == 0x57 then
-			table.insert(result, node[0x12])
+		if node.kind == 0x57 then
+			table.insert(result, node.source)
 			table.insert(words, node)
 		end
 	end
@@ -35,9 +35,9 @@ while executable:word(at) ~= 0 do
 	local stem = selector == 4 and "let" or selector == 2 and "can" or "he"
 	local actual, vector = sources(input)
 	assert(actual == stem .. " " .. inserted, input .. " => " .. actual)
-	assert(vector[1][0x87] == #stem and vector[2][0x87] == #inserted)
-	assert(vector[2][0x10] == 0)
-	assert(vector[2][0x0F] == (kind == "X" and 0x27 or 0))
+	assert(vector[1].source_length == #stem and vector[2].source_length == #inserted)
+	assert(vector[2].source_position == 0)
+	assert(vector[2].marker == (kind == "X" and 0x27 or 0))
 	at, count = at + 18, count + 1
 end
 assert(count == 9)

@@ -30,9 +30,8 @@ snapshot or native executable execution.
 
 ## Representation and scheduling
 
-All stages use ordinary Lua tables and references. Numeric field identifiers
-retain the recovered names used by the grammar code, while words are complete
-numbers and text values are strings. `nodes.prepare(root)` initializes owned
+All stages use ordinary Lua tables and references. Grammatical properties have
+named fields, numbers are complete values, and text values are strings. `nodes.prepare(root)` initializes owned
 reading strings in the existing graph after reordering; it preserves auxiliary
 record identity without copying or serializing records.
 
@@ -68,3 +67,29 @@ research; the runtime selects rules directly.
 
 These informed functional module boundaries and ordinary function composition.
 They do not provide a replacement for the recovered linguistic algorithms.
+
+## Named grammar records
+
+The runtime stores grammatical properties as named Lua fields, rather than
+native offsets: `word.tense`, `word.person`, `word.gender`, `word.case_mask`,
+`word.aspect`, `word.passive`, and `word.short_form`. Source text, packed lexical
+readings and generated text are distinct fields (`source`, `reading`, `text`).
+Links remain ordinary table references. `nodes.number` supplies a zero default
+for absent numeric properties and reads the first byte when an original routine
+inspects a string; `nodes.character` exposes character tags and markers.
+
+`core/record_layout.lua` documents the native mapping used for fixture import and
+packed dictionary decoding. `lookup_*` and `dictionary_*` fields preserve metadata
+whose bit interpretation varies by grammatical class. Their names do not imply
+that those bytes have been fully decoded into linguistic concepts.
+
+Hex notation remains useful for bit masks, encoded character bytes and binary
+asset offsets. `core/grammar_values.lua` names known case masks, tenses, aspects
+and verb flags. Numeric tags and the zero-based vectors remain at matcher and
+native fixture boundaries. Rule selector IDs are source data: dispatch tables
+retain those IDs, while handlers implement named operations.
+
+Phrasing handlers return an explicit traversal action to their scheduler.
+Rebuilding a vector does not automatically replace a saved count: a few original
+handlers deliberately keep it. Syntax uses `nil` for missing records, but its
+working frame persists between selectors because later rules can reuse it.

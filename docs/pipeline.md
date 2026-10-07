@@ -43,6 +43,10 @@ and `last`; the syntax pass relinks them into the sentence.
 `matching` has one interpreter with views for lexical records and constituent
 tags. A view supplies live tags, cached spans and optional lexical tests.
 T5/T6 use literal tag sequences and sequential swaps.
+Lexical classes accept tag and word alternatives together: `[A\`good\`]`
+matches either an adjective or the word `good`. Quoted `!label!` alternatives
+match reading annotations. Negation applies to the whole class; span guards
+and anchors accept the same alternatives.
 
 Sense selection uses local string positions, independent alternative records,
 and immutable dictionary lines. Morphology returns a string or `nil`; output

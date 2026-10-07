@@ -12,8 +12,5 @@ for f in test/*_test.lua; do
 done
 
 echo
-echo "== Sentence regression =="
-lua demo/compare.lua
-
-echo
+sh test/cli_test.sh
 echo "All standard tests completed."

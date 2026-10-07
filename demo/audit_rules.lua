@@ -1,7 +1,7 @@
 -- Audit extraction only: identical records do not prove identical execution.
-local utils = require "core.utils"
+local encoding = require "core.encoding"
 local rules = require "core.rules"
-local suffixes = require "core.suffixes"
+local suffixes = require("core.lexicon").suffix_rows()
 local binary = require "demo.ltpro_binary"
 local path = arg[1] or "LTGOLD/LTPRO.EXE"
 local reader = binary.read(path)
@@ -53,8 +53,8 @@ for _, layout in ipairs(binary.layouts) do
   local expected, actual = reader.records(layout), {}
   total = total + #expected
   for _, record in ipairs(expected) do
-    record.pattern = utils.decode(record.pattern, false)
-    record.action = record.action and utils.decode(record.action, false)
+    record.pattern = encoding.decode(record.pattern, false)
+    record.action = record.action and encoding.decode(record.action, false)
   end
   for _, record in ipairs(rules[layout.lua_index or layout.lua_key] or {}) do
     actual[#actual + 1] = {
@@ -65,17 +65,18 @@ for _, layout in ipairs(binary.layouts) do
   compare(layout, expected, actual)
 end
 
+-- Runtime suffix rows keep selectors and endings; native flags are decoded by the extractor.
 local expected_suffixes = reader.records(binary.suffix_layout)
 local suffix_differences = math.abs(#expected_suffixes - #suffixes)
 for i = 1, math.min(#expected_suffixes, #suffixes) do
   local a, b = expected_suffixes[i], suffixes[i]
-  if a.flag ~= b.flag or a.suffix ~= b.suffix or a.tag ~= b.tag then
+  if a.suffix ~= b.ending or a.tag ~= b.selector then
     suffix_differences = suffix_differences + 1
     print("  suffix record differs: " .. i)
   end
 end
 failures = failures + suffix_differences
-print(string.format("Suffixes: EXE=%d Lua=%d differences=%d", #expected_suffixes, #suffixes, suffix_differences))
+print(string.format("Suffix selectors/endings: EXE=%d Lua=%d differences=%d", #expected_suffixes, #suffixes, suffix_differences))
 print(string.format("Extraction: %d/%d exact rule records; %d difference(s). Runtime equivalence is NOT checked.",
   matched, total, failures))
 os.exit(failures == 0 and 0 or 1)

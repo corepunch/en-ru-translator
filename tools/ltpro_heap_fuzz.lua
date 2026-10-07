@@ -1,5 +1,5 @@
-local memory = require 'core.ltpro.memory'
-local heap = require 'core.ltpro.heap'
+local memory = require 'core.memory'
+local heap = require 'core.heap'
 local spec = dofile(arg[1])
 local f = assert(io.open(spec.memory, 'rb')); local base = f:read('a'); f:close()
 local m = memory.new(base)

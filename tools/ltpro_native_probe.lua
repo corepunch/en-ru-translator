@@ -1,6 +1,6 @@
 -- Feed native fixtures to the Lua port; stdout is machine-readable for the 8086 harness.
-local nodes = require 'core.ltpro.nodes'
-local reorder = require 'core.ltpro.reorder'
+local nodes = require 'core.nodes'
+local reorder = require 'core.reorder'
 for _, fixture in ipairs(assert(loadfile(arg[1]))()) do
   local records = {}
   for i, fields in ipairs(fixture) do

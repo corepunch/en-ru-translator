@@ -1,5 +1,8 @@
 # PLAN.md — Reverse-Engineering the LTGOLD Rule System
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 Historical research notes; several table roles, flag interpretations, and scan-order
 claims below have been disproved. See [the current executable comparison](LTPRO_COMPARISON.md).
 The current work sequence is in [the LTPRO parity plan](LTPRO_PARITY_PLAN.md).

@@ -159,7 +159,7 @@ table pointer, SI position, `[bp-2]` removed.
 | constituent rules | `21984` | `CS:2318` | 21 selectors |
 
 Handler addresses for T1–T4, reorder, cleanup, T7 and T8 are in
-`core/ltpro/dispatch.lua`. T1 has no indirect jump; its dispatch is a compare
+`demo/extract_dispatch.lua`. T1 has no indirect jump; its dispatch is a compare
 chain.
 
 ## Loop conventions
@@ -250,7 +250,7 @@ chain.
 
 ## Post-reorder stages (ported 2026-10-06)
 
-Ported to Lua on a byte-level memory model (`core/ltpro/memory.lua`) and
+Ported to Lua on a byte-level memory model (`core/memory.lua`) and
 verified against native code run from full DOS memory snapshots; see
 `reference/LTPRO_HANDOVER.md`. Facts needed by later work:
 

@@ -1,5 +1,10 @@
 # Case Study: Translating Zork — Adventure Game Text
 
+> Historical case study for the retired parser/compiler and overlay tools.
+> These commands describe that implementation, not the current engine.
+> Use [the current API](../README.md) for translation; custom overlays are unsupported.
+
+
 This document walks through improving the translator for adventure game text, using the opening
 sentences of Zork as a concrete example. It shows how to identify problems, add vocabulary,
 and add rules — and serves as a template for future domain-specific improvements.

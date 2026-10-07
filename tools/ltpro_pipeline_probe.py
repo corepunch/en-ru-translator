@@ -57,7 +57,7 @@ def lua_fixture(cases, data_dir):
     inputs = ','.join(lua_text(case['input']) for case in cases)
     return '''
 package.path = './?.lua;./?/init.lua;' .. package.path
-local pipeline = require 'core.ltpro.pipeline'
+local engine = require 'core.engine'
 local encoding = require 'core.encoding'
 local inputs = {''' + inputs + '''}
 local options = {data_dir=''' + lua_text(str(data_dir)) + '''}
@@ -65,7 +65,7 @@ local function hex(value)
   return (value:gsub('.', function(c) return string.format('%02x', c:byte()) end))
 end
 for i, input in ipairs(inputs) do
-  local ok, result = pcall(pipeline.translate, input, options)
+  local ok, result = pcall(engine.translate, input, options)
   if ok then io.write(i, '\\tOK\\t', hex(encoding.encode(result)), '\\n')
   else io.write(i, '\\tERROR\\t', hex(encoding.encode(tostring(result))), '\\n') end
   collectgarbage('collect')

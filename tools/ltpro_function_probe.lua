@@ -1,5 +1,5 @@
 -- Replays native calls recorded by ltpro_function_probe.py through Lua ports.
-local memory = require 'core.ltpro.memory'
+local memory = require 'core.memory'
 local spec = dofile(assert(arg[1]))
 local show = tonumber(arg[2] or '5')
 

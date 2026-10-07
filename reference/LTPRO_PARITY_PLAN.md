@@ -1,5 +1,8 @@
 # Plan for LTPRO parity
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 Status: CLI corpus parity achieved; broader parity in progress, 2026-10-07. This is project research
 documentation, not agent instructions. It supersedes the execution plan in the
 historical [PLAN.md](PLAN.md), while preserving those notes as evidence to recheck.
@@ -159,7 +162,7 @@ establishes each transformation.
 
 Port token boundaries, dictionary search order, multiword matching, suffix/prefix
 analysis, spelling changes, case handling, unknown words, and numeric input.
-Construct the native lexical records and tag cache. Extend `core/ltpro/nodes.lua`
+Construct the native lexical records and tag cache. Extend `core/nodes.lua`
 with confirmed fields and operations; retain offsets for unnamed fields. Model
 shared references and record lifetime wherever they affect later behavior.
 

@@ -1,5 +1,8 @@
 # Native stage implementation — 2026-10-06
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 The independent Lua path now reconstructs the two planned lexical examples and
 executes native T1, T2, T3 and T4 scheduling over captured nodes. Full translation
 parity is still incomplete: production paragraph matches improved from **29/77
@@ -74,17 +77,17 @@ output passes. No change to the source executable was needed.
 
 | Module | Behavior | Evidence and limits |
 |---|---|---|
-| `core/ltpro/dictionary.lua` | Lossless record ingestion, ordered duplicates, original bytes | Byte-preservation checks; native lookup/duplicate policy is still separate |
-| `core/ltpro/readings.lua` | Metadata field writes, numeric prefixes, case masks, tag normalization, translated readings | **1,377/1,377** original-instruction comparisons; unknown-word decoding and lexical macros reject explicitly |
-| `core/ltpro/lexical.lua` | Exact-word dictionary/node slice with native metadata and links | **2/2** planned native lexical snapshots; tokenization, multiword lookup, annotations, unknowns and derived searches remain incomplete |
-| `core/ltpro/nodes.lua` | Raw record import, physical pointer identity, linked records and null-parent boundary construction | Alias/invalid-link checks and native calloc-constructor fixtures; records retain unnamed bytes |
-| `core/ltpro/first_pass.lua` | T1 normalization, rule order, handler writes, cache rebuilds and early termination | **77/77** DOS sentence-stage fixtures and **36/36** native rule-selection events, including intermediate fields |
-| `core/ltpro/cleanup.lua` | Cleanup used by question preprocessing | Verified within the captured T1 question paths; only selectors appearing in the nine extracted records are implemented |
-| `core/ltpro/second_pass.lua` | T2 scheduling, all 53 selector bodies the table uses plus unreferenced 17 and 53, linked-record moves, auxiliary links at `+62`, prefix strings at `+243`, stale `DS:C7B1` after handler rebuilds | **76/76** DOS T1→T2 fixtures; **962/962** generated-node instruction fixtures covering every selector |
-| `core/ltpro/third_pass.lua` | T3 scheduling, the 36 selector bodies the table uses plus 8 unreferenced non-default bodies, the `back` endpoint adjustment, terminator-dependent selector 37 | **76/76** DOS T2→T3 fixtures; **872/872** generated-node instruction fixtures covering every selector |
-| `core/ltpro/fourth_pass.lua` | The T4 function: cached-context adjective pre-pass, per-word sub-rule pre-pass with its 17 selector characters, the 9-byte-record loop from position 0 with a rebuild after each removing match, the 54 selector bodies the table uses plus 6 unreferenced ones, boundary insertion and record moves | **76/76** DOS T3→T4 fixtures (12 change tags); **1,690/1,690** generated-node instruction fixtures: every table selector plus 6 unreferenced bodies, both pre-passes, and all 289 dictionary sub-rules (578 cases) |
-| `core/ltpro/reorder.lua` | T5/T6 reordering over native records; now reads the record's own `+11C` text and reports whether it rebuilt | **76/76** DOS T4→reorder fixtures (33 change tags); 358 isolated instruction cases as before |
-| `core/ltpro/lexical.lua` (sub-rules) | Attaches up to ten `word pattern*$action` records per word in dictionary order, as `0A4F:1603` does after the multi-word test | Stage test; the corpus arrays captured from DOS are used directly by the T4 probe |
+| `core/lexicon.lua` | Lossless record ingestion, ordered duplicates, original bytes | Byte-preservation checks; native lookup/duplicate policy is still separate |
+| `core/lexicon.lua` | Metadata field writes, numeric prefixes, case masks, tag normalization, translated readings | **1,377/1,377** original-instruction comparisons; unknown-word decoding and lexical macros reject explicitly |
+| `core/lexicon.lua` | Exact-word dictionary/node slice with native metadata and links | **2/2** planned native lexical snapshots; tokenization, multiword lookup, annotations, unknowns and derived searches remain incomplete |
+| `core/nodes.lua` | Raw record import, physical pointer identity, linked records and null-parent boundary construction | Alias/invalid-link checks and native calloc-constructor fixtures; records retain unnamed bytes |
+| `core/grammar.lua` | T1 normalization, rule order, handler writes, cache rebuilds and early termination | **77/77** DOS sentence-stage fixtures and **36/36** native rule-selection events, including intermediate fields |
+| `core/grammar.lua` | Cleanup used by question preprocessing | Verified within the captured T1 question paths; only selectors appearing in the nine extracted records are implemented |
+| `core/grammar.lua` | T2 scheduling, all 53 selector bodies the table uses plus unreferenced 17 and 53, linked-record moves, auxiliary links at `+62`, prefix strings at `+243`, stale `DS:C7B1` after handler rebuilds | **76/76** DOS T1→T2 fixtures; **962/962** generated-node instruction fixtures covering every selector |
+| `core/grammar.lua` | T3 scheduling, the 36 selector bodies the table uses plus 8 unreferenced non-default bodies, the `back` endpoint adjustment, terminator-dependent selector 37 | **76/76** DOS T2→T3 fixtures; **872/872** generated-node instruction fixtures covering every selector |
+| `core/phrasing.lua` | The T4 function: cached-context adjective pre-pass, per-word sub-rule pre-pass with its 17 selector characters, the 9-byte-record loop from position 0 with a rebuild after each removing match, the 54 selector bodies the table uses plus 6 unreferenced ones, boundary insertion and record moves | **76/76** DOS T3→T4 fixtures (12 change tags); **1,690/1,690** generated-node instruction fixtures: every table selector plus 6 unreferenced bodies, both pre-passes, and all 289 dictionary sub-rules (578 cases) |
+| `core/reorder.lua` | T5/T6 reordering over native records; now reads the record's own `+11C` text and reports whether it rebuilt | **76/76** DOS T4→reorder fixtures (33 change tags); 358 isolated instruction cases as before |
+| `core/lexicon.lua` (sub-rules) | Attaches up to ten `word pattern*$action` records per word in dictionary order, as `0A4F:1603` does after the multi-word test | Stage test; the corpus arrays captured from DOS are used directly by the T4 probe |
 
 T1 has 15 extracted selector entries plus its default. All bodies are implemented.
 The unchanged grammar corpus observes **0, 1, 10, 11, 20 and 63**. An additional
@@ -230,9 +233,9 @@ python3 tools/ltpro_native_probe.py
 python3 tools/ltpro_lexical_probe.py
 python3 tools/ltpro_readings_probe.py
 python3 tools/ltpro_ledger.py
-python3 tools/ltpro_compare.py --report test/ltpro/comparison.json
-python3 tools/ltpro_compare.py --cases test/ltpro/capitalization-cases.json --reference test/ltpro/capitalization-reference.json
-lua test/ltpro_stages_test.lua
+python3 tools/ltpro_pipeline_probe.py --report test/ltpro/comparison.json
+python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/capitalization-cases.json --reference test/ltpro/capitalization-reference.json
+lua test/stages_test.lua
 ```
 
 The full comparison intentionally exits 1 while 33 differences remain. The

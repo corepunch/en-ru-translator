@@ -1,5 +1,8 @@
 # Snapshot-free LTPRO CLI — 2026-10-07
 
+> Historical research record. The older translator has since been retired; see
+> [the current API and commands](../README.md) and [module map](../docs/pipeline.md).
+
 The recovered Lua pipeline now translates input to output without running DOS,
 executing the EXE, or loading a captured process snapshot. It matches all **77/77**
 original translation outputs and **20/20** newly captured inputs. The new inputs
@@ -13,10 +16,10 @@ Runtime data initialization is an internal dependency and is now implemented.
 ## Run
 
 ```sh
-lua init.lua --ltpro 'The letter of credit is valid.'
-printf '%s' 'She cannot work.' | lua init.lua --ltpro
+lua init.lua 'The letter of credit is valid.'
+printf '%s' 'She cannot work.' | lua init.lua
 # Equivalent standalone entry:
-lua tools/ltpro_translate.lua 'Two books.'
+lua init.lua 'Two books.'
 ```
 
 The native path uses the frozen `LTGOLD/` assets. `--data DIR`, `--exe FILE`,
@@ -53,11 +56,11 @@ python3 tools/ltpro_pipeline_probe.py
 python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/holdout_cases.json --reference test/ltpro/holdout_reference.json
 python3 tools/ltpro_lexical_probe.py
 python3 tools/ltpro_readings_probe.py
-lua test/ltpro_initialize_test.lua
-lua test/ltpro_bridge_test.lua
-lua test/ltpro_lexical_test.lua
-lua test/ltpro_suffixes_test.lua
-lua test/ltpro_pipeline_test.lua
+lua test/initialize_test.lua
+lua test/bridge_test.lua
+lua test/lexical_test.lua
+lua test/suffixes_test.lua
+lua test/pipeline_test.lua
 ```
 
 | Check | Result |

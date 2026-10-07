@@ -4,28 +4,16 @@
 DOSBox-X 2026.10.01 on 2026-10-06. Two complete runs produced identical output
 bytes for every case. All ten historical reference paragraphs were reproduced.
 
-The current Lua baseline matches **44/77**, with **33 mismatches and no errors**.
-This is a reproducible baseline, not a claim of complete rule coverage or parity.
-
-| Group | Exact matches | Cases |
-|---|---:|---:|
-| Historical examples | 5 | 10 |
-| Existing Lua regression inputs | 22 | 25 |
-| Lexical ambiguity | 5 | 7 |
-| Auxiliaries, tense, passive | 3 | 9 |
-| Clauses and questions | 1 | 7 |
-| Numbers and dates | 2 | 6 |
-| Reordering | 3 | 4 |
-| Negation and existential constructions | 2 | 4 |
-| Punctuation and unknown words | 1 | 4 |
-| Old custom cat/mat expectation | 0 | 1 |
+The single Lua engine matches **77/77** inputs and **20/20** additional holdout
+inputs. The older 44/77 comparison files are retained as historical research
+artifacts, not current results. See [testing](../../TESTING.md) for current commands.
 
 ## Files
 
 - `cases.json`: input sentences and categories; no hand-authored expected translations.
 - `reference.json`: raw output as CP866 hex, decoded translation paragraphs,
   hashes, emulator version, configuration, command arguments and capture time.
-- `comparison.json`: the current Lua results, expected paragraphs, per-case
+- `comparison.json`: the retired translator’s results, expected paragraphs, per-case
   differences and the reference file's hash. This is a snapshot; rerun the comparison
   after changing the translator.
 - `stages.json`: native lexical/T1/T2 snapshots and T1 rule-selection events,
@@ -33,8 +21,7 @@ This is a reproducible baseline, not a claim of complete rule coverage or parity
   still match the original oracle on both runs. Native raw records, pointer
   identity, cache, rule IDs and handler IDs are retained.
 - `capitalization-cases.json`, `capitalization-reference.json` and
-  `capitalization-comparison.json`: 16 additional casing inputs, raw outputs equal
-  in two original-executable runs, and 16/16 current paragraph matches.
+  `capitalization-comparison.json`: 16 additional casing inputs and historical comparison results.
 
 The separate native T1 port matches **77/77 sentence-stage fixtures** and all
 **36 recorded rule-selection events**. There are 76 files entering grammar,
@@ -52,7 +39,7 @@ From the repository root:
 ```sh
 brew install dosbox-x
 python3 tools/ltpro_capture.py
-python3 tools/ltpro_compare.py --report test/ltpro/comparison.json
+python3 tools/ltpro_pipeline_probe.py --report /tmp/translator-comparison.json
 ```
 
 Capture runs the program with `/I INPUT /O OUTPUT /F- /B- /N`. Every input receives
@@ -80,7 +67,7 @@ reference file. Missing or empty outputs, timeouts, asset mutations, or differin
 runs fail the capture. Failure retains its temporary directory for diagnosis.
 For additional options, run either Python tool with `--help`.
 
-Comparison starts a fresh Lua process per case, loads the original BASE files,
+Comparison creates fresh engine state per case, loads the original BASE files,
 and checks their hashes and the captured input/raw-output integrity before running.
 It does not launch DOSBox-X or silently recapture. Its exit code is 1 when translation
 mismatches exist, 0 for an exact corpus match, and nonzero on invalid provenance or

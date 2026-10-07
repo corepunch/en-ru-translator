@@ -245,7 +245,7 @@ def differences(native, dos, snapshot):
     from ltpro_trace import HOOK_SEGMENT
     base = (snapshot['ds'] - DATA_SEGMENT) * 16
     stack = snapshot['ss'] * 16 + snapshot['sp']
-    excluded = [(0x46C, 0x470), (base + HOOK_SEGMENT * 16, base + HOOK_SEGMENT * 16 + 0x200), (stack - 0x40, stack)]
+    excluded = [(0x46C, 0x470), (base + HOOK_SEGMENT * 16, snapshot['ss'] * 16), (stack - 0x40, stack)]
     a, b = bytes(native[:MEMORY]), bytes(dos)
     runs, i = [], 0
     while True:

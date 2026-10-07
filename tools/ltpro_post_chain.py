@@ -2,15 +2,15 @@
 """Run the ported post-reorder stages back to back and compare with DOS.
 
 From each cached DOS snapshot taken after reordering, the Lua ports of the
-numeric pass (151F:2740), the constituent stage (1C3D:1B3F) and T8
-(1986:000E) run in sequence on the memory model, with no native code in
-between. The resulting memory is compared with the DOS snapshot taken after
-T8, outside the stack segment (not modeled), the BIOS tick counter, the
+numeric pass, constituent stage, T8, generation, sentence output and meanings
+run in sequence on the memory model, with no native code in between. The
+resulting memory is compared with the selected DOS boundary (T8 by default),
+outside the stack segment (not modeled), the BIOS tick counter, the
 trace hook's own bytes and strtok's saved pointer (it may point into dead
 stack). A passing case means the Lua stages reproduce every heap record,
 alternative, constituent element and global that DOS had.
 
-  python3 tools/ltpro_post_chain.py [--ids case-001 ...] [--until T8]
+  python3 tools/ltpro_post_chain.py [--ids case-001 ...] [--until meanings]
 """
 import argparse
 import subprocess
@@ -23,14 +23,16 @@ from ltpro_native_probe import lua_value
 from ltpro_snapshot import DATA_SEGMENT, driver_arguments
 from ltpro_trace import HOOK_SEGMENT
 
-ORDER = ['numeric', 'constituent', 'T8']
+ORDER = ['numeric', 'constituent', 'T8', 'generation', 'output', 'meanings']
 
 
 def excluded_ranges(snapshot):
     base = (snapshot['ds'] - DATA_SEGMENT) * 16
     ds = snapshot['ds'] * 16
     ss = snapshot['ss'] * 16
-    return [(0x46C, 0x470), (base + HOOK_SEGMENT * 16, base + HOOK_SEGMENT * 16 + 0x200),
+    # instrument() places SS immediately after the paragraph-aligned hook.
+    # Its size grows with SITES; a fixed 200h range misses the output hooks.
+    return [(0x46C, 0x470), (base + HOOK_SEGMENT * 16, ss),
             (ss, ss + 0x10000), (ds + 0xCA24, ds + 0xCA28)]
 
 
@@ -51,7 +53,7 @@ def main():
             for position, start in enumerate(snapshots):
                 if start['stage'] != 'reorder': continue
                 end = next((s for s in snapshots[position + 1:] if s['stage'] == args.until), None)
-                if end is None: continue
+                if end is None: raise ValueError(f'{path}: missing {args.until} snapshot; refresh the capture')
                 memory_file = directory / 'memory.bin'
                 memory_file.write_bytes(start['memory'])
                 offset, segment, si = driver_arguments(start)
@@ -79,6 +81,7 @@ def main():
                 else:
                     passed += 1
     print(f'Lua {"+".join(stages)} chain vs DOS: PASS={passed} FAIL={failed}')
+    if not passed and not failed: ap.error('no matching stage snapshots found')
     raise SystemExit(bool(failed))
 
 

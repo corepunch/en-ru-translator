@@ -10,8 +10,24 @@ local seventh = require 'core.ltpro.seventh_pass'
 local eighth = require 'core.ltpro.eighth_pass'
 local lexmatch = require 'core.ltpro.lexmatch'
 local memory = require 'core.ltpro.memory'
+local forms = require 'core.ltpro.forms'
+local generation = require 'core.ltpro.generation'
+local output = require 'core.ltpro.output'
 local function split32(v) return v & 0xFFFF, (v >> 16) & 0xFFFF end
 return function(add)
+  add('0687:0A50', function(m, a) records.clear(m, a[2], a[1]) end)
+  add('0687:0BB7', function(m, a) return output.sentence(m, a[2], a[1], a[4], a[3]) end)
+  add('0687:01C8', function(m, a) output.meanings(m, a[2], a[1], a[4], a[3]) end)
+  add('17AA:000A', function(m, a) return generation.case(a[1]) end)
+  add('17AA:0045', function(m, a) generation.participle(m, a[2], a[1]) end)
+  add('17AA:02E8', function(m, a) generation.pronoun(m, a[2], a[1]) end)
+  add('17AA:0475', function(m, a) return generation.word(m, a[2], a[1]) end)
+  add('17AA:1D31', function(m, a) return generation.run(m, a[2], a[1]) end)
+  add('1E71:02AC', function(m, a) local s, o = forms.noun(m, a[1], a[3], a[2], a[4], a[5], a[6]); return o, s end)
+  add('1E71:0420', function(m, a) local s, o = forms.adjective(m, a[1], a[3], a[2], a[4], a[5], a[6]); return o, s end)
+  add('1E71:05FB', function(m, a) local s, o = forms.verb(m, a[1], a[3], a[2], a[4], a[5], a[6], a[7], a[8], a[9]); return o, s end)
+  add('1E71:0977', function(m, a) local s, o = forms.participle(m, a[1], a[3], a[2], a[4], a[5], a[6], a[7]); return o, s end)
+  add('1E71:0CDC', function(m, a) local s, o = forms.pronoun(m, a[2], a[1], a[3], a[4], a[5], a[6], a[7]); return o, s end)
   add('211E:113A', function(m, a) return runtime.is_upper_cyrillic(a[1]) and 1 or 0 end)
   add('211E:115A', function(m, a) return runtime.is_lower_cyrillic(a[1]) and 1 or 0 end)
   add('211E:117F', function(m, a) return runtime.is_cyrillic(a[1]) and 1 or 0 end)

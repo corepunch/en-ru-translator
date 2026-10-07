@@ -36,14 +36,13 @@ The [native stage report](LTPRO_STAGE_REPORT.md) records the current implementat
   memory after T8 for all 77 inputs and matches native code on mutation
   fuzzing. Details: [handover](LTPRO_HANDOVER.md).
 
-Next: generation (`17AA:1D31`) and output (`0687:7427`) on the same memory
-model, and in parallel the remaining analyzer/lookup branches (multi-word phrases, suffix
-and prefix analysis, unknown words, annotations) so real input reaches the
-native passes, then join the node-table and memory-model representations. Unobserved branches, global allocation state, later generation and
-document/file output remain explicit gaps. The production pipeline still uses
-the legacy parser and later passes; the native T1–T4 ports are development
-entry points. No milestone
-below is declared complete merely because its current corpus passes.
+Generation, sentence output, meanings and cleanup are now ported on the memory
+model. The downstream Lua chain matches 77/77 DOS cases on two captures; see the
+[generation report](LTPRO_GENERATION_REPORT.md). Production paragraph parity is
+still 44/77. Next: the full lexical analyzer, standalone startup state and the
+node-table/memory bridge; then the document/file lifecycle and broader coverage.
+The native development path still relies on snapshots and is not the production
+translator. No milestone below is complete merely because its current corpus passes.
 
 ## Objective and completion contract
 

@@ -5,8 +5,11 @@ A Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator (Li
 Compatibility work is tracked in [the binary comparison](reference/LTPRO_COMPARISON.md).
 The translation pipeline is not yet a one-to-one implementation.
 The [fresh executable corpus](test/ltpro/README.md) currently matches 44/77 paragraphs.
-The native T1–T4 and reorder passes are ported and verified against captured
-executable state; the full lexical analyzer, T7/T8, generation and output are not. Native stage work and remaining gates are recorded in the
+Native grammar stages through T8, generation, sentence output and the meanings
+appendix are ported and verified against captured executable state. The full
+lexical analyzer, startup state and end-to-end integration are still incomplete;
+the production translator does not yet use the complete native path.
+Native stage work and remaining gates are recorded in the
 [parity plan](reference/LTPRO_PARITY_PLAN.md) and [stage report](reference/LTPRO_STAGE_REPORT.md);
 addresses, frames, record fields and harness mechanics are consolidated in the
 [native map](reference/LTPRO_NATIVE_MAP.md).

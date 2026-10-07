@@ -23,7 +23,7 @@ instrumented image, printing every boundary), `tools/ltpro_trace.py`
 | Segment | Content | File base |
 |---|---|---|
 | `0000` | C library (see stubs below) | `0x3A00` |
-| `0687` | driver `066C`, boundary constructor `0812` | `0xA270` |
+| `0687` | driver `05D5`, boundary constructor `0812` | `0xA270` |
 | `0A4F` | lexical analyzer: readings decoder `0C0F`, sub-rule loader `1603`, record match `1713`, entry `3B12` | `0xDEF0` |
 | `0E1F` | one function `0009`: T1, question cleanup call, T2, T3 | `0x11BF0` |
 | `108F` | T4 function `000F` | `0x142F0` |
@@ -42,7 +42,7 @@ instrumented image, printing every boundary), `tools/ltpro_trace.py`
 | `211E` | `117F` is_cyrillic, other ctype helpers | `0x24BE0` |
 | `2269` | constituent-array helpers `0007/01B2/0442` | `0x26090` |
 
-## Sentence pipeline (driver `0687:066C`, file `0xA8C8`)
+## Sentence pipeline (driver `0687:05D5`, file `0xA845`)
 
 ```
 0A4F:3B12 (root)                 lexical analysis
@@ -52,7 +52,9 @@ instrumented image, printing every boundary), `tools/ltpro_trace.py`
 1C3D:1B3F (root, terminator)     constituent builder 05C5, then the 21-selector rule pass (calls T7)
 1986:000E (root, terminator)     T8: per position all rules, then T7 (1449:0004); relink 1C3D:1A97
 17AA:1D31 (root, terminator)     generation 17AA:0475 per word record with +0B > 1 and its alternatives
-near 0687:7427 (file 0xAE27)     output (unexplored)
+0687:0BB7 (root, output)         sentence text and inline alternatives (file 0xAE27)
+0687:01C8 (root, appendix)       meanings appendix, profile-gated (file 0xA438)
+0687:0A50 (root)                 release sentence memory (file 0xACC0)
 ```
 
 `0E1F:0009` returns 0 from T1 selector 10 (`11FDC`) and 1 after the T3
@@ -277,8 +279,10 @@ verified against native code run from full DOS memory snapshots; see
 
 ## What remains unexplored
 
-Generation `17AA:1D31`/`0475` and morphology `1E71:0CDC` on the memory
-model, the output routine `0687:7427` and appendix `0687:6A38/72C0`, the lexical analyzer beyond exact words
+Generation, sentence output, appendix and sentence cleanup now have memory-model
+ports; see [the generation report](LTPRO_GENERATION_REPORT.md). Earlier output
+addresses in this map accidentally used load-image offsets as segment offsets.
+The document/file writer, startup state, the lexical analyzer beyond exact words
 (`0A4F:3B12`: multi-word phrases, suffixes `0x26EC6`, prefixes
 `ERPREFIX.PRE`, unknown words, annotations `{}`, macros `=`/`%`), and whether
 later stages read the stale `C5AE` after reorder.

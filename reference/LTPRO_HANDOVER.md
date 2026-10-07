@@ -1,4 +1,4 @@
-# LTPRO parity handover — 2026-10-06
+# LTPRO parity handover — updated 2026-10-07
 
 This records where the native-parity port stands after the post-reorder
 stages (T5–T8) were completed, how it is verified, and what remains before
@@ -8,7 +8,7 @@ earlier stages in [the stage report](LTPRO_STAGE_REPORT.md).
 
 ## State of the sentence pipeline
 
-The driver `0687:066C` runs, per sentence:
+The driver `0687:05D5` runs, per sentence:
 
 | Step | Native | Lua | Verification |
 |---|---|---|---|
@@ -20,8 +20,9 @@ The driver `0687:066C` runs, per sentence:
 | Constituents and rule pass (calls T7) | `1C3D:1B3F` | `constituents.lua`, `seventh_pass.lua`, `lexmatch.lua` | **77/77**; fuzz |
 | T7 | `1449:0004` | `seventh_pass.lua` | **208/208** native calls; fuzz |
 | T8 | `1986:000E` | `eighth_pass.lua` | **77/77**; fuzz |
-| Generation | `17AA:1D31` → `17AA:0475` | not ported (morphology helpers exist as string functions) | — |
-| Output and meanings appendix | `0687:7427`, `0687:6A38`, `0687:72C0` | not ported | — |
+| Generation | `17AA:1D31` → `17AA:0475` | `generation.lua`, `forms.lua` | **77/77** DOS transitions; mutation fuzz |
+| Sentence output / meanings | `0687:0BB7`, `0687:01C8` | `output.lua` | **77/77** DOS chains on two captures |
+| Sentence cleanup | `0687:0A50` | `records.clear` | native comparison in 200 mutated chains |
 
 The post-reorder ports run on a byte-level model of DOS memory
 (`core/ltpro/memory.lua`): far pointers keep their segment:offset form,
@@ -150,31 +151,36 @@ lua test/ltpro_post_stages_test.lua
    Lua run can go from lexical analysis to output. The DOS snapshots are the
    current bridge.
 
+## Generation/output continuation — 2026-10-07
+
+The Lua chain now runs from the post-reorder snapshot through generation,
+sentence text and the meanings appendix. It matches all 77 DOS transitions
+in each of two newly captured runs, with the same documented memory exclusions.
+All original final output hashes remain unchanged by instrumentation. See the
+[generation report](LTPRO_GENERATION_REPORT.md) for tests and limitations.
+
+Address corrections: the sentence driver starts at `0687:05D5` (file `A845`),
+output at `0687:0BB7` (file `AE27`), appendix at `0687:01C8` (file `A438`),
+and cleanup at `0687:0A50` (file `ACC0`). The previous `7427/6A38/72C0`
+labels were load-image offsets, not offsets relative to segment `0687`.
+The last routine frees sentence memory; it does not wrap output files.
+
 ## What remains for an LTPRO output file from Lua
 
-In dependency order:
+1. **Lexical analyzer**: multi-word phrases, suffix/prefix analysis,
+   unknown words, annotations and macros. The exact-word slice is still the
+   only native input entry point.
+2. **One representation**: connect T1–T4/reorder's node tables to memory
+   records, or move those passes onto memory, without a DOS snapshot bridge.
+3. **Startup state**: build DS globals, the BASE.RUS index, dictionary list
+   and heap from the original assets rather than captured process memory.
+4. **Document/file lifecycle**: input segmentation, punctuation supplied by
+   the outer driver, file framing, wrapping, CRLF and state between sentences.
+   The new output routines produce internal buffers, not a complete file.
+5. **Coverage and other modes**: close the earlier gaps above, generation
+   and output's unobserved branches and unsupported malformed-input behavior,
+   then verify configuration modes and held-out documents.
 
-1. **Generation** `17AA:1D31` → `17AA:0475` (0x18BC bytes; a 56-way tag
-   switch) plus `17AA:0045`, `17AA:02E8`, `17AA:000A` and morphology
-   `1E71:0CDC`. The morphology helpers `1E71:02AC/0420/05FB/0977` are already
-   ported as string functions (`morphology.lua`, 7,029 cases); generation
-   needs them on the memory model (their static result buffers are visible).
-   The DOS `generation` snapshot already exists for every corpus case, so the
-   same probe/chain/fuzz tools apply unchanged (add `17AA:1D31` to the chain).
-2. **Output** `0687:7427` (sentence text from the record list, capitalization,
-   spacing), the meanings appendix (`0687:6A38` when `BBB6/BBB4/BBBA` allow)
-   and `0687:72C0`; then file framing, wrapping and CRLF (plan phase 5).
-3. **Lexical analyzer**: multi-word phrases, suffix/prefix analysis
-   (`0x26EC6`, `ERPREFIX.PRE`), unknown words, annotations and macros, so real
-   input reaches the native passes (plan phase 2).
-4. **One representation**: convert nodes to memory records after the
-   lexical stage, or move T1–T4 onto the memory model; then connect the
-   driver end to end and score full output files.
-5. **Startup state**: production runs need the DS globals, BASE.RUS index,
-   dictionary list and heap that the snapshots currently provide. They can be
-   built from the assets (the index is derivable from BASE.RUS) and checked
-   against the snapshots.
-
-Generation and output are mechanical continuations of this work; the
-lexical analyzer is the larger unknown. A finite corpus plus fuzzing still
-does not prove equality for all inputs (see the plan's completion contract).
+Production paragraph parity remains **44/77**. The new chain still starts with
+DOS lexical/grammar/startup state, so its 77/77 result is a downstream-stage
+measurement, not an end-to-end or universal parity claim.

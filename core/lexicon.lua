@@ -33,55 +33,56 @@ end
 
 -- Narrow lexical fallback recovered from LTPRO 0A4F:07F2 (file 0x0E6E2).
 -- The suffix rows are the native DS:0778 table: ending, class/metadata text.
--- This module only resolves candidates for rows whose transforms are directly
--- visible in the native dispatch. Phrase and annotation handling stays with
--- the lexical analyzer.
+-- Productive rows (ing, ed, plurals, ly) search a rewritten stem. Adjective
+-- and possessive class rows do too. Derivational noun rows do not invent a
+-- stem: an unknown word such as "strongness" stays the surface word and is
+-- recorded as a noun. Phrase and annotation handling stays with the analyzer.
 -- Native row order matters. For example, `ies` precedes `es` and `s`, and
 -- `ed` follows `ied`. The ASCII strings and selectors were read from DS:0778.
 local rows = {
-  { "ies'", "N12", "unsupported" },
-  { "es'", "N12", "unsupported" },
-  { "s'", "N12", "unsupported" },
-  { "'s", "N02", "unsupported" },
+  { "ies'", "N12", "class" },
+  { "es'", "N12", "class" },
+  { "s'", "N12", "class" },
+  { "'s", "N02", "class" },
   { "ing", "G8", "ing" },
   { "ied", "E", "ied" },
   { "ed", "E", "ed" },
-  { "ness", "N00", "unsupported" },
-  { "ous", "A", "unsupported" },
-  { "less", "A", "unsupported" },
+  { "ness", "N00", "class" },
+  { "ous", "A", "class" },
+  { "less", "A", "class" },
   { "ies", "Z13", "ies" },
   { "es", "Z13", "es" },
   { "s", "Z13", "s" },
-  { "fy", "V", "unsupported" },
-  { "ment", "N00", "unsupported" },
-  { "ion", "N00", "unsupported" },
-  { "ence", "N00", "unsupported" },
-  { "ance", "N00", "unsupported" },
-  { "enc", "N00", "unsupported" },
-  { "anc", "N00", "unsupported" },
-  { "ity", "N00", "unsupported" },
-  { "age", "N00", "unsupported" },
-  { "ure", "N00", "unsupported" },
-  { "ag", "N00", "unsupported" },
-  { "nes", "N00", "unsupported" },
-  { "or", "N00", "unsupported" },
-  { "iest", "A", "unsupported" },
-  { "ier", "A", "unsupported" },
-  { "est", "A", "unsupported" },
-  { "eur", "A", "unsupported" },
-  { "er", "A", "unsupported" },
-  { "ur", "N00", "unsupported" },
+  { "fy", "V", "class" },
+  { "ment", "N00", "class" },
+  { "ion", "N00", "class" },
+  { "ence", "N00", "class" },
+  { "ance", "N00", "class" },
+  { "enc", "N00", "class" },
+  { "anc", "N00", "class" },
+  { "ity", "N00", "class" },
+  { "age", "N00", "class" },
+  { "ure", "N00", "class" },
+  { "ag", "N00", "class" },
+  { "nes", "N00", "class" },
+  { "or", "N00", "class" },
+  { "iest", "A", "class" },
+  { "ier", "A", "class" },
+  { "est", "A", "class" },
+  { "eur", "A", "class" },
+  { "er", "A", "class" },
+  { "ur", "N00", "class" },
   { "ly", "D", "ly" },
-  { "ical", "A", "unsupported" },
-  { "ic", "A", "unsupported" },
-  { "ible", "A", "unsupported" },
-  { "able", "A", "unsupported" },
-  { "ibl", "A", "unsupported" },
-  { "abl", "A", "unsupported" },
-  { "ory", "A", "unsupported" },
-  { "ary", "A", "unsupported" },
-  { "ou", "A", "unsupported" },
-  { "les", "A", "unsupported" },
+  { "ical", "A", "class" },
+  { "ic", "A", "class" },
+  { "ible", "A", "class" },
+  { "able", "A", "class" },
+  { "ibl", "A", "class" },
+  { "abl", "A", "class" },
+  { "ory", "A", "class" },
+  { "ary", "A", "class" },
+  { "ou", "A", "class" },
+  { "les", "A", "class" },
 }
 for _, row in ipairs(rows) do
   row.ending, row.selector, row.transform = row[1], row[2], row[3]
@@ -97,6 +98,8 @@ local function lookup(dictionary, key)
   if #records ~= 1 then return nil, "duplicate dictionary key: " .. key end
   return records[1]
 end
+
+local suffix_fields
 
 local function decode_record(record, source, candidate, row, exact)
   local value = record.value or ""
@@ -119,13 +122,10 @@ local function decode_record(record, source, candidate, row, exact)
     tag = "D"
   end
 
-  local fields = {}
-  if row and row.selector == "Z13" then
-    fields.number, fields.person = 1, 3
-  elseif row and row.selector == "G8" then
-    fields.case_mask = 8
-  elseif row and row.selector == "E" then
-    fields.tense, fields.case_mask = 1, 8
+  local fields = suffix_fields(row)
+  if row and row.selector:sub(1, 1) == "A" and fields.tense and fields.tense ~= 0
+      and (tag == "Z" or tag == "N") then
+    tag = "A"
   end
 
   return {
@@ -141,6 +141,63 @@ local function decode_record(record, source, candidate, row, exact)
     native_selector = row and row.selector or nil,
     fields = fields,
   }
+end
+
+local function selector_digit(selector, index)
+  local byte = selector:byte(index + 1) or 0
+  if byte >= 48 and byte <= 57 then return byte - 48 end
+  return 0
+end
+
+-- Grammar written by the 0A4F:07F2 class switch, independent of the dictionary hit.
+function suffix_fields(row)
+  local fields = {}
+  if not row then return fields end
+  local class = row.selector:sub(1, 1)
+  if class == "Z" then
+    fields.number, fields.person = selector_digit(row.selector, 1), selector_digit(row.selector, 2)
+  elseif class == "G" or class == "V" then
+    fields.case_mask = 8
+  elseif class == "E" then
+    fields.tense, fields.case_mask = 1, 8
+  elseif class == "A" then
+    fields.marker = 0x61
+    local last, before = row.ending:sub(-1), row.ending:sub(-2, -2)
+    if last == "r" and (before == "e" or before == "u") then fields.tense = 1
+    elseif row.ending:sub(-2) == "st" then fields.tense = 2 end
+  elseif class == "N" then
+    fields.number = selector_digit(row.selector, 1)
+    fields.case_mask = selector_digit(row.selector, 2)
+  end
+  return fields
+end
+
+local function with_extra(stem, extra)
+  if extra and extra ~= "" and stem:sub(-#extra) ~= extra then return { stem, stem .. extra } end
+  return { stem }
+end
+
+-- Adjective endings restore ie→y, undo a doubled consonant, or keep the
+-- auxiliary e that an ending such as -er records for the second try.
+local function adjective_candidates(word, ending)
+  local stem = word:sub(1, #word - #ending)
+  local extra = ending:sub(1, 1) == "e" and "e" or nil
+  if ending:sub(1, 2) == "ie" then
+    stem, extra = stem .. "y", nil
+  elseif #stem >= 2 and stem:sub(-1) == stem:sub(-2, -2) then
+    extra, stem = stem:sub(-1), stem:sub(1, -2)
+  end
+  return with_extra(stem, extra)
+end
+
+local function class_candidates(word, row)
+  local class = row.selector:sub(1, 1)
+  local ending = row.ending
+  if class == "N" and not ending:find("'", 1, true) then return {} end
+  if class == "A" then return adjective_candidates(word, ending) end
+  local stem = word:sub(1, #word - #ending)
+  if class == "V" then return with_extra(stem, ending:sub(1, 1) == "e" and "e" or nil) end
+  return { stem }
 end
 
 local function candidates(word, row)
@@ -184,20 +241,20 @@ function lexicon.lookup(dictionary, source)
 
   for _, row in ipairs(rows) do
     if #word > #row.ending and word:sub(-#row.ending) == row.ending then
-      if row.transform == "unsupported" then
-        return nil, "native suffix row " .. row.ending .. "/" .. row.selector .. " is not ported"
-      else
-        for _, candidate in ipairs(candidates(word, row)) do
-          local record, err = lookup(dictionary, candidate)
-          if err then return nil, err end
-          if record then
-            return decode_record(record, source, candidate, row, false)
-          end
+      local choices = row.transform == "class" and class_candidates(word, row) or candidates(word, row)
+      for _, candidate in ipairs(choices) do
+        local record, err = lookup(dictionary, candidate)
+        if err then return nil, err end
+        if record then
+          return decode_record(record, source, candidate, row, false)
         end
-        -- 0A4F:07F2 stops at the first table row whose ending matches. Do not
-        -- fall through to a shorter ending when its candidate misses.
-        return nil, "native suffix candidate missed: " .. row.ending
       end
+      -- 0A4F:07F2 stops at the first table row whose ending matches. Do not
+      -- fall through to a shorter ending when its candidate misses. A class
+      -- row with no dictionary stem leaves the surface word unchanged.
+      -- Derivational nouns still publish noun grammar through surface_noun.
+      if row.transform == "class" then return nil end
+      return nil, "native suffix candidate missed: " .. row.ending
     end
   end
   return nil
@@ -225,6 +282,27 @@ function lexicon.attempt_fields(source)
         end
       end
       return { ending = row.ending, selector = row.selector, fields = fields }
+    end
+  end
+  return nil
+end
+
+-- Noun grammar for a derivational ending that keeps the surface word.
+-- 0A4F:07F2 writes tag N, number, and case for an N-class row, and truncates
+-- the source only when the ending contains an apostrophe. With no apostrophe
+-- the caller looks the whole word up, misses, and leaves tag N in place
+-- (0A4F:3A63). Possessives and every earlier row are excluded: those either
+-- find a stem or follow a different miss path.
+function lexicon.surface_noun(source)
+  assert(type(source) == "string" and source ~= "", "surface noun needs a source word")
+  local word = ascii_lower(source)
+  for _, row in ipairs(rows) do
+    if #word > #row.ending and word:sub(-#row.ending) == row.ending then
+      local class = row.selector:sub(1, 1)
+      if row.transform == "class" and class == "N" and not row.ending:find("'", 1, true) then
+        return { tag = "N", ending = row.ending, selector = row.selector, fields = suffix_fields(row) }
+      end
+      return nil
     end
   end
   return nil
@@ -627,15 +705,26 @@ local function decode(dictionary,records,index,options)
     backref=value:match('\\(.*)')
     if backref then node.lookup=backref..' ' end
   end
-  local derived
+  local derived, lookup_error
   if not value then
-    derived=lexicon.lookup(dictionary,source)
-    if derived then
+    derived, lookup_error=lexicon.lookup(dictionary,source)
+    if derived and derived.record then
       value=derived.record.value
       node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()
       for at,v in pairs(derived.fields) do node[layout.key(at)]=v end
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
+    elseif not lookup_error and not source:find('[-/]') then
+      local surface=lexicon.surface_noun(source)
+      if surface then
+        -- The miss epilogue at 0A4F:3AD1 writes person 3 and gender 1 and
+        -- keeps the N tag. previous_tag stays unset, so a following copula
+        -- takes the neuter short adjective. Hyphenated and slashed tokens
+        -- keep the split path below.
+        node.reading_state,node.tag=1,surface.tag:byte()
+        node.person,node.gender=3,1
+        for at,v in pairs(surface.fields) do node[layout.key(at)]=v end
+      end
     end
   end
   local phrase,last=lexicon.match_phrase(dictionary,records,index,source:lower())

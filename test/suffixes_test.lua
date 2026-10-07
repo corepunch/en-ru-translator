@@ -41,7 +41,52 @@ assert(rows[33].ending == 'ly' and rows[33].selector == 'D')
 
 local no_root = lexicon.from_bytes('word*Nслово\n')
 local result, reason = lexicon.lookup(no_root, 'unknownness')
-assert(result == nil and reason:find('native suffix row ness/N00', 1, true))
+assert(result == nil and reason == nil)
+
+-- Derivational nouns do not invent a stem. Adjectives and possessives do.
+-- The surface word is still marked as a noun when the ending is N-class.
+local derived = lexicon.from_bytes('strong*Aпрочный\nsoft*Dмягко\ncat*Nкошка\ndog*Nсобака\nbusy*Aзанятый\n')
+result, reason = lexicon.lookup(derived, 'strongness')
+assert(result == nil and reason == nil)
+local surface = assert(lexicon.surface_noun('strongness'))
+assert(surface.tag == 'N' and surface.ending == 'ness' and surface.selector == 'N00')
+assert(surface.fields.number == 0 and surface.fields.case_mask == 0)
+assert(lexicon.surface_noun('xyzment').ending == 'ment')
+assert(lexicon.surface_noun('stronger') == nil)
+assert(lexicon.surface_noun('books') == nil)
+assert(lexicon.surface_noun("cat's") == nil)
+assert(lexicon.surface_noun('xyzzy') == nil)
+local analyzed = lexicon.analyze(derived, 'strongness')
+local marked
+local node = analyzed.root.next
+while node do
+  if node.source == 'strongness' then marked = node end
+  node = node.next
+end
+assert(marked and marked.tag == string.byte('N') and marked.previous_tag == 0)
+assert(marked.reading_state == 1 and marked.person == 3 and marked.gender == 1)
+assert(marked.number == 0 and marked.case_mask == 0)
+local hyphenated = lexicon.analyze(no_root, 'foo-ness')
+local left
+node = hyphenated.root.next
+while node do
+  if node.source == 'foo' then left = node end
+  node = node.next
+end
+assert(left and left.tag == string.byte('?'))
+result = assert(lexicon.lookup(derived, 'stronger'))
+assert(result.candidate == 'strong' and result.tag == 'A' and result.native_suffix == 'er')
+assert(result.fields.marker == 0x61 and result.fields.tense == 1)
+result = assert(lexicon.lookup(derived, 'strongest'))
+assert(result.candidate == 'strong' and result.fields.tense == 2 and result.fields.marker == 0x61)
+result = assert(lexicon.lookup(derived, "cat's"))
+assert(result.candidate == 'cat' and result.tag == 'N' and result.native_suffix == "'s")
+assert(result.fields.number == 0 and result.fields.case_mask == 2)
+result = assert(lexicon.lookup(derived, "dogs'"))
+assert(result.candidate == 'dog' and result.native_suffix == "s'")
+assert(result.fields.number == 1 and result.fields.case_mask == 2)
+result = assert(lexicon.lookup(derived, 'busier'))
+assert(result.candidate == 'busy' and result.native_suffix == 'ier' and result.fields.tense == 1)
 
 local duplicate = lexicon.from_bytes('book*Zкнига\nbook*Nкнижка\n')
 result, reason = lexicon.lookup(duplicate, 'books')

@@ -54,11 +54,12 @@
   "imported_rows_total": 58825,
   "compiled_records": {
     "DIC": 95552,
-    "RUS": 112315
+    "RUS": 112262,
+    "morphology_templates": 4978
   },
   "binary_encoding": {
     "name": "CP866",
-    "unsupported_codepoints_replaced": 144,
+    "unsupported_codepoints_replaced": 109,
     "stress_marks": "combining accents removed"
   }
 }

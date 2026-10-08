@@ -4,16 +4,18 @@ The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
 indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,552 DIC
-records and 112,315 RUS records, counting English gloss aliases and the
-translator's Russian POS metadata records.
+records and 112,262 RUS records, including 4,978 shared morphology templates.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
-stores all imported source columns under their OpenRussian `source_row` IDs,
-plus POS records used by the existing grammar. Lua reads OpenRussian's named
-noun, verb, and adjective form slots directly; it does not translate them into
-LTPRO paradigm numbers. The translator still uses LTPRO's executable for
-sentence processing and grammar, but loads only the new generated dictionary
-files.
+uses one-byte CP866 headwords and the normal binary POS codes consumed by the
+existing grammar. Each lexeme points to a shared compact transformation
+template: a byte count to trim from the headword and a one-byte CP866 suffix
+for each source-listed form. Noun case slots and verb tense, person, and
+imperative slots stay distinct; the runtime imperative flag selects those
+imperative slots. The template records contain no copied source
+columns, glosses, field names, or row IDs. The translator still uses LTPRO's
+executable for sentence processing and its native ending tables; the OpenRussian
+templates retain forms that do not match those older patterns exactly.
 
 ## Source and encoding
 
@@ -25,10 +27,11 @@ claim that the 2021 backup is the latest live OpenRussian database. The source
 URLs and SHA-256 hashes are pinned in `source-manifest.json`; see
 `ATTRIBUTION.md` for attribution details.
 
-The source TSVs are UTF-8. Binary text remains one-byte CP866 for the current
-Lua runtime. The importer removes combining stress marks and transliterates
-characters CP866 cannot represent; 144 unsupported codepoints were replaced
-in this snapshot. The checked-in TSVs retain the complete UTF-8 source values.
+The source TSVs are UTF-8. Headwords and template suffixes remain one-byte
+CP866 for the current Lua runtime. The importer removes combining stress marks
+and transliterates characters CP866 cannot represent; 109 unsupported
+codepoints in stored dictionary text were replaced in this snapshot. The
+checked-in TSVs retain the complete UTF-8 source values.
 
 ## Download, build, and inspect
 

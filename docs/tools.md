@@ -4,9 +4,11 @@
 
 `tools/openrussian_db.c` imports all four pinned OpenRussian dictionary tables
 into indexed LTech `.DIC` and `.RUS` binary databases. It stores English
-glosses, literal expressions, and named inflection slots in one-byte
-CP866-compatible records. The C utility can also inspect image headers and
-find all records for a headword.
+glosses and literal expressions in `.DIC`. `.RUS` keeps CP866 headwords and
+binary POS metadata, then points each lexeme at a deduplicated template of
+one-byte trim counts and CP866 endings. The templates preserve noun cases and
+verb tense, person, and imperative forms without copying the source rows. The
+C utility can also inspect image headers and find all records for a headword.
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv

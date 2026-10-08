@@ -2,7 +2,7 @@ local text = require 'core.text'
 local russian = {}
 
 function russian.from_bytes(bytes, overlay)
-  local entries, source_forms, openrussian_forms = {}, {}, {}
+  local entries, source_forms, openrussian_forms, templates = {}, {}, {}, {}
   local function ingest(image)
     assert(image:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
     local finish = string.unpack('<I4', image, 0x1F)
@@ -12,9 +12,52 @@ function russian.from_bytes(bytes, overlay)
     for line in image:sub(0x29,finish):gmatch('[^\n]+') do
       local key = line:match('^(.-)%*')
       if key then
-        if key:sub(1,1)~='@' then
+        local code=line:sub(#key+2)
+        local template_id=key:match('^@M(%d+)$')
+        if template_id and code:byte(1)==0x54 then
+          local encoded, decoded, at=code:sub(2), {}, 1
+          while at<=#encoded do
+            local byte=encoded:byte(at);at=at+1
+            if byte==0xff then
+              local escape=encoded:byte(at);assert(escape==0 or escape==1, 'invalid OpenRussian morphology escape');at=at+1
+              byte=escape==0 and 0xff or 0x0a
+            end
+            decoded[#decoded+1]=string.char(byte)
+          end
+          templates[tonumber(template_id)]=table.concat(decoded)
+        elseif key:sub(1,1)~='@' then
           entries[key] = entries[key] or {}
           entries[key][#entries[key]+1] = line
+          if code:byte(1)==0x4D then
+            local pos_byte,aspect=code:byte(2,3)
+            local pos=pos_byte and string.char(pos_byte)
+            local id=tonumber(code:sub(4,7),16)
+            assert(id and #code==7, 'invalid OpenRussian morphology reference')
+            local template=assert(templates[id], 'missing OpenRussian morphology template '..id)
+            local slots=pos=='n' and {'sg_nom','sg_gen','sg_dat','sg_acc','sg_inst','sg_prep','pl_nom','pl_gen','pl_dat','pl_acc','pl_inst','pl_prep'}
+              or pos=='v' and {'imperative_sg','imperative_pl','past_m','past_f','past_n','past_pl','presfut_sg1','presfut_sg2','presfut_sg3','presfut_pl1','presfut_pl2','presfut_pl3'}
+              or pos=='a' and {'decl_m_nom','decl_m_gen','decl_m_dat','decl_m_acc','decl_m_inst','decl_m_prep','decl_f_nom','decl_f_gen','decl_f_dat','decl_f_acc','decl_f_inst','decl_f_prep','decl_n_nom','decl_n_gen','decl_n_dat','decl_n_acc','decl_n_inst','decl_n_prep','decl_pl_nom','decl_pl_gen','decl_pl_dat','decl_pl_acc','decl_pl_inst','decl_pl_prep','comparative','superlative','short_m','short_f','short_n','short_pl'}
+            assert(slots, 'unknown OpenRussian morphology part of speech')
+            local row={pos=pos,lemma=key,forms={}}
+            local at=1
+            for _,slot in ipairs(slots) do
+              local count=assert(template:byte(at), 'truncated OpenRussian morphology template');at=at+1
+              local forms={}
+              for _=1,count do
+                local cut,length=template:byte(at,at+1)
+                assert(cut and length, 'truncated OpenRussian morphology transform');at=at+2
+                local suffix=template:sub(at,at+length-1);at=at+length
+                forms[#forms+1]=key:sub(1,#key-cut)..suffix
+              end
+              if #forms>0 then row.forms[slot]=forms end
+            end
+            assert(at==#template+1, 'OpenRussian morphology template has trailing bytes')
+            local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
+            if pos=='v' then
+              local by_lemma=by_pos[key] or {};by_pos[key]=by_lemma
+              by_lemma[aspect==0x31 and 'pf' or 'ipf']=row
+            else by_pos[key]=row end
+          end
         end
         local payload=key:sub(1,2)~='@o' and line:match('^.-%*(O\t.*)$')
         if payload then
@@ -89,7 +132,8 @@ function russian.lookup(state, key, prefix)
   local base = key:match('^(.-)%*') or key
   for _, line in ipairs(state.russian.entries[base] or {}) do
     local wanted = key .. (prefix == 0 and '*' or '')
-    if line:sub(1,#wanted) == wanted and line:byte(#wanted + 1) ~= 0x51 then return line end
+    local code=line:byte(#wanted+1)
+    if line:sub(1,#wanted) == wanted and code ~= 0x51 and code ~= 0x4D then return line end
   end
 end
 

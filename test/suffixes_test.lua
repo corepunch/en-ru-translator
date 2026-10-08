@@ -56,6 +56,19 @@ assert(lexicon.surface_noun('stronger') == nil)
 assert(lexicon.surface_noun('books') == nil)
 assert(lexicon.surface_noun("cat's") == nil)
 assert(lexicon.surface_noun('xyzzy') == nil)
+local noun_matrix=0
+for _,ending in ipairs({'ness','ment','ion','ence','ance','enc','anc','ity','age','ure','ag','nes','or','ur'}) do
+  for _,stem in ipairs({'xyz','strong','foo','unrecognized'}) do
+    for _,source in ipairs({stem..ending,(stem..ending):upper(),stem:sub(1,1):upper()..stem:sub(2)..ending}) do
+      local result=lexicon.analyze(no_root,source).vector[1]
+      local shadowed=ending=='nes' -- Earlier plural -es wins before truncated -nes.
+      assert(result.source==source and result.tag==string.byte(shadowed and '?' or 'N') and result.previous_tag==0,source)
+      assert(result.reading_state==(shadowed and 0 or 1) and result.person==3 and result.number==0 and result.case_mask==0,source)
+      noun_matrix=noun_matrix+1
+    end
+  end
+end
+assert(noun_matrix==168)
 local analyzed = lexicon.analyze(derived, 'strongness')
 local marked
 local node = analyzed.root.next

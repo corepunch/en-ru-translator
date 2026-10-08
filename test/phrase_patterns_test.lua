@@ -8,6 +8,8 @@ take ~ home*WVнести~Dдомой
 take home*Vотнести
 as ~ please*Jкак~ угодно
 keep ~ safe*Vхранить
+do ~ best*Vстараться
+do ~ level best*Vпытаться
 a number of*WIмногоPР
 article i*WNстатья#I
 how often*WDкакDчасто
@@ -15,6 +17,8 @@ long wave*WAдлиннаяNволна/A.длинноволновый
 black board*WАкласснаяNдоска
 swiss army knife*WармейскийNнож
 empathize with*WVвходитьPВв ~ положение
+literal mark*W#A~B/C#
+put ~ near ~ end*WVкласть~PРоколо~Nконец
 ]]))
 local function analyzed(input) return lexicon.analyze(dictionary,input) end
 local literal = analyzed('take home')
@@ -29,7 +33,8 @@ local derived = analyzed('takes cat dog home')
 assert(derived.vector[1].reading == encoding.encode('нести'))
 assert(derived.vector[2].source=='cat' and derived.vector[4].reading==encoding.encode('домой'))
 local implicit = analyzed('keep cat safe')
-assert(implicit.vector[1].reading == encoding.encode('хранить') and implicit.vector[2].source == 'cat')
+assert(implicit.vector[1].reading == encoding.encode('хранить') and implicit.count==3)
+assert(analyzed('do cat level best').vector[1].reading==encoding.encode('пытаться'))
 local blocked = analyzed('take cat, dog home')
 assert(blocked.vector[1].reading == encoding.encode('брать'), 'gaps cannot cross punctuation')
 assert(analyzed('take {~cat~} home').vector[2].literal, 'gaps cannot consume literal spans')
@@ -41,10 +46,17 @@ local alternative = lexicon.analyze(dictionary,'long wave',{phrase_reading=funct
   assert(#readings==2);return 2
 end})
 assert(alternative.vector[1].reading == encoding.encode('.длинноволновый'))
+for _,invalid in ipairs({false,0,-1,1.5,'1',99}) do
+  assert(not pcall(lexicon.analyze,dictionary,'long wave',{phrase_reading=function() return invalid end}))
+end
+assert(not pcall(lexicon.analyze,dictionary,'long wave',{phrase_reading=function() end}))
 assert(analyzed('long wave').vector[1].reading == encoding.encode('длинная'))
 assert(analyzed('black board').vector[1].tag == string.byte('A'))
 assert(analyzed('swiss army knife').vector[1].reading == encoding.encode('армейский'))
 assert(analyzed('empathize with').count>2)
+assert(analyzed('literal mark').vector[1].reading=='A~B/C')
+local multiple=analyzed('put cat near dog end')
+assert(multiple.vector[2].source=='cat' and multiple.vector[4].source=='dog')
 local translated = engine.translate('take cat dog home', {dictionary=dictionary.bytes, prefixes=false})
 assert(translated:find('кот',1,true) and translated:find('собак',1,true) and translated:find('домой',1,true), translated)
 print('phrase_patterns_test: passed')

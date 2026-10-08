@@ -72,9 +72,10 @@ sentence root; requested glossaries follow the complete list.
 
 Phrase keys support literal words/punctuation and `~` gaps. A gap captures zero
 or more words without crossing punctuation or protected spans; matching chooses
-the longest phrase, preferring a literal key on ties. A `~` in its reading
+the longest phrase, preferring fewer gaps and more literal words on ties. A `~` in its reading
 re-inserts captured words, which receive normal lexical analysis. A reading
-without a gap keeps captured words after the translated phrase.
+without a gap consumes those words as part of the idiom (for example, the
+possessive in `do your best`).
 
 `W` phrase readings distribute tagged words, metadata, and `#literal#` text.
 Slash-separated phrase readings default to the first alternative; the Lua option

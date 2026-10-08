@@ -38,11 +38,12 @@ function patterns.match(key, records, first, head)
 end
 
 function patterns.segments(value)
-  local segments, start, inside = {}, 1, false
+  local segments, start, inside, literal = {}, 1, false, false
   for i=1,#value do
     local c=value:sub(i,i)
     if c=='{' then inside=true elseif c=='}' then inside=false end
-    if c=='~' and not inside then segments[#segments+1]=value:sub(start,i-1);start=i+1 end
+    if c=='#' and not inside then literal=not literal end
+    if c=='~' and not inside and not literal then segments[#segments+1]=value:sub(start,i-1);start=i+1 end
   end
   segments[#segments+1]=value:sub(start)
   return segments

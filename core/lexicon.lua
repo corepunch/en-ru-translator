@@ -98,12 +98,29 @@ end
 local function lookup(dictionary, key, options)
   local records = dictionary.by_key[ascii_lower(key)]
   if not records then return nil end
-  local index = options and options.dictionary_entry and options.dictionary_entry(key, records) or 1
+  local index = 1
+  if options and options.dictionary_entry ~= nil then
+    assert(type(options.dictionary_entry)=='function', 'dictionary_entry must be a function')
+    index=options.dictionary_entry(key,records)
+  end
   assert(type(index) == 'number' and records[index], 'invalid dictionary entry selection: ' .. key)
   return records[index]
 end
 
 local suffix_fields
+
+local function resolve(dictionary,key,options)
+  local seen={}
+  local record=lookup(dictionary,key,options)
+  while record and record.value:sub(1,1)=='=' do
+    local normalized=ascii_lower(key)
+    assert(not seen[normalized], 'cyclic dictionary redirect: '..key)
+    seen[normalized]=true
+    key=record.value:sub(2)
+    record=lookup(dictionary,key,options)
+  end
+  return record,key
+end
 
 local function decode_record(record, source, candidate, row, exact)
   local value = record.value or ""
@@ -241,18 +258,16 @@ end
 function lexicon.lookup(dictionary, source, options)
   assert(type(source) == "string" and source ~= "", "suffix lookup needs a source word")
   local word = ascii_lower(source)
-  local exact, exact_error = lookup(dictionary, word, options)
-  if exact then return decode_record(exact, source, word, nil, true) end
-  if exact_error then return nil, exact_error end
+  local exact, exact_key = resolve(dictionary, word, options)
+  if exact then return decode_record(exact, source, exact_key, nil, true) end
 
   for _, row in ipairs(rows) do
     if #word > #row.ending and word:sub(-#row.ending) == row.ending then
       local choices = row.transform == "class" and class_candidates(word, row) or candidates(word, row)
       for _, candidate in ipairs(choices) do
-        local record, err = lookup(dictionary, candidate, options)
-        if err then return nil, err end
+        local record, resolved = resolve(dictionary, candidate, options)
         if record then
-          return decode_record(record, source, candidate, row, false)
+          return decode_record(record, source, resolved, row, false)
         end
       end
       -- 0A4F:07F2 stops at the first table row whose ending matches. Do not
@@ -458,12 +473,15 @@ end
 -- Longest phrase wins; a literal key wins a tie against a key with gaps.
 
 function lexicon.match_phrase(dictionary, records, index, key)
-  local best,finish,captures,best_gaps
+  local best,finish,captures,best_gaps,best_literals
   for _,record in ipairs(dictionary.by_token[key] or {}) do
     if record.key:find(' ',1,true) and not record.raw:find('*$',1,true) then
       local last,gaps=phrase_patterns.match(record.key,records,index,key)
-      if last and (not finish or last>finish or last==finish and #gaps<best_gaps) then
-        best,finish,captures,best_gaps=record,last,gaps,#gaps
+      local _,parts=record.key:gsub('%S+','')
+      local literals=parts-(gaps and #gaps or 0)
+      if last and (not finish or last>finish or last==finish and
+          (#gaps<best_gaps or #gaps==best_gaps and literals>best_literals)) then
+        best,finish,captures,best_gaps,best_literals=record,last,gaps,#gaps,literals
       end
     end
   end
@@ -475,7 +493,11 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   local node=records[first]
   local readings=phrase_patterns.readings(value)
   if #readings>1 then
-    local selected=options.phrase_reading and options.phrase_reading(record.key,readings) or 1
+    local selected=1
+    if options.phrase_reading ~= nil then
+      assert(type(options.phrase_reading)=='function', 'phrase_reading must be a function')
+      selected=options.phrase_reading(record.key,readings)
+    end
     assert(type(selected)=='number' and readings[selected], 'invalid phrase reading selection')
     node.phrase_readings=readings
     value=readings[selected]
@@ -518,10 +540,8 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
         for _,n in ipairs(captures[segment] or {}) do rendered[#rendered+1]=n end
       end
     end
-    -- A template without an explicit gap keeps captured objects after its text.
-    for gap=#segments,#captures do
-      for _,n in ipairs(captures[gap]) do rendered[#rendered+1]=n end
-    end
+    -- Only explicit output gaps reinsert captured words. Idioms such as
+    -- "do your best" consume a possessive already expressed by their reading.
     for _=first,last do table.remove(records,first) end
     for at=#rendered,1,-1 do table.insert(records,first,rendered[at]) end
     return first
@@ -761,14 +781,10 @@ local function decode(dictionary,records,index,options)
 		if kind == "X" then fresh.marker = 0x27 end
 		table.insert(records, index + 1, fresh)
 	end
-  local entry=lookup(dictionary,source,options)
-  local aliases = {}
-  while entry and entry.value:sub(1,1) == '=' do
-    assert(not aliases[source:lower()], 'cyclic dictionary redirect: '..source)
-    aliases[source:lower()] = true
-    source = entry.value:sub(2)
+  local entry,resolved=resolve(dictionary,source,options)
+  if resolved~=source then
+    source=resolved
     node.source, node.source_length = source, #source
-    entry = lookup(dictionary,source,options)
   end
   local value,backref
   if entry then

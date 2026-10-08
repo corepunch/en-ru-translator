@@ -1,0 +1,102 @@
+[
+  {
+    "id": "openrussian-01",
+    "group": "openrussian-sentence-parity",
+    "input": "The child reads a book."
+  },
+  {
+    "id": "openrussian-02",
+    "group": "openrussian-sentence-parity",
+    "input": "I read a book."
+  },
+  {
+    "id": "openrussian-03",
+    "group": "openrussian-sentence-parity",
+    "input": "The child wants a book."
+  },
+  {
+    "id": "openrussian-04",
+    "group": "openrussian-sentence-parity",
+    "input": "The child wants books."
+  },
+  {
+    "id": "openrussian-05",
+    "group": "openrussian-sentence-parity",
+    "input": "A child reads a book."
+  },
+  {
+    "id": "openrussian-06",
+    "group": "openrussian-sentence-parity",
+    "input": "The person reads a book."
+  },
+  {
+    "id": "openrussian-07",
+    "group": "openrussian-sentence-parity",
+    "input": "A person reads books."
+  },
+  {
+    "id": "openrussian-08",
+    "group": "openrussian-sentence-parity",
+    "input": "The person wants a book."
+  },
+  {
+    "id": "openrussian-09",
+    "group": "openrussian-sentence-parity",
+    "input": "People want a book."
+  },
+  {
+    "id": "openrussian-10",
+    "group": "openrussian-sentence-parity",
+    "input": "I want a book."
+  },
+  {
+    "id": "openrussian-11",
+    "group": "openrussian-sentence-parity",
+    "input": "I want books."
+  },
+  {
+    "id": "openrussian-12",
+    "group": "openrussian-sentence-parity",
+    "input": "I want time."
+  },
+  {
+    "id": "openrussian-13",
+    "group": "openrussian-sentence-parity",
+    "input": "People want time."
+  },
+  {
+    "id": "openrussian-14",
+    "group": "openrussian-sentence-parity",
+    "input": "The child wants time."
+  },
+  {
+    "id": "openrussian-15",
+    "group": "openrussian-sentence-parity",
+    "input": "People give a book."
+  },
+  {
+    "id": "openrussian-16",
+    "group": "openrussian-sentence-parity",
+    "input": "The child gives a book."
+  },
+  {
+    "id": "openrussian-17",
+    "group": "openrussian-sentence-parity",
+    "input": "I give a book."
+  },
+  {
+    "id": "openrussian-18",
+    "group": "openrussian-sentence-parity",
+    "input": "I can read a book."
+  },
+  {
+    "id": "openrussian-19",
+    "group": "openrussian-sentence-parity",
+    "input": "The child eats."
+  },
+  {
+    "id": "openrussian-20",
+    "group": "openrussian-sentence-parity",
+    "input": "The child reads the book."
+  }
+]

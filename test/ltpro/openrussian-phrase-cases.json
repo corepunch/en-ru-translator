@@ -1,0 +1,22 @@
+[
+  {
+    "id": "openrussian-phrase-1",
+    "group": "openrussian-phrases",
+    "input": "Each other."
+  },
+  {
+    "id": "openrussian-phrase-2",
+    "group": "openrussian-phrases",
+    "input": "Good morning."
+  },
+  {
+    "id": "openrussian-phrase-3",
+    "group": "openrussian-phrases",
+    "input": "Good evening."
+  },
+  {
+    "id": "openrussian-phrase-4",
+    "group": "openrussian-phrases",
+    "input": "Welcome!"
+  }
+]

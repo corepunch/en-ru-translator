@@ -12,6 +12,11 @@ local lexicon = {}
 -- annotations, periods, W prefixes, duplicate entries and back-references survive.
 -- Search/merge policies are separate from byte ingestion.
 function lexicon.from_bytes(bytes)
+  if bytes:sub(1,20) == 'LTech DIC File 2.00 ' then
+    local finish = string.unpack('<I4', bytes, 0x1F)
+    assert(finish >= 0x28 and finish <= #bytes, 'BASE.DIC body end is invalid')
+    bytes = bytes:sub(0x29, finish)
+  end
   local result={bytes=bytes,records={},by_key={},by_token={},unparsed={}}
   local start=1
   while start<=#bytes do
@@ -32,6 +37,21 @@ function lexicon.from_bytes(bytes)
     start=finish+1
   end
   return result
+end
+
+function lexicon.overlay(dictionary, bytes)
+  local addition = lexicon.from_bytes(bytes)
+  for _, record in ipairs(addition.records) do
+    dictionary.records[#dictionary.records + 1] = record
+    local by_key = dictionary.by_key[record.key] or {}
+    dictionary.by_key[record.key] = by_key
+    by_key[#by_key + 1] = record
+    local token = record.key:match('^([^ *]*)'):gsub('[A-Z]', string.lower)
+    local by_token = dictionary.by_token[token] or {}
+    dictionary.by_token[token] = by_token
+    by_token[#by_token + 1] = record
+  end
+  return dictionary
 end
 
 -- Narrow lexical fallback recovered from LTPRO 0A4F:07F2 (file 0x0E6E2).

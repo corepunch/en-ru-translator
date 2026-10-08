@@ -39,9 +39,10 @@ function engine.read_asset(source, name)
 end
 
 -- Static binary assets are decoded separately from mutable sentence state.
-function engine.new_state(exe_source,russian_source)
+function engine.new_state(exe_source,russian_source,russian_overlay)
   return {assets=assets.new(engine.read_asset(exe_source,'LTPRO.EXE')),
-    russian=russian.from_bytes(engine.read_asset(russian_source,'BASE.RUS')),
+    russian=russian.from_bytes(engine.read_asset(russian_source,'BASE.RUS'),
+      russian_overlay and engine.read_asset(russian_overlay,'BASE.RUS') or nil),
     elements={},tags={},count=0,word_count=0}
 end
 
@@ -92,7 +93,7 @@ function engine.run(input, options)
   local rus_source = options.russian or options.rus or (data .. '/BASE.RUS')
 
   local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
-  local state = engine.new_state(executable, rus_source)
+  local state = engine.new_state(executable, rus_source, options.rus_overlay)
   state.meaning_start=options.meaning_start
   if options.domain then
     assert(type(options.domain) == 'string' and options.domain ~= '', 'domain must be a nonempty string')
@@ -111,6 +112,9 @@ function engine.run(input, options)
     end
   end
   local dict = lexicon.from_bytes(dic_bytes)
+  if options.dic_overlay then
+    dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))
+  end
   local analyzed = lexicon.analyze(dict, encoding.encode(input), options)
 
   local stages = {}

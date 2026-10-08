@@ -2,6 +2,7 @@ local layout = require 'core.record_layout'
 local text = require 'core.text'
 local nodes = require 'core.nodes'
 local russian = require 'core.russian'
+local special_cases = require 'core.special_cases'
 local generation = {}
 local function signed(n) n=n & 0xFFFF; return n >= 0x8000 and n-0x10000 or n end
 local function reflexive(a, word, length)
@@ -32,6 +33,8 @@ local function build(a,id,word,length,tableoff,index)
   return result
 end
 function generation.noun_form(state,id,word,gender,plural,case)
+  local special=special_cases.noun_form(word,plural,case)
+  if special then return special end
   local numbers = plural ~= 0 and 'pl' or 'sg'
   local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
   local forms = russian.source_forms(state,word,'n',numbers .. '_' .. (cases[case] or 'nom'))

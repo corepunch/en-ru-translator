@@ -31,24 +31,36 @@
       "rows": 5031
     }
   },
-  "scope": "Nouns, verbs, adjectives, and multiword expressions with English glosses and named inflection slots where applicable.",
-  "caveat": "The upstream README describes these checked-in CSVs as outdated backup exports. Use this pinned snapshot for reproducible prototype work; refresh from the current OpenRussian database before production adoption.",
-  "sample_files": {
+  "scope": "Complete rows from all four public OpenRussian dictionary tables: nouns, verbs, adjectives, and others.",
+  "caveat": "The upstream README describes its checked-in CSVs as older backup exports. This import includes every row in those four pinned files; refresh from the current TogetherDB database and pin new hashes before production adoption.",
+  "import_files": {
     "nouns": {
-      "sha256": "de9aace7376bf248cd347a5a4516d8bac26a37821a87c1b1cbd16a2c44045250",
-      "bytes": 2003
+      "sha256": "244be8b79980bd0c8ca0d4965f53469cb980e55d5f2d2a1076afdd25370ba5a6",
+      "bytes": 8502384
     },
     "verbs": {
-      "sha256": "25c5b931b5748fbfe972928d36c63c6a814cb70731899bf1f1cf82ef0766866f",
-      "bytes": 2581
+      "sha256": "8c5fa33b930bcd50749196207bc461535fff68d2fa4794d87933357c74484c26",
+      "bytes": 5713672
     },
     "adjectives": {
-      "sha256": "933b4f55177ce878d3a33abcdcba633f4dbf62a7a9f19e88c99eb8f2cc987856",
-      "bytes": 829
+      "sha256": "7d5ee6b3e2f4e1d30ef6c57b38ba5d944af3b63c2fbe4906ab2ea1578788f21d",
+      "bytes": 8391964
     },
     "others": {
-      "sha256": "beb9743fa221ffb0fd150c0f8e3f6bf6f932830568cdfc720043c37b25360776",
-      "bytes": 2560
+      "sha256": "7c28479ab401538248e116f4e8c32610ba7bfae35998d555b3c52b99d2d067c0",
+      "bytes": 363615
     }
+  },
+  "imported_rows_total": 58825,
+  "compiled_records": {
+    "DIC": 95552,
+    "RUS": 53491,
+    "MORPH": 58772,
+    "morphology_templates": 4978
+  },
+  "binary_encoding": {
+    "name": "CP866",
+    "unsupported_codepoints_replaced": 109,
+    "stress_marks": "combining accents removed"
   }
 }

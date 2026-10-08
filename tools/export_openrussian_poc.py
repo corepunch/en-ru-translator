@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build the small DIC/RUS proof of concept from a pinned OpenRussian snapshot.
+"""Export every row from a pinned OpenRussian snapshot for the DIC/RUS builder.
 
-Given the four upstream CSVs in a directory, run:
+Given the four complete upstream CSV tables in a directory, run:
 
     python3 tools/export_openrussian_poc.py --full-snapshot /path/to/csvs
 
@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 from pathlib import Path
 
@@ -22,11 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data/openrussian-poc"
 SOURCE = DATA / "source"
 MANIFEST_PATH = DATA / "source-manifest.json"
-SAMPLE_WORDS = {
-    "nouns": ["стол", "книга", "окно", "человек", "ребёнок", "время", "путь"],
-    "verbs": ["читать", "писать", "идти", "быть", "дать", "есть", "хотеть", "мочь", "учиться"],
-    "adjectives": ["белый"],
-}
+TABLES = ("nouns", "verbs", "adjectives", "others")
 NOUN_SLOTS = ["sg_nom", "sg_gen", "sg_dat", "sg_acc", "sg_inst", "sg_prep",
               "pl_nom", "pl_gen", "pl_dat", "pl_acc", "pl_inst", "pl_prep"]
 VERB_SLOTS = ["imperative_sg", "imperative_pl", "past_m", "past_f", "past_n", "past_pl",
@@ -57,13 +54,18 @@ def read_tsv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 def write_tsv(path: Path, fields: list[str], rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fields, delimiter="\t", lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
+        writer = csv.writer(stream, delimiter="\t", lineterminator="\n")
+        writer.writerow(fields)
+        for row in rows:
+            buffer = io.StringIO(newline="")
+            csv.writer(buffer, delimiter="\t", lineterminator="\n").writerow(
+                [row.get(field, "") for field in fields]
+            )
+            stream.write(buffer.getvalue().rstrip("\r\n").rstrip("\t") + "\n")
 
 
 def extract_snapshot(source_dir: Path, expected: dict) -> None:
-    for name in (*SAMPLE_WORDS, "others"):
+    for name in TABLES:
         path = source_dir / f"{name}.csv"
         if not path.is_file():
             raise SystemExit(f"Missing pinned source file: {path}")
@@ -74,51 +76,48 @@ def extract_snapshot(source_dir: Path, expected: dict) -> None:
         fields, rows = read_tsv(path)
         selected = []
         for line, row in enumerate(rows, start=2):
-            if (name == "others" and " " in (row.get("bare") or "").strip()) or (
-                name != "others" and row.get("bare") in SAMPLE_WORDS[name]
-            ):
-                selected.append({**row, "source_row": str(line)})
-        absent = sorted(set(SAMPLE_WORDS.get(name, [])) - {row["bare"] for row in selected})
-        if absent:
-            raise SystemExit(f"Pinned {name}.csv is missing sample lemmas: {', '.join(absent)}")
-        write_tsv(SOURCE / f"{name}.tsv", fields + ["source_row"], selected)
+            extra = row.pop(None, []) or []
+            normalized = {
+                key: (value or "").replace("\r", " ").replace("\n", " ").replace("\t", " ")
+                for key, value in row.items()
+            }
+            normalized["source_row"] = str(line)
+            normalized["source_extra"] = " ".join(extra).replace("\r", " ").replace("\n", " ").replace("\t", " ")
+            selected.append(normalized)
+        write_tsv(SOURCE / f"{name}.tsv", fields + ["source_row", "source_extra"], selected)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--full-snapshot", type=Path,
-                        help="directory containing pinned nouns.csv, verbs.csv, adjectives.csv, others.csv")
+                        help="directory containing the complete pinned nouns.csv, verbs.csv, adjectives.csv, and others.csv")
     args = parser.parse_args()
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     if args.full_snapshot:
         extract_snapshot(args.full_snapshot, manifest["files"])
 
-    sample_hashes = {}
-    for name in (*SAMPLE_WORDS, "others"):
+    import_hashes = {}
+    for name in TABLES:
         path = SOURCE / f"{name}.tsv"
         if not path.is_file():
-            raise SystemExit(f"Missing sample source excerpt: {path}")
-        sample_hashes[name] = {"sha256": sha256(path), "bytes": path.stat().st_size}
+            raise SystemExit(f"Missing complete source table: {path}")
+        import_hashes[name] = {"sha256": sha256(path), "bytes": path.stat().st_size}
     if args.full_snapshot:
-        manifest["sample_files"] = sample_hashes
+        manifest["import_files"] = import_hashes
+        manifest.pop("sample_files", None)
         MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    elif manifest.get("sample_files") != sample_hashes:
-        raise SystemExit("Sample source excerpt checksum differs from source-manifest.json")
+    elif manifest.get("import_files") != import_hashes:
+        raise SystemExit("Full imported table checksum differs from source-manifest.json")
 
-    for name in (*SAMPLE_WORDS, "others"):
+    for name in TABLES:
         path = SOURCE / f"{name}.tsv"
         if not path.is_file():
-            raise SystemExit(f"Missing sample source excerpt: {path}")
+            raise SystemExit(f"Missing complete source table: {path}")
         _fields, rows = read_tsv(path)
-        if name == "others":
-            if not rows or any(" " not in (row.get("bare") or "").strip() for row in rows):
-                raise SystemExit("OpenRussian others excerpt must contain only multiword expressions")
-        else:
-            absent = sorted(set(SAMPLE_WORDS[name]) - {row["bare"] for row in rows})
-            if absent:
-                raise SystemExit(f"Sample excerpt lacks {name}: {', '.join(absent)}")
+        if len(rows) != manifest["files"][name]["rows"]:
+            raise SystemExit(f"Imported {name} row count differs from source-manifest.json")
 
-    print("OpenRussian source excerpts are ready for the C binary dictionary builder")
+    print("All OpenRussian source table rows are ready for the C binary dictionary builder")
     return 0
 
 

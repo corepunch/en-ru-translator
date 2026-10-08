@@ -13,10 +13,14 @@
 typedef struct { unsigned char *key, *value; size_t key_len, value_len, sequence; } Record;
 typedef struct { Record *items; size_t count, capacity; } Records;
 typedef struct { char **items; size_t count; } Fields;
+typedef struct { unsigned char pos, *data; size_t length; uint64_t hash; } Pattern;
+typedef struct { Pattern *items; size_t count, capacity; } Patterns;
 
 static void fail(const char *message) { fprintf(stderr, "openrussian_db: %s\n", message); exit(1); }
 static void *allocate(size_t size) { void *p = malloc(size ? size : 1); if (!p) fail("out of memory"); return p; }
 static size_t next_sequence;
+static size_t unrepresentable_codepoints;
+static Patterns morphology_patterns;
 static void put16(unsigned char *p, uint16_t v) { p[0]=(unsigned char)v; p[1]=(unsigned char)(v>>8); }
 static void put32(unsigned char *p, uint32_t v) { p[0]=(unsigned char)v; p[1]=(unsigned char)(v>>8); p[2]=(unsigned char)(v>>16); p[3]=(unsigned char)(v>>24); }
 static uint32_t get32(const unsigned char *p) { return (uint32_t)p[0] | (uint32_t)p[1]<<8 | (uint32_t)p[2]<<16 | (uint32_t)p[3]<<24; }
@@ -25,8 +29,11 @@ static unsigned char *convert_encoding(const char *from, const char *to, const u
   iconv_t cd=iconv_open(to,from); if (cd==(iconv_t)-1) fail("iconv_open failed");
   size_t capacity=input_len*4+32, left=input_len, out_left=capacity;
   unsigned char *output=allocate(capacity), *out=output; char *in=(char *)input;
-  if (iconv(cd,&in,&left,(char **)&out,&out_left)==(size_t)-1 || left) {
-    iconv_close(cd); free(output); fail("input cannot be converted to requested encoding");
+  size_t converted=iconv(cd,&in,&left,(char **)&out,&out_left);
+  if (converted==(size_t)-1 || left) {
+    fprintf(stderr,"openrussian_db: conversion %s -> %s failed at input byte %zu (remaining %zu bytes):",from,to,input_len-left,left);
+    for(size_t i=0;i<left&&i<8;i++)fprintf(stderr," %02x",(unsigned char)in[i]);
+    fputc('\n',stderr);iconv_close(cd);free(output);fail("input cannot be converted to requested encoding");
   }
   *output_len=capacity-out_left; iconv_close(cd); return output;
 }
@@ -37,10 +44,26 @@ static unsigned char *to_cp866(const char *text, size_t *length) {
   for(size_t i=0;i<source_len;i++) {
     if((unsigned char)text[i]==0xd1&&(unsigned char)text[i+1]==0x91) {
       normalized[normalized_len++]=0xd0;normalized[normalized_len++]=0xb5;i++;
+    } else if((unsigned char)text[i]==0xd0&&(unsigned char)text[i+1]==0x81) {
+      normalized[normalized_len++]=0xd0;normalized[normalized_len++]=0x95;i++;
+    } else if((unsigned char)text[i]==0xcc&&((unsigned char)text[i+1]>=0x80&&(unsigned char)text[i+1]<=0x8f)) {
+      /* OpenRussian marks stress with combining accents. Keep the base letter;
+       * the untouched UTF-8 source TSV remains the lossless archive. */
+      i++;
     } else normalized[normalized_len++]=(unsigned char)text[i];
   }
   normalized[normalized_len]=0;
-  unsigned char *result=convert_encoding("UTF-8","CP866",normalized,normalized_len,length);free(normalized);
+  iconv_t cd=iconv_open("CP866//TRANSLIT","UTF-8");if(cd==(iconv_t)-1)fail("iconv_open failed");
+  size_t capacity=normalized_len*4+32,out_left=capacity,at=0;unsigned char *result=allocate(capacity),*out=result;
+  while(at<normalized_len) {
+    size_t width=(normalized[at]&0x80)==0?1:(normalized[at]&0xe0)==0xc0?2:(normalized[at]&0xf0)==0xe0?3:4;
+    if(at+width>normalized_len)width=normalized_len-at;
+    char *in=(char *)normalized+at;size_t left=width;
+    if(iconv(cd,&in,&left,(char **)&out,&out_left)==(size_t)-1||left) {
+      iconv(cd,NULL,NULL,(char **)&out,&out_left);if(!out_left)fail("CP866 output buffer exhausted");*out++='?';out_left--;unrepresentable_codepoints++;at+=width;
+    } else at+=width;
+  }
+  *length=capacity-out_left;iconv_close(cd);free(normalized);
   /* Retain the runtime's one-byte mapping if an unnormalized lowercase ё remains. */
   for(size_t i=0;i<*length;i++)if(result[i]==0xf1)result[i]=0xf0;
   return result;
@@ -100,7 +123,8 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
     unsigned char *value=allocate(lemma_len+4);value[0]='W';value[1]='#';memcpy(value+2,lemma_bytes,lemma_len);value[lemma_len+2]='#';
     add_record(dic,key,alias_len,value,lemma_len+3);free(key);free(lemma_bytes);free(value);return;
   }
-  size_t lemma_len; unsigned char *encoded=to_cp866(lemma,&lemma_len);
+  const char *russian_lemma=plural&&!strcmp(pos,"noun")&&!strcmp(alias,"people")&&!strcmp(lemma,"человек")?"люди":lemma;
+  size_t lemma_len; unsigned char *encoded=to_cp866(russian_lemma,&lemma_len);
   unsigned char *value=allocate(lemma_len+8); size_t used=0;
   if(!strcmp(pos,"noun")){value[used++]=plural?'n':'N';}
   else if(!strcmp(pos,"verb")){value[used++]='e';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
@@ -127,12 +151,13 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
   free(copy);
 }
 
-static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender) {
+static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *sg_only,const char *pl_only) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5]; size_t used=0;
   if(!strcmp(pos,"noun")) {
     value[used++]='N';value[used++]=0xc0;
+    /* Keep the legacy RUS number bits beside the 2-bit gender code. */
     int g=!strcmp(gender,"m")?1:!strcmp(gender,"f")?2:0;
-    value[used++]=(unsigned char)(0x80|g);
+    value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
     value[used++]=0;
   } else if(!strcmp(pos,"verb")) { value[used++]='V';value[used++]=0xc0;value[used++]=0x88;value[used++]=0;value[used++]=0; }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
@@ -140,49 +165,105 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
   add_record(rus,encoded,n,value,used);free(encoded);
 }
 
-static void add_forms(Records *rus,Fields *header,Fields *row,const char *table,const char *pos,const char *lemma,const char *gender,const char *aspect,const char *source_row) {
+static uint64_t pattern_hash(unsigned char pos,const unsigned char *data,size_t length) {
+  uint64_t h=1469598103934665603ULL; h=(h^pos)*1099511628211ULL;
+  for(size_t i=0;i<length;i++)h=(h^data[i])*1099511628211ULL;
+  return h;
+}
+static uint16_t intern_pattern(unsigned char pos,const unsigned char *data,size_t length) {
+  uint64_t hash=pattern_hash(pos,data,length);
+  for(size_t i=0;i<morphology_patterns.count;i++) {
+    Pattern *p=&morphology_patterns.items[i];
+    if(p->hash==hash&&p->pos==pos&&p->length==length&&!memcmp(p->data,data,length))return (uint16_t)i;
+  }
+  if(morphology_patterns.count>=UINT16_MAX)fail("too many distinct morphology patterns");
+  if(morphology_patterns.count==morphology_patterns.capacity) {
+    morphology_patterns.capacity=morphology_patterns.capacity?morphology_patterns.capacity*2:128;
+    morphology_patterns.items=realloc(morphology_patterns.items,morphology_patterns.capacity*sizeof(Pattern));
+    if(!morphology_patterns.items)fail("out of memory");
+  }
+  size_t id=morphology_patterns.count++; Pattern *p=&morphology_patterns.items[id];
+  p->pos=pos;p->data=allocate(length);memcpy(p->data,data,length);p->length=length;p->hash=hash;
+  return (uint16_t)id;
+}
+
+static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,const char *lemma,const char *aspect) {
+  if(!strcmp(pos,"other"))return;
   static const char *noun_slots[]={"sg_nom","sg_gen","sg_dat","sg_acc","sg_inst","sg_prep","pl_nom","pl_gen","pl_dat","pl_acc","pl_inst","pl_prep"};
   static const char *verb_slots[]={"imperative_sg","imperative_pl","past_m","past_f","past_n","past_pl","presfut_sg1","presfut_sg2","presfut_sg3","presfut_pl1","presfut_pl2","presfut_pl3"};
   static const char *adj_slots[]={"decl_m_nom","decl_m_gen","decl_m_dat","decl_m_acc","decl_m_inst","decl_m_prep","decl_f_nom","decl_f_gen","decl_f_dat","decl_f_acc","decl_f_inst","decl_f_prep","decl_n_nom","decl_n_gen","decl_n_dat","decl_n_acc","decl_n_inst","decl_n_prep","decl_pl_nom","decl_pl_gen","decl_pl_dat","decl_pl_acc","decl_pl_inst","decl_pl_prep","comparative","superlative","short_m","short_f","short_n","short_pl"};
   const char **slots=!strcmp(pos,"noun")?noun_slots:!strcmp(pos,"verb")?verb_slots:adj_slots;
   size_t count=!strcmp(pos,"noun")?sizeof noun_slots/sizeof *noun_slots:!strcmp(pos,"verb")?sizeof verb_slots/sizeof *verb_slots:sizeof adj_slots/sizeof *adj_slots;
-  /* Preserve every upstream column under the source row id. Values remain
-   * named source fields rather than translated LTPRO paradigms or slots. */
-  size_t id_len;unsigned char *id=to_cp866(source_row,&id_len);
-  size_t cap=id_len+32,used=0;
-  for(size_t i=0;i<header->count;i++)cap+=strlen(header->items[i])+strlen(cell(row,i))+4;
-  unsigned char *key=allocate(id_len+3),*direct=allocate(cap);
-  key[0]='@';key[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':!strcmp(pos,"other")?'o':'a';memcpy(key+2,id,id_len);
-  for(size_t i=0;i<rus->count;i++)if(rus->items[i].key_len==id_len+2&&!memcmp(rus->items[i].key,key,id_len+2))fail("duplicate OpenRussian source_row id");
-  direct[used++]='O';
-  for(size_t i=0;i<header->count;i++) {
-    direct[used++]='\t';size_t name_len=strlen(header->items[i]);memcpy(direct+used,header->items[i],name_len);used+=name_len;direct[used++]='=';
-    char *clean=strdup(cell(row,i));if(!clean)fail("out of memory");
-    int form_column=0;for(size_t j=0;j<count;j++)if(!strcmp(header->items[i],slots[j]))form_column=1;
-    if(form_column||!strcmp(header->items[i],"accented")) {
-      size_t clean_len=strlen(clean);
-      for(size_t j=0;j<clean_len;j++)if(clean[j]=='\''){memmove(clean+j,clean+j+1,clean_len-j);clean_len--;j--;}
+  /* Each source form is stored as a one-byte trim count plus its CP866 suffix.
+   * Identical complete slot maps share one table record. */
+  size_t lemma_len;unsigned char *encoded_lemma=to_cp866(lemma,&lemma_len);
+  size_t cap=1;for(size_t i=0;i<count;i++)cap+=1+3*strlen(cell(row,column(header,slots[i])));
+  unsigned char *pattern=allocate(cap);size_t used=0;
+  for(size_t i=0;i<count;i++) {
+    const char *source=cell(row,column(header,slots[i]));char *copy=strdup(source);if(!copy)fail("out of memory");
+    unsigned char *cuts=allocate(strlen(source)+2),**suffixes=allocate((strlen(source)+2)*sizeof(unsigned char *));
+    size_t *suffix_lengths=allocate((strlen(source)+2)*sizeof(size_t)),variants=0;char *save=NULL;
+    for(char *form=strtok_r(copy,",",&save);form;form=strtok_r(NULL,",",&save)) {
+      while(*form==' '||*form=='\t')form++;size_t n=strlen(form);while(n&&(form[n-1]==' '||form[n-1]=='\t'))form[--n]=0;
+      for(size_t j=0;j<n;j++)if(form[j]=='\''){memmove(form+j,form+j+1,n-j);n--;j--;}
+      if(!n)continue;
+      size_t form_len;unsigned char *encoded_form=to_cp866(form,&form_len);size_t common=0;
+      while(common<lemma_len&&common<form_len&&encoded_lemma[common]==encoded_form[common])common++;
+      size_t cut=lemma_len-common,suffix_len=form_len-common;
+      if(cut>255||suffix_len>255||variants>=255)fail("morphology transform exceeds compact byte limits");
+      cuts[variants]=(unsigned char)cut;suffixes[variants]=allocate(suffix_len);memcpy(suffixes[variants],encoded_form+common,suffix_len);suffix_lengths[variants]=suffix_len;variants++;free(encoded_form);
     }
-    size_t encoded_len;unsigned char *encoded=to_cp866(clean,&encoded_len);
-    memcpy(direct+used,encoded,encoded_len);used+=encoded_len;free(encoded);free(clean);
+    if(variants>255)fail("too many form variants in one slot");
+    pattern[used++]=(unsigned char)variants;
+    for(size_t j=0;j<variants;j++) {
+      pattern[used++]=cuts[j];pattern[used++]=(unsigned char)suffix_lengths[j];
+      memcpy(pattern+used,suffixes[j],suffix_lengths[j]);used+=suffix_lengths[j];free(suffixes[j]);
+    }
+    free(cuts);free(suffixes);free(suffix_lengths);free(copy);
   }
-  add_record(rus,key,id_len+2,direct,used);free(id);free(key);free(direct);
-  (void)lemma;(void)gender;(void)aspect;(void)table;
+  uint16_t id=intern_pattern(!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a',pattern,used);
+  /* This reference is deliberately separate from the native POS code. The
+   * verb generator still receives its imperative flag and selects slots 0/1. */
+  unsigned char value[8];value[0]='M';value[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a';
+  value[2]=!strcmp(pos,"verb")?(!strcmp(aspect,"perfective")?'1':'0'):'0';
+  snprintf((char *)value+3,5,"%04X",id);
+  add_record(morph,encoded_lemma,lemma_len,value,7);free(encoded_lemma);free(pattern);
 }
 
-static void import_file(Records *source_dic,Records *source_rus,const char *path,const char *pos) {
+static void import_file(Records *source_dic,Records *source_rus,Records *morph,const char *path,const char *pos) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;ssize_t n=getline(&line,&cap,file);if(n<0)fail("empty source TSV");
-  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), source_row=column(&header,"source_row");
+  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), sg_only=column(&header,"sg_only"), pl_only=column(&header,"pl_only"), source_row=column(&header,"source_row");
   if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
   while((n=getline(&line,&cap,file))>=0) {
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
-    if(is_empty(lemma)||(!strcmp(pos,"other")?!strchr(lemma,' '):is_empty(english)))continue;
+    if(is_empty(lemma))continue;
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
-    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g);
+    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,sg_only),cell(&row,pl_only));
     if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a);
-    add_forms(source_rus,&header,&row,path,pos,lemma,g,a,cell(&row,source_row));
+    add_forms(morph,&header,&row,pos,lemma,a);
   }
   free(line);fclose(file);
+}
+
+static void add_people_plural(Records *rus) {
+  /* LTPRO stores this suppletive plural as its own noun, paradigm 30. */
+  static const unsigned char key[]={0xab,0xee,0xa4,0xa8}; /* люди */
+  static const unsigned char code[]={'N',0xd2,0x88,0x9e};
+  add_record(rus,key,sizeof key,code,sizeof code);
+}
+
+static void emit_morphology_patterns(Records *rus) {
+  for(size_t i=0;i<morphology_patterns.count;i++) {
+    Pattern *p=&morphology_patterns.items[i];char key[16];
+    int n=snprintf(key,sizeof key,"@M%05zu",i);if(n<0||(size_t)n>=sizeof key)fail("morphology pattern key overflow");
+    unsigned char *value=allocate(p->length*2+1);size_t used=1;value[0]='T';
+    for(size_t j=0;j<p->length;j++) {
+      if(p->data[j]==0x0a){value[used++]=0xff;value[used++]=1;}
+      else if(p->data[j]==0xff){value[used++]=0xff;value[used++]=0;}
+      else value[used++]=p->data[j];
+    }
+    add_record(rus,(unsigned char *)key,(size_t)n,value,used);free(value);
+  }
 }
 
 static size_t alphabet_index(unsigned char c,int buckets) {
@@ -211,18 +292,21 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
 }
 
 static void command_build(int argc,char **argv) {
-  if(argc!=5)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS");
-  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0};
-  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
-  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
-  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
-  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,path,"other");
-  /* English articles do not have Russian equivalents, but tagging them keeps
-   * them out of the sentence skeleton so OpenRussian nouns and verbs agree. */
+  if(argc!=6)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH");
+  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0},morph={0};
+  /* The demo's closed-class and common-verb readings must outrank unrelated
+   * homonyms that become visible when importing the complete tables. */
   add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
   add_utf8_record(&source_dic,"i","R011я");
-  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);
-  printf("wrote %zu OpenRussian DIC records and %zu RUS records\n",source_dic.count,source_rus.count);free(path);
+  add_utf8_record(&source_dic,"want","e00хотеть");add_utf8_record(&source_dic,"wants","e00хотеть");
+  add_utf8_record(&source_dic,"can","e00мочь");
+  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
+  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
+  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
+  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
+  add_people_plural(&source_rus);emit_morphology_patterns(&morph);
+  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
+  printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);
 }
 static void command_info(const char *path) {
   FILE *f=fopen(path,"rb");if(!f){perror(path);exit(1);}unsigned char h[HEADER_SIZE];if(fread(h,1,sizeof h,f)!=sizeof h||memcmp(h,"LTech DIC File 2.00 ",20))fail("not an LTech DIC image");
@@ -256,6 +340,6 @@ int main(int argc,char **argv) {
   if(!strcmp(argv[1],"build"))command_build(argc,argv);
   else if(!strcmp(argv[1],"info")&&argc==3)command_info(argv[2]);
   else if(!strcmp(argv[1],"find")&&argc==4)command_find(argv[2],argv[3]);
-  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS | info FILE | find FILE HEADWORD");
+  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH | info FILE | find FILE HEADWORD");
   return 0;
 }

@@ -4,6 +4,7 @@ local engine = require 'core.engine'
 local options = {
   dictionary = 'data/openrussian-poc/BASE.DIC',
   russian = 'data/openrussian-poc/BASE.RUS',
+  russian_morphology = 'data/openrussian-poc/BASE.MORPH',
 }
 local examples = {
   'The child reads a book.',

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "full-openrussian-1",
+    "group": "openrussian-full-import",
+    "input": "House."
+  },
+  {
+    "id": "full-openrussian-2",
+    "group": "openrussian-full-import",
+    "input": "Water."
+  },
+  {
+    "id": "full-openrussian-3",
+    "group": "openrussian-full-import",
+    "input": "Student."
+  },
+  {
+    "id": "full-openrussian-4",
+    "group": "openrussian-full-import",
+    "input": "The woman sees a dog."
+  },
+  {
+    "id": "full-openrussian-5",
+    "group": "openrussian-full-import",
+    "input": "A large house."
+  }
+]

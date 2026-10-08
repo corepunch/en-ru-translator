@@ -848,8 +848,9 @@ local function decode(dictionary,records,index,options)
       local context={}
       for key,item in pairs(node) do context[key]=item end
       lexicon.decode_reading(context,value:sub(2):match('^[^\\]*'),options)
-      for _,field in ipairs({'tense','number','person','aspect','gender','case_mask',
-          'verb_flags','governed_case','passive','short_form','lookup_flags','lookup_frame'}) do
+      -- Case government belongs to the replacement reading, not the English
+      -- head ("at" -> "к" must not inherit at's prepositional case).
+      for _,field in ipairs({'tense','number','person','aspect'}) do
         node[field]=context[field]
       end
     end

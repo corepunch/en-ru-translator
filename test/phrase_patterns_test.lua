@@ -11,6 +11,8 @@ keep ~ safe*Vхранить
 do ~ best*Vстараться
 do ~ level best*Vпытаться
 did*X1делать\do
+at*PПв
+at ~ convenience*WPк~ услугам
 a number of*WIмногоPР
 article i*WNстатья#I
 how often*WDкакDчасто
@@ -37,6 +39,7 @@ local implicit = analyzed('keep cat safe')
 assert(implicit.vector[1].reading == encoding.encode('хранить') and implicit.count==3)
 assert(analyzed('do cat level best').vector[1].reading==encoding.encode('пытаться'))
 assert(analyzed('did cat level best').vector[1].tense==1)
+assert(analyzed('at cat convenience').vector[1].case_mask==0)
 local blocked = analyzed('take cat, dog home')
 assert(blocked.vector[1].reading == encoding.encode('брать'), 'gaps cannot cross punctuation')
 assert(analyzed('take {~cat~} home').vector[2].literal, 'gaps cannot consume literal spans')

@@ -1,0 +1,1932 @@
+[
+  {
+    "id": "baseline-001",
+    "group": "baseline",
+    "input": "She can speak Russian."
+  },
+  {
+    "id": "baseline-002",
+    "group": "baseline",
+    "input": "He is in the house."
+  },
+  {
+    "id": "baseline-003",
+    "group": "baseline",
+    "input": "She sat on the chair."
+  },
+  {
+    "id": "baseline-004",
+    "group": "baseline",
+    "input": "He must not go."
+  },
+  {
+    "id": "baseline-005",
+    "group": "baseline",
+    "input": "The dog that I saw ran away."
+  },
+  {
+    "id": "baseline-006",
+    "group": "baseline",
+    "input": "He was arrested by the police."
+  },
+  {
+    "id": "baseline-007",
+    "group": "baseline",
+    "input": "You are standing in an open field."
+  },
+  {
+    "id": "baseline-008",
+    "group": "baseline",
+    "input": "The house door is open."
+  },
+  {
+    "id": "baseline-009",
+    "group": "baseline",
+    "input": "He cannot go."
+  },
+  {
+    "id": "baseline-010",
+    "group": "baseline",
+    "input": "She has been seen."
+  },
+  {
+    "id": "baseline-011",
+    "group": "baseline",
+    "input": "This AGREEMENT is a sample for testing the electronic translation program."
+  },
+  {
+    "id": "baseline-012",
+    "group": "baseline",
+    "input": "AGREEMENT ON SUPPLY OF FISH MEAL"
+  },
+  {
+    "id": "baseline-013",
+    "group": "baseline",
+    "input": "Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT."
+  },
+  {
+    "id": "baseline-014",
+    "group": "baseline",
+    "input": "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations."
+  },
+  {
+    "id": "baseline-015",
+    "group": "baseline",
+    "input": "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal."
+  },
+  {
+    "id": "baseline-016",
+    "group": "baseline",
+    "input": "The total price for the goods and services as defined in EXHIBIT A is USD."
+  },
+  {
+    "id": "baseline-017",
+    "group": "baseline",
+    "input": "The exclusive remedy for breach of this warranty shall be the replacement."
+  },
+  {
+    "id": "baseline-018",
+    "group": "baseline",
+    "input": "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void."
+  },
+  {
+    "id": "baseline-019",
+    "group": "baseline",
+    "input": "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments."
+  },
+  {
+    "id": "baseline-020",
+    "group": "baseline",
+    "input": "The Letter of Credit shall allow for partial shipments and partial payment."
+  },
+  {
+    "id": "baseline-021",
+    "group": "baseline",
+    "input": "EXHIBIT A."
+  },
+  {
+    "id": "baseline-022",
+    "group": "baseline",
+    "input": "by all means."
+  },
+  {
+    "id": "baseline-023",
+    "group": "baseline",
+    "input": "by all means of transport."
+  },
+  {
+    "id": "baseline-024",
+    "group": "baseline",
+    "input": "He walked including me."
+  },
+  {
+    "id": "baseline-025",
+    "group": "baseline",
+    "input": "5 Metric tons."
+  },
+  {
+    "id": "baseline-026",
+    "group": "baseline",
+    "input": "2 Metric tons."
+  },
+  {
+    "id": "baseline-027",
+    "group": "baseline",
+    "input": "It will be a replacement."
+  },
+  {
+    "id": "baseline-028",
+    "group": "baseline",
+    "input": "fish-meal."
+  },
+  {
+    "id": "baseline-029",
+    "group": "baseline",
+    "input": "well-known product."
+  },
+  {
+    "id": "baseline-030",
+    "group": "baseline",
+    "input": "buyer-seller agreement."
+  },
+  {
+    "id": "baseline-031",
+    "group": "baseline",
+    "input": "A-B."
+  },
+  {
+    "id": "baseline-032",
+    "group": "baseline",
+    "input": "state-of-the-art product."
+  },
+  {
+    "id": "baseline-033",
+    "group": "baseline",
+    "input": "He said, I agree."
+  },
+  {
+    "id": "baseline-034",
+    "group": "baseline",
+    "input": "He said, \"I agree.\""
+  },
+  {
+    "id": "baseline-035",
+    "group": "baseline",
+    "input": "\"Fish meal\", seller said."
+  },
+  {
+    "id": "baseline-036",
+    "group": "baseline",
+    "input": "I work."
+  },
+  {
+    "id": "baseline-037",
+    "group": "baseline",
+    "input": "The work is good."
+  },
+  {
+    "id": "baseline-038",
+    "group": "baseline",
+    "input": "They work."
+  },
+  {
+    "id": "baseline-039",
+    "group": "baseline",
+    "input": "He works."
+  },
+  {
+    "id": "baseline-040",
+    "group": "baseline",
+    "input": "The works are good."
+  },
+  {
+    "id": "baseline-041",
+    "group": "baseline",
+    "input": "An open door."
+  },
+  {
+    "id": "baseline-042",
+    "group": "baseline",
+    "input": "Open the door."
+  },
+  {
+    "id": "baseline-043",
+    "group": "baseline",
+    "input": "He can go."
+  },
+  {
+    "id": "baseline-044",
+    "group": "baseline",
+    "input": "He must go."
+  },
+  {
+    "id": "baseline-045",
+    "group": "baseline",
+    "input": "He will go."
+  },
+  {
+    "id": "baseline-046",
+    "group": "baseline",
+    "input": "He did not go."
+  },
+  {
+    "id": "baseline-047",
+    "group": "baseline",
+    "input": "He is working."
+  },
+  {
+    "id": "baseline-048",
+    "group": "baseline",
+    "input": "He has worked."
+  },
+  {
+    "id": "baseline-049",
+    "group": "baseline",
+    "input": "He had worked."
+  },
+  {
+    "id": "baseline-050",
+    "group": "baseline",
+    "input": "The door was opened."
+  },
+  {
+    "id": "baseline-051",
+    "group": "baseline",
+    "input": "The door is closed."
+  },
+  {
+    "id": "baseline-052",
+    "group": "baseline",
+    "input": "If he comes then I go."
+  },
+  {
+    "id": "baseline-053",
+    "group": "baseline",
+    "input": "If he comes, I go."
+  },
+  {
+    "id": "baseline-054",
+    "group": "baseline",
+    "input": "When he comes, I go."
+  },
+  {
+    "id": "baseline-055",
+    "group": "baseline",
+    "input": "I know that he works."
+  },
+  {
+    "id": "baseline-056",
+    "group": "baseline",
+    "input": "Who saw the dog?"
+  },
+  {
+    "id": "baseline-057",
+    "group": "baseline",
+    "input": "What is this?"
+  },
+  {
+    "id": "baseline-058",
+    "group": "baseline",
+    "input": "Please open the door."
+  },
+  {
+    "id": "baseline-059",
+    "group": "baseline",
+    "input": "One book."
+  },
+  {
+    "id": "baseline-060",
+    "group": "baseline",
+    "input": "Two books."
+  },
+  {
+    "id": "baseline-061",
+    "group": "baseline",
+    "input": "Five books."
+  },
+  {
+    "id": "baseline-062",
+    "group": "baseline",
+    "input": "The price is 10 percent."
+  },
+  {
+    "id": "baseline-063",
+    "group": "baseline",
+    "input": "The meeting is on June 15."
+  },
+  {
+    "id": "baseline-064",
+    "group": "baseline",
+    "input": "The meeting is on May 1."
+  },
+  {
+    "id": "baseline-065",
+    "group": "baseline",
+    "input": "A house door."
+  },
+  {
+    "id": "baseline-066",
+    "group": "baseline",
+    "input": "A door of the house."
+  },
+  {
+    "id": "baseline-067",
+    "group": "baseline",
+    "input": "A new house door."
+  },
+  {
+    "id": "baseline-068",
+    "group": "baseline",
+    "input": "A buyer-seller agreement."
+  },
+  {
+    "id": "baseline-069",
+    "group": "baseline",
+    "input": "There is a book."
+  },
+  {
+    "id": "baseline-070",
+    "group": "baseline",
+    "input": "There are two books."
+  },
+  {
+    "id": "baseline-071",
+    "group": "baseline",
+    "input": "There is no book."
+  },
+  {
+    "id": "baseline-072",
+    "group": "baseline",
+    "input": "He is not a teacher."
+  },
+  {
+    "id": "baseline-073",
+    "group": "baseline",
+    "input": "(The house)."
+  },
+  {
+    "id": "baseline-074",
+    "group": "baseline",
+    "input": "He said: \"Go.\""
+  },
+  {
+    "id": "baseline-075",
+    "group": "baseline",
+    "input": "ABC-123."
+  },
+  {
+    "id": "baseline-076",
+    "group": "baseline",
+    "input": "Xylophornium is here."
+  },
+  {
+    "id": "baseline-077",
+    "group": "baseline",
+    "input": "The cat sat on the mat."
+  },
+  {
+    "id": "baseline-078",
+    "group": "baseline",
+    "input": "I have books."
+  },
+  {
+    "id": "baseline-079",
+    "group": "baseline",
+    "input": "The organizations work."
+  },
+  {
+    "id": "baseline-080",
+    "group": "baseline",
+    "input": "They defined a rule."
+  },
+  {
+    "id": "baseline-081",
+    "group": "baseline",
+    "input": "The legally defined terms."
+  },
+  {
+    "id": "baseline-082",
+    "group": "baseline",
+    "input": "He studies English."
+  },
+  {
+    "id": "baseline-083",
+    "group": "baseline",
+    "input": "The dogs run."
+  },
+  {
+    "id": "baseline-084",
+    "group": "baseline",
+    "input": "Boxes are open."
+  },
+  {
+    "id": "baseline-085",
+    "group": "baseline",
+    "input": "He stopped."
+  },
+  {
+    "id": "baseline-086",
+    "group": "baseline",
+    "input": "He is running."
+  },
+  {
+    "id": "baseline-087",
+    "group": "baseline",
+    "input": "Fish meal is good."
+  },
+  {
+    "id": "baseline-088",
+    "group": "baseline",
+    "input": "The letter of credit is valid."
+  },
+  {
+    "id": "baseline-089",
+    "group": "baseline",
+    "input": "She cannot work."
+  },
+  {
+    "id": "baseline-090",
+    "group": "baseline",
+    "input": "BUYER-SELLER."
+  },
+  {
+    "id": "baseline-091",
+    "group": "baseline",
+    "input": "They said, \"Go.\""
+  },
+  {
+    "id": "baseline-092",
+    "group": "baseline",
+    "input": "This is a nice book."
+  },
+  {
+    "id": "baseline-093",
+    "group": "baseline",
+    "input": "We will deliver the goods tomorrow."
+  },
+  {
+    "id": "baseline-094",
+    "group": "baseline",
+    "input": "A book was on the table."
+  },
+  {
+    "id": "baseline-095",
+    "group": "baseline",
+    "input": "They are in the house."
+  },
+  {
+    "id": "baseline-096",
+    "group": "baseline",
+    "input": "Stop."
+  },
+  {
+    "id": "baseline-097",
+    "group": "baseline",
+    "input": "I'm doing th"
+  },
+  {
+    "id": "baseline-098",
+    "group": "baseline",
+    "input": "th."
+  },
+  {
+    "id": "baseline-099",
+    "group": "baseline",
+    "input": "ab."
+  },
+  {
+    "id": "baseline-100",
+    "group": "baseline",
+    "input": "Aaron."
+  },
+  {
+    "id": "baseline-101",
+    "group": "baseline",
+    "input": "Abalone."
+  },
+  {
+    "id": "baseline-102",
+    "group": "baseline",
+    "input": "Ivanova."
+  },
+  {
+    "id": "baseline-103",
+    "group": "baseline",
+    "input": "Vadim."
+  },
+  {
+    "id": "baseline-104",
+    "group": "baseline",
+    "input": "Staros."
+  },
+  {
+    "id": "baseline-105",
+    "group": "baseline",
+    "input": "Lada."
+  },
+  {
+    "id": "baseline-106",
+    "group": "baseline",
+    "input": "Welch."
+  },
+  {
+    "id": "baseline-107",
+    "group": "baseline",
+    "input": "Albert Lea."
+  },
+  {
+    "id": "baseline-108",
+    "group": "baseline",
+    "input": "Allen town."
+  },
+  {
+    "id": "baseline-109",
+    "group": "baseline",
+    "input": "O'Fallon."
+  },
+  {
+    "id": "baseline-110",
+    "group": "baseline",
+    "input": "Ppg."
+  },
+  {
+    "id": "baseline-111",
+    "group": "baseline",
+    "input": "Robin-hood."
+  },
+  {
+    "id": "baseline-112",
+    "group": "baseline",
+    "input": "Sco."
+  },
+  {
+    "id": "baseline-113",
+    "group": "baseline",
+    "input": "Sept-lles."
+  },
+  {
+    "id": "baseline-114",
+    "group": "baseline",
+    "input": "Weaselly."
+  },
+  {
+    "id": "baseline-115",
+    "group": "baseline",
+    "input": "Narvskiy."
+  },
+  {
+    "id": "baseline-116",
+    "group": "baseline",
+    "input": "ABC television."
+  },
+  {
+    "id": "baseline-117",
+    "group": "baseline",
+    "input": "Alexander city."
+  },
+  {
+    "id": "baseline-118",
+    "group": "baseline",
+    "input": "Ash land."
+  },
+  {
+    "id": "baseline-119",
+    "group": "baseline",
+    "input": "Bandar seri begawan."
+  },
+  {
+    "id": "baseline-120",
+    "group": "baseline",
+    "input": "Cape town."
+  },
+  {
+    "id": "baseline-121",
+    "group": "baseline",
+    "input": "abc television."
+  },
+  {
+    "id": "baseline-122",
+    "group": "baseline",
+    "input": "Bel Air."
+  },
+  {
+    "id": "noun-endings-001",
+    "group": "noun-endings",
+    "input": "The xyzness is deep."
+  },
+  {
+    "id": "noun-endings-002",
+    "group": "noun-endings",
+    "input": "The xyzness is good."
+  },
+  {
+    "id": "noun-endings-003",
+    "group": "noun-endings",
+    "input": "The strongness is deep."
+  },
+  {
+    "id": "noun-endings-004",
+    "group": "noun-endings",
+    "input": "The foo-ness is deep."
+  },
+  {
+    "id": "noun-endings-005",
+    "group": "noun-endings",
+    "input": "The ness-foo is deep."
+  },
+  {
+    "id": "noun-endings-006",
+    "group": "noun-endings",
+    "input": "The xyzment is deep."
+  },
+  {
+    "id": "noun-endings-007",
+    "group": "noun-endings",
+    "input": "The xyzment is good."
+  },
+  {
+    "id": "noun-endings-008",
+    "group": "noun-endings",
+    "input": "The strongment is deep."
+  },
+  {
+    "id": "noun-endings-009",
+    "group": "noun-endings",
+    "input": "The foo-ment is deep."
+  },
+  {
+    "id": "noun-endings-010",
+    "group": "noun-endings",
+    "input": "The ment-foo is deep."
+  },
+  {
+    "id": "noun-endings-011",
+    "group": "noun-endings",
+    "input": "The xyzion is deep."
+  },
+  {
+    "id": "noun-endings-012",
+    "group": "noun-endings",
+    "input": "The xyzion is good."
+  },
+  {
+    "id": "noun-endings-013",
+    "group": "noun-endings",
+    "input": "The strongion is deep."
+  },
+  {
+    "id": "noun-endings-014",
+    "group": "noun-endings",
+    "input": "The foo-ion is deep."
+  },
+  {
+    "id": "noun-endings-015",
+    "group": "noun-endings",
+    "input": "The ion-foo is deep."
+  },
+  {
+    "id": "noun-endings-016",
+    "group": "noun-endings",
+    "input": "The xyzence is deep."
+  },
+  {
+    "id": "noun-endings-017",
+    "group": "noun-endings",
+    "input": "The xyzence is good."
+  },
+  {
+    "id": "noun-endings-018",
+    "group": "noun-endings",
+    "input": "The strongence is deep."
+  },
+  {
+    "id": "noun-endings-019",
+    "group": "noun-endings",
+    "input": "The foo-ence is deep."
+  },
+  {
+    "id": "noun-endings-020",
+    "group": "noun-endings",
+    "input": "The ence-foo is deep."
+  },
+  {
+    "id": "noun-endings-021",
+    "group": "noun-endings",
+    "input": "The xyzance is deep."
+  },
+  {
+    "id": "noun-endings-022",
+    "group": "noun-endings",
+    "input": "The xyzance is good."
+  },
+  {
+    "id": "noun-endings-023",
+    "group": "noun-endings",
+    "input": "The strongance is deep."
+  },
+  {
+    "id": "noun-endings-024",
+    "group": "noun-endings",
+    "input": "The foo-ance is deep."
+  },
+  {
+    "id": "noun-endings-025",
+    "group": "noun-endings",
+    "input": "The ance-foo is deep."
+  },
+  {
+    "id": "noun-endings-026",
+    "group": "noun-endings",
+    "input": "The xyzenc is deep."
+  },
+  {
+    "id": "noun-endings-027",
+    "group": "noun-endings",
+    "input": "The xyzenc is good."
+  },
+  {
+    "id": "noun-endings-028",
+    "group": "noun-endings",
+    "input": "The strongenc is deep."
+  },
+  {
+    "id": "noun-endings-029",
+    "group": "noun-endings",
+    "input": "The foo-enc is deep."
+  },
+  {
+    "id": "noun-endings-030",
+    "group": "noun-endings",
+    "input": "The enc-foo is deep."
+  },
+  {
+    "id": "noun-endings-031",
+    "group": "noun-endings",
+    "input": "The xyzanc is deep."
+  },
+  {
+    "id": "noun-endings-032",
+    "group": "noun-endings",
+    "input": "The xyzanc is good."
+  },
+  {
+    "id": "noun-endings-033",
+    "group": "noun-endings",
+    "input": "The stronganc is deep."
+  },
+  {
+    "id": "noun-endings-034",
+    "group": "noun-endings",
+    "input": "The foo-anc is deep."
+  },
+  {
+    "id": "noun-endings-035",
+    "group": "noun-endings",
+    "input": "The anc-foo is deep."
+  },
+  {
+    "id": "noun-endings-036",
+    "group": "noun-endings",
+    "input": "The xyzity is deep."
+  },
+  {
+    "id": "noun-endings-037",
+    "group": "noun-endings",
+    "input": "The xyzity is good."
+  },
+  {
+    "id": "noun-endings-038",
+    "group": "noun-endings",
+    "input": "The strongity is deep."
+  },
+  {
+    "id": "noun-endings-039",
+    "group": "noun-endings",
+    "input": "The foo-ity is deep."
+  },
+  {
+    "id": "noun-endings-040",
+    "group": "noun-endings",
+    "input": "The ity-foo is deep."
+  },
+  {
+    "id": "noun-endings-041",
+    "group": "noun-endings",
+    "input": "The xyzage is deep."
+  },
+  {
+    "id": "noun-endings-042",
+    "group": "noun-endings",
+    "input": "The xyzage is good."
+  },
+  {
+    "id": "noun-endings-043",
+    "group": "noun-endings",
+    "input": "The strongage is deep."
+  },
+  {
+    "id": "noun-endings-044",
+    "group": "noun-endings",
+    "input": "The foo-age is deep."
+  },
+  {
+    "id": "noun-endings-045",
+    "group": "noun-endings",
+    "input": "The age-foo is deep."
+  },
+  {
+    "id": "noun-endings-046",
+    "group": "noun-endings",
+    "input": "The xyzure is deep."
+  },
+  {
+    "id": "noun-endings-047",
+    "group": "noun-endings",
+    "input": "The xyzure is good."
+  },
+  {
+    "id": "noun-endings-048",
+    "group": "noun-endings",
+    "input": "The strongure is deep."
+  },
+  {
+    "id": "noun-endings-049",
+    "group": "noun-endings",
+    "input": "The foo-ure is deep."
+  },
+  {
+    "id": "noun-endings-050",
+    "group": "noun-endings",
+    "input": "The ure-foo is deep."
+  },
+  {
+    "id": "noun-endings-051",
+    "group": "noun-endings",
+    "input": "The xyzag is deep."
+  },
+  {
+    "id": "noun-endings-052",
+    "group": "noun-endings",
+    "input": "The xyzag is good."
+  },
+  {
+    "id": "noun-endings-053",
+    "group": "noun-endings",
+    "input": "The strongag is deep."
+  },
+  {
+    "id": "noun-endings-054",
+    "group": "noun-endings",
+    "input": "The foo-ag is deep."
+  },
+  {
+    "id": "noun-endings-055",
+    "group": "noun-endings",
+    "input": "The ag-foo is deep."
+  },
+  {
+    "id": "noun-endings-056",
+    "group": "noun-endings",
+    "input": "The xyznes is deep."
+  },
+  {
+    "id": "noun-endings-057",
+    "group": "noun-endings",
+    "input": "The xyznes is good."
+  },
+  {
+    "id": "noun-endings-058",
+    "group": "noun-endings",
+    "input": "The strongnes is deep."
+  },
+  {
+    "id": "noun-endings-059",
+    "group": "noun-endings",
+    "input": "The foo-nes is deep."
+  },
+  {
+    "id": "noun-endings-060",
+    "group": "noun-endings",
+    "input": "The nes-foo is deep."
+  },
+  {
+    "id": "noun-endings-061",
+    "group": "noun-endings",
+    "input": "The xyzor is deep."
+  },
+  {
+    "id": "noun-endings-062",
+    "group": "noun-endings",
+    "input": "The xyzor is good."
+  },
+  {
+    "id": "noun-endings-063",
+    "group": "noun-endings",
+    "input": "The strongor is deep."
+  },
+  {
+    "id": "noun-endings-064",
+    "group": "noun-endings",
+    "input": "The foo-or is deep."
+  },
+  {
+    "id": "noun-endings-065",
+    "group": "noun-endings",
+    "input": "The or-foo is deep."
+  },
+  {
+    "id": "noun-endings-066",
+    "group": "noun-endings",
+    "input": "The xyzur is deep."
+  },
+  {
+    "id": "noun-endings-067",
+    "group": "noun-endings",
+    "input": "The xyzur is good."
+  },
+  {
+    "id": "noun-endings-068",
+    "group": "noun-endings",
+    "input": "The strongur is deep."
+  },
+  {
+    "id": "noun-endings-069",
+    "group": "noun-endings",
+    "input": "The foo-ur is deep."
+  },
+  {
+    "id": "noun-endings-070",
+    "group": "noun-endings",
+    "input": "The ur-foo is deep."
+  },
+  {
+    "id": "noun-endings-071",
+    "group": "noun-endings",
+    "input": "The kindness is good."
+  },
+  {
+    "id": "noun-endings-072",
+    "group": "noun-endings",
+    "input": "I see the kindness."
+  },
+  {
+    "id": "noun-endings-073",
+    "group": "noun-endings",
+    "input": "The darkness is good."
+  },
+  {
+    "id": "noun-endings-074",
+    "group": "noun-endings",
+    "input": "I see the darkness."
+  },
+  {
+    "id": "noun-endings-075",
+    "group": "noun-endings",
+    "input": "The happiness is good."
+  },
+  {
+    "id": "noun-endings-076",
+    "group": "noun-endings",
+    "input": "I see the happiness."
+  },
+  {
+    "id": "noun-endings-077",
+    "group": "noun-endings",
+    "input": "The abruptness is good."
+  },
+  {
+    "id": "noun-endings-078",
+    "group": "noun-endings",
+    "input": "I see the abruptness."
+  },
+  {
+    "id": "noun-endings-079",
+    "group": "noun-endings",
+    "input": "The abandonment is good."
+  },
+  {
+    "id": "noun-endings-080",
+    "group": "noun-endings",
+    "input": "I see the abandonment."
+  },
+  {
+    "id": "noun-endings-081",
+    "group": "noun-endings",
+    "input": "The agreement is good."
+  },
+  {
+    "id": "noun-endings-082",
+    "group": "noun-endings",
+    "input": "I see the agreement."
+  },
+  {
+    "id": "noun-endings-083",
+    "group": "noun-endings",
+    "input": "The action is good."
+  },
+  {
+    "id": "noun-endings-084",
+    "group": "noun-endings",
+    "input": "I see the action."
+  },
+  {
+    "id": "noun-endings-085",
+    "group": "noun-endings",
+    "input": "The difference is good."
+  },
+  {
+    "id": "noun-endings-086",
+    "group": "noun-endings",
+    "input": "I see the difference."
+  },
+  {
+    "id": "noun-endings-087",
+    "group": "noun-endings",
+    "input": "The ability is good."
+  },
+  {
+    "id": "noun-endings-088",
+    "group": "noun-endings",
+    "input": "I see the ability."
+  },
+  {
+    "id": "noun-endings-089",
+    "group": "noun-endings",
+    "input": "The color is good."
+  },
+  {
+    "id": "noun-endings-090",
+    "group": "noun-endings",
+    "input": "I see the color."
+  },
+  {
+    "id": "noun-endings-091",
+    "group": "noun-endings",
+    "input": "The strongness is good."
+  },
+  {
+    "id": "noun-endings-092",
+    "group": "noun-endings",
+    "input": "I see the strongness."
+  },
+  {
+    "id": "noun-endings-093",
+    "group": "noun-endings",
+    "input": "I see the xyzness."
+  },
+  {
+    "id": "contractions-001",
+    "group": "contractions",
+    "input": "I've worked."
+  },
+  {
+    "id": "contractions-002",
+    "group": "contractions",
+    "input": "I'll work."
+  },
+  {
+    "id": "contractions-003",
+    "group": "contractions",
+    "input": "I'd work."
+  },
+  {
+    "id": "contractions-004",
+    "group": "contractions",
+    "input": "you're working."
+  },
+  {
+    "id": "contractions-005",
+    "group": "contractions",
+    "input": "you've worked."
+  },
+  {
+    "id": "contractions-006",
+    "group": "contractions",
+    "input": "you'll work."
+  },
+  {
+    "id": "contractions-007",
+    "group": "contractions",
+    "input": "you'd work."
+  },
+  {
+    "id": "contractions-008",
+    "group": "contractions",
+    "input": "we're working."
+  },
+  {
+    "id": "contractions-009",
+    "group": "contractions",
+    "input": "we've worked."
+  },
+  {
+    "id": "contractions-010",
+    "group": "contractions",
+    "input": "we'll work."
+  },
+  {
+    "id": "contractions-011",
+    "group": "contractions",
+    "input": "we'd work."
+  },
+  {
+    "id": "contractions-012",
+    "group": "contractions",
+    "input": "they're working."
+  },
+  {
+    "id": "contractions-013",
+    "group": "contractions",
+    "input": "they've worked."
+  },
+  {
+    "id": "contractions-014",
+    "group": "contractions",
+    "input": "they'll work."
+  },
+  {
+    "id": "contractions-015",
+    "group": "contractions",
+    "input": "they'd work."
+  },
+  {
+    "id": "contractions-016",
+    "group": "contractions",
+    "input": "he'll work."
+  },
+  {
+    "id": "contractions-017",
+    "group": "contractions",
+    "input": "he'd work."
+  },
+  {
+    "id": "contractions-018",
+    "group": "contractions",
+    "input": "she'll work."
+  },
+  {
+    "id": "contractions-019",
+    "group": "contractions",
+    "input": "she'd work."
+  },
+  {
+    "id": "contractions-020",
+    "group": "contractions",
+    "input": "it'll work."
+  },
+  {
+    "id": "contractions-021",
+    "group": "contractions",
+    "input": "it'd work."
+  },
+  {
+    "id": "contractions-022",
+    "group": "contractions",
+    "input": "I'm working."
+  },
+  {
+    "id": "contractions-023",
+    "group": "contractions",
+    "input": "I'm ready."
+  },
+  {
+    "id": "contractions-024",
+    "group": "contractions",
+    "input": "You're ready."
+  },
+  {
+    "id": "contractions-025",
+    "group": "contractions",
+    "input": "We're ready."
+  },
+  {
+    "id": "contractions-026",
+    "group": "contractions",
+    "input": "They're ready."
+  },
+  {
+    "id": "contractions-027",
+    "group": "contractions",
+    "input": "I've seen the book."
+  },
+  {
+    "id": "contractions-028",
+    "group": "contractions",
+    "input": "You've seen the book."
+  },
+  {
+    "id": "contractions-029",
+    "group": "contractions",
+    "input": "We've seen the book."
+  },
+  {
+    "id": "contractions-030",
+    "group": "contractions",
+    "input": "They've seen the book."
+  },
+  {
+    "id": "contractions-031",
+    "group": "contractions",
+    "input": "I've been working."
+  },
+  {
+    "id": "contractions-032",
+    "group": "contractions",
+    "input": "We've been working."
+  },
+  {
+    "id": "contractions-033",
+    "group": "contractions",
+    "input": "They've been working."
+  },
+  {
+    "id": "contractions-034",
+    "group": "contractions",
+    "input": "He's ready."
+  },
+  {
+    "id": "contractions-035",
+    "group": "contractions",
+    "input": "She's ready."
+  },
+  {
+    "id": "contractions-036",
+    "group": "contractions",
+    "input": "It's good."
+  },
+  {
+    "id": "contractions-037",
+    "group": "contractions",
+    "input": "There's a book."
+  },
+  {
+    "id": "contractions-038",
+    "group": "contractions",
+    "input": "Here's a book."
+  },
+  {
+    "id": "contractions-039",
+    "group": "contractions",
+    "input": "What's this?"
+  },
+  {
+    "id": "contractions-040",
+    "group": "contractions",
+    "input": "Who's here?"
+  },
+  {
+    "id": "contractions-041",
+    "group": "contractions",
+    "input": "That's good."
+  },
+  {
+    "id": "contractions-042",
+    "group": "contractions",
+    "input": "Let's go."
+  },
+  {
+    "id": "contractions-043",
+    "group": "contractions",
+    "input": "I can't work."
+  },
+  {
+    "id": "contractions-044",
+    "group": "contractions",
+    "input": "He cannot work."
+  },
+  {
+    "id": "contractions-045",
+    "group": "contractions",
+    "input": "She won't go."
+  },
+  {
+    "id": "contractions-046",
+    "group": "contractions",
+    "input": "We shan't go."
+  },
+  {
+    "id": "contractions-047",
+    "group": "contractions",
+    "input": "He doesn't work."
+  },
+  {
+    "id": "contractions-048",
+    "group": "contractions",
+    "input": "I don't work."
+  },
+  {
+    "id": "contractions-049",
+    "group": "contractions",
+    "input": "They didn't work."
+  },
+  {
+    "id": "contractions-050",
+    "group": "contractions",
+    "input": "They aren't ready."
+  },
+  {
+    "id": "contractions-051",
+    "group": "contractions",
+    "input": "He isn't ready."
+  },
+  {
+    "id": "contractions-052",
+    "group": "contractions",
+    "input": "We weren't ready."
+  },
+  {
+    "id": "contractions-053",
+    "group": "contractions",
+    "input": "She wasn't ready."
+  },
+  {
+    "id": "contractions-054",
+    "group": "contractions",
+    "input": "I haven't seen it."
+  },
+  {
+    "id": "contractions-055",
+    "group": "contractions",
+    "input": "He hasn't seen it."
+  },
+  {
+    "id": "contractions-056",
+    "group": "contractions",
+    "input": "They hadn't seen it."
+  },
+  {
+    "id": "contractions-057",
+    "group": "contractions",
+    "input": "He couldn't go."
+  },
+  {
+    "id": "contractions-058",
+    "group": "contractions",
+    "input": "You shouldn't go."
+  },
+  {
+    "id": "contractions-059",
+    "group": "contractions",
+    "input": "She wouldn't go."
+  },
+  {
+    "id": "contractions-060",
+    "group": "contractions",
+    "input": "He mustn't go."
+  },
+  {
+    "id": "contractions-061",
+    "group": "contractions",
+    "input": "We're testing this."
+  },
+  {
+    "id": "contractions-062",
+    "group": "contractions",
+    "input": "They've finished the work."
+  },
+  {
+    "id": "contractions-063",
+    "group": "contractions",
+    "input": "I'd have gone."
+  },
+  {
+    "id": "contractions-064",
+    "group": "contractions",
+    "input": "We'd been working."
+  },
+  {
+    "id": "contractions-065",
+    "group": "contractions",
+    "input": "They'll be here."
+  },
+  {
+    "id": "contractions-066",
+    "group": "contractions",
+    "input": "I'M WORKING."
+  },
+  {
+    "id": "contractions-067",
+    "group": "contractions",
+    "input": "WE'RE READY."
+  },
+  {
+    "id": "contractions-068",
+    "group": "contractions",
+    "input": "THEY'VE WORKED."
+  },
+  {
+    "id": "degrees-001",
+    "group": "degrees",
+    "input": "He is stronger."
+  },
+  {
+    "id": "degrees-002",
+    "group": "degrees",
+    "input": "The stronger book is here."
+  },
+  {
+    "id": "degrees-003",
+    "group": "degrees",
+    "input": "He is strongest."
+  },
+  {
+    "id": "degrees-004",
+    "group": "degrees",
+    "input": "The strongest book is here."
+  },
+  {
+    "id": "degrees-005",
+    "group": "degrees",
+    "input": "He is softer."
+  },
+  {
+    "id": "degrees-006",
+    "group": "degrees",
+    "input": "The softer book is here."
+  },
+  {
+    "id": "degrees-007",
+    "group": "degrees",
+    "input": "He is softest."
+  },
+  {
+    "id": "degrees-008",
+    "group": "degrees",
+    "input": "The softest book is here."
+  },
+  {
+    "id": "degrees-009",
+    "group": "degrees",
+    "input": "He is darker."
+  },
+  {
+    "id": "degrees-010",
+    "group": "degrees",
+    "input": "The darker book is here."
+  },
+  {
+    "id": "degrees-011",
+    "group": "degrees",
+    "input": "He is darkest."
+  },
+  {
+    "id": "degrees-012",
+    "group": "degrees",
+    "input": "The darkest book is here."
+  },
+  {
+    "id": "degrees-013",
+    "group": "degrees",
+    "input": "He is busier."
+  },
+  {
+    "id": "degrees-014",
+    "group": "degrees",
+    "input": "The busier book is here."
+  },
+  {
+    "id": "degrees-015",
+    "group": "degrees",
+    "input": "He is busiest."
+  },
+  {
+    "id": "degrees-016",
+    "group": "degrees",
+    "input": "The busiest book is here."
+  },
+  {
+    "id": "degrees-017",
+    "group": "degrees",
+    "input": "He is kinder."
+  },
+  {
+    "id": "degrees-018",
+    "group": "degrees",
+    "input": "The kinder book is here."
+  },
+  {
+    "id": "degrees-019",
+    "group": "degrees",
+    "input": "He is kindest."
+  },
+  {
+    "id": "degrees-020",
+    "group": "degrees",
+    "input": "The kindest book is here."
+  },
+  {
+    "id": "degrees-021",
+    "group": "degrees",
+    "input": "He is bigger."
+  },
+  {
+    "id": "degrees-022",
+    "group": "degrees",
+    "input": "The bigger book is here."
+  },
+  {
+    "id": "degrees-023",
+    "group": "degrees",
+    "input": "He is biggest."
+  },
+  {
+    "id": "degrees-024",
+    "group": "degrees",
+    "input": "The biggest book is here."
+  },
+  {
+    "id": "degrees-025",
+    "group": "degrees",
+    "input": "He is happier."
+  },
+  {
+    "id": "degrees-026",
+    "group": "degrees",
+    "input": "The happier book is here."
+  },
+  {
+    "id": "degrees-027",
+    "group": "degrees",
+    "input": "He is happiest."
+  },
+  {
+    "id": "degrees-028",
+    "group": "degrees",
+    "input": "The happiest book is here."
+  },
+  {
+    "id": "degrees-029",
+    "group": "degrees",
+    "input": "He is smaller."
+  },
+  {
+    "id": "degrees-030",
+    "group": "degrees",
+    "input": "The smaller book is here."
+  },
+  {
+    "id": "degrees-031",
+    "group": "degrees",
+    "input": "He is smallest."
+  },
+  {
+    "id": "degrees-032",
+    "group": "degrees",
+    "input": "The smallest book is here."
+  },
+  {
+    "id": "degrees-033",
+    "group": "degrees",
+    "input": "He is faster."
+  },
+  {
+    "id": "degrees-034",
+    "group": "degrees",
+    "input": "The faster book is here."
+  },
+  {
+    "id": "degrees-035",
+    "group": "degrees",
+    "input": "He is fastest."
+  },
+  {
+    "id": "degrees-036",
+    "group": "degrees",
+    "input": "The fastest book is here."
+  },
+  {
+    "id": "possessives-001",
+    "group": "possessives",
+    "input": "The cat's mat is here."
+  },
+  {
+    "id": "possessives-002",
+    "group": "possessives",
+    "input": "The dogs' owner left."
+  },
+  {
+    "id": "possessives-003",
+    "group": "possessives",
+    "input": "The boy's book is here."
+  },
+  {
+    "id": "possessives-004",
+    "group": "possessives",
+    "input": "The boys' book is here."
+  },
+  {
+    "id": "possessives-005",
+    "group": "possessives",
+    "input": "The city's name is here."
+  },
+  {
+    "id": "possessives-006",
+    "group": "possessives",
+    "input": "The cities' names are here."
+  },
+  {
+    "id": "possessives-007",
+    "group": "possessives",
+    "input": "John's book is good."
+  },
+  {
+    "id": "possessives-008",
+    "group": "possessives",
+    "input": "This is the girl's book."
+  },
+  {
+    "id": "possessives-009",
+    "group": "possessives",
+    "input": "This is the girls' book."
+  },
+  {
+    "id": "compounds-001",
+    "group": "compounds",
+    "input": "The foo-bar is deep."
+  },
+  {
+    "id": "compounds-002",
+    "group": "compounds",
+    "input": "The xyz-abc is deep."
+  },
+  {
+    "id": "compounds-003",
+    "group": "compounds",
+    "input": "The foo-quux is deep."
+  },
+  {
+    "id": "compounds-004",
+    "group": "compounds",
+    "input": "The quux-foo is deep."
+  },
+  {
+    "id": "compounds-005",
+    "group": "compounds",
+    "input": "The bar-ness is deep."
+  },
+  {
+    "id": "compounds-006",
+    "group": "compounds",
+    "input": "The abc-ness is deep."
+  },
+  {
+    "id": "compounds-007",
+    "group": "compounds",
+    "input": "The ness-bar is deep."
+  },
+  {
+    "id": "compounds-008",
+    "group": "compounds",
+    "input": "The foo/bar is deep."
+  },
+  {
+    "id": "compounds-009",
+    "group": "compounds",
+    "input": "The cat/dog is deep."
+  },
+  {
+    "id": "compounds-010",
+    "group": "compounds",
+    "input": "The buyer-seller is deep."
+  },
+  {
+    "id": "compounds-011",
+    "group": "compounds",
+    "input": "The ABC-123 is deep."
+  },
+  {
+    "id": "compounds-012",
+    "group": "compounds",
+    "input": "The word-processing is deep."
+  },
+  {
+    "id": "prefixes-001",
+    "group": "prefixes",
+    "input": "The nonstandard is good."
+  },
+  {
+    "id": "prefixes-002",
+    "group": "prefixes",
+    "input": "The non-strong is good."
+  },
+  {
+    "id": "prefixes-003",
+    "group": "prefixes",
+    "input": "The noncat is good."
+  },
+  {
+    "id": "prefixes-004",
+    "group": "prefixes",
+    "input": "The subcat is good."
+  },
+  {
+    "id": "prefixes-005",
+    "group": "prefixes",
+    "input": "The subcats is good."
+  },
+  {
+    "id": "prefixes-006",
+    "group": "prefixes",
+    "input": "The subsystem is good."
+  },
+  {
+    "id": "prefixes-007",
+    "group": "prefixes",
+    "input": "The prewar is good."
+  },
+  {
+    "id": "prefixes-008",
+    "group": "prefixes",
+    "input": "The rework is good."
+  },
+  {
+    "id": "prefixes-009",
+    "group": "prefixes",
+    "input": "The reopen is good."
+  },
+  {
+    "id": "prefixes-010",
+    "group": "prefixes",
+    "input": "The rewrite is good."
+  },
+  {
+    "id": "prefixes-011",
+    "group": "prefixes",
+    "input": "The unhappy is good."
+  },
+  {
+    "id": "prefixes-012",
+    "group": "prefixes",
+    "input": "The unseen is good."
+  },
+  {
+    "id": "prefixes-013",
+    "group": "prefixes",
+    "input": "The unusual is good."
+  },
+  {
+    "id": "prefixes-014",
+    "group": "prefixes",
+    "input": "The antivirus is good."
+  },
+  {
+    "id": "prefixes-015",
+    "group": "prefixes",
+    "input": "The microcomputer is good."
+  },
+  {
+    "id": "prefixes-016",
+    "group": "prefixes",
+    "input": "The supercomputer is good."
+  },
+  {
+    "id": "prefixes-017",
+    "group": "prefixes",
+    "input": "The multilevel is good."
+  },
+  {
+    "id": "prefixes-018",
+    "group": "prefixes",
+    "input": "The postwar is good."
+  },
+  {
+    "id": "prefixes-019",
+    "group": "prefixes",
+    "input": "The nonexistent is good."
+  },
+  {
+    "id": "prefixes-020",
+    "group": "prefixes",
+    "input": "The subxyzzy is good."
+  },
+  {
+    "id": "phrases-001",
+    "group": "phrases",
+    "input": "He is aware of the problem."
+  },
+  {
+    "id": "phrases-002",
+    "group": "phrases",
+    "input": "He is very careful."
+  },
+  {
+    "id": "phrases-003",
+    "group": "phrases",
+    "input": "He is sure of it."
+  },
+  {
+    "id": "phrases-004",
+    "group": "phrases",
+    "input": "He takes the cat home."
+  },
+  {
+    "id": "phrases-005",
+    "group": "phrases",
+    "input": "Take the cat home."
+  },
+  {
+    "id": "phrases-006",
+    "group": "phrases",
+    "input": "He bears it in mind."
+  },
+  {
+    "id": "phrases-007",
+    "group": "phrases",
+    "input": "At your convenience."
+  },
+  {
+    "id": "phrases-008",
+    "group": "phrases",
+    "input": "A number of books."
+  },
+  {
+    "id": "phrases-009",
+    "group": "phrases",
+    "input": "How often?"
+  },
+  {
+    "id": "phrases-010",
+    "group": "phrases",
+    "input": "The black board is here."
+  },
+  {
+    "id": "phrases-011",
+    "group": "phrases",
+    "input": "The swiss army knife is here."
+  },
+  {
+    "id": "phrases-012",
+    "group": "phrases",
+    "input": "The long wave is good."
+  },
+  {
+    "id": "phrases-013",
+    "group": "phrases",
+    "input": "They default on a contract."
+  },
+  {
+    "id": "phrases-014",
+    "group": "phrases",
+    "input": "The article I is here."
+  },
+  {
+    "id": "phrases-015",
+    "group": "phrases",
+    "input": "I agree."
+  },
+  {
+    "id": "phrases-016",
+    "group": "phrases",
+    "input": "He agrees."
+  },
+  {
+    "id": "phrases-017",
+    "group": "phrases",
+    "input": "Admission is good."
+  },
+  {
+    "id": "phrases-018",
+    "group": "phrases",
+    "input": "The boot is here."
+  },
+  {
+    "id": "directives-001",
+    "group": "directives",
+    "input": "{~Keep TEXT~}."
+  },
+  {
+    "id": "directives-002",
+    "group": "directives",
+    "input": "{~=John Smith~}."
+  },
+  {
+    "id": "directives-003",
+    "group": "directives",
+    "input": "Two books {~unchanged~}."
+  },
+  {
+    "id": "directives-004",
+    "group": "directives",
+    "input": "{~one~} {~two~}."
+  },
+  {
+    "id": "directives-005",
+    "group": "directives",
+    "input": "{~one~}, {~two~}."
+  },
+  {
+    "id": "directives-006",
+    "group": "directives",
+    "input": "{~\\2 cat dog book"
+  },
+  {
+    "id": "directives-007",
+    "group": "directives",
+    "input": "{~\\1 cat dog"
+  },
+  {
+    "id": "directives-008",
+    "group": "directives",
+    "input": "{~\\2 cat dog {~\\. Two books."
+  }
+]

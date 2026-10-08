@@ -21,6 +21,27 @@ and API/CLI integration. `phrase_inventory_test.lua` also analyzes 8,940 multiwo
 W entries (using `cat` for gaps) to catch unsupported branches. It checks safe
 analysis, not linguistic correctness of every generated sentence.
 
+## Expanded executable review
+
+```sh
+python3 -m unittest discover -s test -p 'feature_review_test.py'
+python3 tools/ltpro_feature_review.py --report /tmp/ltpro-feature-review.json
+```
+
+The [2026-10-08 review](test/ltpro/review-2026-10-08/README.md) contains 627
+freshly captured cases (611 distinct inputs), including `-ness`, `'re`, `'ve`,
+other contractions, all 180 phrase-gap keys, and expanded grammatical controls.
+Each original executable output was captured twice with identical bytes. The
+runner verifies provenance and requires exact outputs for both oracle matches
+and individually reviewed Lua differences. A changed output or execution error
+fails; a documented known limitation does not. Successful execution therefore
+means no unreviewed regressions, not universally correct Russian.
+
+The checked-in result is 574 exact matches, 47 intentional differences and 6
+known-limitation cases, with zero unexpected changes or errors. Use
+`--strict-oracle` to fail on any difference, including intentional Lua behavior.
+See the review for separate original/Lua outputs and remaining quality issues.
+
 ## Optional historical comparisons
 
 ```sh

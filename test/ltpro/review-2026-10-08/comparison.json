@@ -1,0 +1,5679 @@
+{
+  "total": 627,
+  "exact": 574,
+  "intentional_difference": 47,
+  "known_limitation": 6,
+  "unexpected": 0,
+  "errors": 0,
+  "provenance": [
+    {
+      "reference": "reference.json",
+      "reference_sha256": "b95f3e33e124fcf90538309785b7cf4c1f720a8ec55df02e9498f9123e5ed0b8",
+      "cases": "cases.json",
+      "cases_sha256": "f378e949055297684659c09ca2eac3990b23e374e7ca6ab36ca9221043a67e5a"
+    },
+    {
+      "reference": "phrase-reference.json",
+      "reference_sha256": "6d0e7c28f47769c7dbcc7d51b93ad47ba5e3da29c7f5560a101e10e5fd3b6d66",
+      "cases": "phrase-cases.json",
+      "cases_sha256": "a289fc8a57b7e2bbc64a3405aba31e1f14911c085923f779e292ffb08a800d75"
+    },
+    {
+      "reference": "natural-reference.json",
+      "reference_sha256": "4d9e245d156b3688ce1797ec65c872c38e529b62b1bff23e31d2dd65efa5da63",
+      "cases": "natural-cases.json",
+      "cases_sha256": "27f2050b75f6cb6ee5320db363e265353adde8a0746da14e7403105a891c6b3b"
+    },
+    {
+      "reference": "control-reference.json",
+      "reference_sha256": "5e9ad93d356c97b41699b83778e110927f71b36b8eab70a3f5127d2f7b02aa59",
+      "cases": "control-cases.json",
+      "cases_sha256": "262add6deea6c61ffa8ed38e9030e5abde4c2fb0bec368f56d6eecd3a5be8def"
+    }
+  ],
+  "cases": [
+    {
+      "id": "baseline-001",
+      "group": "baseline",
+      "input": "She can speak Russian.",
+      "ltpro": "Она может сказать Русского.",
+      "lua": "Она может сказать Русского.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-002",
+      "group": "baseline",
+      "input": "He is in the house.",
+      "ltpro": "Он - в доме.",
+      "lua": "Он - в доме.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-003",
+      "group": "baseline",
+      "input": "She sat on the chair.",
+      "ltpro": "Она посидeла на стуле.",
+      "lua": "Она посидeла на стуле.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-004",
+      "group": "baseline",
+      "input": "He must not go.",
+      "ltpro": "Он не должен придти.",
+      "lua": "Он не должен придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-005",
+      "group": "baseline",
+      "input": "The dog that I saw ran away.",
+      "ltpro": "Собака, которую Я видeл убегать.",
+      "lua": "Собака, которую Я видeл убегать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-006",
+      "group": "baseline",
+      "input": "He was arrested by the police.",
+      "ltpro": "Он арестовывался полицией.",
+      "lua": "Он арестовывался полицией.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-007",
+      "group": "baseline",
+      "input": "You are standing in an open field.",
+      "ltpro": "Вы стоите в открытой области.",
+      "lua": "Вы стоите в открытой области.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-008",
+      "group": "baseline",
+      "input": "The house door is open.",
+      "ltpro": "Дверь{1.вход} дома открыта.",
+      "lua": "Дверь{1.вход} дома открыта.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-009",
+      "group": "baseline",
+      "input": "He cannot go.",
+      "ltpro": "Он не может придти.",
+      "lua": "Он не может придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-010",
+      "group": "baseline",
+      "input": "She has been seen.",
+      "ltpro": "Она была увидена.",
+      "lua": "Она была увидена.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-011",
+      "group": "baseline",
+      "input": "This AGREEMENT is a sample for testing the electronic translation program.",
+      "ltpro": "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.",
+      "lua": "Это СОГЛАШЕНИЕ - образец{1.выборка} для испытания программы электронного перевода.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-012",
+      "group": "baseline",
+      "input": "AGREEMENT ON SUPPLY OF FISH MEAL",
+      "ltpro": "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ",
+      "lua": "ДОГОВОР О ПОСТАВКЕ РЫБНОЙ МУКИ",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-013",
+      "group": "baseline",
+      "input": "Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT.",
+      "ltpro": "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ.",
+      "lua": "Как ПОКУПАТЕЛЬ так и ПРОДАВЕЦ соглашаются соответствовать всем срокам и условиям определенным в этом СОГЛАШЕНИИ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-014",
+      "group": "baseline",
+      "input": "The PARTIES to this AGREEMENT acknowledge they are legally authorized to represent their organizations.",
+      "ltpro": "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации.",
+      "lua": "СТОРОНЫ{1.партия;вечеринка} в этом СОГЛАШЕНИИ признают, что они юридически уполномочены представлять их организации.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-015",
+      "group": "baseline",
+      "input": "SELLER shall supply to BUYER 1,000,000 Metric tons of Fish Meal.",
+      "ltpro": "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки.",
+      "lua": "ПРОДАВЕЦ поставит ПОКУПАТЕЛЮ 1,000,000 Метрических тонн Рыбной Муки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-016",
+      "group": "baseline",
+      "input": "The total price for the goods and services as defined in EXHIBIT A is USD.",
+      "ltpro": "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США.",
+      "lua": "Общая цена для товаров и услуг как определено в ПРИЛОЖЕНИИ{1.экспонат} - ДОЛЛАР США.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-017",
+      "group": "baseline",
+      "input": "The exclusive remedy for breach of this warranty shall be the replacement.",
+      "ltpro": "Единственная Компенсация За Нарушение этой гарантии будет заменой.",
+      "lua": "Единственная Компенсация За Нарушение этой гарантии будет заменой.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-018",
+      "group": "baseline",
+      "input": "This AGREEMENT supersedes all preceding negotiations and correspondence, making them null and void.",
+      "ltpro": "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу.",
+      "lua": "Это СОГЛАШЕНИЕ заменяет все предыдущие переговоры и корреспонденцию, заставляя их утративший законную силу.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-019",
+      "group": "baseline",
+      "input": "Packing is to ensure full safety of PRODUCTS during transportation by all means of transport including transshipments.",
+      "ltpro": "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки.",
+      "lua": "Упаковка должна гарантировать полную безопасность ПРОДУКТОВ в течение транспортировки всеми видами транспорта включая перегрузки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-020",
+      "group": "baseline",
+      "input": "The Letter of Credit shall allow for partial shipments and partial payment.",
+      "ltpro": "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу.",
+      "lua": "Аккредитив Позволит частичным грузам{1.поставка} и частичному платежу.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-021",
+      "group": "baseline",
+      "input": "EXHIBIT A.",
+      "ltpro": "ПОКАЖИТЕ A.",
+      "lua": "ПОКАЖИТЕ A.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-022",
+      "group": "baseline",
+      "input": "by all means.",
+      "ltpro": "во что бы то ни стало.",
+      "lua": "во что бы то ни стало.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-023",
+      "group": "baseline",
+      "input": "by all means of transport.",
+      "ltpro": "всеми видами транспорта.",
+      "lua": "всеми видами транспорта.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-024",
+      "group": "baseline",
+      "input": "He walked including me.",
+      "ltpro": "Он прошел включая меня.",
+      "lua": "Он прошел включая меня.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-025",
+      "group": "baseline",
+      "input": "5 Metric tons.",
+      "ltpro": "5 Метрических тонн.",
+      "lua": "5 Метрических тонн.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-026",
+      "group": "baseline",
+      "input": "2 Metric tons.",
+      "ltpro": "2 Метрические тонны.",
+      "lua": "2 Метрические тонны.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-027",
+      "group": "baseline",
+      "input": "It will be a replacement.",
+      "ltpro": "Это Будет заменой.",
+      "lua": "Это Будет заменой.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-028",
+      "group": "baseline",
+      "input": "fish-meal.",
+      "ltpro": "рыбная мука.",
+      "lua": "рыбная мука.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-029",
+      "group": "baseline",
+      "input": "well-known product.",
+      "ltpro": "известный продукт.",
+      "lua": "известный продукт.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-030",
+      "group": "baseline",
+      "input": "buyer-seller agreement.",
+      "ltpro": "соглашение продавца покупателя.",
+      "lua": "соглашение продавца покупателя.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-031",
+      "group": "baseline",
+      "input": "A-B.",
+      "ltpro": "-B.",
+      "lua": "-B.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-032",
+      "group": "baseline",
+      "input": "state-of-the-art product.",
+      "ltpro": "современный продукт.",
+      "lua": "современный продукт.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-033",
+      "group": "baseline",
+      "input": "He said, I agree.",
+      "ltpro": "Он сказал, Я соглашаюсь{1.согласовывать}.",
+      "lua": "Он сказал, Я соглашаюсь{1.согласовывать}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-034",
+      "group": "baseline",
+      "input": "He said, \"I agree.\"",
+      "ltpro": "Он сказал, \"Я соглашаюсь{1.согласовывать}.\"",
+      "lua": "Он сказал, \"Я соглашаюсь{1.согласовывать}.\"",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-035",
+      "group": "baseline",
+      "input": "\"Fish meal\", seller said.",
+      "ltpro": "\"Рыбная Мука\", продавец сказал.",
+      "lua": "\"Рыбная Мука\", продавец сказал.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-036",
+      "group": "baseline",
+      "input": "I work.",
+      "ltpro": "Я работаю.",
+      "lua": "Я работаю.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-037",
+      "group": "baseline",
+      "input": "The work is good.",
+      "ltpro": "Работа{1.труд} хорошая.",
+      "lua": "Работа{1.труд} хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-038",
+      "group": "baseline",
+      "input": "They work.",
+      "ltpro": "Они работают.",
+      "lua": "Они работают.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-039",
+      "group": "baseline",
+      "input": "He works.",
+      "ltpro": "Он работает.",
+      "lua": "Он работает.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-040",
+      "group": "baseline",
+      "input": "The works are good.",
+      "ltpro": "Работа хорошая.",
+      "lua": "Работа хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-041",
+      "group": "baseline",
+      "input": "An open door.",
+      "ltpro": "Открытая дверь{1.вход}.",
+      "lua": "Открытая дверь{1.вход}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-042",
+      "group": "baseline",
+      "input": "Open the door.",
+      "ltpro": "Откройте дверь{1.вход}.",
+      "lua": "Откройте дверь{1.вход}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-043",
+      "group": "baseline",
+      "input": "He can go.",
+      "ltpro": "Он может придти.",
+      "lua": "Он может придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-044",
+      "group": "baseline",
+      "input": "He must go.",
+      "ltpro": "Он должен придти.",
+      "lua": "Он должен придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-045",
+      "group": "baseline",
+      "input": "He will go.",
+      "ltpro": "Он придет.",
+      "lua": "Он придет.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-046",
+      "group": "baseline",
+      "input": "He did not go.",
+      "ltpro": "Он не шел.",
+      "lua": "Он не шел.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-047",
+      "group": "baseline",
+      "input": "He is working.",
+      "ltpro": "Он работает.",
+      "lua": "Он работает.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-048",
+      "group": "baseline",
+      "input": "He has worked.",
+      "ltpro": "Он работал.",
+      "lua": "Он работал.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-049",
+      "group": "baseline",
+      "input": "He had worked.",
+      "ltpro": "Он работал.",
+      "lua": "Он работал.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-050",
+      "group": "baseline",
+      "input": "The door was opened.",
+      "ltpro": "Дверь{1.вход} была открыта.",
+      "lua": "Дверь{1.вход} была открыта.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-051",
+      "group": "baseline",
+      "input": "The door is closed.",
+      "ltpro": "Дверь{1.вход} закрыта.",
+      "lua": "Дверь{1.вход} закрыта.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-052",
+      "group": "baseline",
+      "input": "If he comes then I go.",
+      "ltpro": "Если он приходит тогда Я иду.",
+      "lua": "Если он приходит тогда Я иду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-053",
+      "group": "baseline",
+      "input": "If he comes, I go.",
+      "ltpro": "Если он приходит, Я иду.",
+      "lua": "Если он приходит, Я иду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-054",
+      "group": "baseline",
+      "input": "When he comes, I go.",
+      "ltpro": "Когда он приходит, Я иду.",
+      "lua": "Когда он приходит, Я иду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-055",
+      "group": "baseline",
+      "input": "I know that he works.",
+      "ltpro": "Я знаю, что он работает.",
+      "lua": "Я знаю, что он работает.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-056",
+      "group": "baseline",
+      "input": "Who saw the dog?",
+      "ltpro": "Кто видeл собаку?",
+      "lua": "Кто видeл собаку?",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-057",
+      "group": "baseline",
+      "input": "What is this?",
+      "ltpro": "Что Это?",
+      "lua": "Что Это?",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-058",
+      "group": "baseline",
+      "input": "Please open the door.",
+      "ltpro": "Пожалуйста откройте дверь{1.вход}.",
+      "lua": "Пожалуйста откройте дверь{1.вход}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-059",
+      "group": "baseline",
+      "input": "One book.",
+      "ltpro": "Один книга.",
+      "lua": "Один книга.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-060",
+      "group": "baseline",
+      "input": "Two books.",
+      "ltpro": "Две книги.",
+      "lua": "Две книги.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-061",
+      "group": "baseline",
+      "input": "Five books.",
+      "ltpro": "Пять книг.",
+      "lua": "Пять книг.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-062",
+      "group": "baseline",
+      "input": "The price is 10 percent.",
+      "ltpro": "Цена - 10 процент.",
+      "lua": "Цена - 10 процент.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-063",
+      "group": "baseline",
+      "input": "The meeting is on June 15.",
+      "ltpro": "Собрание - в Июне 15.",
+      "lua": "Собрание - в Июне 15.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-064",
+      "group": "baseline",
+      "input": "The meeting is on May 1.",
+      "ltpro": "Собрание - на Может 1.",
+      "lua": "Собрание - на Может 1.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-065",
+      "group": "baseline",
+      "input": "A house door.",
+      "ltpro": "Дверь{1.вход} дома.",
+      "lua": "Дверь{1.вход} дома.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-066",
+      "group": "baseline",
+      "input": "A door of the house.",
+      "ltpro": "Дверь{1.вход} дома.",
+      "lua": "Дверь{1.вход} дома.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-067",
+      "group": "baseline",
+      "input": "A new house door.",
+      "ltpro": "Дверь{1.вход} нового дома.",
+      "lua": "Дверь{1.вход} нового дома.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-068",
+      "group": "baseline",
+      "input": "A buyer-seller agreement.",
+      "ltpro": "Соглашение продавца покупателя.",
+      "lua": "Соглашение продавца покупателя.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-069",
+      "group": "baseline",
+      "input": "There is a book.",
+      "ltpro": "Есть книга.",
+      "lua": "Есть книга.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-070",
+      "group": "baseline",
+      "input": "There are two books.",
+      "ltpro": "Есть две книги.",
+      "lua": "Есть две книги.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-071",
+      "group": "baseline",
+      "input": "There is no book.",
+      "ltpro": "Нет книги.",
+      "lua": "Нет книги.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-072",
+      "group": "baseline",
+      "input": "He is not a teacher.",
+      "ltpro": "Он не - учитель.",
+      "lua": "Он не - учитель.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-073",
+      "group": "baseline",
+      "input": "(The house).",
+      "ltpro": "(Дом).",
+      "lua": "(Дом).",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-074",
+      "group": "baseline",
+      "input": "He said: \"Go.\"",
+      "ltpro": "Он сказал: \"Идти.\"",
+      "lua": "Он сказал: \"Идти.\"",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-075",
+      "group": "baseline",
+      "input": "ABC-123.",
+      "ltpro": "ABC-123.",
+      "lua": "ABC-123.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-076",
+      "group": "baseline",
+      "input": "Xylophornium is here.",
+      "ltpro": "Xylophornium - здесь.",
+      "lua": "Xylophornium - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-077",
+      "group": "baseline",
+      "input": "The cat sat on the mat.",
+      "ltpro": "Кошка посидeла в ковер{1.матрица}.",
+      "lua": "Кошка посидeла в ковер{1.матрица}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-078",
+      "group": "baseline",
+      "input": "I have books.",
+      "ltpro": "Я имею книги.",
+      "lua": "Я имею книги.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-079",
+      "group": "baseline",
+      "input": "The organizations work.",
+      "ltpro": "Организации работают.",
+      "lua": "Организации работают.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-080",
+      "group": "baseline",
+      "input": "They defined a rule.",
+      "ltpro": "Они определили правило.",
+      "lua": "Они определили правило.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-081",
+      "group": "baseline",
+      "input": "The legally defined terms.",
+      "ltpro": "Юридически определенные сроки{1.условие;термин}.",
+      "lua": "Юридически определенные сроки{1.условие;термин}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-082",
+      "group": "baseline",
+      "input": "He studies English.",
+      "ltpro": "Он изучает Английского.",
+      "lua": "Он изучает Английского.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-083",
+      "group": "baseline",
+      "input": "The dogs run.",
+      "ltpro": "Собаки бегите{1.выполнять}.",
+      "lua": "Собаки бегите{1.выполнять}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-084",
+      "group": "baseline",
+      "input": "Boxes are open.",
+      "ltpro": "Ящики{1.бокс;рамка} открыты.",
+      "lua": "Ящики{1.бокс;рамка} открыты.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-085",
+      "group": "baseline",
+      "input": "He stopped.",
+      "ltpro": "Он остановил.",
+      "lua": "Он остановил.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-086",
+      "group": "baseline",
+      "input": "He is running.",
+      "ltpro": "Он бежит{1.выполнять}.",
+      "lua": "Он бежит{1.выполнять}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-087",
+      "group": "baseline",
+      "input": "Fish meal is good.",
+      "ltpro": "Рыбная Мука хорошая.",
+      "lua": "Рыбная Мука хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-088",
+      "group": "baseline",
+      "input": "The letter of credit is valid.",
+      "ltpro": "Аккредитив - в силе.",
+      "lua": "Аккредитив - в силе.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-089",
+      "group": "baseline",
+      "input": "She cannot work.",
+      "ltpro": "Она не может работать.",
+      "lua": "Она не может работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-090",
+      "group": "baseline",
+      "input": "BUYER-SELLER.",
+      "ltpro": "ПРОДАВЕЦ ПОКУПАТЕЛЯ.",
+      "lua": "ПРОДАВЕЦ ПОКУПАТЕЛЯ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-091",
+      "group": "baseline",
+      "input": "They said, \"Go.\"",
+      "ltpro": "Они сказали, \"Идти.\"",
+      "lua": "Они сказали, \"Идти.\"",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-092",
+      "group": "baseline",
+      "input": "This is a nice book.",
+      "ltpro": "Это хорошая книга.",
+      "lua": "Это хорошая книга.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-093",
+      "group": "baseline",
+      "input": "We will deliver the goods tomorrow.",
+      "ltpro": "Мы доставим товары завтра.",
+      "lua": "Мы доставим товары завтра.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-094",
+      "group": "baseline",
+      "input": "A book was on the table.",
+      "ltpro": "Книга была на столе{1.таблица}.",
+      "lua": "Книга была на столе{1.таблица}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-095",
+      "group": "baseline",
+      "input": "They are in the house.",
+      "ltpro": "Они - в доме.",
+      "lua": "Они - в доме.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-096",
+      "group": "baseline",
+      "input": "Stop.",
+      "ltpro": "Останов.",
+      "lua": "Останов.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-097",
+      "group": "baseline",
+      "input": "I'm doing th",
+      "ltpro": "Я делаю т",
+      "lua": "Я делаю т",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-098",
+      "group": "baseline",
+      "input": "th.",
+      "ltpro": "т.",
+      "lua": "т.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-099",
+      "group": "baseline",
+      "input": "ab.",
+      "ltpro": "аб.",
+      "lua": "аб.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-100",
+      "group": "baseline",
+      "input": "Aaron.",
+      "ltpro": "Аарон.",
+      "lua": "Аарон.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-101",
+      "group": "baseline",
+      "input": "Abalone.",
+      "ltpro": "Абалоне.",
+      "lua": "Абалоне.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-102",
+      "group": "baseline",
+      "input": "Ivanova.",
+      "ltpro": "Иванова.",
+      "lua": "Иванова.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-103",
+      "group": "baseline",
+      "input": "Vadim.",
+      "ltpro": "Вадим.",
+      "lua": "Вадим.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-104",
+      "group": "baseline",
+      "input": "Staros.",
+      "ltpro": "Старос.",
+      "lua": "Старос.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-105",
+      "group": "baseline",
+      "input": "Lada.",
+      "ltpro": "Лада.",
+      "lua": "Лада.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-106",
+      "group": "baseline",
+      "input": "Welch.",
+      "ltpro": "Уэльский.",
+      "lua": "Уэльский.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-107",
+      "group": "baseline",
+      "input": "Albert Lea.",
+      "ltpro": "Альберт Ли.",
+      "lua": "Альберт Ли.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-108",
+      "group": "baseline",
+      "input": "Allen town.",
+      "ltpro": "Аллен таун.",
+      "lua": "Аллен таун.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-109",
+      "group": "baseline",
+      "input": "O'Fallon.",
+      "ltpro": "=.",
+      "lua": "=.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-110",
+      "group": "baseline",
+      "input": "Ppg.",
+      "ltpro": "=частей на грамм.",
+      "lua": "=частей на грамм.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-111",
+      "group": "baseline",
+      "input": "Robin-hood.",
+      "ltpro": "=робин гуд.",
+      "lua": "=робин гуд.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-112",
+      "group": "baseline",
+      "input": "Sco.",
+      "ltpro": "=санта круз оперэйшн.",
+      "lua": "=санта круз оперэйшн.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-113",
+      "group": "baseline",
+      "input": "Sept-lles.",
+      "ltpro": "=.",
+      "lua": "=.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-114",
+      "group": "baseline",
+      "input": "Weaselly.",
+      "ltpro": "Уиселли.",
+      "lua": "Уиселли.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-115",
+      "group": "baseline",
+      "input": "Narvskiy.",
+      "ltpro": "Нарвский.",
+      "lua": "Нарвский.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-116",
+      "group": "baseline",
+      "input": "ABC television.",
+      "ltpro": "АБК тилевижн.",
+      "lua": "АБК тилевижн.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-117",
+      "group": "baseline",
+      "input": "Alexander city.",
+      "ltpro": "Ейлександер сайти.",
+      "lua": "Ейлександер сайти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-118",
+      "group": "baseline",
+      "input": "Ash land.",
+      "ltpro": "Эшленд.",
+      "lua": "Эшленд.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-119",
+      "group": "baseline",
+      "input": "Bandar seri begawan.",
+      "ltpro": "Бандар сери бегоан.",
+      "lua": "Бандар сери бегоан.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-120",
+      "group": "baseline",
+      "input": "Cape town.",
+      "ltpro": "Кейптаун.",
+      "lua": "Кейптаун.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-121",
+      "group": "baseline",
+      "input": "abc television.",
+      "ltpro": "абк тилевижн.",
+      "lua": "абк тилевижн.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "baseline-122",
+      "group": "baseline",
+      "input": "Bel Air.",
+      "ltpro": "БЕЛ ЭР.",
+      "lua": "БЕЛ ЭР.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-001",
+      "group": "noun-endings",
+      "input": "The xyzness is deep.",
+      "ltpro": "xyzness глубоко.",
+      "lua": "xyzness глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-002",
+      "group": "noun-endings",
+      "input": "The xyzness is good.",
+      "ltpro": "xyzness хорошее.",
+      "lua": "xyzness хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-003",
+      "group": "noun-endings",
+      "input": "The strongness is deep.",
+      "ltpro": "strongness глубоко.",
+      "lua": "strongness глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-004",
+      "group": "noun-endings",
+      "input": "The foo-ness is deep.",
+      "ltpro": "foo-ness глубокое.",
+      "lua": "foo-ness глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-005",
+      "group": "noun-endings",
+      "input": "The ness-foo is deep.",
+      "ltpro": "ness-foo глубоко.",
+      "lua": "ness-foo глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-006",
+      "group": "noun-endings",
+      "input": "The xyzment is deep.",
+      "ltpro": "xyzment глубоко.",
+      "lua": "xyzment глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-007",
+      "group": "noun-endings",
+      "input": "The xyzment is good.",
+      "ltpro": "xyzment хорошее.",
+      "lua": "xyzment хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-008",
+      "group": "noun-endings",
+      "input": "The strongment is deep.",
+      "ltpro": "strongment глубоко.",
+      "lua": "strongment глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-009",
+      "group": "noun-endings",
+      "input": "The foo-ment is deep.",
+      "ltpro": "foo-ment глубокое.",
+      "lua": "foo-ment глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-010",
+      "group": "noun-endings",
+      "input": "The ment-foo is deep.",
+      "ltpro": "ment-foo глубоко.",
+      "lua": "ment-foo глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-011",
+      "group": "noun-endings",
+      "input": "The xyzion is deep.",
+      "ltpro": "xyzion глубоко.",
+      "lua": "xyzion глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-012",
+      "group": "noun-endings",
+      "input": "The xyzion is good.",
+      "ltpro": "xyzion хорошее.",
+      "lua": "xyzion хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-013",
+      "group": "noun-endings",
+      "input": "The strongion is deep.",
+      "ltpro": "strongion глубоко.",
+      "lua": "strongion глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-014",
+      "group": "noun-endings",
+      "input": "The foo-ion is deep.",
+      "ltpro": "foo-ионный глубокое.",
+      "lua": "foo-ионный глубокое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-015",
+      "group": "noun-endings",
+      "input": "The ion-foo is deep.",
+      "ltpro": "Ион-foo глубок.",
+      "lua": "Ион-foo глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-016",
+      "group": "noun-endings",
+      "input": "The xyzence is deep.",
+      "ltpro": "xyzence глубоко.",
+      "lua": "xyzence глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-017",
+      "group": "noun-endings",
+      "input": "The xyzence is good.",
+      "ltpro": "xyzence хорошее.",
+      "lua": "xyzence хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-018",
+      "group": "noun-endings",
+      "input": "The strongence is deep.",
+      "ltpro": "strongence глубоко.",
+      "lua": "strongence глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-019",
+      "group": "noun-endings",
+      "input": "The foo-ence is deep.",
+      "ltpro": "foo-ence глубокое.",
+      "lua": "foo-ence глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-020",
+      "group": "noun-endings",
+      "input": "The ence-foo is deep.",
+      "ltpro": "ence-foo глубоко.",
+      "lua": "ence-foo глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-021",
+      "group": "noun-endings",
+      "input": "The xyzance is deep.",
+      "ltpro": "xyzance глубоко.",
+      "lua": "xyzance глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-022",
+      "group": "noun-endings",
+      "input": "The xyzance is good.",
+      "ltpro": "xyzance хорошее.",
+      "lua": "xyzance хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-023",
+      "group": "noun-endings",
+      "input": "The strongance is deep.",
+      "ltpro": "strongance глубоко.",
+      "lua": "strongance глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-024",
+      "group": "noun-endings",
+      "input": "The foo-ance is deep.",
+      "ltpro": "foo-ance глубокое.",
+      "lua": "foo-ance глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-025",
+      "group": "noun-endings",
+      "input": "The ance-foo is deep.",
+      "ltpro": "ance-foo глубоко.",
+      "lua": "ance-foo глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-026",
+      "group": "noun-endings",
+      "input": "The xyzenc is deep.",
+      "ltpro": "xyzenc глубоко.",
+      "lua": "xyzenc глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-027",
+      "group": "noun-endings",
+      "input": "The xyzenc is good.",
+      "ltpro": "xyzenc хорошее.",
+      "lua": "xyzenc хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-028",
+      "group": "noun-endings",
+      "input": "The strongenc is deep.",
+      "ltpro": "strongenc глубоко.",
+      "lua": "strongenc глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-029",
+      "group": "noun-endings",
+      "input": "The foo-enc is deep.",
+      "ltpro": "foo-enc глубок.",
+      "lua": "foo-enc глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-030",
+      "group": "noun-endings",
+      "input": "The enc-foo is deep.",
+      "ltpro": "enc-foo глубок.",
+      "lua": "enc-foo глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-031",
+      "group": "noun-endings",
+      "input": "The xyzanc is deep.",
+      "ltpro": "xyzanc глубоко.",
+      "lua": "xyzanc глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-032",
+      "group": "noun-endings",
+      "input": "The xyzanc is good.",
+      "ltpro": "xyzanc хорошее.",
+      "lua": "xyzanc хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-033",
+      "group": "noun-endings",
+      "input": "The stronganc is deep.",
+      "ltpro": "stronganc глубоко.",
+      "lua": "stronganc глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-034",
+      "group": "noun-endings",
+      "input": "The foo-anc is deep.",
+      "ltpro": "foo-anc глубок.",
+      "lua": "foo-anc глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-035",
+      "group": "noun-endings",
+      "input": "The anc-foo is deep.",
+      "ltpro": "anc-foo глубок.",
+      "lua": "anc-foo глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-036",
+      "group": "noun-endings",
+      "input": "The xyzity is deep.",
+      "ltpro": "xyzity глубоко.",
+      "lua": "xyzity глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-037",
+      "group": "noun-endings",
+      "input": "The xyzity is good.",
+      "ltpro": "xyzity хорошее.",
+      "lua": "xyzity хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-038",
+      "group": "noun-endings",
+      "input": "The strongity is deep.",
+      "ltpro": "strongity глубоко.",
+      "lua": "strongity глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-039",
+      "group": "noun-endings",
+      "input": "The foo-ity is deep.",
+      "ltpro": "foo-ity глубок.",
+      "lua": "foo-ity глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-040",
+      "group": "noun-endings",
+      "input": "The ity-foo is deep.",
+      "ltpro": "ity-foo глубок.",
+      "lua": "ity-foo глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-041",
+      "group": "noun-endings",
+      "input": "The xyzage is deep.",
+      "ltpro": "xyzage глубоко.",
+      "lua": "xyzage глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-042",
+      "group": "noun-endings",
+      "input": "The xyzage is good.",
+      "ltpro": "xyzage хорошее.",
+      "lua": "xyzage хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-043",
+      "group": "noun-endings",
+      "input": "The strongage is deep.",
+      "ltpro": "strongage глубоко.",
+      "lua": "strongage глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-044",
+      "group": "noun-endings",
+      "input": "The foo-age is deep.",
+      "ltpro": "foo-возрастной глубокое.",
+      "lua": "foo-возрастной глубокое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-045",
+      "group": "noun-endings",
+      "input": "The age-foo is deep.",
+      "ltpro": "Возраст{1.век}-foo глубок.",
+      "lua": "Возраст{1.век}-foo глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-046",
+      "group": "noun-endings",
+      "input": "The xyzure is deep.",
+      "ltpro": "xyzure глубоко.",
+      "lua": "xyzure глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-047",
+      "group": "noun-endings",
+      "input": "The xyzure is good.",
+      "ltpro": "xyzure хорошее.",
+      "lua": "xyzure хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-048",
+      "group": "noun-endings",
+      "input": "The strongure is deep.",
+      "ltpro": "strongure глубоко.",
+      "lua": "strongure глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-049",
+      "group": "noun-endings",
+      "input": "The foo-ure is deep.",
+      "ltpro": "foo-ure глубок.",
+      "lua": "foo-ure глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-050",
+      "group": "noun-endings",
+      "input": "The ure-foo is deep.",
+      "ltpro": "ure-foo глубок.",
+      "lua": "ure-foo глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-051",
+      "group": "noun-endings",
+      "input": "The xyzag is deep.",
+      "ltpro": "xyzag глубоко.",
+      "lua": "xyzag глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-052",
+      "group": "noun-endings",
+      "input": "The xyzag is good.",
+      "ltpro": "xyzag хорошее.",
+      "lua": "xyzag хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-053",
+      "group": "noun-endings",
+      "input": "The strongag is deep.",
+      "ltpro": "strongag глубоко.",
+      "lua": "strongag глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-054",
+      "group": "noun-endings",
+      "input": "The foo-ag is deep.",
+      "ltpro": "foo-аг глубокое.",
+      "lua": "foo-аг глубокое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-055",
+      "group": "noun-endings",
+      "input": "The ag-foo is deep.",
+      "ltpro": "Аг-foo глубок.",
+      "lua": "Аг-foo глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-056",
+      "group": "noun-endings",
+      "input": "The xyznes is deep.",
+      "ltpro": "xyznes глубок.",
+      "lua": "xyznes глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-057",
+      "group": "noun-endings",
+      "input": "The xyznes is good.",
+      "ltpro": "xyznes хороший.",
+      "lua": "xyznes хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-058",
+      "group": "noun-endings",
+      "input": "The strongnes is deep.",
+      "ltpro": "strongnes глубок.",
+      "lua": "strongnes глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-059",
+      "group": "noun-endings",
+      "input": "The foo-nes is deep.",
+      "ltpro": "foo-nes глубок.",
+      "lua": "foo-nes глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-060",
+      "group": "noun-endings",
+      "input": "The nes-foo is deep.",
+      "ltpro": "nes-foo глубок.",
+      "lua": "nes-foo глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-061",
+      "group": "noun-endings",
+      "input": "The xyzor is deep.",
+      "ltpro": "xyzor глубоко.",
+      "lua": "xyzor глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-062",
+      "group": "noun-endings",
+      "input": "The xyzor is good.",
+      "ltpro": "xyzor хорошее.",
+      "lua": "xyzor хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-063",
+      "group": "noun-endings",
+      "input": "The strongor is deep.",
+      "ltpro": "strongor глубоко.",
+      "lua": "strongor глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-064",
+      "group": "noun-endings",
+      "input": "The foo-or is deep.",
+      "ltpro": "foo-или глубокое.",
+      "lua": "foo-или глубокое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-065",
+      "group": "noun-endings",
+      "input": "The or-foo is deep.",
+      "ltpro": "Или-foo глубок.",
+      "lua": "Или-foo глубокое.",
+      "classification": "intentional_difference",
+      "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement."
+    },
+    {
+      "id": "noun-endings-066",
+      "group": "noun-endings",
+      "input": "The xyzur is deep.",
+      "ltpro": "xyzur глубоко.",
+      "lua": "xyzur глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-067",
+      "group": "noun-endings",
+      "input": "The xyzur is good.",
+      "ltpro": "xyzur хорошее.",
+      "lua": "xyzur хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-068",
+      "group": "noun-endings",
+      "input": "The strongur is deep.",
+      "ltpro": "strongur глубоко.",
+      "lua": "strongur глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-069",
+      "group": "noun-endings",
+      "input": "The foo-ur is deep.",
+      "ltpro": "foo-ur глубок.",
+      "lua": "foo-ur глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-070",
+      "group": "noun-endings",
+      "input": "The ur-foo is deep.",
+      "ltpro": "ur-foo глубок.",
+      "lua": "ur-foo глубоко.",
+      "classification": "intentional_difference",
+      "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable."
+    },
+    {
+      "id": "noun-endings-071",
+      "group": "noun-endings",
+      "input": "The kindness is good.",
+      "ltpro": "Доброта хорошая.",
+      "lua": "Доброта хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-072",
+      "group": "noun-endings",
+      "input": "I see the kindness.",
+      "ltpro": "Я вижу доброту.",
+      "lua": "Я вижу доброту.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-073",
+      "group": "noun-endings",
+      "input": "The darkness is good.",
+      "ltpro": "Темнота хороший.",
+      "lua": "Темнота хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-074",
+      "group": "noun-endings",
+      "input": "I see the darkness.",
+      "ltpro": "Я вижу темнота.",
+      "lua": "Я вижу темнота.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-075",
+      "group": "noun-endings",
+      "input": "The happiness is good.",
+      "ltpro": "Счастье хорошее.",
+      "lua": "Счастье хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-076",
+      "group": "noun-endings",
+      "input": "I see the happiness.",
+      "ltpro": "Я вижу счастье.",
+      "lua": "Я вижу счастье.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-077",
+      "group": "noun-endings",
+      "input": "The abruptness is good.",
+      "ltpro": "Крутизна хороший.",
+      "lua": "Крутизна хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-078",
+      "group": "noun-endings",
+      "input": "I see the abruptness.",
+      "ltpro": "Я вижу крутизна.",
+      "lua": "Я вижу крутизна.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-079",
+      "group": "noun-endings",
+      "input": "The abandonment is good.",
+      "ltpro": "Отказ хороший.",
+      "lua": "Отказ хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-080",
+      "group": "noun-endings",
+      "input": "I see the abandonment.",
+      "ltpro": "Я вижу отказ.",
+      "lua": "Я вижу отказ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-081",
+      "group": "noun-endings",
+      "input": "The agreement is good.",
+      "ltpro": "Соглашение хорошее.",
+      "lua": "Соглашение хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-082",
+      "group": "noun-endings",
+      "input": "I see the agreement.",
+      "ltpro": "Я вижу соглашение.",
+      "lua": "Я вижу соглашение.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-083",
+      "group": "noun-endings",
+      "input": "The action is good.",
+      "ltpro": "Действие{1.иск} хорошее.",
+      "lua": "Действие{1.иск} хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-084",
+      "group": "noun-endings",
+      "input": "I see the action.",
+      "ltpro": "Я вижу действие{1.иск}.",
+      "lua": "Я вижу действие{1.иск}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-085",
+      "group": "noun-endings",
+      "input": "The difference is good.",
+      "ltpro": "Различие хорошее.",
+      "lua": "Различие хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-086",
+      "group": "noun-endings",
+      "input": "I see the difference.",
+      "ltpro": "Я вижу различие.",
+      "lua": "Я вижу различие.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-087",
+      "group": "noun-endings",
+      "input": "The ability is good.",
+      "ltpro": "Способность хорошая.",
+      "lua": "Способность хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-088",
+      "group": "noun-endings",
+      "input": "I see the ability.",
+      "ltpro": "Я вижу способность.",
+      "lua": "Я вижу способность.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-089",
+      "group": "noun-endings",
+      "input": "The color is good.",
+      "ltpro": "Цвет хороший.",
+      "lua": "Цвет хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-090",
+      "group": "noun-endings",
+      "input": "I see the color.",
+      "ltpro": "Я вижу цвет.",
+      "lua": "Я вижу цвет.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-091",
+      "group": "noun-endings",
+      "input": "The strongness is good.",
+      "ltpro": "strongness хорошее.",
+      "lua": "strongness хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-092",
+      "group": "noun-endings",
+      "input": "I see the strongness.",
+      "ltpro": "Я вижу strongness.",
+      "lua": "Я вижу strongness.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "noun-endings-093",
+      "group": "noun-endings",
+      "input": "I see the xyzness.",
+      "ltpro": "Я вижу xyzness.",
+      "lua": "Я вижу xyzness.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-001",
+      "group": "contractions",
+      "input": "I've worked.",
+      "ltpro": "Я работал.",
+      "lua": "Я работал.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-002",
+      "group": "contractions",
+      "input": "I'll work.",
+      "ltpro": "Я буду работать.",
+      "lua": "Я буду работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-003",
+      "group": "contractions",
+      "input": "I'd work.",
+      "ltpro": "Я буду работать.",
+      "lua": "Я буду работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-004",
+      "group": "contractions",
+      "input": "you're working.",
+      "ltpro": "Вы работаете.",
+      "lua": "Вы работаете.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-005",
+      "group": "contractions",
+      "input": "you've worked.",
+      "ltpro": "Вы работали.",
+      "lua": "Вы работали.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-006",
+      "group": "contractions",
+      "input": "you'll work.",
+      "ltpro": "Вы будете работать.",
+      "lua": "Вы будете работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-007",
+      "group": "contractions",
+      "input": "you'd work.",
+      "ltpro": "Вы будете работать.",
+      "lua": "Вы будете работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-008",
+      "group": "contractions",
+      "input": "we're working.",
+      "ltpro": "мы работаем.",
+      "lua": "мы работаем.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-009",
+      "group": "contractions",
+      "input": "we've worked.",
+      "ltpro": "мы работали.",
+      "lua": "мы работали.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-010",
+      "group": "contractions",
+      "input": "we'll work.",
+      "ltpro": "мы будем работать.",
+      "lua": "мы будем работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-011",
+      "group": "contractions",
+      "input": "we'd work.",
+      "ltpro": "мы будем работать.",
+      "lua": "мы будем работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-012",
+      "group": "contractions",
+      "input": "they're working.",
+      "ltpro": "они работают.",
+      "lua": "они работают.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-013",
+      "group": "contractions",
+      "input": "they've worked.",
+      "ltpro": "они работали.",
+      "lua": "они работали.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-014",
+      "group": "contractions",
+      "input": "they'll work.",
+      "ltpro": "они будут работать.",
+      "lua": "они будут работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-015",
+      "group": "contractions",
+      "input": "they'd work.",
+      "ltpro": "они будут работать.",
+      "lua": "они будут работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-016",
+      "group": "contractions",
+      "input": "he'll work.",
+      "ltpro": "он будет работать.",
+      "lua": "он будет работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-017",
+      "group": "contractions",
+      "input": "he'd work.",
+      "ltpro": "он будет работать.",
+      "lua": "он будет работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-018",
+      "group": "contractions",
+      "input": "she'll work.",
+      "ltpro": "она будет работать.",
+      "lua": "она будет работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-019",
+      "group": "contractions",
+      "input": "she'd work.",
+      "ltpro": "она будет работать.",
+      "lua": "она будет работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-020",
+      "group": "contractions",
+      "input": "it'll work.",
+      "ltpro": "он будет работать.",
+      "lua": "он будет работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-021",
+      "group": "contractions",
+      "input": "it'd work.",
+      "ltpro": "он будет работать.",
+      "lua": "он будет работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-022",
+      "group": "contractions",
+      "input": "I'm working.",
+      "ltpro": "Я работаю.",
+      "lua": "Я работаю.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-023",
+      "group": "contractions",
+      "input": "I'm ready.",
+      "ltpro": "Я готов.",
+      "lua": "Я готов.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-024",
+      "group": "contractions",
+      "input": "You're ready.",
+      "ltpro": "Вы готовы.",
+      "lua": "Вы готовы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-025",
+      "group": "contractions",
+      "input": "We're ready.",
+      "ltpro": "Мы готовы.",
+      "lua": "Мы готовы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-026",
+      "group": "contractions",
+      "input": "They're ready.",
+      "ltpro": "Они готовы.",
+      "lua": "Они готовы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-027",
+      "group": "contractions",
+      "input": "I've seen the book.",
+      "ltpro": "Я увидeл книгу.",
+      "lua": "Я увидeл книгу.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-028",
+      "group": "contractions",
+      "input": "You've seen the book.",
+      "ltpro": "Вы увидeли книгу.",
+      "lua": "Вы увидeли книгу.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-029",
+      "group": "contractions",
+      "input": "We've seen the book.",
+      "ltpro": "Мы увидeли книгу.",
+      "lua": "Мы увидeли книгу.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-030",
+      "group": "contractions",
+      "input": "They've seen the book.",
+      "ltpro": "Они увидeли книгу.",
+      "lua": "Они увидeли книгу.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-031",
+      "group": "contractions",
+      "input": "I've been working.",
+      "ltpro": "Я работаю.",
+      "lua": "Я работаю.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-032",
+      "group": "contractions",
+      "input": "We've been working.",
+      "ltpro": "Мы работаем.",
+      "lua": "Мы работаем.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-033",
+      "group": "contractions",
+      "input": "They've been working.",
+      "ltpro": "Они работают.",
+      "lua": "Они работают.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-034",
+      "group": "contractions",
+      "input": "He's ready.",
+      "ltpro": "Он готов.",
+      "lua": "Он готов.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-035",
+      "group": "contractions",
+      "input": "She's ready.",
+      "ltpro": "Она готова.",
+      "lua": "Она готова.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-036",
+      "group": "contractions",
+      "input": "It's good.",
+      "ltpro": "Это хороший.",
+      "lua": "Это хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-037",
+      "group": "contractions",
+      "input": "There's a book.",
+      "ltpro": "Есть книга.",
+      "lua": "Есть книга.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-038",
+      "group": "contractions",
+      "input": "Here's a book.",
+      "ltpro": "Вот книга.",
+      "lua": "Вот книга.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-039",
+      "group": "contractions",
+      "input": "What's this?",
+      "ltpro": "Что Это?",
+      "lua": "Что Это?",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-040",
+      "group": "contractions",
+      "input": "Who's here?",
+      "ltpro": "Кто - здесь?",
+      "lua": "Кто - здесь?",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-041",
+      "group": "contractions",
+      "input": "That's good.",
+      "ltpro": "Это хорошее.",
+      "lua": "Это хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-042",
+      "group": "contractions",
+      "input": "Let's go.",
+      "ltpro": "Давайте идти.",
+      "lua": "Давайте идти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-043",
+      "group": "contractions",
+      "input": "I can't work.",
+      "ltpro": "Я не могу работать.",
+      "lua": "Я не могу работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-044",
+      "group": "contractions",
+      "input": "He cannot work.",
+      "ltpro": "Он не может работать.",
+      "lua": "Он не может работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-045",
+      "group": "contractions",
+      "input": "She won't go.",
+      "ltpro": "Она не придет.",
+      "lua": "Она не придет.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-046",
+      "group": "contractions",
+      "input": "We shan't go.",
+      "ltpro": "Мы не придем.",
+      "lua": "Мы не придем.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-047",
+      "group": "contractions",
+      "input": "He doesn't work.",
+      "ltpro": "Он не работает.",
+      "lua": "Он не работает.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-048",
+      "group": "contractions",
+      "input": "I don't work.",
+      "ltpro": "Я не работаю.",
+      "lua": "Я не работаю.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-049",
+      "group": "contractions",
+      "input": "They didn't work.",
+      "ltpro": "Они не работали.",
+      "lua": "Они не работали.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-050",
+      "group": "contractions",
+      "input": "They aren't ready.",
+      "ltpro": "Они не готовы.",
+      "lua": "Они не готовы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-051",
+      "group": "contractions",
+      "input": "He isn't ready.",
+      "ltpro": "Он не готов.",
+      "lua": "Он не готов.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-052",
+      "group": "contractions",
+      "input": "We weren't ready.",
+      "ltpro": "Мы не были готовыми.",
+      "lua": "Мы не были готовыми.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-053",
+      "group": "contractions",
+      "input": "She wasn't ready.",
+      "ltpro": "Она не была готовой.",
+      "lua": "Она не была готовой.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-054",
+      "group": "contractions",
+      "input": "I haven't seen it.",
+      "ltpro": "Я не увидeл это.",
+      "lua": "Я не увидeл это.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-055",
+      "group": "contractions",
+      "input": "He hasn't seen it.",
+      "ltpro": "Он не увидeл это.",
+      "lua": "Он не увидeл это.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-056",
+      "group": "contractions",
+      "input": "They hadn't seen it.",
+      "ltpro": "Они не увидeли это.",
+      "lua": "Они не увидeли это.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-057",
+      "group": "contractions",
+      "input": "He couldn't go.",
+      "ltpro": "Он не мог придти.",
+      "lua": "Он не мог придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-058",
+      "group": "contractions",
+      "input": "You shouldn't go.",
+      "ltpro": "Вы не должны придти.",
+      "lua": "Вы не должны придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-059",
+      "group": "contractions",
+      "input": "She wouldn't go.",
+      "ltpro": "Она не придет.",
+      "lua": "Она не придет.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-060",
+      "group": "contractions",
+      "input": "He mustn't go.",
+      "ltpro": "Он не должен придти.",
+      "lua": "Он не должен придти.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-061",
+      "group": "contractions",
+      "input": "We're testing this.",
+      "ltpro": "Мы тестируем это.",
+      "lua": "Мы тестируем это.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-062",
+      "group": "contractions",
+      "input": "They've finished the work.",
+      "ltpro": "Они завершили работу{1.труд}.",
+      "lua": "Они завершили работу{1.труд}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-063",
+      "group": "contractions",
+      "input": "I'd have gone.",
+      "ltpro": "Я приду.",
+      "lua": "Я приду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-064",
+      "group": "contractions",
+      "input": "We'd been working.",
+      "ltpro": "Мы будем быты, работающий.",
+      "lua": "Мы будем быты, работающий.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-065",
+      "group": "contractions",
+      "input": "They'll be here.",
+      "ltpro": "Они будут здесь.",
+      "lua": "Они будут здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-066",
+      "group": "contractions",
+      "input": "I'M WORKING.",
+      "ltpro": "Я РАБОТАЮ.",
+      "lua": "Я РАБОТАЮ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-067",
+      "group": "contractions",
+      "input": "WE'RE READY.",
+      "ltpro": "МЫ ГОТОВЫ.",
+      "lua": "МЫ ГОТОВЫ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "contractions-068",
+      "group": "contractions",
+      "input": "THEY'VE WORKED.",
+      "ltpro": "ОНИ РАБОТАЛИ.",
+      "lua": "ОНИ РАБОТАЛИ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-001",
+      "group": "degrees",
+      "input": "He is stronger.",
+      "ltpro": "Он прочен.",
+      "lua": "Он прочен.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-002",
+      "group": "degrees",
+      "input": "The stronger book is here.",
+      "ltpro": "Более прочная книга - здесь.",
+      "lua": "Более прочная книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-003",
+      "group": "degrees",
+      "input": "He is strongest.",
+      "ltpro": "Он прочен.",
+      "lua": "Он прочен.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-004",
+      "group": "degrees",
+      "input": "The strongest book is here.",
+      "ltpro": "Самая прочная книга - здесь.",
+      "lua": "Самая прочная книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-005",
+      "group": "degrees",
+      "input": "He is softer.",
+      "ltpro": "Он - мягко.",
+      "lua": "Он - мягко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-006",
+      "group": "degrees",
+      "input": "The softer book is here.",
+      "ltpro": "Более мягкая книга - здесь.",
+      "lua": "Более мягкая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-007",
+      "group": "degrees",
+      "input": "He is softest.",
+      "ltpro": "Он - мягко.",
+      "lua": "Он - мягко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-008",
+      "group": "degrees",
+      "input": "The softest book is here.",
+      "ltpro": "Самая мягкая книга - здесь.",
+      "lua": "Самая мягкая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-009",
+      "group": "degrees",
+      "input": "He is darker.",
+      "ltpro": "Он более темный.",
+      "lua": "Он более темный.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-010",
+      "group": "degrees",
+      "input": "The darker book is here.",
+      "ltpro": "Более темная книга - здесь.",
+      "lua": "Более темная книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-011",
+      "group": "degrees",
+      "input": "He is darkest.",
+      "ltpro": "Он самый темный.",
+      "lua": "Он самый темный.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-012",
+      "group": "degrees",
+      "input": "The darkest book is here.",
+      "ltpro": "Самая темная книга - здесь.",
+      "lua": "Самая темная книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-013",
+      "group": "degrees",
+      "input": "He is busier.",
+      "ltpro": "Он более занятый.",
+      "lua": "Он более занятый.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-014",
+      "group": "degrees",
+      "input": "The busier book is here.",
+      "ltpro": "Более занятая книга - здесь.",
+      "lua": "Более занятая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-015",
+      "group": "degrees",
+      "input": "He is busiest.",
+      "ltpro": "Он самый занятый.",
+      "lua": "Он самый занятый.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-016",
+      "group": "degrees",
+      "input": "The busiest book is here.",
+      "ltpro": "Самая занятая книга - здесь.",
+      "lua": "Самая занятая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-017",
+      "group": "degrees",
+      "input": "He is kinder.",
+      "ltpro": "Он более хороший{1.добрый}.",
+      "lua": "Он более хороший{1.добрый}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-018",
+      "group": "degrees",
+      "input": "The kinder book is here.",
+      "ltpro": "Более хорошая{1.добрый} книга - здесь.",
+      "lua": "Более хорошая{1.добрый} книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-019",
+      "group": "degrees",
+      "input": "He is kindest.",
+      "ltpro": "Он любезнейший.",
+      "lua": "Он любезнейший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-020",
+      "group": "degrees",
+      "input": "The kindest book is here.",
+      "ltpro": "Любезнейшая книга - здесь.",
+      "lua": "Любезнейшая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-021",
+      "group": "degrees",
+      "input": "He is bigger.",
+      "ltpro": "Он - больше.",
+      "lua": "Он - больше.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-022",
+      "group": "degrees",
+      "input": "The bigger book is here.",
+      "ltpro": "Большая книга - здесь.",
+      "lua": "Большая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-023",
+      "group": "degrees",
+      "input": "He is biggest.",
+      "ltpro": "Он самый большой.",
+      "lua": "Он самый большой.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-024",
+      "group": "degrees",
+      "input": "The biggest book is here.",
+      "ltpro": "Самая большая книга - здесь.",
+      "lua": "Самая большая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-025",
+      "group": "degrees",
+      "input": "He is happier.",
+      "ltpro": "Он - счастливее.",
+      "lua": "Он - счастливее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-026",
+      "group": "degrees",
+      "input": "The happier book is here.",
+      "ltpro": "Счастливее книга - здесь.",
+      "lua": "Счастливее книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-027",
+      "group": "degrees",
+      "input": "He is happiest.",
+      "ltpro": "Он счастлив.",
+      "lua": "Он счастлив.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-028",
+      "group": "degrees",
+      "input": "The happiest book is here.",
+      "ltpro": "Самая счастливая книга - здесь.",
+      "lua": "Самая счастливая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-029",
+      "group": "degrees",
+      "input": "He is smaller.",
+      "ltpro": "Он меньший.",
+      "lua": "Он меньший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-030",
+      "group": "degrees",
+      "input": "The smaller book is here.",
+      "ltpro": "Меньшая книга - здесь.",
+      "lua": "Меньшая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-031",
+      "group": "degrees",
+      "input": "He is smallest.",
+      "ltpro": "Он минимальный.",
+      "lua": "Он минимальный.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-032",
+      "group": "degrees",
+      "input": "The smallest book is here.",
+      "ltpro": "Минимальная книга - здесь.",
+      "lua": "Минимальная книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-033",
+      "group": "degrees",
+      "input": "He is faster.",
+      "ltpro": "Он - более быстро.",
+      "lua": "Он - более быстро.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-034",
+      "group": "degrees",
+      "input": "The faster book is here.",
+      "ltpro": "Более Быстрая книга - здесь.",
+      "lua": "Более Быстрая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-035",
+      "group": "degrees",
+      "input": "He is fastest.",
+      "ltpro": "Он самый быстрый.",
+      "lua": "Он самый быстрый.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "degrees-036",
+      "group": "degrees",
+      "input": "The fastest book is here.",
+      "ltpro": "Самая Быстрая книга - здесь.",
+      "lua": "Самая Быстрая книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-001",
+      "group": "possessives",
+      "input": "The cat's mat is here.",
+      "ltpro": "Ковер{1.матрица} кошки - здесь.",
+      "lua": "Ковер{1.матрица} кошки - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-002",
+      "group": "possessives",
+      "input": "The dogs' owner left.",
+      "ltpro": "Владелец собак остался.",
+      "lua": "Владелец собак остался.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-003",
+      "group": "possessives",
+      "input": "The boy's book is here.",
+      "ltpro": "Книга мальчика - здесь.",
+      "lua": "Книга мальчика - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-004",
+      "group": "possessives",
+      "input": "The boys' book is here.",
+      "ltpro": "Книга мальчиков - здесь.",
+      "lua": "Книга мальчиков - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-005",
+      "group": "possessives",
+      "input": "The city's name is here.",
+      "ltpro": "Городское имя - здесь.",
+      "lua": "Городское имя - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-006",
+      "group": "possessives",
+      "input": "The cities' names are here.",
+      "ltpro": "cities' имена - здесь.",
+      "lua": "Имена городов - здесь.",
+      "classification": "intentional_difference",
+      "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form."
+    },
+    {
+      "id": "possessives-007",
+      "group": "possessives",
+      "input": "John's book is good.",
+      "ltpro": "Книга Джона хорошая.",
+      "lua": "Книга Джона хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-008",
+      "group": "possessives",
+      "input": "This is the girl's book.",
+      "ltpro": "Это книга девушки.",
+      "lua": "Это книга девушки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "possessives-009",
+      "group": "possessives",
+      "input": "This is the girls' book.",
+      "ltpro": "Это книга девушек.",
+      "lua": "Это книга девушек.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-001",
+      "group": "compounds",
+      "input": "The foo-bar is deep.",
+      "ltpro": "foo-преграждать глубокое.",
+      "lua": "foo-преграждать глубокое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-002",
+      "group": "compounds",
+      "input": "The xyz-abc is deep.",
+      "ltpro": "xyz-азбука глубокое.",
+      "lua": "xyz-азбука глубокое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-003",
+      "group": "compounds",
+      "input": "The foo-quux is deep.",
+      "ltpro": "foo-quux глубок.",
+      "lua": "foo-quux глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-004",
+      "group": "compounds",
+      "input": "The quux-foo is deep.",
+      "ltpro": "quux-foo глубок.",
+      "lua": "quux-foo глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-005",
+      "group": "compounds",
+      "input": "The bar-ness is deep.",
+      "ltpro": "ness бара{1.полоса;брусок;адвокатура;суд} глубоко.",
+      "lua": "Бар{1.полоса;брусок;адвокатура;суд}-ness глубок.",
+      "classification": "intentional_difference",
+      "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement."
+    },
+    {
+      "id": "compounds-006",
+      "group": "compounds",
+      "input": "The abc-ness is deep.",
+      "ltpro": "ness азбуки глубоко.",
+      "lua": "Азбука-ness глубока.",
+      "classification": "intentional_difference",
+      "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement."
+    },
+    {
+      "id": "compounds-007",
+      "group": "compounds",
+      "input": "The ness-bar is deep.",
+      "ltpro": "Бар{1.полоса;брусок;адвокатура;суд} ness глубок.",
+      "lua": "ness-преграждать глубокое.",
+      "classification": "intentional_difference",
+      "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement."
+    },
+    {
+      "id": "compounds-008",
+      "group": "compounds",
+      "input": "The foo/bar is deep.",
+      "ltpro": "foo/бар{1.полоса;брусок;адвокатура;суд} глубок.",
+      "lua": "foo/бар{1.полоса;брусок;адвокатура;суд} глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-009",
+      "group": "compounds",
+      "input": "The cat/dog is deep.",
+      "ltpro": "Кошка/собака глубока.",
+      "lua": "Кошка/собака глубока.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-010",
+      "group": "compounds",
+      "input": "The buyer-seller is deep.",
+      "ltpro": "Продавец покупателя глубок.",
+      "lua": "Продавец покупателя глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-011",
+      "group": "compounds",
+      "input": "The ABC-123 is deep.",
+      "ltpro": "ABC-123 глубок.",
+      "lua": "ABC-123 глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "compounds-012",
+      "group": "compounds",
+      "input": "The word-processing is deep.",
+      "ltpro": "Текстовая обработка глубока.",
+      "lua": "Текстовая обработка глубока.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-001",
+      "group": "prefixes",
+      "input": "The nonstandard is good.",
+      "ltpro": "Нестандартный хорошее.",
+      "lua": "Нестандартный хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-002",
+      "group": "prefixes",
+      "input": "The non-strong is good.",
+      "ltpro": "Не-Прочный хорошее.",
+      "lua": "Непрочный хорошее.",
+      "classification": "intentional_difference",
+      "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen."
+    },
+    {
+      "id": "prefixes-003",
+      "group": "prefixes",
+      "input": "The noncat is good.",
+      "ltpro": "НеКошка хорошая.",
+      "lua": "Некошка хорошая.",
+      "classification": "intentional_difference",
+      "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen."
+    },
+    {
+      "id": "prefixes-004",
+      "group": "prefixes",
+      "input": "The subcat is good.",
+      "ltpro": "ПодКошка хорошая.",
+      "lua": "Подкошка хорошая.",
+      "classification": "intentional_difference",
+      "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen."
+    },
+    {
+      "id": "prefixes-005",
+      "group": "prefixes",
+      "input": "The subcats is good.",
+      "ltpro": "ПодКошки хорошие.",
+      "lua": "Подкошки хорошие.",
+      "classification": "intentional_difference",
+      "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen."
+    },
+    {
+      "id": "prefixes-006",
+      "group": "prefixes",
+      "input": "The subsystem is good.",
+      "ltpro": "Подсистема хорошая.",
+      "lua": "Подсистема хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-007",
+      "group": "prefixes",
+      "input": "The prewar is good.",
+      "ltpro": "Довоенный хорошее.",
+      "lua": "Довоенный хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-008",
+      "group": "prefixes",
+      "input": "The rework is good.",
+      "ltpro": "Перерабатывание хороший.",
+      "lua": "Перерабатывание хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-009",
+      "group": "prefixes",
+      "input": "The reopen is good.",
+      "ltpro": "Вновь Открывать хорошее.",
+      "lua": "Вновь Открывать хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-010",
+      "group": "prefixes",
+      "input": "The rewrite is good.",
+      "ltpro": "Перезапись хорошая.",
+      "lua": "Перезапись хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-011",
+      "group": "prefixes",
+      "input": "The unhappy is good.",
+      "ltpro": "Неудачный{1.несчастливый} хорошее.",
+      "lua": "Неудачный{1.несчастливый} хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-012",
+      "group": "prefixes",
+      "input": "The unseen is good.",
+      "ltpro": "Невидимый хорошее.",
+      "lua": "Невидимый хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-013",
+      "group": "prefixes",
+      "input": "The unusual is good.",
+      "ltpro": "Необычный хорошее.",
+      "lua": "Необычный хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-014",
+      "group": "prefixes",
+      "input": "The antivirus is good.",
+      "ltpro": "АнтиВирусы хорошие.",
+      "lua": "Антивирус хороший.",
+      "classification": "intentional_difference",
+      "reason": "The recognized virus stem remains singular when prefixed with anti. The original antivirus capture unexpectedly becomes plural, while the unprefixed virus control is singular in both engines."
+    },
+    {
+      "id": "prefixes-015",
+      "group": "prefixes",
+      "input": "The microcomputer is good.",
+      "ltpro": "Микро-эвм хороший.",
+      "lua": "Микро-эвм хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-016",
+      "group": "prefixes",
+      "input": "The supercomputer is good.",
+      "ltpro": "Супер-эвм хорошая.",
+      "lua": "Супер-эвм хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-017",
+      "group": "prefixes",
+      "input": "The multilevel is good.",
+      "ltpro": "Многоуровневый хорошее.",
+      "lua": "Многоуровневый хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-018",
+      "group": "prefixes",
+      "input": "The postwar is good.",
+      "ltpro": "Послевоенный хорошее.",
+      "lua": "Послевоенный хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-019",
+      "group": "prefixes",
+      "input": "The nonexistent is good.",
+      "ltpro": "Несуществующий хорошее.",
+      "lua": "Несуществующий хорошее.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "prefixes-020",
+      "group": "prefixes",
+      "input": "The subxyzzy is good.",
+      "ltpro": "subxyzzy хороший.",
+      "lua": "subxyzzy хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-001",
+      "group": "phrases",
+      "input": "He is aware of the problem.",
+      "ltpro": "Он знает о проблеме.",
+      "lua": "Он знает о проблеме.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-002",
+      "group": "phrases",
+      "input": "He is very careful.",
+      "ltpro": "Он очень осторожн.",
+      "lua": "Он очень осторожн.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-003",
+      "group": "phrases",
+      "input": "He is sure of it.",
+      "ltpro": "Он уверен в это.",
+      "lua": "Он уверен в это.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-004",
+      "group": "phrases",
+      "input": "He takes the cat home.",
+      "ltpro": "Он берет дом кошки.",
+      "lua": "Он берет дом кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-005",
+      "group": "phrases",
+      "input": "Take the cat home.",
+      "ltpro": "Возьмите дом кошки.",
+      "lua": "Возьмите дом кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-006",
+      "group": "phrases",
+      "input": "He bears it in mind.",
+      "ltpro": "Он имеет это в виду.",
+      "lua": "Он имеет это в виду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-007",
+      "group": "phrases",
+      "input": "At your convenience.",
+      "ltpro": "К Ваше Услугам.",
+      "lua": "К ваше услугам.",
+      "classification": "known_limitation",
+      "reason": "The supplied at ~ convenience reading contains untagged literal услугам and does not supply enough case/number information for correct Russian possessive agreement. Both captured original and Lua output are awkward; Lua also uses ordinary casing for phrase components. This is an inherited phrase/morphology limitation, not a claim of correct Russian."
+    },
+    {
+      "id": "phrases-008",
+      "group": "phrases",
+      "input": "A number of books.",
+      "ltpro": "Много книг.",
+      "lua": "Много книг.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-009",
+      "group": "phrases",
+      "input": "How often?",
+      "ltpro": "Как часто?",
+      "lua": "Как часто?",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-010",
+      "group": "phrases",
+      "input": "The black board is here.",
+      "ltpro": "Классная Доска - здесь.",
+      "lua": "Классная Доска - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-011",
+      "group": "phrases",
+      "input": "The swiss army knife is here.",
+      "ltpro": "Рмейский Нож - здесь.",
+      "lua": "Армейский Нож - здесь.",
+      "classification": "intentional_difference",
+      "reason": "The shipped swiss army knife W reading omits the first selector. Lua preserves its full untagged text; the original drops the first Cyrillic letter. No original dictionary bytes were changed."
+    },
+    {
+      "id": "phrases-012",
+      "group": "phrases",
+      "input": "The long wave is good.",
+      "ltpro": "Длинная Волна хорошая.",
+      "lua": "Длинная Волна хорошая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-013",
+      "group": "phrases",
+      "input": "They default on a contract.",
+      "ltpro": "Они не выполняют обязательства по контракту.",
+      "lua": "Они не выполняют обязательства по контракту.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-014",
+      "group": "phrases",
+      "input": "The article I is here.",
+      "ltpro": "Статья I - здесь.",
+      "lua": "Статья I - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-015",
+      "group": "phrases",
+      "input": "I agree.",
+      "ltpro": "Я соглашаюсь{1.согласовывать}.",
+      "lua": "Я соглашаюсь{1.согласовывать}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-016",
+      "group": "phrases",
+      "input": "He agrees.",
+      "ltpro": "Он соглашается.",
+      "lua": "Он соглашается.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-017",
+      "group": "phrases",
+      "input": "Admission is good.",
+      "ltpro": "Допущение{1.доступ} хороший.",
+      "lua": "Допущение{1.доступ} хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "phrases-018",
+      "group": "phrases",
+      "input": "The boot is here.",
+      "ltpro": "Ботинок{1.багажник;загрузка} - здесь.",
+      "lua": "Ботинок{1.багажник;загрузка} - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "directives-001",
+      "group": "directives",
+      "input": "{~Keep TEXT~}.",
+      "ltpro": "Keep TEXT.",
+      "lua": "Keep TEXT.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "directives-002",
+      "group": "directives",
+      "input": "{~=John Smith~}.",
+      "ltpro": "Джохн Смит.",
+      "lua": "Джохн Смит.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "directives-003",
+      "group": "directives",
+      "input": "Two books {~unchanged~}.",
+      "ltpro": "Две книги unchanged.",
+      "lua": "Две книги unchanged.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "directives-004",
+      "group": "directives",
+      "input": "{~one~} {~two~}.",
+      "ltpro": "one two.",
+      "lua": "one two.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "directives-005",
+      "group": "directives",
+      "input": "{~one~}, {~two~}.",
+      "ltpro": "one~}, two.",
+      "lua": "one, two.",
+      "classification": "intentional_difference",
+      "reason": "A delimited protected span closes before adjacent punctuation. Lua prints its literal contents and comma; the captured executable leaks the closing ~} marker."
+    },
+    {
+      "id": "directives-006",
+      "group": "directives",
+      "input": "{~\\2 cat dog book",
+      "ltpro": "\\2 cat dog book",
+      "lua": "кошка\tсобака\nкнига",
+      "classification": "intentional_difference",
+      "reason": "Lua implements the documented list controls using independent translated items, tabs, and newlines. The supplied executable capture prints the control text literally. List formatting is an explicit Lua feature contract."
+    },
+    {
+      "id": "directives-007",
+      "group": "directives",
+      "input": "{~\\1 cat dog",
+      "ltpro": "\\1 cat dog",
+      "lua": "кошка\nсобака",
+      "classification": "intentional_difference",
+      "reason": "Lua implements the documented list controls using independent translated items, tabs, and newlines. The supplied executable capture prints the control text literally. List formatting is an explicit Lua feature contract."
+    },
+    {
+      "id": "directives-008",
+      "group": "directives",
+      "input": "{~\\2 cat dog {~\\. Two books.",
+      "ltpro": "\\2 cat dog \\. Two books.",
+      "lua": "кошка\tсобака\nДве книги.",
+      "classification": "intentional_difference",
+      "reason": "Lua implements the documented list controls using independent translated items, tabs, and newlines. The supplied executable capture prints the control text literally. List formatting is an explicit Lua feature contract."
+    },
+    {
+      "id": "gap-phrase-001",
+      "group": "phrase-gaps",
+      "input": "above cat and below.",
+      "ltpro": "выше кошки и ниже.",
+      "lua": "выше кошки и ниже.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-002",
+      "group": "phrase-gaps",
+      "input": "accept cat at its face value.",
+      "ltpro": "примите кошку за чистую монету.",
+      "lua": "примите кошку за чистую монету.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-003",
+      "group": "phrase-gaps",
+      "input": "acquit cat ill.",
+      "ltpro": "плохо справьтесь.",
+      "lua": "плохо справьтесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-004",
+      "group": "phrase-gaps",
+      "input": "acquit cat well.",
+      "ltpro": "хорошо справьтесь.",
+      "lua": "хорошо справьтесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-005",
+      "group": "phrase-gaps",
+      "input": "act on cat behalf.",
+      "ltpro": "задействуйте от имени кошки.",
+      "lua": "задействуйте от имени кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-006",
+      "group": "phrase-gaps",
+      "input": "affect cat interests.",
+      "ltpro": "задевать интересы кошки.",
+      "lua": "задевать интересы кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-007",
+      "group": "phrase-gaps",
+      "input": "affected cat item.",
+      "ltpro": "раздел активной кошки.",
+      "lua": "раздел активной кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-008",
+      "group": "phrase-gaps",
+      "input": "against cat will.",
+      "ltpro": "против воли кошки.",
+      "lua": "против воли кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-009",
+      "group": "phrase-gaps",
+      "input": "aim cat efforts at.",
+      "ltpro": "направьте усилия на.",
+      "lua": "направьте усилия на.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-010",
+      "group": "phrase-gaps",
+      "input": "all cat concerned.",
+      "ltpro": "все заинтересованные кошка.",
+      "lua": "все заинтересованные кошка.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-011",
+      "group": "phrase-gaps",
+      "input": "aply cat to.",
+      "ltpro": "применитесь кошкой к.",
+      "lua": "применитесь кошкой к.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-012",
+      "group": "phrase-gaps",
+      "input": "apply cat to.",
+      "ltpro": "применитесь кошкой к.",
+      "lua": "применитесь кошкой к.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-013",
+      "group": "phrase-gaps",
+      "input": "as much as cat times.",
+      "ltpro": "в кошка раз.",
+      "lua": "в кошка раз.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-014",
+      "group": "phrase-gaps",
+      "input": "as cat please.",
+      "ltpro": "как~ угодно.",
+      "lua": "как кошка угодно.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-015",
+      "group": "phrase-gaps",
+      "input": "assume cat responsibility for.",
+      "ltpro": "возьмите на себя ответственность за.",
+      "lua": "возьмите на себя ответственность за.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-016",
+      "group": "phrase-gaps",
+      "input": "at a cat lower.",
+      "ltpro": "при более низкий.",
+      "lua": "при более низкий.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-017",
+      "group": "phrase-gaps",
+      "input": "at the cat option.",
+      "ltpro": "по выбору кошки.",
+      "lua": "по выбору кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-018",
+      "group": "phrase-gaps",
+      "input": "at cat convenience.",
+      "ltpro": "к кошка услугам.",
+      "lua": "к кошка услугам.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-019",
+      "group": "phrase-gaps",
+      "input": "at cat cost.",
+      "ltpro": "за счет кошки.",
+      "lua": "за счет кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-020",
+      "group": "phrase-gaps",
+      "input": "avail cat of.",
+      "ltpro": "воспользуйтесь.",
+      "lua": "воспользуйтесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-021",
+      "group": "phrase-gaps",
+      "input": "be of cat importance.",
+      "ltpro": "имейте значение кошки.",
+      "lua": "имейте значение кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-022",
+      "group": "phrase-gaps",
+      "input": "be cat anxious to.",
+      "ltpro": "кошка хочет.",
+      "lua": "кошка хочет.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-023",
+      "group": "phrase-gaps",
+      "input": "be cat aware of.",
+      "ltpro": "кошка знает о.",
+      "lua": "кошка знает о.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-024",
+      "group": "phrase-gaps",
+      "input": "be cat careful.",
+      "ltpro": "кошка осторожная.",
+      "lua": "кошка осторожная.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-025",
+      "group": "phrase-gaps",
+      "input": "be cat certain to.",
+      "ltpro": "кошка несомненно.",
+      "lua": "кошка несомненно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-026",
+      "group": "phrase-gaps",
+      "input": "be cat disclaimed.",
+      "ltpro": "отвергнутым кошка.",
+      "lua": "отвергнутым кошка.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-027",
+      "group": "phrase-gaps",
+      "input": "be cat intended to.",
+      "ltpro": "кошка собирается.",
+      "lua": "кошка собирается.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-028",
+      "group": "phrase-gaps",
+      "input": "be cat interesting.",
+      "ltpro": "кошка интересная.",
+      "lua": "кошка интересная.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-029",
+      "group": "phrase-gaps",
+      "input": "be cat likely to.",
+      "ltpro": "кошка вероятно.",
+      "lua": "кошка вероятно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-030",
+      "group": "phrase-gaps",
+      "input": "be cat strained.",
+      "ltpro": "кошка натянутая.",
+      "lua": "кошка натянутая.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-031",
+      "group": "phrase-gaps",
+      "input": "be cat sure of.",
+      "ltpro": "кошка уверенная в.",
+      "lua": "кошка уверенная в.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-032",
+      "group": "phrase-gaps",
+      "input": "be cat sure to.",
+      "ltpro": "кошка обязательно.",
+      "lua": "кошка обязательно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-033",
+      "group": "phrase-gaps",
+      "input": "be cat tense.",
+      "ltpro": "кошка напряженная.",
+      "lua": "кошка напряженная.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-034",
+      "group": "phrase-gaps",
+      "input": "be cat under arrest.",
+      "ltpro": "кошка под арестом.",
+      "lua": "кошка под арестом.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-035",
+      "group": "phrase-gaps",
+      "input": "be cat unlikely to.",
+      "ltpro": "кошка вряд-ли.",
+      "lua": "кошка вряд-ли.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-036",
+      "group": "phrase-gaps",
+      "input": "bear cat in mind.",
+      "ltpro": "имейте кошку в виду.",
+      "lua": "имейте кошку в виду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-037",
+      "group": "phrase-gaps",
+      "input": "bide cat time.",
+      "ltpro": "выжидать подходящий момент.",
+      "lua": "выжидать подходящий момент.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-038",
+      "group": "phrase-gaps",
+      "input": "board of cat.",
+      "ltpro": "совет кошки.",
+      "lua": "совет кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-039",
+      "group": "phrase-gaps",
+      "input": "bring cat back into.",
+      "ltpro": "возвратите кошку в.",
+      "lua": "возвратите кошку в.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-040",
+      "group": "phrase-gaps",
+      "input": "brush cat hair.",
+      "ltpro": "причесывать кошка волосы.",
+      "lua": "причесывать кошка волосы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-041",
+      "group": "phrase-gaps",
+      "input": "burning cat fuels.",
+      "ltpro": "топливо кошки сжигания.",
+      "lua": "топливо кошки сжигания.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-042",
+      "group": "phrase-gaps",
+      "input": "catch cat napping.",
+      "ltpro": "застаньте кошку врасплох.",
+      "lua": "застаньте кошку врасплох.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-043",
+      "group": "phrase-gaps",
+      "input": "catch cat off guard.",
+      "ltpro": "застаньте кошку врасплох.",
+      "lua": "застаньте кошку врасплох.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-044",
+      "group": "phrase-gaps",
+      "input": "change cat from.",
+      "ltpro": "замените кошку с.",
+      "lua": "замените кошку с.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-045",
+      "group": "phrase-gaps",
+      "input": "change cat mind.",
+      "ltpro": "измените решение кошки.",
+      "lua": "измените решение кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-046",
+      "group": "phrase-gaps",
+      "input": "clear cat throat.",
+      "ltpro": "откашливаться.",
+      "lua": "откашливаться.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-047",
+      "group": "phrase-gaps",
+      "input": "come to cat attention.",
+      "ltpro": "обнаруживатьние.",
+      "lua": "обнаруживатьние.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-048",
+      "group": "phrase-gaps",
+      "input": "come cat to.",
+      "ltpro": "перейдите кошку к.",
+      "lua": "перейдите кошку к.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-049",
+      "group": "phrase-gaps",
+      "input": "communicate cat with.",
+      "ltpro": "пообщайтесь кошкой с.",
+      "lua": "пообщайтесь кошкой с.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-050",
+      "group": "phrase-gaps",
+      "input": "concern cat with.",
+      "ltpro": "займитесь.",
+      "lua": "займитесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-051",
+      "group": "phrase-gaps",
+      "input": "confine cat of.",
+      "ltpro": "ограничьте.",
+      "lua": "ограничьте.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-052",
+      "group": "phrase-gaps",
+      "input": "cut cat dead.",
+      "ltpro": "проигнорируйте.",
+      "lua": "проигнорируйте.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-053",
+      "group": "phrase-gaps",
+      "input": "cut cat payrolls.",
+      "ltpro": "срезаемое зарплату.",
+      "lua": "срезаемое зарплату.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-054",
+      "group": "phrase-gaps",
+      "input": "debar cat the right.",
+      "ltpro": "откажите кошке в праве на.",
+      "lua": "откажите кошке в праве на.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-055",
+      "group": "phrase-gaps",
+      "input": "debris cat thrown around.",
+      "ltpro": "разбросанный обломки.",
+      "lua": "разбросанные обломки.",
+      "classification": "intentional_difference",
+      "reason": "Plural information from the head entry survives phrase distribution, giving plural adjective agreement with обломки. The captured executable emits a singular adjective before the plural noun."
+    },
+    {
+      "id": "gap-phrase-056",
+      "group": "phrase-gaps",
+      "input": "default cat parameters.",
+      "ltpro": "установите по умолчанию параметры кошки.",
+      "lua": "установите по умолчанию параметры кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-057",
+      "group": "phrase-gaps",
+      "input": "deter cat from trying.",
+      "ltpro": "удержите от попыток.",
+      "lua": "удержите кошку от попыток.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-058",
+      "group": "phrase-gaps",
+      "input": "deter cat from trying again.",
+      "ltpro": "удержите от повторных попыток.",
+      "lua": "удержите кошку от повторных попыток.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-059",
+      "group": "phrase-gaps",
+      "input": "distinguish cat by.",
+      "ltpro": "отличитесь.",
+      "lua": "отличитесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-060",
+      "group": "phrase-gaps",
+      "input": "do cat a favour.",
+      "ltpro": "окажите милость кошки.",
+      "lua": "окажите милость кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-061",
+      "group": "phrase-gaps",
+      "input": "do cat best.",
+      "ltpro": "сделайте все возможное.",
+      "lua": "сделайте все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-062",
+      "group": "phrase-gaps",
+      "input": "do cat bit.",
+      "ltpro": "исполните свой долг.",
+      "lua": "исполните свой долг.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-063",
+      "group": "phrase-gaps",
+      "input": "do cat by.",
+      "ltpro": "сделайте с помощью.",
+      "lua": "сделайте с помощью.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-064",
+      "group": "phrase-gaps",
+      "input": "do cat by hand.",
+      "ltpro": "сделайте вручную.",
+      "lua": "сделайте кошку вручную.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-065",
+      "group": "phrase-gaps",
+      "input": "do cat duty.",
+      "ltpro": "выполните долг кошки.",
+      "lua": "выполните долг кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-066",
+      "group": "phrase-gaps",
+      "input": "do cat endeavours.",
+      "ltpro": "приложите силы.",
+      "lua": "приложите силы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-067",
+      "group": "phrase-gaps",
+      "input": "do cat level best.",
+      "ltpro": "сделайте все возможное.",
+      "lua": "сделайте все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-068",
+      "group": "phrase-gaps",
+      "input": "do cat with.",
+      "ltpro": "кошка удовлетворяется.",
+      "lua": "кошка удовлетворяется.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-069",
+      "group": "phrase-gaps",
+      "input": "draw cat attention to.",
+      "ltpro": "привлеките внимание к.",
+      "lua": "привлеките внимание к.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-070",
+      "group": "phrase-gaps",
+      "input": "eat cat heart out.",
+      "ltpro": "изведите.",
+      "lua": "изведите.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-071",
+      "group": "phrase-gaps",
+      "input": "elect cat to.",
+      "ltpro": "предпочтите кошку.",
+      "lua": "предпочтите кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-072",
+      "group": "phrase-gaps",
+      "input": "enabled cat to.",
+      "ltpro": "дана возможность кошки.",
+      "lua": "дана возможность кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-073",
+      "group": "phrase-gaps",
+      "input": "endorse cat by.",
+      "ltpro": "утвердите кошку.",
+      "lua": "утвердите кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-074",
+      "group": "phrase-gaps",
+      "input": "enter cat mind.",
+      "ltpro": "придите в голову.",
+      "lua": "придите в голову.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-075",
+      "group": "phrase-gaps",
+      "input": "exceed cat worst anticipations.",
+      "ltpro": "превзойдите наихудшие опасения.",
+      "lua": "превзойдите наихудшие опасения.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-076",
+      "group": "phrase-gaps",
+      "input": "figment of cat imagination.",
+      "ltpro": "кошка воображения плода.",
+      "lua": "кошка воображения плода.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-077",
+      "group": "phrase-gaps",
+      "input": "find cat account in.",
+      "ltpro": "получите выгоду от.",
+      "lua": "получите выгоду от.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-078",
+      "group": "phrase-gaps",
+      "input": "find cat easier.",
+      "ltpro": "считайте легче.",
+      "lua": "считайте легче.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-079",
+      "group": "phrase-gaps",
+      "input": "find cat way.",
+      "ltpro": "получите доступ.",
+      "lua": "получите доступ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-080",
+      "group": "phrase-gaps",
+      "input": "fit cat requirements.",
+      "ltpro": "соответствуйте требованиям кошки.",
+      "lua": "соответствуйте требованиям кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-081",
+      "group": "phrase-gaps",
+      "input": "for cat own account.",
+      "ltpro": "за собственный счет кошки.",
+      "lua": "за собственный счет кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-082",
+      "group": "phrase-gaps",
+      "input": "for cat sake.",
+      "ltpro": "ради кошки.",
+      "lua": "ради кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-083",
+      "group": "phrase-gaps",
+      "input": "forgive cat for.",
+      "ltpro": "простите кошку за.",
+      "lua": "простите кошку за.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-084",
+      "group": "phrase-gaps",
+      "input": "forward cat to.",
+      "ltpro": "перешлите кошку.",
+      "lua": "перешлите кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-085",
+      "group": "phrase-gaps",
+      "input": "gain cat end.",
+      "ltpro": "достигните цели.",
+      "lua": "достигните цели.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-086",
+      "group": "phrase-gaps",
+      "input": "get a cat system.",
+      "ltpro": "создайте системы кошки.",
+      "lua": "создайте системы кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-087",
+      "group": "phrase-gaps",
+      "input": "get on cat soapbox.",
+      "ltpro": "ораторствуйте.",
+      "lua": "ораторствуйте.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-088",
+      "group": "phrase-gaps",
+      "input": "get cat hands on.",
+      "ltpro": "приобретите.",
+      "lua": "приобретите.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-089",
+      "group": "phrase-gaps",
+      "input": "get cat informed.",
+      "ltpro": "кошка осведомленная.",
+      "lua": "кошка осведомленная.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-090",
+      "group": "phrase-gaps",
+      "input": "get cat inserted.",
+      "ltpro": "кошка включается.",
+      "lua": "кошка включается.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-091",
+      "group": "phrase-gaps",
+      "input": "get cat up to.",
+      "ltpro": "приобретите.",
+      "lua": "приобретите.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-092",
+      "group": "phrase-gaps",
+      "input": "give cat a push.",
+      "ltpro": "толкните кошку.",
+      "lua": "толкните кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-093",
+      "group": "phrase-gaps",
+      "input": "glass of cat.",
+      "ltpro": "стекло кошки.",
+      "lua": "стакан кошки.",
+      "classification": "intentional_difference",
+      "reason": "Lua recognizes the literal/patterned glass of phrase and selects стакан. The original captured output uses the separate glass entry meaning стекло. This is the documented phrase-precedence policy."
+    },
+    {
+      "id": "gap-phrase-094",
+      "group": "phrase-gaps",
+      "input": "go cat own gate.",
+      "ltpro": "задействуйте самостоятельно.",
+      "lua": "задействуйте самостоятельно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-095",
+      "group": "phrase-gaps",
+      "input": "go cat own way.",
+      "ltpro": "задействуйте самостоятельно.",
+      "lua": "задействуйте самостоятельно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-096",
+      "group": "phrase-gaps",
+      "input": "have cat hair cut.",
+      "ltpro": "постригитесь.",
+      "lua": "постригитесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-097",
+      "group": "phrase-gaps",
+      "input": "hold cat talks.",
+      "ltpro": "проведите переговоры кошки.",
+      "lua": "проведите переговоры кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-098",
+      "group": "phrase-gaps",
+      "input": "in one of cat ways.",
+      "ltpro": "одним из способа кошки.",
+      "lua": "одним из способа кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-099",
+      "group": "phrase-gaps",
+      "input": "in order cat to.",
+      "ltpro": "кошка для того, чтобы.",
+      "lua": "кошка для того, чтобы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-100",
+      "group": "phrase-gaps",
+      "input": "industry specific cat dictionaries.",
+      "ltpro": "тематические словари кошки.",
+      "lua": "тематические словари кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-101",
+      "group": "phrase-gaps",
+      "input": "industry specific cat dictionary.",
+      "ltpro": "тематический словарь кошки.",
+      "lua": "тематический словарь кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-102",
+      "group": "phrase-gaps",
+      "input": "instruct cat on.",
+      "ltpro": "проинструктируйте кошку относительно.",
+      "lua": "проинструктируйте кошку относительно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-103",
+      "group": "phrase-gaps",
+      "input": "investment from cat to.",
+      "ltpro": "вклад от кошки до.",
+      "lua": "вклад от кошки до.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-104",
+      "group": "phrase-gaps",
+      "input": "it behooves cat to.",
+      "ltpro": "кошка надлежит.",
+      "lua": "кошка надлежит.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-105",
+      "group": "phrase-gaps",
+      "input": "it cat a bargain.",
+      "ltpro": "это очень дешево.",
+      "lua": "это очень дешево.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-106",
+      "group": "phrase-gaps",
+      "input": "keep cat company.",
+      "ltpro": "составьте кошку компанию.",
+      "lua": "составьте кошку компанию.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-107",
+      "group": "phrase-gaps",
+      "input": "keep cat posted on.",
+      "ltpro": "проинформируйте о.",
+      "lua": "проинформируйте о.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-108",
+      "group": "phrase-gaps",
+      "input": "largest cat possible.",
+      "ltpro": "предельно возможный.",
+      "lua": "предельно возможный.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-109",
+      "group": "phrase-gaps",
+      "input": "latest cat possible.",
+      "ltpro": "самый последний.",
+      "lua": "самый последний.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-110",
+      "group": "phrase-gaps",
+      "input": "leave your cat alone.",
+      "ltpro": "оставьте вашу кошку в покое.",
+      "lua": "оставьте вашу кошку в покое.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-111",
+      "group": "phrase-gaps",
+      "input": "let cat know.",
+      "ltpro": "сообщение.",
+      "lua": "сообщение.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-112",
+      "group": "phrase-gaps",
+      "input": "look cat like.",
+      "ltpro": "выглядите кошкой как.",
+      "lua": "выглядите кошкой как.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-113",
+      "group": "phrase-gaps",
+      "input": "look cat up.",
+      "ltpro": "найдите кошку.",
+      "lua": "найдите кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-114",
+      "group": "phrase-gaps",
+      "input": "lose cat time.",
+      "ltpro": "даром потеряйте время.",
+      "lua": "даром потеряйте время.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-115",
+      "group": "phrase-gaps",
+      "input": "lost cat at.",
+      "ltpro": "потерянная кошка у.",
+      "lua": "потерянная кошка у.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-116",
+      "group": "phrase-gaps",
+      "input": "make up cat mind.",
+      "ltpro": "решите.",
+      "lua": "решите.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-117",
+      "group": "phrase-gaps",
+      "input": "make cat a snap.",
+      "ltpro": "упростите.",
+      "lua": "упростите.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-118",
+      "group": "phrase-gaps",
+      "input": "make cat easy.",
+      "ltpro": "облегчите.",
+      "lua": "облегчите.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-119",
+      "group": "phrase-gaps",
+      "input": "make cat familiar with.",
+      "ltpro": "познакомьте кошку с.",
+      "lua": "познакомьте кошку с.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-120",
+      "group": "phrase-gaps",
+      "input": "make cat possible.",
+      "ltpro": "сделайте кошку возможную.",
+      "lua": "сделайте кошку возможную.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-121",
+      "group": "phrase-gaps",
+      "input": "make cat way to.",
+      "ltpro": "направьтесь в.",
+      "lua": "направьтесь в.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-122",
+      "group": "phrase-gaps",
+      "input": "means there is cat not.",
+      "ltpro": "означает что нет.",
+      "lua": "означает что нет.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-123",
+      "group": "phrase-gaps",
+      "input": "meet cat goal.",
+      "ltpro": "достигните цели кошки.",
+      "lua": "достигните цели кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-124",
+      "group": "phrase-gaps",
+      "input": "meet cat liabilities.",
+      "ltpro": "выполните обязательства кошки.",
+      "lua": "выполните обязательства кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-125",
+      "group": "phrase-gaps",
+      "input": "meet cat liability.",
+      "ltpro": "выполните обязательство кошки.",
+      "lua": "выполните обязательство кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-126",
+      "group": "phrase-gaps",
+      "input": "meet cat obligations.",
+      "ltpro": "выполните обязательства кошки.",
+      "lua": "выполните обязательства кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-127",
+      "group": "phrase-gaps",
+      "input": "mend cat ways.",
+      "ltpro": "исправьте.",
+      "lua": "исправьте.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-128",
+      "group": "phrase-gaps",
+      "input": "of cat own accord.",
+      "ltpro": "добровольно.",
+      "lua": "добровольно.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-129",
+      "group": "phrase-gaps",
+      "input": "on cat behalf.",
+      "ltpro": "от имени кошки.",
+      "lua": "от имени кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-130",
+      "group": "phrase-gaps",
+      "input": "one cat per.",
+      "ltpro": "одни кошки на.",
+      "lua": "одни кошки на.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-131",
+      "group": "phrase-gaps",
+      "input": "perform cat duties.",
+      "ltpro": "выполните обязанности кошки.",
+      "lua": "выполните обязанности кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-132",
+      "group": "phrase-gaps",
+      "input": "pit cat against.",
+      "ltpro": "выставьте кошку против.",
+      "lua": "выставьте кошку против.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-133",
+      "group": "phrase-gaps",
+      "input": "present cat condolences.",
+      "ltpro": "принесите кошку соболезнования.",
+      "lua": "принесите кошку соболезнования.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-134",
+      "group": "phrase-gaps",
+      "input": "present cat with.",
+      "ltpro": "преподнесите кошку.",
+      "lua": "преподнесите кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-135",
+      "group": "phrase-gaps",
+      "input": "prevent cat from.",
+      "ltpro": "предохраните от.",
+      "lua": "предохраните кошку от.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-136",
+      "group": "phrase-gaps",
+      "input": "prevent cat from happening.",
+      "ltpro": "не давайте произойти.",
+      "lua": "не давайте кошке произойти.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-137",
+      "group": "phrase-gaps",
+      "input": "provide cat to.",
+      "ltpro": "предоставляйте кошку.",
+      "lua": "предоставляйте кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-138",
+      "group": "phrase-gaps",
+      "input": "provide cat with.",
+      "ltpro": "обеспечьте кошку.",
+      "lua": "обеспечьте кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-139",
+      "group": "phrase-gaps",
+      "input": "pursue cat own end.",
+      "ltpro": "преследуйте свои собственные цели.",
+      "lua": "преследуйте свои собственные цели.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-140",
+      "group": "phrase-gaps",
+      "input": "ranging from cat to.",
+      "ltpro": "изменятение от кошки до.",
+      "lua": "изменятение от кошки до.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-141",
+      "group": "phrase-gaps",
+      "input": "rely cat on.",
+      "ltpro": "полагайтесь кошка на.",
+      "lua": "полагайтесь кошка на.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-142",
+      "group": "phrase-gaps",
+      "input": "rely cat upon.",
+      "ltpro": "полагайтесь кошка на.",
+      "lua": "полагайтесь кошка на.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-143",
+      "group": "phrase-gaps",
+      "input": "rename cat back to.",
+      "ltpro": "переименуйте кошку снова в.",
+      "lua": "переименуйте кошку снова в.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-144",
+      "group": "phrase-gaps",
+      "input": "replace cat with.",
+      "ltpro": "замените кошку.",
+      "lua": "замените кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-145",
+      "group": "phrase-gaps",
+      "input": "report cat on.",
+      "ltpro": "сообщение о.",
+      "lua": "сообщение о.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-146",
+      "group": "phrase-gaps",
+      "input": "reported cat on.",
+      "ltpro": "сообщена кошка о.",
+      "lua": "сообщена кошка о.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-147",
+      "group": "phrase-gaps",
+      "input": "return cat call.",
+      "ltpro": "перезвоните.",
+      "lua": "перезвоните.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-148",
+      "group": "phrase-gaps",
+      "input": "see cat off.",
+      "ltpro": "смотри.",
+      "lua": "смотри.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-149",
+      "group": "phrase-gaps",
+      "input": "selfcat.",
+      "ltpro": "самокошка.",
+      "lua": "самокошка.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-150",
+      "group": "phrase-gaps",
+      "input": "send cat back.",
+      "ltpro": "возвратите кошку.",
+      "lua": "возвратите кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-151",
+      "group": "phrase-gaps",
+      "input": "send cat order.",
+      "ltpro": "отправьте заказ.",
+      "lua": "отправьте заказ кошки.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-152",
+      "group": "phrase-gaps",
+      "input": "send cat order to.",
+      "ltpro": "отправьте заказ в.",
+      "lua": "отправьте заказ в.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-153",
+      "group": "phrase-gaps",
+      "input": "set cat aside.",
+      "ltpro": "отклонение.",
+      "lua": "отклонение.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-154",
+      "group": "phrase-gaps",
+      "input": "set cat up with.",
+      "ltpro": "установите кошку с.",
+      "lua": "установите кошку с.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-155",
+      "group": "phrase-gaps",
+      "input": "settle cat account.",
+      "ltpro": "уплатите по счету.",
+      "lua": "уплатите по счету.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-156",
+      "group": "phrase-gaps",
+      "input": "share cat concern.",
+      "ltpro": "разделите интересы кошки.",
+      "lua": "разделите интересы кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-157",
+      "group": "phrase-gaps",
+      "input": "show cat the way.",
+      "ltpro": "провожайте кошку.",
+      "lua": "провожайте кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-158",
+      "group": "phrase-gaps",
+      "input": "speak cat to the.",
+      "ltpro": "скажите кошку с.",
+      "lua": "скажите кошку с.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-159",
+      "group": "phrase-gaps",
+      "input": "submit cat payment.",
+      "ltpro": "произведите оплату кошки.",
+      "lua": "произведите оплату кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-160",
+      "group": "phrase-gaps",
+      "input": "supply cat with.",
+      "ltpro": "обеспечьте кошку.",
+      "lua": "обеспечьте кошку.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-161",
+      "group": "phrase-gaps",
+      "input": "take cat advantage of.",
+      "ltpro": "имейте преимущество кошки перед.",
+      "lua": "имейте преимущество кошки перед.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-162",
+      "group": "phrase-gaps",
+      "input": "take cat at its face value.",
+      "ltpro": "примите кошку за чистую монету.",
+      "lua": "примите кошку за чистую монету.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-163",
+      "group": "phrase-gaps",
+      "input": "take cat breath.",
+      "ltpro": "переведите дух.",
+      "lua": "переведите дух.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-164",
+      "group": "phrase-gaps",
+      "input": "take cat for.",
+      "ltpro": "примите кошку за.",
+      "lua": "примите кошку за.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-165",
+      "group": "phrase-gaps",
+      "input": "take cat measures.",
+      "ltpro": "примите меры кошки.",
+      "lua": "примите меры кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-166",
+      "group": "phrase-gaps",
+      "input": "take cat out of.",
+      "ltpro": "уберите кошку из.",
+      "lua": "уберите кошку из.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-167",
+      "group": "phrase-gaps",
+      "input": "take cat photographs.",
+      "ltpro": "сделайте фотографии.",
+      "lua": "сделайте фотографии кошки.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-168",
+      "group": "phrase-gaps",
+      "input": "take cat photographs of.",
+      "ltpro": "сделайте фотографии с.",
+      "lua": "сделайте фотографии кошки с.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "gap-phrase-169",
+      "group": "phrase-gaps",
+      "input": "take cat rights away.",
+      "ltpro": "отберите права кошки.",
+      "lua": "отберите права кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-170",
+      "group": "phrase-gaps",
+      "input": "term of cat paragraph.",
+      "ltpro": "условие раздела кошки.",
+      "lua": "условие раздела кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-171",
+      "group": "phrase-gaps",
+      "input": "throw cat into melting-pot.",
+      "ltpro": "подвергните коренному преобразованию.",
+      "lua": "подвергните коренному преобразованию.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-172",
+      "group": "phrase-gaps",
+      "input": "tie cat up in knots.",
+      "ltpro": "поставьте в затруднительное положение.",
+      "lua": "поставьте в затруднительное положение.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-173",
+      "group": "phrase-gaps",
+      "input": "to cat account.",
+      "ltpro": "за счет кошки.",
+      "lua": "за счет кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-174",
+      "group": "phrase-gaps",
+      "input": "turn cat back on.",
+      "ltpro": "включите кошку снова.",
+      "lua": "включите кошку снова.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-175",
+      "group": "phrase-gaps",
+      "input": "turn cat efforts to.",
+      "ltpro": "направьте усилия кошки на.",
+      "lua": "направьте усилия кошки на.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-176",
+      "group": "phrase-gaps",
+      "input": "under cat agreement.",
+      "ltpro": "по соглашениям кошки.",
+      "lua": "по соглашениям кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-177",
+      "group": "phrase-gaps",
+      "input": "under cat conditions.",
+      "ltpro": "при условий кошки.",
+      "lua": "при условий кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-178",
+      "group": "phrase-gaps",
+      "input": "united cat states.",
+      "ltpro": "штаты соединенной кошки.",
+      "lua": "штаты соединенной кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-179",
+      "group": "phrase-gaps",
+      "input": "upon cat of.",
+      "ltpro": "по кошке.",
+      "lua": "по кошке.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "gap-phrase-180",
+      "group": "phrase-gaps",
+      "input": "vary between cat and.",
+      "ltpro": "изменитесь в пределах от кошки до.",
+      "lua": "изменитесь в пределах от кошки до.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "review-extra-181",
+      "group": "regression",
+      "input": "The houses' doors are open.",
+      "ltpro": "Двери{1.вход} домов открыты.",
+      "lua": "Двери{1.вход} домов открыты.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "review-extra-182",
+      "group": "regression",
+      "input": "The classes' names are here.",
+      "ltpro": "Имена классов - здесь.",
+      "lua": "Имена классов - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "review-extra-183",
+      "group": "regression",
+      "input": "The babies' names are here.",
+      "ltpro": "babies' имена - здесь.",
+      "lua": "Имена младенцев - здесь.",
+      "classification": "intentional_difference",
+      "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form."
+    },
+    {
+      "id": "review-extra-184",
+      "group": "regression",
+      "input": "The ladies' books are here.",
+      "ltpro": "Книги парней - здесь.",
+      "lua": "Книги дама - здесь.",
+      "classification": "known_limitation",
+      "reason": "Lua restores ladies' to lady rather than lad, avoiding the original translation парней. BASE.RUS contains no дама noun paradigm, so its inflection remains unavailable. Both engines also emit uninflected дама in the expanded books-of-the-ladies control. This missing dictionary morphology is a known language limitation."
+    },
+    {
+      "id": "review-extra-185",
+      "group": "regression",
+      "input": "The cities' names are here.",
+      "ltpro": "cities' имена - здесь.",
+      "lua": "Имена городов - здесь.",
+      "classification": "intentional_difference",
+      "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form."
+    },
+    {
+      "id": "review-extra-186",
+      "group": "regression",
+      "input": "He bears it in mind.",
+      "ltpro": "Он имеет это в виду.",
+      "lua": "Он имеет это в виду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "review-extra-187",
+      "group": "regression",
+      "input": "He takes the cat home.",
+      "ltpro": "Он берет дом кошки.",
+      "lua": "Он берет дом кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "review-extra-188",
+      "group": "regression",
+      "input": "He is very sure of it.",
+      "ltpro": "Он очень уверен в это.",
+      "lua": "Он очень уверен в это.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "review-extra-189",
+      "group": "regression",
+      "input": "We are aware of the problem.",
+      "ltpro": "Мы знаем о проблеме.",
+      "lua": "Мы знаем о проблеме.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-001",
+      "group": "natural-regressions",
+      "input": "Do your best.",
+      "ltpro": "Сделайте Все Возможное.",
+      "lua": "Сделайте Все Возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-002",
+      "group": "natural-regressions",
+      "input": "Do your level best.",
+      "ltpro": "Сделайте Все Возможное.",
+      "lua": "Сделайте Все Возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-003",
+      "group": "natural-regressions",
+      "input": "I will do my best.",
+      "ltpro": "Я достаточно мой наилучшим образом.",
+      "lua": "Я достаточно мой наилучшим образом.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-004",
+      "group": "natural-regressions",
+      "input": "She did her best.",
+      "ltpro": "Она делала все возможное.",
+      "lua": "Она делала все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-005",
+      "group": "natural-regressions",
+      "input": "I made up my mind.",
+      "ltpro": "Я решил.",
+      "lua": "Я решил.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-006",
+      "group": "natural-regressions",
+      "input": "He makes up his mind.",
+      "ltpro": "Он решает.",
+      "lua": "Он решает.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-007",
+      "group": "natural-regressions",
+      "input": "We make up our minds.",
+      "ltpro": "Мы создаем наши умы.",
+      "lua": "Мы создаем наши умы.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-008",
+      "group": "natural-regressions",
+      "input": "He bears it in mind.",
+      "ltpro": "Он имеет это в виду.",
+      "lua": "Он имеет это в виду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-009",
+      "group": "natural-regressions",
+      "input": "They bear it in mind.",
+      "ltpro": "Они имеют это в виду.",
+      "lua": "Они имеют это в виду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-010",
+      "group": "natural-regressions",
+      "input": "I keep it in mind.",
+      "ltpro": "Я сохраняю это в уме{1.мнение}.",
+      "lua": "Я сохраняю это в уме{1.мнение}.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-011",
+      "group": "natural-regressions",
+      "input": "He is very careful.",
+      "ltpro": "Он очень осторожн.",
+      "lua": "Он очень осторожн.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-012",
+      "group": "natural-regressions",
+      "input": "We are aware of the problem.",
+      "ltpro": "Мы знаем о проблеме.",
+      "lua": "Мы знаем о проблеме.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-013",
+      "group": "natural-regressions",
+      "input": "At your convenience.",
+      "ltpro": "К Ваше Услугам.",
+      "lua": "К ваше услугам.",
+      "classification": "known_limitation",
+      "reason": "The supplied at ~ convenience reading contains untagged literal услугам and does not supply enough case/number information for correct Russian possessive agreement. Both captured original and Lua output are awkward; Lua also uses ordinary casing for phrase components. This is an inherited phrase/morphology limitation, not a claim of correct Russian."
+    },
+    {
+      "id": "natural-014",
+      "group": "natural-regressions",
+      "input": "She takes her photographs.",
+      "ltpro": "Она делает фотографии.",
+      "lua": "Она делает ее фотографии.",
+      "classification": "intentional_difference",
+      "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original."
+    },
+    {
+      "id": "natural-015",
+      "group": "natural-regressions",
+      "input": "They take photographs of the cat.",
+      "ltpro": "Они делают фотографии с кошки.",
+      "lua": "Они делают фотографии с кошки.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-016",
+      "group": "natural-regressions",
+      "input": "I have my hair cut.",
+      "ltpro": "Я постригаюсь.",
+      "lua": "Я постригаюсь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-017",
+      "group": "natural-regressions",
+      "input": "He clears his throat.",
+      "ltpro": "Он откашливаться.",
+      "lua": "Он откашливаться.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-018",
+      "group": "natural-regressions",
+      "input": "She changed her mind.",
+      "ltpro": "Она изменила ее решение.",
+      "lua": "Она изменила ее решение.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-019",
+      "group": "natural-regressions",
+      "input": "We find our way.",
+      "ltpro": "Мы получаем доступ.",
+      "lua": "Мы получаем доступ.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-020",
+      "group": "natural-regressions",
+      "input": "Let me know.",
+      "ltpro": "Сообщение.",
+      "lua": "Сообщение.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-021",
+      "group": "natural-regressions",
+      "input": "He lets me know.",
+      "ltpro": "Он сообщает.",
+      "lua": "Он сообщает.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-022",
+      "group": "natural-regressions",
+      "input": "I'm doing my best.",
+      "ltpro": "Я делаю все возможное.",
+      "lua": "Я делаю все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-023",
+      "group": "natural-regressions",
+      "input": "We're doing our best.",
+      "ltpro": "Мы делаем все возможное.",
+      "lua": "Мы делаем все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-024",
+      "group": "natural-regressions",
+      "input": "They've done their best.",
+      "ltpro": "Они сделали все возможное.",
+      "lua": "Они сделали все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-025",
+      "group": "natural-regressions",
+      "input": "You've made up your mind.",
+      "ltpro": "Вы решили.",
+      "lua": "Вы решили.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-026",
+      "group": "natural-regressions",
+      "input": "The lady's book is here.",
+      "ltpro": "Дамская книга - здесь.",
+      "lua": "Дамская книга - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-027",
+      "group": "natural-regressions",
+      "input": "The ladies' books are here.",
+      "ltpro": "Книги парней - здесь.",
+      "lua": "Книги дама - здесь.",
+      "classification": "known_limitation",
+      "reason": "Lua restores ladies' to lady rather than lad, avoiding the original translation парней. BASE.RUS contains no дама noun paradigm, so its inflection remains unavailable. Both engines also emit uninflected дама in the expanded books-of-the-ladies control. This missing dictionary morphology is a known language limitation."
+    },
+    {
+      "id": "natural-028",
+      "group": "natural-regressions",
+      "input": "The mothers' books are here.",
+      "ltpro": "Книги матерей - здесь.",
+      "lua": "Книги матерей - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-029",
+      "group": "natural-regressions",
+      "input": "The babies' names are here.",
+      "ltpro": "babies' имена - здесь.",
+      "lua": "Имена младенцев - здесь.",
+      "classification": "intentional_difference",
+      "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form."
+    },
+    {
+      "id": "natural-030",
+      "group": "natural-regressions",
+      "input": "The cities' names are here.",
+      "ltpro": "cities' имена - здесь.",
+      "lua": "Имена городов - здесь.",
+      "classification": "intentional_difference",
+      "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form."
+    },
+    {
+      "id": "natural-031",
+      "group": "natural-regressions",
+      "input": "The houses' doors are open.",
+      "ltpro": "Двери{1.вход} домов открыты.",
+      "lua": "Двери{1.вход} домов открыты.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-032",
+      "group": "natural-regressions",
+      "input": "The classes' names are here.",
+      "ltpro": "Имена классов - здесь.",
+      "lua": "Имена классов - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-033",
+      "group": "natural-regressions",
+      "input": "The kindness is deep.",
+      "ltpro": "Доброта глубока.",
+      "lua": "Доброта глубока.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-034",
+      "group": "natural-regressions",
+      "input": "The darkness is deep.",
+      "ltpro": "Темнота глубок.",
+      "lua": "Темнота глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-035",
+      "group": "natural-regressions",
+      "input": "The happiness is deep.",
+      "ltpro": "Счастье глубоко.",
+      "lua": "Счастье глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-036",
+      "group": "natural-regressions",
+      "input": "The xyzness is deep.",
+      "ltpro": "xyzness глубоко.",
+      "lua": "xyzness глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-037",
+      "group": "natural-regressions",
+      "input": "The strongness is deep.",
+      "ltpro": "strongness глубоко.",
+      "lua": "strongness глубоко.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-038",
+      "group": "natural-regressions",
+      "input": "The xyznes is deep.",
+      "ltpro": "xyznes глубок.",
+      "lua": "xyznes глубок.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-039",
+      "group": "natural-regressions",
+      "input": "I would've gone.",
+      "ltpro": "Я приду.",
+      "lua": "Я приду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "natural-040",
+      "group": "natural-regressions",
+      "input": "They shouldn't've gone.",
+      "ltpro": "Они shouldn't пришли.",
+      "lua": "Они не должны пришли.",
+      "classification": "known_limitation",
+      "reason": "Lua expands stacked contractions fully; the original leaves shouldn't/We'd untranslated. The resulting Lua output equals the captured original for the expanded should not have/would have control, including its inherited modal/perfect or conditional grammar defect. Expansion is supported, but the Russian result is not claimed to be correct."
+    },
+    {
+      "id": "natural-041",
+      "group": "natural-regressions",
+      "input": "We'd've worked.",
+      "ltpro": "We'd Работал.",
+      "lua": "Мы будем работать.",
+      "classification": "known_limitation",
+      "reason": "Lua expands stacked contractions fully; the original leaves shouldn't/We'd untranslated. The resulting Lua output equals the captured original for the expanded should not have/would have control, including its inherited modal/perfect or conditional grammar defect. Expansion is supported, but the Russian result is not claimed to be correct."
+    },
+    {
+      "id": "control-001",
+      "group": "controls",
+      "input": "They should not have gone.",
+      "ltpro": "Они не должны пришли.",
+      "lua": "Они не должны пришли.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-002",
+      "group": "controls",
+      "input": "We would have worked.",
+      "ltpro": "Мы будем работать.",
+      "lua": "Мы будем работать.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-003",
+      "group": "controls",
+      "input": "I would have gone.",
+      "ltpro": "Я приду.",
+      "lua": "Я приду.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-004",
+      "group": "controls",
+      "input": "The books of the ladies are here.",
+      "ltpro": "Книги дама - здесь.",
+      "lua": "Книги дама - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-005",
+      "group": "controls",
+      "input": "The book of the lady is here.",
+      "ltpro": "Книга дама - здесь.",
+      "lua": "Книга дама - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-006",
+      "group": "controls",
+      "input": "A lady is here.",
+      "ltpro": "Дама - здесь.",
+      "lua": "Дама - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-007",
+      "group": "controls",
+      "input": "The names of the cities are here.",
+      "ltpro": "Имена городов - здесь.",
+      "lua": "Имена городов - здесь.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-008",
+      "group": "controls",
+      "input": "The antivirus is good.",
+      "ltpro": "АнтиВирусы хорошие.",
+      "lua": "Антивирус хороший.",
+      "classification": "intentional_difference",
+      "reason": "The recognized virus stem remains singular when prefixed with anti. The original antivirus capture unexpectedly becomes plural, while the unprefixed virus control is singular in both engines."
+    },
+    {
+      "id": "control-009",
+      "group": "controls",
+      "input": "The virus is good.",
+      "ltpro": "Вирус хороший.",
+      "lua": "Вирус хороший.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-010",
+      "group": "controls",
+      "input": "They have done their best.",
+      "ltpro": "Они сделали все возможное.",
+      "lua": "Они сделали все возможное.",
+      "classification": "exact",
+      "reason": null
+    },
+    {
+      "id": "control-011",
+      "group": "controls",
+      "input": "We are doing our best.",
+      "ltpro": "Мы делаем все возможное.",
+      "lua": "Мы делаем все возможное.",
+      "classification": "exact",
+      "reason": null
+    }
+  ]
+}

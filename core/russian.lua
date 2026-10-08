@@ -1,29 +1,54 @@
 local text = require 'core.text'
 local russian = {}
 
-function russian.from_bytes(bytes)
-  assert(bytes:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
-  local finish = string.unpack('<I4', bytes, 0x1F)
-  assert(string.unpack('<I4',bytes,0x23) == #bytes, 'BASE.RUS header length does not match asset')
-  assert(finish >= 0x28 and finish + 32*33*4 == #bytes and string.unpack('<I2',bytes,0x1D) == 32,
-    'BASE.RUS does not contain the expected 32x33 index tail')
-  local entries = {}
-  for line in bytes:sub(0x29,finish):gmatch('[^\n]+') do
-    local key = line:match('^(.-)%*')
-    if key then
-      entries[key] = entries[key] or {}
-      entries[key][#entries[key]+1] = line
+function russian.from_bytes(bytes, overlay)
+  local entries, source_forms = {}, {}
+  local function ingest(image)
+    assert(image:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
+    local finish = string.unpack('<I4', image, 0x1F)
+    assert(string.unpack('<I4',image,0x23) == #image, 'BASE.RUS header length does not match asset')
+    assert(finish >= 0x28 and finish + 32*33*4 == #image and string.unpack('<I2',image,0x1D) == 32,
+      'BASE.RUS does not contain the expected 32x33 index tail')
+    for line in image:sub(0x29,finish):gmatch('[^\n]+') do
+      local key = line:match('^(.-)%*')
+      if key then
+        entries[key] = entries[key] or {}
+        entries[key][#entries[key]+1] = line
+        local pos, aspect, slot, form = line:match('^.-%*Q([nav])%*([^*]+)%*([^*]+)%*(.*)$')
+        if not pos then pos, slot, form = line:match('^.-%*Q([na])%*([^*]+)%*(.*)$') end
+        if pos then
+          local folded = key:gsub(string.char(0xf0), string.char(0xa5))
+          local by_pos = source_forms[key] or source_forms[folded] or {}
+          source_forms[key], source_forms[folded] = by_pos, by_pos
+          local by_slot = by_pos[pos]
+          if aspect then by_slot = by_slot and by_slot[aspect] or {}; by_pos[pos] = by_slot
+          else by_slot = by_slot or {}; by_pos[pos] = by_slot end
+          by_slot[slot] = by_slot[slot] or {}
+          by_slot[slot][#by_slot[slot] + 1] = form
+        end
+      end
     end
   end
-  return entries
+  ingest(bytes)
+  if overlay then ingest(overlay) end
+  return {entries=entries, source_forms=source_forms}
+end
+
+function russian.source_forms(state, word, pos, slot, aspect)
+  local by_pos = state.russian.source_forms[word]
+  if not by_pos then return nil end
+  local forms = by_pos[pos]
+  if not forms then return nil end
+  if pos == 'v' then forms = forms[aspect == 1 and 'pf' or 'ipf'] end
+  return forms and forms[slot] or nil
 end
 
 -- Dictionary lines are immutable strings; no shared read buffer or DOS handles.
 function russian.lookup(state, key, prefix)
   local base = key:match('^(.-)%*') or key
-  for _, line in ipairs(state.russian[base] or {}) do
+  for _, line in ipairs(state.russian.entries[base] or {}) do
     local wanted = key .. (prefix == 0 and '*' or '')
-    if line:sub(1,#wanted) == wanted then return line end
+    if line:sub(1,#wanted) == wanted and line:byte(#wanted + 1) ~= 0x51 then return line end
   end
 end
 

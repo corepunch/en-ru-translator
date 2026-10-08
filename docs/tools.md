@@ -1,5 +1,21 @@
 # Python Extraction Tools
 
+## Binary Dictionary Database
+
+`tools/openrussian_db.c` imports the pinned OpenRussian sample into compact
+indexed LTech `.DIC` and `.RUS` binary overlays. It adds only English aliases
+missing from the supplied base DIC and stores source-listed inflections as
+one-byte CP866-compatible RUS records. The C utility can also inspect the image
+header and find all records for a headword.
+
+```sh
+cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
+/tmp/openrussian_db build data/openrussian-poc/source LTGOLD/BASE.DIC LTGOLD/BASE.RUS \
+  data/openrussian-poc/BASE.DIC data/openrussian-poc/BASE.RUS
+/tmp/openrussian_db info data/openrussian-poc/BASE.RUS
+/tmp/openrussian_db find data/openrussian-poc/BASE.RUS читать
+```
+
 These tools in `LTGOLD/` were used to reverse-engineer the LTGOLD.EXE binary and
 extract the translation rules, dictionaries, and grammatical data.
 

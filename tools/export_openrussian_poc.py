@@ -5,9 +5,9 @@ Given all three upstream CSVs in a directory, run:
 
     python3 tools/export_openrussian_poc.py --full-snapshot /path/to/csvs
 
-This checks the pinned full-file hashes, extracts only the representative
-source rows, then emits UTF-8 BASE.DIC and BASE.RUS prototype files. With no argument it builds
-from the committed source excerpts.
+This checks the pinned full-file hashes and extracts only representative
+source rows. The C importer builds indexed CP866 BASE.DIC and BASE.RUS images
+from those excerpts and the repository's existing LTech base dictionaries.
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ import argparse
 import csv
 import hashlib
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,27 +82,6 @@ def extract_snapshot(source_dir: Path, expected: dict) -> None:
         write_tsv(SOURCE / f"{name}.tsv", fields + ["source_row"], selected)
 
 
-def slot_forms(value: str) -> list[dict[str, str]]:
-    # OpenRussian marks stress with apostrophes and comma-separates variants.
-    # Preserve each source spelling alongside its unaccented output spelling.
-    return [
-        {"form": part.strip().replace("'", ""), "source_form": part.strip()}
-        for part in value.split(",") if part.strip()
-    ]
-
-
-def write_dictionary(path: Path, format_name: str, fields: list[str], rows: list[dict], manifest: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as stream:
-        stream.write(f"# format\ten-ru-{format_name}\t1\n")
-        stream.write(f"# source\t{manifest['source']}\n")
-        stream.write(f"# source_commit\t{manifest['repository_commit']}\n")
-        stream.write(f"# license\t{manifest['license']}\n")
-        writer = csv.DictWriter(stream, fields, delimiter="\t", lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--full-snapshot", type=Path,
@@ -125,60 +103,16 @@ def main() -> int:
     elif manifest.get("sample_files") != sample_hashes:
         raise SystemExit("Sample source excerpt checksum differs from source-manifest.json")
 
-    selected = {}
     for name in SAMPLE_WORDS:
         path = SOURCE / f"{name}.tsv"
         if not path.is_file():
             raise SystemExit(f"Missing sample source excerpt: {path}")
-        fields, rows = read_tsv(path)
-        selected[name] = (fields, rows)
+        _fields, rows = read_tsv(path)
         absent = sorted(set(SAMPLE_WORDS[name]) - {row["bare"] for row in rows})
         if absent:
             raise SystemExit(f"Sample excerpt lacks {name}: {', '.join(absent)}")
 
-    dic_entries, rus_forms = [], []
-    for pos, name, slots in (("noun", "nouns", NOUN_SLOTS),
-                             ("verb", "verbs", VERB_SLOTS),
-                             ("adjective", "adjectives", ADJECTIVE_SLOTS)):
-        _fields, rows = selected[name]
-        for row in rows:
-            row_id = f"{pos[0]}-{int(row['source_row']):06d}"
-            forms = {slot: slot_forms(row.get(slot, "")) for slot in slots if row.get(slot, "").strip()}
-            # The upstream cell uses semicolons for sense groups and commas
-            # for alternate English glosses; retain each raw group in BASE.DIC.
-            for sense_index, group in enumerate(row.get("translations_en", "").split(";"), start=1):
-                group = group.strip()
-                if not group:
-                    continue
-                for alias in re.split(r"\s*,\s*", group):
-                    alias = alias.strip().lower()
-                    if alias:
-                        dic_entries.append({
-                            "english": alias,
-                            "russian_id": row_id,
-                            "pos": pos,
-                            "sense": group,
-                            "source_file": f"{name}.csv",
-                            "source_row": int(row["source_row"]),
-                            "sense_index": sense_index,
-                        })
-            metadata = {key: row.get(key, "") for key in
-                        ("gender", "animate", "indeclinable", "sg_only", "pl_only", "aspect", "partner")}
-            for slot, alternatives in forms.items():
-                for variant_index, form in enumerate(alternatives, start=1):
-                    rus_forms.append({"id": row_id, "pos": pos, "lemma": row["bare"],
-                                      "accented_lemma": row.get("accented", ""), **metadata,
-                                      "slot": slot, "variant": variant_index, "form": form["form"],
-                                      "source_form": form["source_form"], "source_file": f"{name}.csv",
-                                      "source_row": int(row["source_row"])})
-
-    dic_fields = ["english", "russian_id", "pos", "sense", "sense_index", "source_file", "source_row"]
-    rus_fields = ["id", "pos", "lemma", "accented_lemma", "gender", "animate", "indeclinable",
-                  "sg_only", "pl_only", "aspect", "partner", "slot", "variant", "form",
-                  "source_form", "source_file", "source_row"]
-    write_dictionary(DATA / "BASE.DIC", "dic", dic_fields, dic_entries, manifest)
-    write_dictionary(DATA / "BASE.RUS", "rus", rus_fields, rus_forms, manifest)
-    print(f"Wrote BASE.DIC ({len(dic_entries)} English entries) and BASE.RUS ({len(rus_forms)} forms)")
+    print("OpenRussian source excerpts are ready for the C binary dictionary builder")
     return 0
 
 

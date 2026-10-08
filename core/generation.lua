@@ -1,6 +1,7 @@
 local layout = require 'core.record_layout'
 local text = require 'core.text'
 local nodes = require 'core.nodes'
+local russian = require 'core.russian'
 local generation = {}
 local function signed(n) n=n & 0xFFFF; return n >= 0x8000 and n-0x10000 or n end
 local function reflexive(a, word, length)
@@ -31,11 +32,21 @@ local function build(a,id,word,length,tableoff,index)
   return result
 end
 function generation.noun_form(state,id,word,gender,plural,case)
+  local numbers = plural ~= 0 and 'pl' or 'sg'
+  local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
+  local forms = russian.source_forms(state,word,'n',numbers .. '_' .. (cases[case] or 'nom'))
+  if forms and forms[1] then return forms[1] end
   return build(state.assets,id,word,#word,gender==0 and 0x55A6 or gender==2 and 0x5450 or 0x5238,
     signed(case+(plural~=0 and 6 or 0))-1)
 end
 function generation.adjective_form(state,id,word,gender,plural,case)
   local a=state.assets
+  local numbers = plural ~= 0 and 'pl' or 'm'
+  local genders = {[0]='n',[1]='m',[2]='f'}
+  if plural == 0 then numbers = genders[gender] or 'm' end
+  local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
+  local forms = russian.source_forms(state,word,'a','decl_' .. numbers .. '_' .. (cases[case] or 'nom'))
+  if forms and forms[1] then return forms[1] end
   local refl=id~=14 and reflexive(a,word,#word)
   local result=build(a,id,word,#word-(refl and 2 or 0),gender==0 and 0x580C or gender==2 and 0x5770 or 0x56D4,
     signed(case+(plural~=0 and 6 or 0)))
@@ -43,6 +54,17 @@ function generation.adjective_form(state,id,word,gender,plural,case)
 end
 function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gender)
   local a,index=state.assets
+  local source_slot
+  if flags & 4 ~= 0 then source_slot = plural ~= 0 and 'imperative_pl' or 'imperative_sg'
+  elseif past == 1 then
+    source_slot = plural ~= 0 and 'past_pl' or ({[0]='past_n',[1]='past_m',[2]='past_f'})[gender]
+  elseif person ~= 0 then
+    local numbers = plural ~= 0 and 'pl' or 'sg'
+    local persons = {[1]='1',[2]='2',[3]='3'}
+    if persons[person] then source_slot = 'presfut_' .. numbers .. persons[person] end
+  end
+  local forms = source_slot and russian.source_forms(state,word,'v',source_slot,aspect)
+  if forms and forms[1] then return forms[1] end
   if flags & 4 ~= 0 then index,past=6,0
   elseif past==1 then index=7
   elseif person==0 then return word

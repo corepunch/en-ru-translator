@@ -12,6 +12,7 @@ Inline {~text~} preserves text; {~=text~} transliterates it.
 {~\N starts a list with 1-10 words per row; {~\. returns to sentence mode.
 --meanings appends a glossary of alternative meanings and annotations.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
+--dic-overlay FILE and --rus-overlay FILE add indexed binary dictionary records.
 --domain LABEL prefers readings with that dictionary domain label (e.g. инф).
 ]]
 
@@ -19,7 +20,8 @@ local options, words = {}, {}
 local asset_options = {
   ['--data'] = 'data_dir', ['--exe'] = 'executable',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
-  ['--prefixes'] = 'prefixes',
+  ['--prefixes'] = 'prefixes', ['--dic-overlay'] = 'dic_overlay',
+  ['--rus-overlay'] = 'rus_overlay',
   ['--domain'] = 'domain',
 }
 local end_options = false

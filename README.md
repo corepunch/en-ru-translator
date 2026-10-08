@@ -46,7 +46,9 @@ the dictionary records are preserved and should be treated as read-only.
 Hyphen and slash compounds first try an exact dictionary entry, then analyze
 their components while retaining the separator. A compound containing a bare
 derivational noun ending (such as `foo-ness` or `ment/foo`) stays intact as an
-unknown noun. This is an intentional Lua feature policy, not DOS output parity.
+unknown noun only when neither component has a dictionary reading. Known words
+such as `ion` and `age` still translate. This is a Lua feature policy, not DOS
+output parity.
 
 Prefix analysis loads `ERPREFIX.PRE` from the asset directory when present.
 Exact entries win; otherwise the longest prefix with a recognized stem is used.

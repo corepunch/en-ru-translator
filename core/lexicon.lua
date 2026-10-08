@@ -329,9 +329,12 @@ function lexicon.surface_noun(source)
   return nil
 end
 
-local function derivational_compound(source)
+local function derivational_compound(dictionary,source,options)
   local left, right = ascii_lower(source):match('^([^/-]+)[/-]([^/-]+)$')
   if not left then return false end
+  -- A standalone dictionary word (ion, age, or, ...) is not merely a suffix.
+  -- Preserve whole unknown compounds only when neither part has a reading.
+  if lookup(dictionary,left,options) or lookup(dictionary,right,options) then return false end
   for _, row in ipairs(rows) do
     if row.selector == 'N00' and (left == row.ending or right == row.ending) then return true end
   end
@@ -809,7 +812,7 @@ local function decode(dictionary,records,index,options)
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
     elseif not lookup_error then
-      local compound=derivational_compound(source)
+      local compound=derivational_compound(dictionary,source,options)
       local surface=compound and {tag='N',fields={number=0,case_mask=0}}
         or not source:find('[-/]') and lexicon.surface_noun(source)
       if surface then

@@ -1,9 +1,9 @@
 local text = require 'core.text'
 local russian = {}
 
-function russian.from_bytes(bytes, overlay)
+function russian.from_bytes(bytes, overlay, morphology)
   local entries, source_forms, openrussian_forms, templates = {}, {}, {}, {}
-  local function ingest(image)
+  local function ingest(image, morphology_only)
     assert(image:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
     local finish = string.unpack('<I4', image, 0x1F)
     assert(string.unpack('<I4',image,0x23) == #image, 'BASE.RUS header length does not match asset')
@@ -26,9 +26,11 @@ function russian.from_bytes(bytes, overlay)
           end
           templates[tonumber(template_id)]=table.concat(decoded)
         elseif key:sub(1,1)~='@' then
-          entries[key] = entries[key] or {}
-          entries[key][#entries[key]+1] = line
           if code:byte(1)==0x4D then
+            if not morphology_only then
+              entries[key] = entries[key] or {}
+              entries[key][#entries[key]+1] = line
+            end
             local pos_byte,aspect=code:byte(2,3)
             local pos=pos_byte and string.char(pos_byte)
             local id=tonumber(code:sub(4,7),16)
@@ -57,6 +59,9 @@ function russian.from_bytes(bytes, overlay)
               local by_lemma=by_pos[key] or {};by_pos[key]=by_lemma
               by_lemma[aspect==0x31 and 'pf' or 'ipf']=row
             else by_pos[key]=row end
+          elseif not morphology_only then
+            entries[key] = entries[key] or {}
+            entries[key][#entries[key]+1] = line
           end
         end
         local payload=key:sub(1,2)~='@o' and line:match('^.-%*(O\t.*)$')
@@ -106,8 +111,9 @@ function russian.from_bytes(bytes, overlay)
       end
     end
   end
-  ingest(bytes)
-  if overlay then ingest(overlay) end
+  ingest(bytes,false)
+  if overlay then ingest(overlay,false) end
+  if morphology then ingest(morphology,true) end
   return {entries=entries, source_forms=source_forms,openrussian_forms=openrussian_forms}
 end
 

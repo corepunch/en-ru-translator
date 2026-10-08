@@ -54,7 +54,8 @@
   "imported_rows_total": 58825,
   "compiled_records": {
     "DIC": 95552,
-    "RUS": 112262,
+    "RUS": 53491,
+    "MORPH": 58772,
     "morphology_templates": 4978
   },
   "binary_encoding": {

@@ -4,18 +4,18 @@ The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
 indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,552 DIC
-records and 112,262 RUS records, including 4,978 shared morphology templates.
+records, 53,491 native-format RUS records, and 58,772 compact morphology
+records, including 4,978 shared templates.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
-uses one-byte CP866 headwords and the normal binary POS codes consumed by the
-existing grammar. Each lexeme points to a shared compact transformation
-template: a byte count to trim from the headword and a one-byte CP866 suffix
-for each source-listed form. Noun case slots and verb tense, person, and
-imperative slots stay distinct; the runtime imperative flag selects those
-imperative slots. The template records contain no copied source
-columns, glosses, field names, or row IDs. The translator still uses LTPRO's
-executable for sentence processing and its native ending tables; the OpenRussian
-templates retain forms that do not match those older patterns exactly.
+keeps the original indexed LTech format, with one-byte CP866 headwords and
+native binary POS codes. The sibling `BASE.MORPH` carries OpenRussian morphology
+references and shared templates. Each form is represented as a byte count to
+trim from its headword and a one-byte CP866 suffix. Noun case slots and verb
+tense, person, and imperative slots stay distinct; the runtime imperative flag
+selects those imperative slots. The template records contain no copied source
+columns, glosses, field names, or row IDs. For example, `people` maps directly
+to `люди`, which keeps LTPRO's original plural-only noun code and paradigm 30.
 
 ## Source and encoding
 
@@ -48,7 +48,8 @@ Build the binary databases:
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
 /tmp/openrussian_db build data/openrussian-poc/source \
-  data/openrussian-poc/BASE.DIC data/openrussian-poc/BASE.RUS
+  data/openrussian-poc/BASE.DIC data/openrussian-poc/BASE.RUS \
+  data/openrussian-poc/BASE.MORPH
 ```
 
 `info FILE` reports the binary image size and record count; `find FILE HEADWORD`

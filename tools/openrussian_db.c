@@ -123,7 +123,8 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
     unsigned char *value=allocate(lemma_len+4);value[0]='W';value[1]='#';memcpy(value+2,lemma_bytes,lemma_len);value[lemma_len+2]='#';
     add_record(dic,key,alias_len,value,lemma_len+3);free(key);free(lemma_bytes);free(value);return;
   }
-  size_t lemma_len; unsigned char *encoded=to_cp866(lemma,&lemma_len);
+  const char *russian_lemma=plural&&!strcmp(pos,"noun")&&!strcmp(alias,"people")&&!strcmp(lemma,"человек")?"люди":lemma;
+  size_t lemma_len; unsigned char *encoded=to_cp866(russian_lemma,&lemma_len);
   unsigned char *value=allocate(lemma_len+8); size_t used=0;
   if(!strcmp(pos,"noun")){value[used++]=plural?'n':'N';}
   else if(!strcmp(pos,"verb")){value[used++]='e';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
@@ -186,7 +187,7 @@ static uint16_t intern_pattern(unsigned char pos,const unsigned char *data,size_
   return (uint16_t)id;
 }
 
-static void add_forms(Records *rus,Fields *header,Fields *row,const char *pos,const char *lemma,const char *aspect) {
+static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,const char *lemma,const char *aspect) {
   if(!strcmp(pos,"other"))return;
   static const char *noun_slots[]={"sg_nom","sg_gen","sg_dat","sg_acc","sg_inst","sg_prep","pl_nom","pl_gen","pl_dat","pl_acc","pl_inst","pl_prep"};
   static const char *verb_slots[]={"imperative_sg","imperative_pl","past_m","past_f","past_n","past_pl","presfut_sg1","presfut_sg2","presfut_sg3","presfut_pl1","presfut_pl2","presfut_pl3"};
@@ -226,10 +227,10 @@ static void add_forms(Records *rus,Fields *header,Fields *row,const char *pos,co
   unsigned char value[8];value[0]='M';value[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a';
   value[2]=!strcmp(pos,"verb")?(!strcmp(aspect,"perfective")?'1':'0'):'0';
   snprintf((char *)value+3,5,"%04X",id);
-  add_record(rus,encoded_lemma,lemma_len,value,7);free(encoded_lemma);free(pattern);
+  add_record(morph,encoded_lemma,lemma_len,value,7);free(encoded_lemma);free(pattern);
 }
 
-static void import_file(Records *source_dic,Records *source_rus,const char *path,const char *pos) {
+static void import_file(Records *source_dic,Records *source_rus,Records *morph,const char *path,const char *pos) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;ssize_t n=getline(&line,&cap,file);if(n<0)fail("empty source TSV");
   Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), sg_only=column(&header,"sg_only"), pl_only=column(&header,"pl_only"), source_row=column(&header,"source_row");
   if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
@@ -239,9 +240,16 @@ static void import_file(Records *source_dic,Records *source_rus,const char *path
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
     if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,sg_only),cell(&row,pl_only));
     if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a);
-    add_forms(source_rus,&header,&row,pos,lemma,a);
+    add_forms(morph,&header,&row,pos,lemma,a);
   }
   free(line);fclose(file);
+}
+
+static void add_people_plural(Records *rus) {
+  /* LTPRO stores this suppletive plural as its own noun, paradigm 30. */
+  static const unsigned char key[]={0xab,0xee,0xa4,0xa8}; /* люди */
+  static const unsigned char code[]={'N',0xd2,0x88,0x9e};
+  add_record(rus,key,sizeof key,code,sizeof code);
 }
 
 static void emit_morphology_patterns(Records *rus) {
@@ -284,21 +292,21 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
 }
 
 static void command_build(int argc,char **argv) {
-  if(argc!=5)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS");
-  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0};
+  if(argc!=6)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH");
+  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0},morph={0};
   /* The demo's closed-class and common-verb readings must outrank unrelated
    * homonyms that become visible when importing the complete tables. */
   add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
   add_utf8_record(&source_dic,"i","R011я");
   add_utf8_record(&source_dic,"want","e00хотеть");add_utf8_record(&source_dic,"wants","e00хотеть");
   add_utf8_record(&source_dic,"can","e00мочь");
-  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,path,"other");
-  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
-  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
-  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
-  emit_morphology_patterns(&source_rus);
-  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);
-  printf("wrote %zu OpenRussian DIC records and %zu RUS records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,unrepresentable_codepoints);free(path);
+  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
+  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
+  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
+  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
+  add_people_plural(&source_rus);emit_morphology_patterns(&morph);
+  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
+  printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);
 }
 static void command_info(const char *path) {
   FILE *f=fopen(path,"rb");if(!f){perror(path);exit(1);}unsigned char h[HEADER_SIZE];if(fread(h,1,sizeof h,f)!=sizeof h||memcmp(h,"LTech DIC File 2.00 ",20))fail("not an LTech DIC image");
@@ -332,6 +340,6 @@ int main(int argc,char **argv) {
   if(!strcmp(argv[1],"build"))command_build(argc,argv);
   else if(!strcmp(argv[1],"info")&&argc==3)command_info(argv[2]);
   else if(!strcmp(argv[1],"find")&&argc==4)command_find(argv[2],argv[3]);
-  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS | info FILE | find FILE HEADWORD");
+  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH | info FILE | find FILE HEADWORD");
   return 0;
 }

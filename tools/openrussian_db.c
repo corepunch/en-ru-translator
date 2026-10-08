@@ -91,7 +91,7 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
       size_t lemma_len; unsigned char *encoded=to_cp866(lemma,&lemma_len);
       unsigned char *value=allocate(lemma_len+8); size_t used=0;
       if(!strcmp(pos,"noun")){value[used++]='N';}
-      else if(!strcmp(pos,"verb")){value[used++]='V';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
+      else if(!strcmp(pos,"verb")){value[used++]='e';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
       else value[used++]='A';
       memcpy(value+used,encoded,lemma_len);used+=lemma_len;
       size_t alias_len; unsigned char *key=to_cp866(alias,&alias_len);add_record(dic,key,alias_len,value,used);
@@ -101,7 +101,7 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
   free(copy);
 }
 
-static void add_russian_lexeme(Records *source_rus,Records *base_rus,const char *pos,const char *lemma,const char *gender,const char *aspect) {
+static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5]; size_t used=0;
   if(!strcmp(pos,"noun")) {
     value[used++]='N';value[used++]=0xc0;
@@ -110,10 +110,8 @@ static void add_russian_lexeme(Records *source_rus,Records *base_rus,const char 
     value[used++]=0;
   } else if(!strcmp(pos,"verb")) { value[used++]='V';value[used++]=0xc0;value[used++]=0x88;value[used++]=0;value[used++]=0; }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
-  for(size_t i=0;i<base_rus->count;i++)if(base_rus->items[i].key_len==n&&!memcmp(base_rus->items[i].key,encoded,n)&&base_rus->items[i].value_len&&base_rus->items[i].value[0]==value[0]){free(encoded);(void)aspect;return;}
-  for(size_t i=0;i<source_rus->count;i++)if(source_rus->items[i].key_len==n&&!memcmp(source_rus->items[i].key,encoded,n)&&source_rus->items[i].value_len&&source_rus->items[i].value[0]==value[0]){free(encoded);(void)aspect;return;}
-  add_record(source_rus,encoded,n,value,used);free(encoded);
-  (void)aspect;
+  for(size_t i=0;i<rus->count;i++)if(rus->items[i].key_len==n&&!memcmp(rus->items[i].key,encoded,n)&&rus->items[i].value_len&&rus->items[i].value[0]==value[0]){free(encoded);return;}
+  add_record(rus,encoded,n,value,used);free(encoded);
 }
 
 static void add_forms(Records *rus,Fields *header,Fields *row,const char *table,const char *pos,const char *lemma,const char *aspect) {
@@ -142,14 +140,14 @@ static void add_forms(Records *rus,Fields *header,Fields *row,const char *table,
   (void)table;
 }
 
-static void import_file(Records *source_dic,Records *source_rus,Records *base_rus,const char *path,const char *pos) {
+static void import_file(Records *source_dic,Records *source_rus,const char *path,const char *pos) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;ssize_t n=getline(&line,&cap,file);if(n<0)fail("empty source TSV");
   Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect");
   if(bare==(size_t)-1||gloss==(size_t)-1)fail("source TSV is missing required columns");
   while((n=getline(&line,&cap,file))>=0) {
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
     if(is_empty(lemma)||is_empty(english))continue;
-    add_russian_lexeme(source_rus,base_rus,pos,lemma,g,a);parse_glosses(source_dic,english,pos,lemma,a);add_forms(source_rus,&header,&row,path,pos,lemma,a);
+    add_russian_lexeme(source_rus,pos,lemma,g);parse_glosses(source_dic,english,pos,lemma,a);add_forms(source_rus,&header,&row,path,pos,lemma,a);
   }
   free(line);fclose(file);
 }
@@ -179,37 +177,13 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
   FILE *out=fopen(path,"wb");if(!out){perror(path);exit(1);}if(fwrite(image,1,total,out)!=total)fail("failed writing dictionary image");fclose(out);free(slots);free(image);
 }
 
-static void read_binary_dictionary(const char *path,Records *db,int expected_buckets) {
-  FILE *f=fopen(path,"rb");if(!f){perror(path);exit(1);}if(fseek(f,0,SEEK_END))fail("seek failed");long length=ftell(f);rewind(f);
-  unsigned char header[HEADER_SIZE];if(fread(header,1,HEADER_SIZE,f)!=HEADER_SIZE||memcmp(header,"LTech DIC File 2.00 ",20))fail("base file is not an LTech dictionary");
-  int buckets=header[28]|(int)header[29]<<8;if(buckets!=expected_buckets)fail("base dictionary alphabet does not match output");
-  long end=length-(long)buckets*(buckets+1)*4;if(end<HEADER_SIZE)fail("base dictionary is missing its index tail");
-  if(fseek(f,HEADER_SIZE,SEEK_SET))fail("seek failed");unsigned char *line=allocate((size_t)(end-HEADER_SIZE+1));size_t used=0;int c;
-  while(ftell(f)<end&&(c=fgetc(f))!=EOF){if(c=='\n'){if(used){unsigned char *star=memchr(line,'*',used);if(star)add_record(db,line,(size_t)(star-line),star+1,used-(size_t)(star-line)-1);}used=0;}else line[used++]=(unsigned char)c;}
-  if(used){unsigned char *star=memchr(line,'*',used);if(star)add_record(db,line,(size_t)(star-line),star+1,used-(size_t)(star-line)-1);}
-  free(line);fclose(f);
-}
-static int same_folded(const Record *a,const Record *b) {
-  if(a->key_len!=b->key_len)return 0;for(size_t i=0;i<a->key_len;i++)if(fold(a->key[i])!=fold(b->key[i]))return 0;return 1;
-}
-static void remove_existing_english_keys(Records *base,Records *source) {
-  size_t kept=0;
-  for(size_t i=0;i<source->count;i++){
-    int exists=0;for(size_t j=0;j<base->count;j++)if(same_folded(&base->items[j],&source->items[i])){exists=1;break;}
-    if(exists){free(source->items[i].key);free(source->items[i].value);}
-    else source->items[kept++]=source->items[i];
-  }
-  source->count=kept;
-}
 static void command_build(int argc,char **argv) {
-  if(argc!=7)fail("usage: openrussian_db build SOURCE_DIR BASE.DIC BASE.RUS OUTPUT.DIC OUTPUT.RUS");
-  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records base_dic={0},base_rus={0},source_dic={0},source_rus={0};
-  read_binary_dictionary(argv[3],&base_dic,26);read_binary_dictionary(argv[4],&base_rus,32);
-  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&base_rus,path,"noun");
-  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&base_rus,path,"verb");
-  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&base_rus,path,"adjective");
-  remove_existing_english_keys(&base_dic,&source_dic);
-  write_dictionary(argv[5],&source_dic,"ERS",26);write_dictionary(argv[6],&source_rus,"RS",32);
+  if(argc!=5)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS");
+  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0};
+  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
+  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
+  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
+  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);
   printf("wrote %zu OpenRussian DIC records and %zu RUS records\n",source_dic.count,source_rus.count);free(path);
 }
 static void command_info(const char *path) {
@@ -244,6 +218,6 @@ int main(int argc,char **argv) {
   if(!strcmp(argv[1],"build"))command_build(argc,argv);
   else if(!strcmp(argv[1],"info")&&argc==3)command_info(argv[2]);
   else if(!strcmp(argv[1],"find")&&argc==4)command_find(argv[2],argv[3]);
-  else fail("usage: openrussian_db build SOURCE_DIR BASE.DIC BASE.RUS | info FILE | find FILE HEADWORD");
+  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS | info FILE | find FILE HEADWORD");
   return 0;
 }

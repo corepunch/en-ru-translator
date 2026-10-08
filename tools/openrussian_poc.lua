@@ -2,8 +2,8 @@ package.path = './?.lua;./?/init.lua;' .. package.path
 
 local engine = require 'core.engine'
 local options = {
-  dic_overlay = 'data/openrussian-poc/BASE.DIC',
-  rus_overlay = 'data/openrussian-poc/BASE.RUS',
+  dictionary = 'data/openrussian-poc/BASE.DIC',
+  russian = 'data/openrussian-poc/BASE.RUS',
 }
 local examples = {
   'The child reads a book.',

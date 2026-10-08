@@ -7,7 +7,7 @@ Given all three upstream CSVs in a directory, run:
 
 This checks the pinned full-file hashes and extracts only representative
 source rows. The C importer builds indexed CP866 BASE.DIC and BASE.RUS images
-from those excerpts and the repository's existing LTech base dictionaries.
+directly from those excerpts, without reading the legacy DIC or RUS files.
 """
 
 from __future__ import annotations

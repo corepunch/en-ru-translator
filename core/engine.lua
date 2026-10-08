@@ -16,6 +16,7 @@ local prefixes = require 'core.prefixes'
 local directives = require 'core.directives'
 
 local engine = {}
+local static_cache = {}
 
 local signatures = {
   ['LTPRO.EXE'] = 'MZ',
@@ -38,11 +39,26 @@ function engine.read_asset(source, name)
   return source
 end
 
+-- Parsed dictionary and executable assets are immutable. Keep one parsed copy
+-- per path so repeatedly translating with the full OpenRussian tables does not
+-- rebuild their indexes for every sentence. Comparing the bytes also keeps
+-- edits to a file visible during long-running Lua sessions.
+local function memoized_asset(source,name,decoder,secondary,secondary_name)
+  local bytes=engine.read_asset(source,name)
+  local secondary_bytes=secondary and engine.read_asset(secondary,secondary_name or name) or nil
+  local key=#bytes>=1024*1024 and type(source)=='string' and not source:find('\0',1,true) and name..'\0'..source..
+    (secondary and '\0'..secondary or '')
+  local cached=key and static_cache[key]
+  if cached and cached.bytes==bytes and cached.secondary_bytes==secondary_bytes then return cached.value end
+  local value=decoder(bytes,secondary_bytes)
+  if key then static_cache[key]={bytes=bytes,secondary_bytes=secondary_bytes,value=value} end
+  return value
+end
+
 -- Static binary assets are decoded separately from mutable sentence state.
 function engine.new_state(exe_source,russian_source,russian_overlay)
-  return {assets=assets.new(engine.read_asset(exe_source,'LTPRO.EXE')),
-    russian=russian.from_bytes(engine.read_asset(russian_source,'BASE.RUS'),
-      russian_overlay and engine.read_asset(russian_overlay,'BASE.RUS') or nil),
+  return {assets=memoized_asset(exe_source,'LTPRO.EXE',assets.new),
+    russian=memoized_asset(russian_source,'BASE.RUS',russian.from_bytes,russian_overlay,'BASE.RUS'),
     elements={},tags={},count=0,word_count=0}
 end
 
@@ -92,7 +108,6 @@ function engine.run(input, options)
   local dic_source = options.dictionary or options.dic or (data .. '/BASE.DIC')
   local rus_source = options.russian or options.rus or (data .. '/BASE.RUS')
 
-  local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
   local state = engine.new_state(executable, rus_source, options.rus_overlay)
   state.meaning_start=options.meaning_start
   if options.domain then
@@ -111,7 +126,7 @@ function engine.run(input, options)
       end
     end
   end
-  local dict = lexicon.from_bytes(dic_bytes)
+  local dict = memoized_asset(dic_source,'BASE.DIC',lexicon.from_bytes)
   if options.dic_overlay then
     dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))
   end

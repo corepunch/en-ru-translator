@@ -17,6 +17,7 @@ typedef struct { char **items; size_t count; } Fields;
 static void fail(const char *message) { fprintf(stderr, "openrussian_db: %s\n", message); exit(1); }
 static void *allocate(size_t size) { void *p = malloc(size ? size : 1); if (!p) fail("out of memory"); return p; }
 static size_t next_sequence;
+static size_t unrepresentable_codepoints;
 static void put16(unsigned char *p, uint16_t v) { p[0]=(unsigned char)v; p[1]=(unsigned char)(v>>8); }
 static void put32(unsigned char *p, uint32_t v) { p[0]=(unsigned char)v; p[1]=(unsigned char)(v>>8); p[2]=(unsigned char)(v>>16); p[3]=(unsigned char)(v>>24); }
 static uint32_t get32(const unsigned char *p) { return (uint32_t)p[0] | (uint32_t)p[1]<<8 | (uint32_t)p[2]<<16 | (uint32_t)p[3]<<24; }
@@ -25,8 +26,11 @@ static unsigned char *convert_encoding(const char *from, const char *to, const u
   iconv_t cd=iconv_open(to,from); if (cd==(iconv_t)-1) fail("iconv_open failed");
   size_t capacity=input_len*4+32, left=input_len, out_left=capacity;
   unsigned char *output=allocate(capacity), *out=output; char *in=(char *)input;
-  if (iconv(cd,&in,&left,(char **)&out,&out_left)==(size_t)-1 || left) {
-    iconv_close(cd); free(output); fail("input cannot be converted to requested encoding");
+  size_t converted=iconv(cd,&in,&left,(char **)&out,&out_left);
+  if (converted==(size_t)-1 || left) {
+    fprintf(stderr,"openrussian_db: conversion %s -> %s failed at input byte %zu (remaining %zu bytes):",from,to,input_len-left,left);
+    for(size_t i=0;i<left&&i<8;i++)fprintf(stderr," %02x",(unsigned char)in[i]);
+    fputc('\n',stderr);iconv_close(cd);free(output);fail("input cannot be converted to requested encoding");
   }
   *output_len=capacity-out_left; iconv_close(cd); return output;
 }
@@ -37,10 +41,26 @@ static unsigned char *to_cp866(const char *text, size_t *length) {
   for(size_t i=0;i<source_len;i++) {
     if((unsigned char)text[i]==0xd1&&(unsigned char)text[i+1]==0x91) {
       normalized[normalized_len++]=0xd0;normalized[normalized_len++]=0xb5;i++;
+    } else if((unsigned char)text[i]==0xd0&&(unsigned char)text[i+1]==0x81) {
+      normalized[normalized_len++]=0xd0;normalized[normalized_len++]=0x95;i++;
+    } else if((unsigned char)text[i]==0xcc&&((unsigned char)text[i+1]>=0x80&&(unsigned char)text[i+1]<=0x8f)) {
+      /* OpenRussian marks stress with combining accents. Keep the base letter;
+       * the untouched UTF-8 source TSV remains the lossless archive. */
+      i++;
     } else normalized[normalized_len++]=(unsigned char)text[i];
   }
   normalized[normalized_len]=0;
-  unsigned char *result=convert_encoding("UTF-8","CP866",normalized,normalized_len,length);free(normalized);
+  iconv_t cd=iconv_open("CP866//TRANSLIT","UTF-8");if(cd==(iconv_t)-1)fail("iconv_open failed");
+  size_t capacity=normalized_len*4+32,out_left=capacity,at=0;unsigned char *result=allocate(capacity),*out=result;
+  while(at<normalized_len) {
+    size_t width=(normalized[at]&0x80)==0?1:(normalized[at]&0xe0)==0xc0?2:(normalized[at]&0xf0)==0xe0?3:4;
+    if(at+width>normalized_len)width=normalized_len-at;
+    char *in=(char *)normalized+at;size_t left=width;
+    if(iconv(cd,&in,&left,(char **)&out,&out_left)==(size_t)-1||left) {
+      iconv(cd,NULL,NULL,(char **)&out,&out_left);if(!out_left)fail("CP866 output buffer exhausted");*out++='?';out_left--;unrepresentable_codepoints++;at+=width;
+    } else at+=width;
+  }
+  *length=capacity-out_left;iconv_close(cd);free(normalized);
   /* Retain the runtime's one-byte mapping if an unnormalized lowercase ё remains. */
   for(size_t i=0;i<*length;i++)if(result[i]==0xf1)result[i]=0xf0;
   return result;
@@ -176,7 +196,7 @@ static void import_file(Records *source_dic,Records *source_rus,const char *path
   if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
   while((n=getline(&line,&cap,file))>=0) {
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
-    if(is_empty(lemma)||(!strcmp(pos,"other")?!strchr(lemma,' '):is_empty(english)))continue;
+    if(is_empty(lemma))continue;
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
     if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g);
     if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a);
@@ -213,16 +233,18 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
 static void command_build(int argc,char **argv) {
   if(argc!=5)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS");
   const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0};
+  /* The demo's closed-class and common-verb readings must outrank unrelated
+   * homonyms that become visible when importing the complete tables. */
+  add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
+  add_utf8_record(&source_dic,"i","R011я");
+  add_utf8_record(&source_dic,"want","e00хотеть");add_utf8_record(&source_dic,"wants","e00хотеть");
+  add_utf8_record(&source_dic,"can","e00мочь");
+  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
-  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,path,"other");
-  /* English articles do not have Russian equivalents, but tagging them keeps
-   * them out of the sentence skeleton so OpenRussian nouns and verbs agree. */
-  add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
-  add_utf8_record(&source_dic,"i","R011я");
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);
-  printf("wrote %zu OpenRussian DIC records and %zu RUS records\n",source_dic.count,source_rus.count);free(path);
+  printf("wrote %zu OpenRussian DIC records and %zu RUS records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,unrepresentable_codepoints);free(path);
 }
 static void command_info(const char *path) {
   FILE *f=fopen(path,"rb");if(!f){perror(path);exit(1);}unsigned char h[HEADER_SIZE];if(fread(h,1,sizeof h,f)!=sizeof h||memcmp(h,"LTech DIC File 2.00 ",20))fail("not an LTech DIC image");

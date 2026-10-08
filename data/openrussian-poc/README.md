@@ -1,46 +1,46 @@
-# OpenRussian dictionary integration POC
+# Full OpenRussian dictionary import
 
-This sample compiles the checked-in OpenRussian TSV excerpts into standalone
-binary `.DIC` and `.RUS` files with one-byte CP866-compatible text and rebuilt
-indexes. `.DIC` indexes English glosses. `.RUS` stores every imported source
-column, unchanged in meaning and keyed by its OpenRussian `source_row` id. The
-runtime reads named OpenRussian form columns directly; it does not convert
-those forms into LTPRO paradigm records.
+The checked-in source tables contain every row from the four public OpenRussian
+backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
+entries (58,825 source rows total). The C builder compiles them into standalone
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,552 DIC
+records and 112,315 RUS records, counting English gloss aliases and the
+translator's Russian POS metadata records.
 
-The `.RUS` file also has a small set of POS metadata records used to connect the
-OpenRussian lexemes to the translator's existing grammar tags. That adapter
-does not contain inflection tables. When the source row lacks the exact aspect
-the sentence needs, the engine can still use the executable's morphology
-tables. The demo passes the generated `.DIC` and `.RUS` as its only dictionary
+`.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
+stores all imported source columns under their OpenRussian `source_row` IDs,
+plus POS records used by the existing grammar. Lua reads OpenRussian's named
+noun, verb, and adjective form slots directly; it does not translate them into
+LTPRO paradigm numbers. The translator still uses LTPRO's executable for
+sentence processing and grammar, but loads only the new generated dictionary
 files.
 
-The standalone DIC also contains a small set of hand-authored English grammar
-entries for articles and `I`, plus irregular plural aliases (`people`,
-`children`). The `others` table contributes 24 multiword expression rows to
-the RUS image and their English glosses to DIC. Fixed expressions use a literal
-phrase reading; they remain ordinary binary dictionary records. These keep the
-sample sentences parseable without loading the legacy English dictionary. The
-selected sample does not aim for general English vocabulary coverage.
+## Source and encoding
 
-## Pinned source
+The data is from repository commit
+[`50e210c4803237779cb562bc1abcea529066031c`](https://github.com/Badestrand/russian-dictionary/commit/50e210c4803237779cb562bc1abcea529066031c),
+licensed CC BY-SA 4.0. The upstream repository says these checked-in CSVs are
+older backup exports; this import covers every row in those four files, not a
+claim that the 2021 backup is the latest live OpenRussian database. The source
+URLs and SHA-256 hashes are pinned in `source-manifest.json`; see
+`ATTRIBUTION.md` for attribution details.
 
-The OpenRussian sample is from repository commit
-`50e210c4803237779cb562bc1abcea529066031c` (2021-08-09), licensed CC BY-SA
-4.0. Its checked-in CSVs are older backup exports, so refresh the source and
-pin new hashes before production adoption. See [attribution](ATTRIBUTION.md)
-and [source manifest](source-manifest.json). OpenCorpora through PyMorphy3 is
-also retained as a morphology-only comparison in `data/morphology-poc/`.
+The source TSVs are UTF-8. Binary text remains one-byte CP866 for the current
+Lua runtime. The importer removes combining stress marks and transliterates
+characters CP866 cannot represent; 144 unsupported codepoints were replaced
+in this snapshot. The checked-in TSVs retain the complete UTF-8 source values.
 
-## Build and inspect
+## Download, build, and inspect
 
-Regenerate the small, checksummed source excerpts when needed:
+Clone the upstream data with GitHub CLI, verify its pinned CSV hashes, and
+regenerate the complete TSV tables:
 
 ```sh
-python3 tools/export_openrussian_poc.py
+gh repo clone Badestrand/russian-dictionary /tmp/openrussian-source
+python3 tools/export_openrussian_poc.py --full-snapshot /tmp/openrussian-source
 ```
 
-Build the C database utility and emit standalone binary `.DIC` and `.RUS`
-images from the OpenRussian excerpts:
+Build the binary databases:
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
@@ -48,28 +48,30 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
   data/openrussian-poc/BASE.DIC data/openrussian-poc/BASE.RUS
 ```
 
-The utility supports `info FILE` and `find FILE HEADWORD` for inspecting the
-binary database. The source excerpt is UTF-8; the generated dictionaries use
-the engine's one-byte encoding. Lowercase `ё` is normalized to `е` to match
-LTPRO's preferred spelling in this parity sample.
+`info FILE` reports the binary image size and record count; `find FILE HEADWORD`
+shows matching dictionary records. The builder also adds a few high-priority
+English function-word and common-verb readings so source homonyms do not
+override the translator's basic grammar.
 
-Run sentence examples using the generated images:
+## Parity examples
 
-```sh
-lua tools/openrussian_poc.lua
-```
+The original LTPRO captures and exact comparison cases are checked in:
 
-The 20 noun/verb sentence cases and their original LTPRO captures are in
-`test/ltpro/openrussian-cases.json` and `test/ltpro/openrussian-reference.json`.
-Four captured phrase cases are in `test/ltpro/openrussian-phrase-cases.json` and
-`test/ltpro/openrussian-phrase-reference.json`. The 20 noun/verb cases and four
-phrase cases pass exact paragraph comparison. Other imported expressions can
-differ from LTPRO's older English glosses or translations (for example,
-OpenRussian's `because` gloss translates as `потому что` while this LTPRO build
-uses `поскольку`); this small phrase sample does not claim that every
-OpenRussian expression reproduces LTPRO.
-Recheck exact parity while forcing the Lua engine to use only these generated
-DIC and RUS files:
+- 20 noun/verb sentences: `test/ltpro/openrussian-cases.json` and
+  `test/ltpro/openrussian-reference.json`
+- Four phrases: `test/ltpro/openrussian-phrase-cases.json` and
+  `test/ltpro/openrussian-phrase-reference.json`
+- Five additional words and sentences from the full tables:
+  `test/ltpro/openrussian-full-cases.json` and
+  `test/ltpro/openrussian-full-reference.json`
+
+All 29 cases pass exact paragraph comparison with the generated full tables.
+This verifies those examples, not every English gloss or expression. OpenRussian
+word senses can differ from LTPRO's older choices; for example, OpenRussian
+maps `because` to `потому что`, while this LTPRO build uses `поскольку`.
+Exploratory full-vocabulary checks also exposed unresolved ambiguity and word
+order cases: `City.` currently selects `городской`, and `Cold water.` is
+reordered. These remain translation-quality issues despite the complete import.
 
 ```sh
 python3 tools/ltpro_pipeline_probe.py \
@@ -78,16 +80,16 @@ python3 tools/ltpro_pipeline_probe.py \
   --data LTGOLD \
   --dictionary data/openrussian-poc/BASE.DIC \
   --russian data/openrussian-poc/BASE.RUS
+python3 tools/ltpro_pipeline_probe.py \
+  --cases test/ltpro/openrussian-phrase-cases.json \
+  --reference test/ltpro/openrussian-phrase-reference.json \
+  --data LTGOLD \
+  --dictionary data/openrussian-poc/BASE.DIC \
+  --russian data/openrussian-poc/BASE.RUS
+python3 tools/ltpro_pipeline_probe.py \
+  --cases test/ltpro/openrussian-full-cases.json \
+  --reference test/ltpro/openrussian-full-reference.json \
+  --data LTGOLD \
+  --dictionary data/openrussian-poc/BASE.DIC \
+  --russian data/openrussian-poc/BASE.RUS
 ```
-
-The capture reference is produced by the original LTPRO executable and its
-supplied assets. The Lua comparison receives the new DIC and RUS paths
-explicitly. This POC's sample sentences currently match all 20 captured
-translations exactly; it is not a general-purpose English dictionary.
-
-The sample contains seven nouns, nine verb lemmas (including both `писать`
-homonyms), one adjective, and 24 multiword expression rows. Sentence
-translation still uses the LTPRO executable for its grammar and
-sentence-processing tables, but does not load
-the legacy `BASE.DIC` or `BASE.RUS` files. To match LTPRO's preferred spelling,
-the importer normalizes source `ё` to `е` in the generated tables.

@@ -2,7 +2,7 @@ local text = require 'core.text'
 local russian = {}
 
 function russian.from_bytes(bytes, overlay)
-  local entries, source_forms, openrussian_forms, openrussian_rows = {}, {}, {}, {}
+  local entries, source_forms, openrussian_forms = {}, {}, {}
   local function ingest(image)
     assert(image:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
     local finish = string.unpack('<I4', image, 0x1F)
@@ -12,9 +12,11 @@ function russian.from_bytes(bytes, overlay)
     for line in image:sub(0x29,finish):gmatch('[^\n]+') do
       local key = line:match('^(.-)%*')
       if key then
-        entries[key] = entries[key] or {}
-        entries[key][#entries[key]+1] = line
-        local payload=line:match('^.-%*(O\t.*)$')
+        if key:sub(1,1)~='@' then
+          entries[key] = entries[key] or {}
+          entries[key][#entries[key]+1] = line
+        end
+        local payload=key:sub(1,2)~='@o' and line:match('^.-%*(O\t.*)$')
         if payload then
           local fields={}
           for field in (payload..'\t'):gmatch('(.-)\t') do
@@ -23,8 +25,8 @@ function russian.from_bytes(bytes, overlay)
           end
           local pos=key:match('^@([nvao])')
           local metadata=pos=='n' and fields.gender or fields.aspect
-          if pos and fields.bare and (metadata or pos=='o') then
-            local row={id=key:sub(3),pos=pos,lemma=fields.bare,metadata=metadata,columns=fields,forms={}}
+          if pos and fields.bare and (metadata or pos=='o' or pos=='a') then
+            local row={id=key:sub(3),pos=pos,lemma=fields.bare,metadata=metadata,forms={}}
             for slot,values in pairs(fields) do
               if slot:match('^sg_') or slot:match('^pl_') or slot:match('^imperative_') or
                  slot:match('^past_') or slot:match('^presfut_') or slot:match('^decl_') or
@@ -34,7 +36,6 @@ function russian.from_bytes(bytes, overlay)
                 row.forms[slot]=forms
               end
             end
-            openrussian_rows[key]=row
             if pos~='o' then
               local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
               local by_lemma=by_pos[fields.bare] or {};by_pos[fields.bare]=by_lemma
@@ -64,7 +65,7 @@ function russian.from_bytes(bytes, overlay)
   end
   ingest(bytes)
   if overlay then ingest(overlay) end
-  return {entries=entries, source_forms=source_forms,openrussian_forms=openrussian_forms,openrussian_rows=openrussian_rows}
+  return {entries=entries, source_forms=source_forms,openrussian_forms=openrussian_forms}
 end
 
 function russian.source_forms(state, word, pos, slot, aspect)

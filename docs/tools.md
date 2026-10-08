@@ -2,10 +2,10 @@
 
 ## Binary Dictionary Database
 
-`tools/openrussian_db.c` imports the pinned OpenRussian sample into compact
-indexed LTech `.DIC` and `.RUS` binary databases. It stores English aliases,
-literal multiword expressions, and source-listed inflections as one-byte
-CP866-compatible records. The C utility can also inspect the image header and
+`tools/openrussian_db.c` imports all four pinned OpenRussian dictionary tables
+into indexed LTech `.DIC` and `.RUS` binary databases. It stores English
+glosses, literal expressions, and named inflection slots in one-byte
+CP866-compatible records. The C utility can also inspect image headers and
 find all records for a headword.
 
 ```sh

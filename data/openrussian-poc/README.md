@@ -1,23 +1,18 @@
 # OpenRussian dictionary integration POC
 
-This sample feeds source-listed OpenRussian noun, verb, and adjective forms into
-the sentence translator. The C builder creates standalone binary LTech
-dictionaries with one-byte CP866-compatible text and rebuilt indexes. It reads
-only the checked-in OpenRussian TSV excerpts: the DIC maps English glosses to
-Russian lemmas, and the RUS stores Russian lexeme metadata and named forms.
-The demo passes these files as its only DIC and RUS inputs.
+This sample compiles the checked-in OpenRussian TSV excerpts into standalone
+binary `.DIC` and `.RUS` files with one-byte CP866-compatible text and rebuilt
+indexes. `.DIC` indexes English glosses. `.RUS` stores every imported source
+column, unchanged in meaning and keyed by its OpenRussian `source_row` id. The
+runtime reads named OpenRussian form columns directly; it does not convert
+those forms into LTPRO paradigm records.
 
-The source records are stored as indexed RUS entries with a `Q` extension:
-
-```text
-lemma*Qn*sg_gen*form
-lemma*Qa*decl_m_gen*form
-lemma*Qv*ipf*presfut_sg1*form
-```
-
-They remain ordinary single-byte records inside the LTech binary envelope.
-The runtime reads them by lemma and named form slot. Standard RUS lexeme
-metadata is generated into the same standalone RUS file.
+The `.RUS` file also has a small set of POS metadata records used to connect the
+OpenRussian lexemes to the translator's existing grammar tags. That adapter
+does not contain inflection tables. When the source row lacks the exact aspect
+the sentence needs, the engine can still use the executable's morphology
+tables. The demo passes the generated `.DIC` and `.RUS` as its only dictionary
+files.
 
 The standalone DIC also contains a small set of hand-authored English grammar
 entries for articles and `I`, plus irregular plural aliases (`people`,

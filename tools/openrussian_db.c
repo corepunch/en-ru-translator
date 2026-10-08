@@ -132,40 +132,45 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
   add_record(rus,encoded,n,value,used);free(encoded);
 }
 
-static void add_forms(Records *rus,Fields *header,Fields *row,const char *table,const char *pos,const char *lemma,const char *aspect) {
+static void add_forms(Records *rus,Fields *header,Fields *row,const char *table,const char *pos,const char *lemma,const char *gender,const char *aspect,const char *source_row) {
   static const char *noun_slots[]={"sg_nom","sg_gen","sg_dat","sg_acc","sg_inst","sg_prep","pl_nom","pl_gen","pl_dat","pl_acc","pl_inst","pl_prep"};
   static const char *verb_slots[]={"imperative_sg","imperative_pl","past_m","past_f","past_n","past_pl","presfut_sg1","presfut_sg2","presfut_sg3","presfut_pl1","presfut_pl2","presfut_pl3"};
   static const char *adj_slots[]={"decl_m_nom","decl_m_gen","decl_m_dat","decl_m_acc","decl_m_inst","decl_m_prep","decl_f_nom","decl_f_gen","decl_f_dat","decl_f_acc","decl_f_inst","decl_f_prep","decl_n_nom","decl_n_gen","decl_n_dat","decl_n_acc","decl_n_inst","decl_n_prep","decl_pl_nom","decl_pl_gen","decl_pl_dat","decl_pl_acc","decl_pl_inst","decl_pl_prep","comparative","superlative","short_m","short_f","short_n","short_pl"};
   const char **slots=!strcmp(pos,"noun")?noun_slots:!strcmp(pos,"verb")?verb_slots:adj_slots;
   size_t count=!strcmp(pos,"noun")?sizeof noun_slots/sizeof *noun_slots:!strcmp(pos,"verb")?sizeof verb_slots/sizeof *verb_slots:sizeof adj_slots/sizeof *adj_slots;
-  for(size_t i=0;i<count;i++) {
-    size_t at=column(header,slots[i]); const char *field=cell(row,at); if(is_empty(field))continue;
-    char *copy=strdup(field);if(!copy)fail("out of memory");char *save=NULL;
-    for(char *variant=strtok_r(copy,",",&save);variant;variant=strtok_r(NULL,",",&save)) {
-      while(*variant==' ')variant++;size_t len=strlen(variant);while(len&&variant[len-1]==' ')variant[--len]=0;
-      for(size_t j=0;j<len;j++)if(variant[j]=='\'') {memmove(variant+j,variant+j+1,len-j);len--;j--;}
-      if(!len)continue;
-      size_t lemma_len,form_len;unsigned char *ekey=to_cp866(lemma,&lemma_len),*form=to_cp866(variant,&form_len);
-      const char *poscode=!strcmp(pos,"noun")?"n":!strcmp(pos,"verb")?"v":"a";
-      size_t cap=lemma_len+strlen(slots[i])+strlen(aspect)+12;unsigned char *value=allocate(cap);size_t used=0;
-      value[used++]='Q';value[used++]=poscode[0];value[used++]='*';
-      if(!strcmp(pos,"verb")){const char *a=!strcmp(aspect,"perfective")?"pf":"ipf";size_t aspect_len=strlen(a);memcpy(value+used,a,aspect_len);used+=aspect_len;value[used++]='*';}
-      size_t slot_len=strlen(slots[i]);memcpy(value+used,slots[i],slot_len);used+=slot_len;value[used++]='*';memcpy(value+used,form,form_len);used+=form_len;
-      add_record(rus,ekey,lemma_len,value,used);free(ekey);free(form);free(value);
+  /* Preserve every upstream column under the source row id. Values remain
+   * named source fields rather than translated LTPRO paradigms or slots. */
+  size_t id_len;unsigned char *id=to_cp866(source_row,&id_len);
+  size_t cap=id_len+32,used=0;
+  for(size_t i=0;i<header->count;i++)cap+=strlen(header->items[i])+strlen(cell(row,i))+4;
+  unsigned char *key=allocate(id_len+3),*direct=allocate(cap);
+  key[0]='@';key[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a';memcpy(key+2,id,id_len);
+  for(size_t i=0;i<rus->count;i++)if(rus->items[i].key_len==id_len+2&&!memcmp(rus->items[i].key,key,id_len+2))fail("duplicate OpenRussian source_row id");
+  direct[used++]='O';
+  for(size_t i=0;i<header->count;i++) {
+    direct[used++]='\t';size_t name_len=strlen(header->items[i]);memcpy(direct+used,header->items[i],name_len);used+=name_len;direct[used++]='=';
+    char *clean=strdup(cell(row,i));if(!clean)fail("out of memory");
+    int form_column=0;for(size_t j=0;j<count;j++)if(!strcmp(header->items[i],slots[j]))form_column=1;
+    if(form_column||!strcmp(header->items[i],"accented")) {
+      size_t clean_len=strlen(clean);
+      for(size_t j=0;j<clean_len;j++)if(clean[j]=='\''){memmove(clean+j,clean+j+1,clean_len-j);clean_len--;j--;}
     }
-    free(copy);
+    size_t encoded_len;unsigned char *encoded=to_cp866(clean,&encoded_len);
+    memcpy(direct+used,encoded,encoded_len);used+=encoded_len;free(encoded);free(clean);
   }
-  (void)table;
+  add_record(rus,key,id_len+2,direct,used);free(id);free(key);free(direct);
+  (void)lemma;(void)gender;(void)aspect;(void)table;
 }
 
 static void import_file(Records *source_dic,Records *source_rus,const char *path,const char *pos) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;ssize_t n=getline(&line,&cap,file);if(n<0)fail("empty source TSV");
-  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect");
-  if(bare==(size_t)-1||gloss==(size_t)-1)fail("source TSV is missing required columns");
+  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), source_row=column(&header,"source_row");
+  if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
   while((n=getline(&line,&cap,file))>=0) {
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
     if(is_empty(lemma)||is_empty(english))continue;
-    add_russian_lexeme(source_rus,pos,lemma,g);parse_glosses(source_dic,english,pos,lemma,a);add_forms(source_rus,&header,&row,path,pos,lemma,a);
+    if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
+    add_russian_lexeme(source_rus,pos,lemma,g);parse_glosses(source_dic,english,pos,lemma,a);add_forms(source_rus,&header,&row,path,pos,lemma,g,a,cell(&row,source_row));
   }
   free(line);fclose(file);
 }

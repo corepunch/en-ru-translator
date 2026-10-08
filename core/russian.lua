@@ -2,7 +2,7 @@ local text = require 'core.text'
 local russian = {}
 
 function russian.from_bytes(bytes, overlay)
-  local entries, source_forms = {}, {}
+  local entries, source_forms, openrussian_forms, openrussian_rows = {}, {}, {}, {}
   local function ingest(image)
     assert(image:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
     local finish = string.unpack('<I4', image, 0x1F)
@@ -14,6 +14,33 @@ function russian.from_bytes(bytes, overlay)
       if key then
         entries[key] = entries[key] or {}
         entries[key][#entries[key]+1] = line
+        local payload=line:match('^.-%*(O\t.*)$')
+        if payload then
+          local fields={}
+          for field in (payload..'\t'):gmatch('(.-)\t') do
+            local name,value=field:match('^([^=]+)=(.*)$')
+            if name then fields[name]=value end
+          end
+          local pos=key:match('^@([nva])')
+          local metadata=pos=='n' and fields.gender or fields.aspect
+          if pos and fields.bare and metadata then
+            local row={id=key:sub(3),pos=pos,lemma=fields.bare,metadata=metadata,columns=fields,forms={}}
+            for slot,values in pairs(fields) do
+              if slot:match('^sg_') or slot:match('^pl_') or slot:match('^imperative_') or
+                 slot:match('^past_') or slot:match('^presfut_') or slot:match('^decl_') or
+                 slot=='comparative' or slot=='superlative' or slot:match('^short_') then
+                local forms={}
+                for form in (values..','):gmatch('(.-),') do if form~='' then forms[#forms+1]=form end end
+                row.forms[slot]=forms
+              end
+            end
+            openrussian_rows[key]=row
+            local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
+            local by_lemma=by_pos[fields.bare] or {};by_pos[fields.bare]=by_lemma
+            if pos=='v' then by_lemma[metadata=='perfective' and 'pf' or 'ipf']=row
+            else by_pos[fields.bare]=row end
+          end
+        end
         local pos, aspect, slot, form = line:match('^.-%*Q(v)%*([^*]+)%*([^*]+)%*(.*)$')
         if not pos then pos, slot, form = line:match('^.-%*Q([na])%*([^*]+)%*(.*)$') end
         if pos then
@@ -35,10 +62,17 @@ function russian.from_bytes(bytes, overlay)
   end
   ingest(bytes)
   if overlay then ingest(overlay) end
-  return {entries=entries, source_forms=source_forms}
+  return {entries=entries, source_forms=source_forms,openrussian_forms=openrussian_forms,openrussian_rows=openrussian_rows}
 end
 
 function russian.source_forms(state, word, pos, slot, aspect)
+  local direct=state.russian.openrussian_forms and state.russian.openrussian_forms[pos]
+  local row=direct and direct[word]
+  if row and pos=='v' then row=row[aspect==1 and 'pf' or 'ipf'] end
+  if row then
+    local forms=row.forms[slot]
+    if forms and #forms>0 then return forms end
+  end
   local by_pos = state.russian.source_forms[word]
   if not by_pos then return nil end
   local forms = by_pos[pos]

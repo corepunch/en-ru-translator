@@ -10,6 +10,7 @@ as ~ please*Jкак~ угодно
 keep ~ safe*Vхранить
 do ~ best*Vстараться
 do ~ level best*Vпытаться
+did*X1делать\do
 a number of*WIмногоPР
 article i*WNстатья#I
 how often*WDкакDчасто
@@ -35,6 +36,7 @@ assert(derived.vector[2].source=='cat' and derived.vector[4].reading==encoding.e
 local implicit = analyzed('keep cat safe')
 assert(implicit.vector[1].reading == encoding.encode('хранить') and implicit.count==3)
 assert(analyzed('do cat level best').vector[1].reading==encoding.encode('пытаться'))
+assert(analyzed('did cat level best').vector[1].tense==1)
 local blocked = analyzed('take cat, dog home')
 assert(blocked.vector[1].reading == encoding.encode('брать'), 'gaps cannot cross punctuation')
 assert(analyzed('take {~cat~} home').vector[2].literal, 'gaps cannot consume literal spans')

@@ -837,7 +837,21 @@ local function decode(dictionary,records,index,options)
   end
   local phrase_base=backref or (derived and derived.candidate)
   if not phrase and phrase_base then phrase,last,captures=lexicon.match_phrase(dictionary,records,index,phrase_base:lower()) end
-  if phrase then return lexicon.apply_phrase(phrase,records,index,last,options,captures) end
+  if phrase then
+    if value then
+      -- A phrase can replace an auxiliary with a lexical verb. Decode its
+      -- tense/person metadata first (did = X1), retaining the original tag
+      -- that phrase distribution uses for participles and other conversions.
+      local context={}
+      for key,item in pairs(node) do context[key]=item end
+      lexicon.decode_reading(context,value:sub(2):match('^[^\\]*'),options)
+      for _,field in ipairs({'tense','number','person','aspect','gender','case_mask',
+          'verb_flags','governed_case','passive','short_form','lookup_flags','lookup_frame'}) do
+        node[field]=context[field]
+      end
+    end
+    return lexicon.apply_phrase(phrase,records,index,last,options,captures)
+  end
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end

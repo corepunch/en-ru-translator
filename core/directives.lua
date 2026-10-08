@@ -75,7 +75,8 @@ function directives.chunks(input)
     local value = input:sub(content, finish - 1)
     assert(not value:find('{~', 1, true), 'nested inline directives are not supported')
     if mode == '=' then value = transliteration.convert(value, true) end
-    if value ~= '' then append(value, start, finish + 1, true) end
+    if value ~= '' then append(value, start, finish + 1, true)
+    elseif start==previous_end+1 then previous_end=finish+1 end
     cursor = finish + 2
   end
   return chunks

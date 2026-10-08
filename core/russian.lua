@@ -14,14 +14,18 @@ function russian.from_bytes(bytes, overlay)
       if key then
         entries[key] = entries[key] or {}
         entries[key][#entries[key]+1] = line
-        local pos, aspect, slot, form = line:match('^.-%*Q([nav])%*([^*]+)%*([^*]+)%*(.*)$')
+        local pos, aspect, slot, form = line:match('^.-%*Q(v)%*([^*]+)%*([^*]+)%*(.*)$')
         if not pos then pos, slot, form = line:match('^.-%*Q([na])%*([^*]+)%*(.*)$') end
         if pos then
           local folded = key:gsub(string.char(0xf0), string.char(0xa5))
           local by_pos = source_forms[key] or source_forms[folded] or {}
           source_forms[key], source_forms[folded] = by_pos, by_pos
           local by_slot = by_pos[pos]
-          if aspect then by_slot = by_slot and by_slot[aspect] or {}; by_pos[pos] = by_slot
+          if aspect then
+            local by_aspect = by_slot or {}
+            by_pos[pos] = by_aspect
+            by_slot = by_aspect[aspect] or {}
+            by_aspect[aspect] = by_slot
           else by_slot = by_slot or {}; by_pos[pos] = by_slot end
           by_slot[slot] = by_slot[slot] or {}
           by_slot[slot][#by_slot[slot] + 1] = form

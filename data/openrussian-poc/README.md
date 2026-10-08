@@ -19,6 +19,12 @@ They remain ordinary single-byte records inside the LTech binary envelope.
 The runtime reads them by lemma and named form slot. Standard RUS lexeme
 metadata is generated into the same standalone RUS file.
 
+The standalone DIC also contains a small set of hand-authored English grammar
+entries for articles and `I`, plus irregular plural aliases (`people`,
+`children`). Those keep the sample sentences parseable without loading the
+legacy English dictionary. The selected sample does not aim for general English
+vocabulary coverage.
+
 ## Pinned source
 
 The OpenRussian sample is from repository commit
@@ -47,8 +53,8 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
 
 The utility supports `info FILE` and `find FILE HEADWORD` for inspecting the
 binary database. The source excerpt is UTF-8; the generated dictionaries use
-the engine's one-byte encoding. Lowercase `ё` is normalized to the engine's
-CP866-compatible `F0` byte.
+the engine's one-byte encoding. Lowercase `ё` is normalized to `е` to match
+LTPRO's preferred spelling in this parity sample.
 
 Run sentence examples using the generated images:
 
@@ -56,12 +62,27 @@ Run sentence examples using the generated images:
 lua tools/openrussian_poc.lua
 ```
 
-The standalone sample intentionally contains only the selected OpenRussian
-content. Function words such as articles and pronouns are outside this sample,
-so the current demo leaves some English words untranslated and sentence-level
-case handling is incomplete.
+The 20 sentence cases and their original LTPRO captures are in
+`test/ltpro/openrussian-cases.json` and `test/ltpro/openrussian-reference.json`.
+Recheck exact parity while forcing the Lua engine to use only these generated
+DIC and RUS files:
+
+```sh
+python3 tools/ltpro_pipeline_probe.py \
+  --cases test/ltpro/openrussian-cases.json \
+  --reference test/ltpro/openrussian-reference.json \
+  --data LTGOLD \
+  --dictionary data/openrussian-poc/BASE.DIC \
+  --russian data/openrussian-poc/BASE.RUS
+```
+
+The capture reference is produced by the original LTPRO executable and its
+supplied assets. The Lua comparison receives the new DIC and RUS paths
+explicitly. This POC's sample sentences currently match all 20 captured
+translations exactly; it is not a general-purpose English dictionary.
 
 The sample contains seven nouns, nine verb lemmas (including both `писать`
 homonyms), and one adjective. Sentence translation still uses the LTPRO
 executable for its grammar and sentence-processing tables, but does not load
-the legacy `BASE.DIC` or `BASE.RUS` files.
+the legacy `BASE.DIC` or `BASE.RUS` files. To match LTPRO's preferred spelling,
+the importer normalizes source `ё` to `е` in the generated tables.

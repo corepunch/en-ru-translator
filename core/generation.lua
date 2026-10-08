@@ -195,7 +195,10 @@ function generation.word(state, node)
   local r = record(state, node)
   local tag = r.b('tag')
   if tag == 0x4E then -- N
-    if r.valid() and (r.b('number') ~= 0 or r.b('case_mask') > 1) then
+    local numbers = r.b('number') ~= 0 and 'pl' or 'sg'
+    local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
+    local source_form = russian.source_forms(state,r.text(),'n',numbers .. '_' .. (cases[generation.case(r.b('case_mask'))] or 'nom'))
+    if (r.valid() or source_form) and (r.b('number') ~= 0 or r.b('case_mask') > 1) then
       r.save(generation.noun_form(state, r.w('paradigm'), r.text(), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
     end
   elseif tag == 0x55 then -- U
@@ -250,7 +253,10 @@ function generation.word(state, node)
       r.save(generation.participle_form(state, r.w('paradigm'), r.text(), r.b('aspect'), 0x47, 0, 0))
     end
   elseif tag == 0x41 then -- A
-    if (r.b('short_form') ~= 0 and r.b('previous_tag') == 0x41) or r.valid() then
+    local numbers = r.b('number') ~= 0 and 'pl' or ({[0]='n',[1]='m',[2]='f'})[r.b('gender')] or 'm'
+    local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
+    local source_form = russian.source_forms(state,r.text(),'a','decl_' .. numbers .. '_' .. (cases[generation.case(r.b('case_mask'))] or 'nom'))
+    if (r.b('short_form') ~= 0 and r.b('previous_tag') == 0x41) or r.valid() or source_form then
       local original = r.b('previous_tag')
       if original == 0x45 or original == 0x56 or original == 0x46 or original == 0x65 or original == 0x47 then
         if original == 0x45 or original == 0x65 or original == 0x46 then

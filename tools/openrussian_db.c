@@ -32,8 +32,16 @@ static unsigned char *convert_encoding(const char *from, const char *to, const u
 }
 
 static unsigned char *to_cp866(const char *text, size_t *length) {
-  unsigned char *result=convert_encoding("UTF-8","CP866",(const unsigned char *)text,strlen(text),length);
-  /* The Lua engine's one-byte boundary maps lowercase ё to F0. */
+  size_t source_len=strlen(text),normalized_len=0;
+  unsigned char *normalized=allocate(source_len+1);
+  for(size_t i=0;i<source_len;i++) {
+    if((unsigned char)text[i]==0xd1&&(unsigned char)text[i+1]==0x91) {
+      normalized[normalized_len++]=0xd0;normalized[normalized_len++]=0xb5;i++;
+    } else normalized[normalized_len++]=(unsigned char)text[i];
+  }
+  normalized[normalized_len]=0;
+  unsigned char *result=convert_encoding("UTF-8","CP866",normalized,normalized_len,length);free(normalized);
+  /* Retain the runtime's one-byte mapping if an unnormalized lowercase ё remains. */
   for(size_t i=0;i<*length;i++)if(result[i]==0xf1)result[i]=0xf0;
   return result;
 }
@@ -60,6 +68,10 @@ static void add_record(Records *db,const unsigned char *key,size_t key_len,const
   Record *r=&db->items[db->count++]; r->key=allocate(key_len);memcpy(r->key,key,key_len);r->key_len=key_len;
   r->value=allocate(value_len);memcpy(r->value,value,value_len);r->value_len=value_len;r->sequence=next_sequence++;
 }
+static void add_utf8_record(Records *db,const char *key,const char *value) {
+  size_t key_len,value_len;unsigned char *encoded_key=to_cp866(key,&key_len),*encoded_value=to_cp866(value,&value_len);
+  add_record(db,encoded_key,key_len,encoded_value,value_len);free(encoded_key);free(encoded_value);
+}
 static Fields parse_tsv(char *line) {
   Fields result={0}; size_t cap=0; char *field=allocate(strlen(line)+1),*out=field; int quoted=0;
   for(char *p=line;;p++) {
@@ -80,6 +92,16 @@ static const char *cell(Fields *row,size_t at) { return at<row->count?row->items
 static void lower_ascii(char *text) { for(;*text;text++)if(*text>='A'&&*text<='Z')*text=(char)(*text+32); }
 static int is_empty(const char *s) { return !s||!*s; }
 
+static void add_english_alias(Records *dic,const char *alias,const char *pos,const char *lemma,const char *aspect,int plural) {
+  size_t lemma_len; unsigned char *encoded=to_cp866(lemma,&lemma_len);
+  unsigned char *value=allocate(lemma_len+8); size_t used=0;
+  if(!strcmp(pos,"noun")){value[used++]=plural?'n':'N';}
+  else if(!strcmp(pos,"verb")){value[used++]='e';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
+  else value[used++]='A';
+  memcpy(value+used,encoded,lemma_len);used+=lemma_len;
+  size_t alias_len; unsigned char *key=to_cp866(alias,&alias_len);add_record(dic,key,alias_len,value,used);
+  free(encoded);free(value);free(key);
+}
 static void parse_glosses(Records *dic,const char *gloss,const char *pos,const char *lemma,const char *aspect) {
   char *copy=strdup(gloss); if(!copy)fail("out of memory");
   char *group_save=NULL;
@@ -88,14 +110,10 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
     for(char *alias=strtok_r(group,",",&alias_save);alias;alias=strtok_r(NULL,",",&alias_save)) {
       while(*alias==' '||*alias=='\t')alias++; size_t n=strlen(alias);while(n&&(alias[n-1]==' '||alias[n-1]=='\t'))alias[--n]=0;
       if(!n)continue; lower_ascii(alias);
-      size_t lemma_len; unsigned char *encoded=to_cp866(lemma,&lemma_len);
-      unsigned char *value=allocate(lemma_len+8); size_t used=0;
-      if(!strcmp(pos,"noun")){value[used++]='N';}
-      else if(!strcmp(pos,"verb")){value[used++]='e';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
-      else value[used++]='A';
-      memcpy(value+used,encoded,lemma_len);used+=lemma_len;
-      size_t alias_len; unsigned char *key=to_cp866(alias,&alias_len);add_record(dic,key,alias_len,value,used);
-      free(encoded);free(value);free(key);
+      int plural=!strcmp(pos,"noun")&&(!strcmp(alias,"people")||!strcmp(alias,"children"));
+      add_english_alias(dic,alias,pos,lemma,aspect,plural);
+      if(!strcmp(pos,"noun")&&!strcmp(lemma,"ребёнок")&&!strcmp(alias,"child"))
+        add_english_alias(dic,"children",pos,lemma,aspect,1);
     }
   }
   free(copy);
@@ -183,6 +201,10 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
+  /* English articles do not have Russian equivalents, but tagging them keeps
+   * them out of the sentence skeleton so OpenRussian nouns and verbs agree. */
+  add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
+  add_utf8_record(&source_dic,"i","R011я");
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);
   printf("wrote %zu OpenRussian DIC records and %zu RUS records\n",source_dic.count,source_rus.count);free(path);
 }

@@ -4,7 +4,7 @@ local transliteration = require 'core.transliteration'
 local encoding = require 'core.encoding'
 assert(engine.translate('{~Keep  My TEXT!~}') == 'Keep  My TEXT!')
 assert(engine.translate('{~' .. string.rep('long ', 30) .. '~}') == string.rep('long ', 30))
-assert(engine.translate('{~=John Smith~}') == encoding.decode(transliteration.convert('John Smith', false)))
+assert(engine.translate('{~=John Smith~}') == encoding.decode(transliteration.convert('John Smith', true)))
 assert(engine.translate('{~a~} {~b~}.') == 'a b.')
 assert(engine.translate('{~a~}{~b~}.') == 'ab.')
 assert(engine.translate('{~a~}, {~b~}.') == 'a, b.')

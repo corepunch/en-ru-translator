@@ -87,6 +87,11 @@ assert(result.candidate == 'dog' and result.native_suffix == "s'")
 assert(result.fields.number == 1 and result.fields.case_mask == 2)
 result = assert(lexicon.lookup(derived, 'busier'))
 assert(result.candidate == 'busy' and result.native_suffix == 'ier' and result.fields.tense == 1)
+local possessives=lexicon.from_bytes('city*Nгород\nhouse*Nдом\nclass*Nкласс\n')
+for source,stem in pairs({["cities'"]='city',["houses'"]='house',["classes'"]='class'}) do
+  local found=assert(lexicon.lookup(possessives,source))
+  assert(found.candidate==stem and found.fields.number==1 and found.fields.case_mask==2)
+end
 
 local duplicate = lexicon.from_bytes('book*Zкнига\nbook*Nкнижка\n')
 result, reason = lexicon.lookup(duplicate, 'books')

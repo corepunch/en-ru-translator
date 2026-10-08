@@ -74,7 +74,7 @@ function directives.chunks(input)
     local finish = assert(input:find('~}', content, true), 'unterminated inline directive')
     local value = input:sub(content, finish - 1)
     assert(not value:find('{~', 1, true), 'nested inline directives are not supported')
-    if mode == '=' then value = transliteration.convert(value, false) end
+    if mode == '=' then value = transliteration.convert(value, true) end
     if value ~= '' then append(value, start, finish + 1, true) end
     cursor = finish + 2
   end

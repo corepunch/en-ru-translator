@@ -60,4 +60,35 @@ for _, apostrophe in ipairs({ "'", "’", "‘" }) do
 	assert(sources("we" .. apostrophe .. "ve") == sources("we have"))
 	assert(sources("he" .. apostrophe .. "s") == sources("he is"))
 end
+-- Exercise valid pronoun/auxiliary combinations, casing and apostrophe forms.
+-- These lexical invariants complement the full-sentence executable captures.
+local combinations = {
+  {pronouns={'I'}, ending='m', auxiliary='am'},
+  {pronouns={'you','we','they'}, ending='re', auxiliary='are'},
+  {pronouns={'I','you','we','they'}, ending='ve', auxiliary='have'},
+  {pronouns={'he','she','it','there','here','what','that','who'}, ending='s', auxiliary='is'},
+  {pronouns={'I','you','he','she','it','we','they'}, ending='ll', auxiliary='will'},
+  {pronouns={'I','you','he','she','it','we','they'}, ending='d', auxiliary='would'},
+  {pronouns={'I','you','he','she','it','we','they'}, ending="d've", auxiliary='would have'},
+}
+local matrix_count=0
+for _, row in ipairs(combinations) do
+  for _, pronoun in ipairs(row.pronouns) do
+    for _, apostrophe in ipairs({"'",'’','‘'}) do
+      for _, casing in ipairs({'lower','title','upper'}) do
+        local stem=pronoun:lower()
+        if casing=='title' then stem=stem:sub(1,1):upper()..stem:sub(2)
+        elseif casing=='upper' then stem=stem:upper() end
+        local ending=row.ending:gsub("'",apostrophe)
+        if casing=='upper' then ending=ending:upper() end
+        local input=stem..apostrophe..ending..' testing this.'
+        local expected=sources(stem..' '..row.auxiliary..' testing this.')
+        local actual=sources(input)
+        assert(actual==expected,input..' => '..actual..' / '..expected)
+        matrix_count=matrix_count+1
+      end
+    end
+  end
+end
+assert(matrix_count==333)
 print("contractions_test: passed")

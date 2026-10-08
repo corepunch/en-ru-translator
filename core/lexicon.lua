@@ -201,6 +201,8 @@ local function class_candidates(word, row)
   if class == "A" then return adjective_candidates(word, ending) end
   local stem = word:sub(1, #word - #ending)
   if class == "V" then return with_extra(stem, ending:sub(1, 1) == "e" and "e" or nil) end
+  if ending == "ies'" then return {stem .. 'y'} end
+  if ending == "es'" then return with_extra(stem, 'e') end
   return { stem }
 end
 
@@ -817,7 +819,8 @@ local function decode(dictionary,records,index,options)
     end
     if #rules>0 then node.rules=rules end
   end
-  if not phrase and backref then phrase,last,captures=lexicon.match_phrase(dictionary,records,index,backref:lower()) end
+  local phrase_base=backref or (derived and derived.candidate)
+  if not phrase and phrase_base then phrase,last,captures=lexicon.match_phrase(dictionary,records,index,phrase_base:lower()) end
   if phrase then return lexicon.apply_phrase(phrase,records,index,last,options,captures) end
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.

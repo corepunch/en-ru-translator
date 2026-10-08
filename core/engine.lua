@@ -12,6 +12,8 @@ local syntax = require 'core.syntax'
 local generation = require 'core.generation'
 local output = require 'core.output'
 local encoding = require 'core.encoding'
+local prefixes = require 'core.prefixes'
+local directives = require 'core.directives'
 
 local engine = {}
 
@@ -45,7 +47,45 @@ end
 
 function engine.run(input, options)
   options = options or {}
+  local configured = options
+  options = {}
+  for key, value in pairs(configured) do options[key] = value end
   assert(type(input) == 'string', 'input sentence must be a UTF-8 string')
+  local sections=directives.sections(input)
+  if sections then
+    local chunks, states, glossary={},{},{}
+    local cell_options={}
+    for key,value in pairs(options) do cell_options[key]=value end
+    cell_options.meanings=false
+    local meaning_start=options.meaning_start or 1
+    local alternatives=0
+    for _,section in ipairs(sections) do
+      local items=section.columns and directives.items(section.input) or {section.input}
+      local lines,row={},{}
+      for index,item in ipairs(items) do
+        cell_options.meaning_start=meaning_start+alternatives
+        local translated,state=engine.run(item,cell_options)
+        alternatives=alternatives+(state.alternatives or 0)
+        states[#states+1]=state
+        row[#row+1]=translated
+        if options.meanings then
+          local meanings=output.meanings(state,state.root)
+          if meanings~='' then glossary[#glossary+1]=meanings end
+        end
+        if not section.columns or index%section.columns==0 then
+          lines[#lines+1]=table.concat(row,'\t');row={}
+        end
+      end
+      if #row>0 then lines[#lines+1]=table.concat(row,'\t') end
+      chunks[#chunks+1]=table.concat(lines,'\n')
+    end
+    local result=table.concat(chunks,'\n')
+    local meanings=table.concat(glossary,'\n')
+    if meanings~='' then result=result..'\n\n'..meanings end
+    return result,{output=result,text=encoding.decode(result),sections=states,alternatives=alternatives,
+      meanings=options.meanings and meanings or nil,
+      meanings_text=options.meanings and encoding.decode(meanings) or nil}
+  end
   local data = options.data_dir or 'LTGOLD'
   local executable = options.executable or (data .. '/LTPRO.EXE')
   local dic_source = options.dictionary or options.dic or (data .. '/BASE.DIC')
@@ -53,6 +93,23 @@ function engine.run(input, options)
 
   local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
   local state = engine.new_state(executable, rus_source)
+  state.meaning_start=options.meaning_start
+  if options.domain then
+    assert(type(options.domain) == 'string' and options.domain ~= '', 'domain must be a nonempty string')
+    state.domain=encoding.encode(options.domain)
+  end
+  if options.prefixes ~= false then
+    if type(options.prefixes) == 'string' then
+      options.prefixes = prefixes.from_bytes(engine.read_asset(options.prefixes, 'ERPREFIX.PRE'))
+      assert(#options.prefixes > 0, 'ERPREFIX.PRE is unreadable or contains no active prefix rows')
+    elseif options.prefixes == nil then
+      local file = io.open(data .. '/ERPREFIX.PRE', 'rb')
+      if file then
+        options.prefixes = prefixes.from_bytes(file:read('*a'))
+        file:close()
+      end
+    end
+  end
   local dict = lexicon.from_bytes(dic_bytes)
   local analyzed = lexicon.analyze(dict, encoding.encode(input), options)
 
@@ -97,6 +154,17 @@ function engine.run(input, options)
     generation.run(state,analyzed.root)
     stages.generation=true
   end
+  local prefixed=analyzed.root.next
+  while prefixed do
+    if prefixed.derivation_prefix and (prefixed.text or '') ~= '' then
+      local reading=prefixed
+      while reading do
+        if (reading.text or '')~='' then reading.text=prefixed.derivation_prefix .. reading.text end
+        reading=reading.alternative
+      end
+    end
+    prefixed=prefixed.next
+  end
   local result,alternatives=output.sentence(state,analyzed.root)
   result=result:gsub('^ ','')
   local terminator=analyzed.terminator
@@ -109,6 +177,12 @@ function engine.run(input, options)
   state.text,state.output=encoding.decode(result),result
   state.dictionary,state.lexical,state.root=dict,analyzed,analyzed.root
   state.stages,state.alternatives=stages,alternatives
+  if options.meanings then
+    state.meanings = output.meanings(state, analyzed.root)
+    state.meanings_text = encoding.decode(state.meanings)
+    if state.meanings ~= '' then result = result .. '\n\n' .. state.meanings end
+    state.text,state.output=encoding.decode(result),result
+  end
   return result,state
 end
 

@@ -8,12 +8,19 @@ local usage = [[Usage: lua init.lua [--data DIR] [--exe FILE] [--dic FILE] [--ru
 
 Input and output are UTF-8. The translator accepts one sentence;
 it does not split multiple sentences. Asset options accept paths.
+Inline {~text~} preserves text; {~=text~} transliterates it.
+{~\N starts a list with 1-10 words per row; {~\. returns to sentence mode.
+--meanings appends a glossary of alternative meanings and annotations.
+--prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
+--domain LABEL prefers readings with that dictionary domain label (e.g. инф).
 ]]
 
 local options, words = {}, {}
 local asset_options = {
   ['--data'] = 'data_dir', ['--exe'] = 'executable',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
+  ['--prefixes'] = 'prefixes',
+  ['--domain'] = 'domain',
 }
 local end_options = false
 local i = 1
@@ -24,6 +31,12 @@ while i <= #arg do
     os.exit(0)
   elseif not end_options and key == '--' then
     end_options = true
+    i = i + 1
+  elseif not end_options and key == '--meanings' then
+    options.meanings = true
+    i = i + 1
+  elseif not end_options and key == '--no-prefixes' then
+    options.prefixes = false
     i = i + 1
   elseif not end_options and asset_options[key] then
     local value = arg[i + 1]

@@ -1,0 +1,364 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-08T05:40:05.950958+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "27f2050b75f6cb6ee5320db363e265353adde8a0746da14e7403105a891c6b3b",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "natural-001",
+      "group": "natural-regressions",
+      "input": "Do your best.",
+      "raw_cp866_hex": "91a4a5aba0a9e2a52082e1a52082aea7acaea6adaea52e0d0a",
+      "raw_sha256": "f3d3a40c59f20d9f0c212f64a77a5cd9b2fdfa48dc22e2e72cc0502f6cbc8734",
+      "translation": "Сделайте Все Возможное."
+    },
+    {
+      "id": "natural-002",
+      "group": "natural-regressions",
+      "input": "Do your level best.",
+      "raw_cp866_hex": "91a4a5aba0a9e2a52082e1a52082aea7acaea6adaea52e0d0a",
+      "raw_sha256": "f3d3a40c59f20d9f0c212f64a77a5cd9b2fdfa48dc22e2e72cc0502f6cbc8734",
+      "translation": "Сделайте Все Возможное."
+    },
+    {
+      "id": "natural-003",
+      "group": "natural-regressions",
+      "input": "I will do my best.",
+      "raw_cp866_hex": "9f20a4aee1e2a0e2aee7adae20acaea920ada0a8abe3e7e8a8ac20aea1e0a0a7aeac2e0d0a",
+      "raw_sha256": "6917645d618d9db1468b90077d78673281045ce46cf0a433211d0d760eb03607",
+      "translation": "Я достаточно мой наилучшим образом."
+    },
+    {
+      "id": "natural-004",
+      "group": "natural-regressions",
+      "input": "She did her best.",
+      "raw_cp866_hex": "8eada020a4a5aba0aba020a2e1a520a2aea7acaea6adaea52e0d0a",
+      "raw_sha256": "ccc02f709791dd2258a02348e046959745990d1aee4712265d46b6b0ff68cfe8",
+      "translation": "Она делала все возможное."
+    },
+    {
+      "id": "natural-005",
+      "group": "natural-regressions",
+      "input": "I made up my mind.",
+      "raw_cp866_hex": "9f20e0a5e8a8ab2e0d0a",
+      "raw_sha256": "93c535735219138e4f3d9a0aa79d89539d251579fd6ba8cacf0d68b007d80ae7",
+      "translation": "Я решил."
+    },
+    {
+      "id": "natural-006",
+      "group": "natural-regressions",
+      "input": "He makes up his mind.",
+      "raw_cp866_hex": "8ead20e0a5e8a0a5e22e0d0a",
+      "raw_sha256": "3049f4f269545d52b753538d56f16de6507fe4e5dfb85b3d6e35eb35135a2b77",
+      "translation": "Он решает."
+    },
+    {
+      "id": "natural-007",
+      "group": "natural-regressions",
+      "input": "We make up our minds.",
+      "raw_cp866_hex": "8ceb20e1aea7a4a0a5ac20ada0e8a820e3aceb2e0d0a",
+      "raw_sha256": "406f68a8bf88f3ac63b473269fe078a82e762974eb43d360a7a8efd98eaf2a83",
+      "translation": "Мы создаем наши умы."
+    },
+    {
+      "id": "natural-008",
+      "group": "natural-regressions",
+      "input": "He bears it in mind.",
+      "raw_cp866_hex": "8ead20a8aca5a5e220ede2ae20a220a2a8a4e32e0d0a",
+      "raw_sha256": "96499f1f1051ed5511e56efa987183c2a66b6e0073bb3a33b27e4524f5bcfaf7",
+      "translation": "Он имеет это в виду."
+    },
+    {
+      "id": "natural-009",
+      "group": "natural-regressions",
+      "input": "They bear it in mind.",
+      "raw_cp866_hex": "8eada820a8aca5eee220ede2ae20a220a2a8a4e32e0d0a",
+      "raw_sha256": "9d4d509420599c65d6b06d22819e77b5450b7ebc9d9457fff8542f17111d94c7",
+      "translation": "Они имеют это в виду."
+    },
+    {
+      "id": "natural-010",
+      "group": "natural-regressions",
+      "input": "I keep it in mind.",
+      "raw_cp866_hex": "9f20e1aee5e0a0adefee20ede2ae20a220e3aca57b312eacada5ada8a57d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206d696e643a20627261696e202d20e3aca53b206f7070696e696f6e202d20acada5ada8a50d0a0d0a",
+      "raw_sha256": "65c463dd7e34b7de5678a348d18db32964dafd1283d9d47a36384bb73f7394c1",
+      "translation": "Я сохраняю это в уме{1.мнение}."
+    },
+    {
+      "id": "natural-011",
+      "group": "natural-regressions",
+      "input": "He is very careful.",
+      "raw_cp866_hex": "8ead20aee7a5adec20aee1e2aee0aea6ad2e0d0a",
+      "raw_sha256": "247c1b57f6ec832932289f4987cd304d299f267ebceed42d085e5ab55c755350",
+      "translation": "Он очень осторожн."
+    },
+    {
+      "id": "natural-012",
+      "group": "natural-regressions",
+      "input": "We are aware of the problem.",
+      "raw_cp866_hex": "8ceb20a7ada0a5ac20ae20afe0aea1aba5aca52e0d0a",
+      "raw_sha256": "e06695bdb79517a18e5ed0c698431fe2a52b8ec22abf4b7a4f7a04b4024b4dd7",
+      "translation": "Мы знаем о проблеме."
+    },
+    {
+      "id": "natural-013",
+      "group": "natural-regressions",
+      "input": "At your convenience.",
+      "raw_cp866_hex": "8a2082a0e8a52093e1abe3a3a0ac2e0d0a",
+      "raw_sha256": "3a47097726e6553741cc4dc220abc433f27123fbe5fbc7646a8d655e26cd0306",
+      "translation": "К Ваше Услугам."
+    },
+    {
+      "id": "natural-014",
+      "group": "natural-regressions",
+      "input": "She takes her photographs.",
+      "raw_cp866_hex": "8eada020a4a5aba0a5e220e4aee2aea3e0a0e4a8a82e0d0a",
+      "raw_sha256": "3ff868810c3073866164b5f6d417ff4458c025e17590ca76ef202eba3aae6afc",
+      "translation": "Она делает фотографии."
+    },
+    {
+      "id": "natural-015",
+      "group": "natural-regressions",
+      "input": "They take photographs of the cat.",
+      "raw_cp866_hex": "8eada820a4a5aba0eee220e4aee2aea3e0a0e4a8a820e120aaaee8aaa82e0d0a",
+      "raw_sha256": "17cd04f39f0c61006b5ae10b6a7bee1540769f342d905bd17eca277a3b193e36",
+      "translation": "Они делают фотографии с кошки."
+    },
+    {
+      "id": "natural-016",
+      "group": "natural-regressions",
+      "input": "I have my hair cut.",
+      "raw_cp866_hex": "9f20afaee1e2e0a8a3a0eee1ec2e0d0a",
+      "raw_sha256": "455079bbe6f18b77aa33bf8873921a626988bd64e32461757ac153f8ce6dcfbd",
+      "translation": "Я постригаюсь."
+    },
+    {
+      "id": "natural-017",
+      "group": "natural-regressions",
+      "input": "He clears his throat.",
+      "raw_cp866_hex": "8ead20aee2aaa0e8aba8a2a0e2ece1ef2e0d0a",
+      "raw_sha256": "2cf2c92cc4272447cd612b74f7270bf3998b7712a87b133e5f46aad0ad91c3da",
+      "translation": "Он откашливаться."
+    },
+    {
+      "id": "natural-018",
+      "group": "natural-regressions",
+      "input": "She changed her mind.",
+      "raw_cp866_hex": "8eada020a8a7aca5ada8aba020a5a520e0a5e8a5ada8a52e0d0a",
+      "raw_sha256": "61145f5081859b0ee467316f294f7f50d76bf930135e313f64c4054a0ab15245",
+      "translation": "Она изменила ее решение."
+    },
+    {
+      "id": "natural-019",
+      "group": "natural-regressions",
+      "input": "We find our way.",
+      "raw_cp866_hex": "8ceb20afaeabe3e7a0a5ac20a4aee1e2e3af2e0d0a",
+      "raw_sha256": "f2b10f79de7e426afdff062d62020efe416f79a9aed19a00e307f52c14ccd921",
+      "translation": "Мы получаем доступ."
+    },
+    {
+      "id": "natural-020",
+      "group": "natural-regressions",
+      "input": "Let me know.",
+      "raw_cp866_hex": "91aeaea1e9a5ada8a52e0d0a",
+      "raw_sha256": "14c77e4abbd2bf641c0c7b400ceb9a97ea278e15cd4aa13e281c7a3cd653312e",
+      "translation": "Сообщение."
+    },
+    {
+      "id": "natural-021",
+      "group": "natural-regressions",
+      "input": "He lets me know.",
+      "raw_cp866_hex": "8ead20e1aeaea1e9a0a5e22e0d0a",
+      "raw_sha256": "af828d22b15158013f16bce14c9741a1cfbaa9d244c2440918698b1c56b408b6",
+      "translation": "Он сообщает."
+    },
+    {
+      "id": "natural-022",
+      "group": "natural-regressions",
+      "input": "I'm doing my best.",
+      "raw_cp866_hex": "9f20a4a5aba0ee20a2e1a520a2aea7acaea6adaea52e0d0a",
+      "raw_sha256": "d2cb85105bb0663172bb4a5bf307a9658d85a19cd98f02cd03875a32c79c81f6",
+      "translation": "Я делаю все возможное."
+    },
+    {
+      "id": "natural-023",
+      "group": "natural-regressions",
+      "input": "We're doing our best.",
+      "raw_cp866_hex": "8ceb20a4a5aba0a5ac20a2e1a520a2aea7acaea6adaea52e0d0a",
+      "raw_sha256": "92d669ffb1146e8065fa806a9b6aa601b8077285b0aedc048d3b713c04cd033c",
+      "translation": "Мы делаем все возможное."
+    },
+    {
+      "id": "natural-024",
+      "group": "natural-regressions",
+      "input": "They've done their best.",
+      "raw_cp866_hex": "8eada820e1a4a5aba0aba820a2e1a520a2aea7acaea6adaea52e0d0a",
+      "raw_sha256": "607a5bcb934901c8636f0e3885eeb39635e2d3f446ba4364b383c8f92db6465b",
+      "translation": "Они сделали все возможное."
+    },
+    {
+      "id": "natural-025",
+      "group": "natural-regressions",
+      "input": "You've made up your mind.",
+      "raw_cp866_hex": "82eb20e0a5e8a8aba82e0d0a",
+      "raw_sha256": "ea55cf6cf60eb86dfb64e6dad359f22ce15c8850d6d769c13477cc79a5e7c57d",
+      "translation": "Вы решили."
+    },
+    {
+      "id": "natural-026",
+      "group": "natural-regressions",
+      "input": "The lady's book is here.",
+      "raw_cp866_hex": "84a0ace1aaa0ef20aaada8a3a0202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "75e808c3ba002cc0d943e4b8450ab7bdeb1ca9cf503677d91b8ad96405c98fa2",
+      "translation": "Дамская книга - здесь."
+    },
+    {
+      "id": "natural-027",
+      "group": "natural-regressions",
+      "input": "The ladies' books are here.",
+      "raw_cp866_hex": "8aada8a3a820afa0e0ada5a9202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "f9ee98ce490ecfc05a2de0325fd848d94879b6c2073ed3796919b9b817bf9d37",
+      "translation": "Книги парней - здесь."
+    },
+    {
+      "id": "natural-028",
+      "group": "natural-regressions",
+      "input": "The mothers' books are here.",
+      "raw_cp866_hex": "8aada8a3a820aca0e2a5e0a5a9202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "bc5068a3167533d087052c19ba05a170ba5b7e115776a434a89840a9b4d9f33f",
+      "translation": "Книги матерей - здесь."
+    },
+    {
+      "id": "natural-029",
+      "group": "natural-regressions",
+      "input": "The babies' names are here.",
+      "raw_cp866_hex": "6261626965732720a8aca5ada0202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "54488fda5342e3cbb5bf84b041bc2b181892a13c336b756e52ee8acb797845fe",
+      "translation": "babies' имена - здесь."
+    },
+    {
+      "id": "natural-030",
+      "group": "natural-regressions",
+      "input": "The cities' names are here.",
+      "raw_cp866_hex": "6369746965732720a8aca5ada0202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "54da5bb21a6049876059a2eb46fa1c47305bc6bc13ba29295065e82582ebc3f7",
+      "translation": "cities' имена - здесь."
+    },
+    {
+      "id": "natural-031",
+      "group": "natural-regressions",
+      "input": "The houses' doors are open.",
+      "raw_cp866_hex": "84a2a5e0a87b312ea2e5aea47d20a4aeacaea220aee2aae0ebe2eb2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f72733a20706879736963616c20646f6f72202d2084a2a5e0a83b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "41cce67fe9ddf66dd1f318c8989b851a96a9eb06201be648d06939a189174163",
+      "translation": "Двери{1.вход} домов открыты."
+    },
+    {
+      "id": "natural-032",
+      "group": "natural-regressions",
+      "input": "The classes' names are here.",
+      "raw_cp866_hex": "88aca5ada020aaaba0e1e1aea2202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "ae36abc526b8fc85d7a9693d5075db6cb1a36c45c8d0dce1fe26cc3e2ba57d08",
+      "translation": "Имена классов - здесь."
+    },
+    {
+      "id": "natural-033",
+      "group": "natural-regressions",
+      "input": "The kindness is deep.",
+      "raw_cp866_hex": "84aea1e0aee2a020a3abe3a1aeaaa02e0d0a",
+      "raw_sha256": "18c51c1a34c55ef484c818fb74ff410bd14c832f3cbce527cca4da4111858c9f",
+      "translation": "Доброта глубока."
+    },
+    {
+      "id": "natural-034",
+      "group": "natural-regressions",
+      "input": "The darkness is deep.",
+      "raw_cp866_hex": "92a5acadaee2a020a3abe3a1aeaa2e0d0a",
+      "raw_sha256": "6e43d77b4c938de84ba4ae8dda68cdc62df79260e4852e5aba40cd6f029cb663",
+      "translation": "Темнота глубок."
+    },
+    {
+      "id": "natural-035",
+      "group": "natural-regressions",
+      "input": "The happiness is deep.",
+      "raw_cp866_hex": "91e7a0e1e2eca520a3abe3a1aeaaae2e0d0a",
+      "raw_sha256": "6ecf55bacfaa2f595d97a08beb0bad2ff8059199dd8cf0c01b65b26c0db24b30",
+      "translation": "Счастье глубоко."
+    },
+    {
+      "id": "natural-036",
+      "group": "natural-regressions",
+      "input": "The xyzness is deep.",
+      "raw_cp866_hex": "78797a6e65737320a3abe3a1aeaaae2e0d0a",
+      "raw_sha256": "885855bac1e406f9c22c4f15be6363fa0d11c7db188a967fa0e5be1544dceb11",
+      "translation": "xyzness глубоко."
+    },
+    {
+      "id": "natural-037",
+      "group": "natural-regressions",
+      "input": "The strongness is deep.",
+      "raw_cp866_hex": "7374726f6e676e65737320a3abe3a1aeaaae2e0d0a",
+      "raw_sha256": "370b71e5212cef89c151b856d2d31c87e26aee72958e5079e7b3cb44b1fdc4da",
+      "translation": "strongness глубоко."
+    },
+    {
+      "id": "natural-038",
+      "group": "natural-regressions",
+      "input": "The xyznes is deep.",
+      "raw_cp866_hex": "78797a6e657320a3abe3a1aeaa2e0d0a",
+      "raw_sha256": "fd6330dae6011fc02ccb1533700a9ba624e081d6a28f9e0e249e8f64dbe37d88",
+      "translation": "xyznes глубок."
+    },
+    {
+      "id": "natural-039",
+      "group": "natural-regressions",
+      "input": "I would've gone.",
+      "raw_cp866_hex": "9f20afe0a8a4e32e0d0a",
+      "raw_sha256": "ba85d49d598082b24383c58e0c59bb81c5fc0b06fcb3ec3fa2b1dd7f2aabc2f7",
+      "translation": "Я приду."
+    },
+    {
+      "id": "natural-040",
+      "group": "natural-regressions",
+      "input": "They shouldn't've gone.",
+      "raw_cp866_hex": "8eada82073686f756c646e277420afe0a8e8aba82e0d0a",
+      "raw_sha256": "2e89862bf8c2213d77caa485db81f6d4240a46befcec2fdcafe47d4cd9284de2",
+      "translation": "Они shouldn't пришли."
+    },
+    {
+      "id": "natural-041",
+      "group": "natural-regressions",
+      "input": "We'd've worked.",
+      "raw_cp866_hex": "576527642090a0a1aee2a0ab2e0d0a",
+      "raw_sha256": "2b5679194cf3657bf79bb2a4c0c9ec52261fec73ba5541f3227c3df8e5a46e72",
+      "translation": "We'd Работал."
+    }
+  ]
+}

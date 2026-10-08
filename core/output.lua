@@ -46,6 +46,7 @@ end
 function output.sentence(state,root)
   local a=state.assets
   local si,first,count,previous=0,true,0,nil
+  local meaning_start=state.meaning_start
   local r=assert(root.next,'output requires the leading boundary')
   local initial_caps=get(r,9)
   local chunks={}
@@ -61,6 +62,8 @@ function output.sentence(state,root)
         local c=b('source'); emit(' '..(c~=0 and string.char(c) or ''))
       elseif delimiter~=0x2A and delimiter~=0x5E and delimiter~=0x7C and b('source')~=0 then emit(string.char(b('source'))) end
       if b('marker')~=0 and r.next and get(r.next,'kind')==0x57 then r.next.separator=0x20 end
+    elseif r.literal then
+      emit((r.literal_joined and '' or ' ') .. r.literal)
     else
       if b('tag')~=0x3F then
         local partner=r.aux
@@ -109,7 +112,8 @@ function output.sentence(state,root)
           emit(r.text)
           local alt=r.alternative
           if alt then
-            emit(a:string(0x45C)..string.format(a:string(0x5F9),a:word(0x042B)+count))
+            r.meaning_number=(meaning_start or a:word(0x042B))+count
+            emit(a:string(0x45C)..string.format(a:string(0x5F9),r.meaning_number))
             count=count+1
             while alt do
               emit(output.reading(alt.text))
@@ -142,16 +146,22 @@ function output.meanings(state,root)
   while r do
     if get(r,'kind')==0x57 and (r.alternative or r.annotation) then
       local source=(r.source or ''):lower()
-      chunks[#chunks+1]=string.format(a:string(0x5CE),a:word(0x042B)+count,source)
-      r.text=(r.text or ''):gsub('^,',''):gsub('^ ','')
-      chunks[#chunks+1]=r.annotation and string.format(a:string(0x5D9),r.annotation,r.text) or string.format(a:string(0x5E1),r.text)
+      if r.alternative then
+        local number=r.meaning_number or (state.meaning_start or a:word(0x042B))+count
+        chunks[#chunks+1]=string.format(a:string(0x5CE),number,source)
+        count=count+1
+      else
+        -- Annotation-only entries have no numbered inline reference.
+        chunks[#chunks+1]='\n   '..source..': '
+      end
+      local reading=(r.text or ''):gsub('^,',''):gsub('^ ','')
+      chunks[#chunks+1]=r.annotation and string.format(a:string(0x5D9),r.annotation,reading) or string.format(a:string(0x5E1),reading)
       local alt=r.alternative
       while alt do
         local value=output.reading(alt.text)
         chunks[#chunks+1]=alt.annotation and string.format(a:string(0x5E6),alt.annotation,value) or string.format(a:string(0x5F0),value)
         alt=alt.alternative
       end
-      count=count+1
     end
     r=r.next
   end

@@ -2,6 +2,9 @@ local layout = require 'core.record_layout'
 local nodes = require 'core.nodes'
 local transliteration = require 'core.transliteration'
 local text = require 'core.text'
+local prefixes = require 'core.prefixes'
+local directives = require 'core.directives'
+local phrase_patterns = require 'core.phrase_patterns'
 
 local lexicon = {}
 
@@ -33,55 +36,56 @@ end
 
 -- Narrow lexical fallback recovered from LTPRO 0A4F:07F2 (file 0x0E6E2).
 -- The suffix rows are the native DS:0778 table: ending, class/metadata text.
--- This module only resolves candidates for rows whose transforms are directly
--- visible in the native dispatch. Phrase and annotation handling stays with
--- the lexical analyzer.
+-- Productive rows (ing, ed, plurals, ly) search a rewritten stem. Adjective
+-- and possessive class rows do too. Derivational noun rows do not invent a
+-- stem: an unknown word such as "strongness" stays the surface word and is
+-- recorded as a noun. Phrase and annotation handling stays with the analyzer.
 -- Native row order matters. For example, `ies` precedes `es` and `s`, and
 -- `ed` follows `ied`. The ASCII strings and selectors were read from DS:0778.
 local rows = {
-  { "ies'", "N12", "unsupported" },
-  { "es'", "N12", "unsupported" },
-  { "s'", "N12", "unsupported" },
-  { "'s", "N02", "unsupported" },
+  { "ies'", "N12", "class" },
+  { "es'", "N12", "class" },
+  { "s'", "N12", "class" },
+  { "'s", "N02", "class" },
   { "ing", "G8", "ing" },
   { "ied", "E", "ied" },
   { "ed", "E", "ed" },
-  { "ness", "N00", "unsupported" },
-  { "ous", "A", "unsupported" },
-  { "less", "A", "unsupported" },
+  { "ness", "N00", "class" },
+  { "ous", "A", "class" },
+  { "less", "A", "class" },
   { "ies", "Z13", "ies" },
   { "es", "Z13", "es" },
   { "s", "Z13", "s" },
-  { "fy", "V", "unsupported" },
-  { "ment", "N00", "unsupported" },
-  { "ion", "N00", "unsupported" },
-  { "ence", "N00", "unsupported" },
-  { "ance", "N00", "unsupported" },
-  { "enc", "N00", "unsupported" },
-  { "anc", "N00", "unsupported" },
-  { "ity", "N00", "unsupported" },
-  { "age", "N00", "unsupported" },
-  { "ure", "N00", "unsupported" },
-  { "ag", "N00", "unsupported" },
-  { "nes", "N00", "unsupported" },
-  { "or", "N00", "unsupported" },
-  { "iest", "A", "unsupported" },
-  { "ier", "A", "unsupported" },
-  { "est", "A", "unsupported" },
-  { "eur", "A", "unsupported" },
-  { "er", "A", "unsupported" },
-  { "ur", "N00", "unsupported" },
+  { "fy", "V", "class" },
+  { "ment", "N00", "class" },
+  { "ion", "N00", "class" },
+  { "ence", "N00", "class" },
+  { "ance", "N00", "class" },
+  { "enc", "N00", "class" },
+  { "anc", "N00", "class" },
+  { "ity", "N00", "class" },
+  { "age", "N00", "class" },
+  { "ure", "N00", "class" },
+  { "ag", "N00", "class" },
+  { "nes", "N00", "class" },
+  { "or", "N00", "class" },
+  { "iest", "A", "class" },
+  { "ier", "A", "class" },
+  { "est", "A", "class" },
+  { "eur", "A", "class" },
+  { "er", "A", "class" },
+  { "ur", "N00", "class" },
   { "ly", "D", "ly" },
-  { "ical", "A", "unsupported" },
-  { "ic", "A", "unsupported" },
-  { "ible", "A", "unsupported" },
-  { "able", "A", "unsupported" },
-  { "ibl", "A", "unsupported" },
-  { "abl", "A", "unsupported" },
-  { "ory", "A", "unsupported" },
-  { "ary", "A", "unsupported" },
-  { "ou", "A", "unsupported" },
-  { "les", "A", "unsupported" },
+  { "ical", "A", "class" },
+  { "ic", "A", "class" },
+  { "ible", "A", "class" },
+  { "able", "A", "class" },
+  { "ibl", "A", "class" },
+  { "abl", "A", "class" },
+  { "ory", "A", "class" },
+  { "ary", "A", "class" },
+  { "ou", "A", "class" },
+  { "les", "A", "class" },
 }
 for _, row in ipairs(rows) do
   row.ending, row.selector, row.transform = row[1], row[2], row[3]
@@ -91,11 +95,31 @@ local function ascii_lower(text)
   return (text:gsub("[A-Z]", function(c) return string.char(c:byte() + 32) end))
 end
 
-local function lookup(dictionary, key)
+local function lookup(dictionary, key, options)
   local records = dictionary.by_key[ascii_lower(key)]
   if not records then return nil end
-  if #records ~= 1 then return nil, "duplicate dictionary key: " .. key end
-  return records[1]
+  local index = 1
+  if options and options.dictionary_entry ~= nil then
+    assert(type(options.dictionary_entry)=='function', 'dictionary_entry must be a function')
+    index=options.dictionary_entry(key,records)
+  end
+  assert(type(index) == 'number' and records[index], 'invalid dictionary entry selection: ' .. key)
+  return records[index]
+end
+
+local suffix_fields
+
+local function resolve(dictionary,key,options)
+  local seen={}
+  local record=lookup(dictionary,key,options)
+  while record and record.value:sub(1,1)=='=' do
+    local normalized=ascii_lower(key)
+    assert(not seen[normalized], 'cyclic dictionary redirect: '..key)
+    seen[normalized]=true
+    key=record.value:sub(2)
+    record=lookup(dictionary,key,options)
+  end
+  return record,key
 end
 
 local function decode_record(record, source, candidate, row, exact)
@@ -119,13 +143,10 @@ local function decode_record(record, source, candidate, row, exact)
     tag = "D"
   end
 
-  local fields = {}
-  if row and row.selector == "Z13" then
-    fields.number, fields.person = 1, 3
-  elseif row and row.selector == "G8" then
-    fields.case_mask = 8
-  elseif row and row.selector == "E" then
-    fields.tense, fields.case_mask = 1, 8
+  local fields = suffix_fields(row)
+  if row and row.selector:sub(1, 1) == "A" and fields.tense and fields.tense ~= 0
+      and (tag == "Z" or tag == "N") then
+    tag = "A"
   end
 
   return {
@@ -141,6 +162,65 @@ local function decode_record(record, source, candidate, row, exact)
     native_selector = row and row.selector or nil,
     fields = fields,
   }
+end
+
+local function selector_digit(selector, index)
+  local byte = selector:byte(index + 1) or 0
+  if byte >= 48 and byte <= 57 then return byte - 48 end
+  return 0
+end
+
+-- Grammar written by the 0A4F:07F2 class switch, independent of the dictionary hit.
+function suffix_fields(row)
+  local fields = {}
+  if not row then return fields end
+  local class = row.selector:sub(1, 1)
+  if class == "Z" then
+    fields.number, fields.person = selector_digit(row.selector, 1), selector_digit(row.selector, 2)
+  elseif class == "G" or class == "V" then
+    fields.case_mask = 8
+  elseif class == "E" then
+    fields.tense, fields.case_mask = 1, 8
+  elseif class == "A" then
+    fields.marker = 0x61
+    local last, before = row.ending:sub(-1), row.ending:sub(-2, -2)
+    if last == "r" and (before == "e" or before == "u") then fields.tense = 1
+    elseif row.ending:sub(-2) == "st" then fields.tense = 2 end
+  elseif class == "N" then
+    fields.number = selector_digit(row.selector, 1)
+    fields.case_mask = selector_digit(row.selector, 2)
+  end
+  return fields
+end
+
+local function with_extra(stem, extra)
+  if extra and extra ~= "" and stem:sub(-#extra) ~= extra then return { stem, stem .. extra } end
+  return { stem }
+end
+
+-- Adjective endings restore ie→y, undo a doubled consonant, or keep the
+-- auxiliary e that an ending such as -er records for the second try.
+local function adjective_candidates(word, ending)
+  local stem = word:sub(1, #word - #ending)
+  local extra = ending:sub(1, 1) == "e" and "e" or nil
+  if ending:sub(1, 2) == "ie" then
+    stem, extra = stem .. "y", nil
+  elseif #stem >= 2 and stem:sub(-1) == stem:sub(-2, -2) then
+    extra, stem = stem:sub(-1), stem:sub(1, -2)
+  end
+  return with_extra(stem, extra)
+end
+
+local function class_candidates(word, row)
+  local class = row.selector:sub(1, 1)
+  local ending = row.ending
+  if class == "N" and not ending:find("'", 1, true) then return {} end
+  if class == "A" then return adjective_candidates(word, ending) end
+  local stem = word:sub(1, #word - #ending)
+  if class == "V" then return with_extra(stem, ending:sub(1, 1) == "e" and "e" or nil) end
+  if ending == "ies'" then return {stem .. 'y'} end
+  if ending == "es'" then return with_extra(stem, 'e') end
+  return { stem }
 end
 
 local function candidates(word, row)
@@ -175,29 +255,27 @@ end
 -- no applicable native ending, or (nil, reason) for a recognized but
 -- unsupported/ambiguous branch. Result.payload excludes a dictionary backref;
 -- callers must apply result.backref only when their native context allows it.
-function lexicon.lookup(dictionary, source)
+function lexicon.lookup(dictionary, source, options)
   assert(type(source) == "string" and source ~= "", "suffix lookup needs a source word")
   local word = ascii_lower(source)
-  local exact, exact_error = lookup(dictionary, word)
-  if exact then return decode_record(exact, source, word, nil, true) end
-  if exact_error then return nil, exact_error end
+  local exact, exact_key = resolve(dictionary, word, options)
+  if exact then return decode_record(exact, source, exact_key, nil, true) end
 
   for _, row in ipairs(rows) do
     if #word > #row.ending and word:sub(-#row.ending) == row.ending then
-      if row.transform == "unsupported" then
-        return nil, "native suffix row " .. row.ending .. "/" .. row.selector .. " is not ported"
-      else
-        for _, candidate in ipairs(candidates(word, row)) do
-          local record, err = lookup(dictionary, candidate)
-          if err then return nil, err end
-          if record then
-            return decode_record(record, source, candidate, row, false)
-          end
+      local choices = row.transform == "class" and class_candidates(word, row) or candidates(word, row)
+      for _, candidate in ipairs(choices) do
+        local record, resolved = resolve(dictionary, candidate, options)
+        if record then
+          return decode_record(record, source, resolved, row, false)
         end
-        -- 0A4F:07F2 stops at the first table row whose ending matches. Do not
-        -- fall through to a shorter ending when its candidate misses.
-        return nil, "native suffix candidate missed: " .. row.ending
       end
+      -- 0A4F:07F2 stops at the first table row whose ending matches. Do not
+      -- fall through to a shorter ending when its candidate misses. A class
+      -- row with no dictionary stem leaves the surface word unchanged.
+      -- Derivational nouns still publish noun grammar through surface_noun.
+      if row.transform == "class" then return nil end
+      return nil, "native suffix candidate missed: " .. row.ending
     end
   end
   return nil
@@ -228,6 +306,39 @@ function lexicon.attempt_fields(source)
     end
   end
   return nil
+end
+
+-- Noun grammar for a derivational ending that keeps the surface word.
+-- 0A4F:07F2 writes tag N, number, and case for an N-class row, and truncates
+-- the source only when the ending contains an apostrophe. With no apostrophe
+-- the caller looks the whole word up, misses, and leaves tag N in place
+-- (0A4F:3A63). Possessives and every earlier row are excluded: those either
+-- find a stem or follow a different miss path.
+function lexicon.surface_noun(source)
+  assert(type(source) == "string" and source ~= "", "surface noun needs a source word")
+  local word = ascii_lower(source)
+  for _, row in ipairs(rows) do
+    if #word > #row.ending and word:sub(-#row.ending) == row.ending then
+      local class = row.selector:sub(1, 1)
+      if row.transform == "class" and class == "N" and not row.ending:find("'", 1, true) then
+        return { tag = "N", ending = row.ending, selector = row.selector, fields = suffix_fields(row) }
+      end
+      return nil
+    end
+  end
+  return nil
+end
+
+local function derivational_compound(dictionary,source,options)
+  local left, right = ascii_lower(source):match('^([^/-]+)[/-]([^/-]+)$')
+  if not left then return false end
+  -- A standalone dictionary word (ion, age, or, ...) is not merely a suffix.
+  -- Preserve whole unknown compounds only when neither part has a reading.
+  if lookup(dictionary,left,options) or lookup(dictionary,right,options) then return false end
+  for _, row in ipairs(rows) do
+    if row.selector == 'N00' and (left == row.ending or right == row.ending) then return true end
+  end
+  return false
 end
 
 -- Expose a defensive copy for fixture tooling; callers cannot change dispatch.
@@ -362,31 +473,83 @@ function lexicon.decode_reading(node, payload, options, macroSource)
   return p-1
 end
 
--- Literal-key branch of 0A4F:1713 and reading distribution in 0A4F:18F8.
--- Pattern keys and record insertion markers require separate ports.
+-- Longest phrase wins; a literal key wins a tie against a key with gaps.
 
 function lexicon.match_phrase(dictionary, records, index, key)
-  local best,finish
+  local best,finish,captures,best_gaps,best_literals
   for _,record in ipairs(dictionary.by_token[key] or {}) do
-    if record.key:find(' ',1,true) and record.key:match("^[A-Za-z '-]+$") then
-      local words={}
-      for w in record.key:gmatch('%S+') do words[#words+1]=w:lower() end
-      local matched=words[1]==key
-      for j=2,#words do
-        local n=records[index+j-1]
-        if not n or n.kind~=0x57 or n.source:lower()~=words[j] then matched=false;break end
-      end
-      if matched and record.value:sub(1,1)~='$' and (not finish or index+#words-1>finish) then
-        best,finish=record,index+#words-1
+    if record.key:find(' ',1,true) and not record.raw:find('*$',1,true) then
+      local last,gaps=phrase_patterns.match(record.key,records,index,key)
+      local _,parts=record.key:gsub('%S+','')
+      local literals=parts-(gaps and #gaps or 0)
+      if last and (not finish or last>finish or last==finish and
+          (#gaps<best_gaps or #gaps==best_gaps and literals>best_literals)) then
+        best,finish,captures,best_gaps,best_literals=record,last,gaps,#gaps,literals
       end
     end
   end
-  return best,finish
+  return best,finish,captures
 end
-function lexicon.apply_phrase(record, records, first, last, options)
+function lexicon.apply_phrase(record, records, first, last, options, captures)
   options = options or {}
   local value=record.value:match('^[^\\]*')
   local node=records[first]
+  local readings=phrase_patterns.readings(value)
+  if #readings>1 then
+    local selected=1
+    if options.phrase_reading ~= nil then
+      assert(type(options.phrase_reading)=='function', 'phrase_reading must be a function')
+      selected=options.phrase_reading(record.key,readings)
+    end
+    assert(type(selected)=='number' and readings[selected], 'invalid phrase reading selection')
+    node.phrase_readings=readings
+    value=readings[selected]
+    value=value:match('^[A-Za-z]%.(W.*)$') or value
+  end
+  -- Two shipped entries omit/mistype a selector. Untagged text stays literal;
+  -- the Cyrillic lookalike А in black board is an adjective selector.
+  value=value:gsub('^W\x80','WA')
+  if value:sub(1,1)=='W' and value:sub(2,2)~='~' and not value:sub(2,2):match('[A-Za-z#]') then
+    value='Ww'..value:sub(2)
+  end
+  if captures and #captures>0 then
+    local held,literals,rendered={},{},{}
+    for _,capture in ipairs(captures) do for _,n in ipairs(capture) do held[n]=true end end
+    for at=first,last do if not held[records[at]] then literals[#literals+1]=records[at] end end
+    local template={}
+    for k,v in pairs(node) do template[k]=v end
+    local used=0
+    local segments=phrase_patterns.segments(value)
+    for segment,part in ipairs(segments) do
+      if part~='' and part~='W' then
+        if segment>1 then
+          if part:sub(1,1)==' ' then part='Ww'..part:sub(2)
+          elseif not part:sub(1,1):match('[A-Za-z#]') then part='Ww'..part
+          elseif value:sub(1,1)=='W' then part='W'..part end
+        end
+        local pieces
+        if used==0 then pieces=literals
+        else
+          local fresh={}
+          for k,v in pairs(template) do fresh[k]=v end
+          fresh.source,fresh.source_length,fresh.rules='',0,nil
+          pieces={fresh}
+        end
+        lexicon.apply_phrase({value=part},pieces,1,#pieces,options)
+        for _,n in ipairs(pieces) do rendered[#rendered+1]=n end
+        used=used+1
+      end
+      if segment<#segments then
+        for _,n in ipairs(captures[segment] or {}) do rendered[#rendered+1]=n end
+      end
+    end
+    -- Only explicit output gaps reinsert captured words. Idioms such as
+    -- "do your best" consume a possessive already expressed by their reading.
+    for _=first,last do table.remove(records,first) end
+    for at=#rendered,1,-1 do table.insert(records,first,rendered[at]) end
+    return first
+  end
+  if value:find('~',1,true) then value=table.concat(phrase_patterns.segments(value)) end
   if value:sub(1,1)~='W' then
     local t=value:sub(1,1)
     node.previous_tag=t:upper():byte()
@@ -406,14 +569,15 @@ function lexicon.apply_phrase(record, records, first, last, options)
   local oldtag,number=nodes.tag(node),node.number or 0
   local index=first
   while index<=last or tag~='' do
-    assert(tag~='' and tag:match('[ANnVvEhFebPCwX]'), 'native W phrase selector is not ported: '..tag)
+    assert(tag~='' and tag:match('[A-Za-z#]'), 'invalid W phrase selector: '..tag)
     local stop=pos
-    while stop<=#value and not value:sub(stop,stop):match('[A-Za-z ~#/;]') do
+    while stop<=#value and not value:sub(stop,stop):match(tag=='#' and '#' or '[A-Za-z ~#/]') do
       if value:sub(stop,stop)=='{' then stop=assert(value:find('}',stop,true),'unterminated phrase annotation') end
       stop=stop+1
     end
     local text=value:sub(pos,stop-1)
     local nexttag=value:sub(stop,stop)
+    if tag=='#' and nexttag=='#' then stop=stop+1;nexttag=value:sub(stop,stop) end
     if nexttag==' ' then nexttag='w' end
     if index>last then
       local fresh=nodes.new(tag,{kind=0x57,marker=0x77,source='',lookup='',
@@ -450,6 +614,10 @@ function lexicon.apply_phrase(record, records, first, last, options)
       text = macroText(n.source or '', text, options)
     end
     n.tag,n.previous_tag,n.reading=tag:byte(),tag:upper():byte(),text
+    if not tag:match('[ANVvEhFebPCwX]') then
+      lexicon.decode_reading(n,text,options)
+      n.reading_state=2
+    end
     if (n.marker or 0)==0 then n.marker=0x77 end
     tag,pos=nexttag,stop+1
     if tag=='' then
@@ -462,13 +630,11 @@ function lexicon.apply_phrase(record, records, first, last, options)
 end
 
 -- Lexical analyzer over CP866 strings and lossless dictionary data.
--- Ports literal lookup, phrase readings, macros and a bounded tokenizer;
--- unsupported pattern and suffix branches fail explicitly.
+-- Literal and patterned phrases share reading distribution and ordinary records.
 
 -- 0A4F:1603 attaches up to ten `word pattern*$action` records to a word node:
 -- records whose first token matches the word and whose last star is followed
--- by `$`. Literal phrase keys are handled separately; pattern-key phrase
--- matching and its interaction with these subrules remain outside this slice.
+-- by `$`. Phrase-key matching is separate from these grammatical subrules.
 function lexicon.sub_rules(dictionary,word)
   local rules={}
   for _,record in ipairs(dictionary.by_token[word:gsub('[A-Z]',string.lower)] or {}) do
@@ -495,7 +661,7 @@ local function word(source, position)
   fields.source,fields.lookup,fields.reading,fields.previous_tag=source,'','',0
   fields.source_position,fields.source_length,fields.paradigm,fields.paradigm_high=position,#source,0xFF,0xFF
   local numeric=source:match('^[%d,]+$') ~= nil
-  local tag=numeric and 'H' or source:match("^[A-Za-z'-]+$") and '?' or '#'
+  local tag=numeric and 'H' or source:match("^[A-Za-z'/-]+$") and '?' or '#'
   fields.counted_word=tag=='?'
   if tag=='#' then fields.person,fields.gender=3,1 end
   -- 0687:0892 preserves the original length but bounds the source copy.
@@ -551,7 +717,6 @@ end
 -- trailing punctuation becomes boundary records. Internal hyphens stay in
 -- the word until dictionary analysis has had a chance to recognize them.
 function lexicon.tokenize(input)
-  assert(not input:find('[{}]'), 'native inline input directives are not ported')
   local records={boundary('*',0x2A)}
   local quoted=input:match("([.!?])['\"]%s*$")
   if quoted then input=input:gsub("['\"]%s*$",'') end
@@ -563,13 +728,21 @@ function lexicon.tokenize(input)
     end
   end
   local words=0
-  for position,chunk in input:gmatch('()([^%s]+)') do
+  for _, item in ipairs(directives.chunks(input)) do
+    local position,chunk=item.position,item.text
+    if item.literal then
+      local n=word(chunk,position-1)
+      n.tag,n.counted_word,n.literal,n.source,n.source_length=0x23,false,chunk,chunk,#chunk
+      n.literal_joined=item.joined
+      if item.joined then n.separator=1 end
+      records[#records+1]=n
+    else
     local leading=false
     while chunk~='' and chunk:sub(1,1):match('[%p]') and not chunk:sub(1,1):match('[._?]') do
       local c=chunk:sub(1,1)
       if (c=='#' or c=='/') and chunk:sub(2,2):match('%a') then break end
       if c=='`' then c="'" end
-      local n=boundary(c,leading and 0 or 0x20,position-1)
+      local n=boundary(c,(leading or item.joined) and 0 or 0x20,position-1)
       n.marker=0x20
       records[#records+1]=n;leading=true
       chunk=chunk:sub(2);position=position+1
@@ -583,6 +756,7 @@ function lexicon.tokenize(input)
       end
       if chunk~='' then
         local n=word(chunk,position-1)
+        if item.joined then n.separator=1 end
         records[#records+1]=n
         if n.counted_word then
           words=words+1
@@ -590,6 +764,7 @@ function lexicon.tokenize(input)
         end
       end
       for c in tail:gmatch('.') do records[#records+1]=boundary(c,0) end
+    end
     end
   end
   records[#records+1]=boundary('*',0x2A)
@@ -609,36 +784,48 @@ local function decode(dictionary,records,index,options)
 		if kind == "X" then fresh.marker = 0x27 end
 		table.insert(records, index + 1, fresh)
 	end
-  local matches=dictionary.by_key[source:lower()]
-  local aliases = {}
-  while matches and #matches == 1 and matches[1].value:sub(1,1) == '=' do
-    assert(not aliases[source:lower()], 'cyclic dictionary redirect: '..source)
-    aliases[source:lower()] = true
-    source = matches[1].value:sub(2)
+  local entry,resolved=resolve(dictionary,source,options)
+  if resolved~=source then
+    source=resolved
     node.source, node.source_length = source, #source
-    matches = dictionary.by_key[source:lower()]
   end
   local value,backref
-  if matches then
-    assert(#matches==1,'native duplicate lookup is not ported: '..source)
-    value=matches[1].value
+  if entry then
+    value=entry.value
     local initial=value:sub(1,1)
     node.reading_state,node.tag,node.previous_tag=initial=='#' and 0 or 1,initial:byte(),initial:upper():byte()
     backref=value:match('\\(.*)')
     if backref then node.lookup=backref..' ' end
   end
-  local derived
+  local derived, lookup_error
   if not value then
-    derived=lexicon.lookup(dictionary,source)
-    if derived then
+    derived, lookup_error=lexicon.lookup(dictionary,source,options)
+    if not derived and options.prefixes then
+      derived, node.derivation_prefix=prefixes.lookup(options.prefixes,source,function(stem)
+        return lexicon.lookup(dictionary,stem,options)
+      end)
+    end
+    if derived and derived.record then
       value=derived.record.value
       node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()
       for at,v in pairs(derived.fields) do node[layout.key(at)]=v end
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
+    elseif not lookup_error then
+      local compound=derivational_compound(dictionary,source,options)
+      local surface=compound and {tag='N',fields={number=0,case_mask=0}}
+        or not source:find('[-/]') and lexicon.surface_noun(source)
+      if surface then
+        -- Unknown derivational nouns keep their surface spelling. Bare
+        -- endings in compounds follow the same Lua policy without splitting.
+        node.reading_state,node.tag=1,surface.tag:byte()
+        node.person,node.gender=3,1
+        for at,v in pairs(surface.fields) do node[layout.key(at)]=v end
+        node.surface_compound=compound
+      end
     end
   end
-  local phrase,last=lexicon.match_phrase(dictionary,records,index,source:lower())
+  local phrase,last,captures=lexicon.match_phrase(dictionary,records,index,source:lower())
   -- Subrules are collected while scanning possible following words, even
   -- when a literal phrase later wins. At a terminal boundary no scan occurs.
   if records[index+1] and records[index+1].separator~=0x2A then
@@ -651,12 +838,28 @@ local function decode(dictionary,records,index,options)
     end
     if #rules>0 then node.rules=rules end
   end
-  if not phrase and backref then phrase,last=lexicon.match_phrase(dictionary,records,index,backref:lower()) end
-  if phrase then return lexicon.apply_phrase(phrase,records,index,last,options) end
+  local phrase_base=backref or (derived and derived.candidate)
+  if not phrase and phrase_base then phrase,last,captures=lexicon.match_phrase(dictionary,records,index,phrase_base:lower()) end
+  if phrase then
+    if value then
+      -- A phrase can replace an auxiliary with a lexical verb. Decode its
+      -- tense/person metadata first (did = X1), retaining the original tag
+      -- that phrase distribution uses for participles and other conversions.
+      local context={}
+      for key,item in pairs(node) do context[key]=item end
+      lexicon.decode_reading(context,value:sub(2):match('^[^\\]*'),options)
+      -- Case government belongs to the replacement reading, not the English
+      -- head ("at" -> "к" must not inherit at's prepositional case).
+      for _,field in ipairs({'tense','number','person','aspect'}) do
+        node[field]=context[field]
+      end
+    end
+    return lexicon.apply_phrase(phrase,records,index,last,options,captures)
+  end
   -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
   -- 10D36 clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end
-  if not value then
+  if not value and not node.surface_compound then
     local left,separator,right=source:match('^([^/-]+)([/-])(.+)$')
     if left then
       local attempt=lexicon.attempt_fields(source)
@@ -681,7 +884,7 @@ function lexicon.analyze(dictionary,input,options)
   local records,terminator,word_count=lexicon.tokenize(input)
   local i=1
   while i<=#records do
-    if records[i].kind==0x57 and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then
+    if records[i].kind==0x57 and not records[i].literal and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then
       i=decode(dictionary,records,i,options)
     else i=i+1 end
   end

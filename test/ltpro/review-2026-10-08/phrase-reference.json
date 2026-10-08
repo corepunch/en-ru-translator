@@ -1,0 +1,1548 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-08T05:32:42.410423+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "a289fc8a57b7e2bbc64a3405aba31e1f14911c085923f779e292ffb08a800d75",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "gap-phrase-001",
+      "group": "phrase-gaps",
+      "input": "above cat and below.",
+      "raw_cp866_hex": "a2ebe8a520aaaee8aaa820a820ada8a6a52e0d0a",
+      "raw_sha256": "b8c326b5a5e3949b2c87e112223c97e3d15c348933ae0fd7838224e1041701eb",
+      "translation": "выше кошки и ниже."
+    },
+    {
+      "id": "gap-phrase-002",
+      "group": "phrase-gaps",
+      "input": "accept cat at its face value.",
+      "raw_cp866_hex": "afe0a8aca8e2a520aaaee8aae320a7a020e7a8e1e2e3ee20acaeada5e2e32e0d0a",
+      "raw_sha256": "a565e95534dde0de1cf8b72637b08fafd3bdf289842af6e48f47d0dd5559ec7a",
+      "translation": "примите кошку за чистую монету."
+    },
+    {
+      "id": "gap-phrase-003",
+      "group": "phrase-gaps",
+      "input": "acquit cat ill.",
+      "raw_cp866_hex": "afabaee5ae20e1afe0a0a2ece2a5e1ec2e0d0a",
+      "raw_sha256": "d2230eae34e43e6cffa00a54c1a7ac00621e996d87a1ffca3d74f1b0d80fa365",
+      "translation": "плохо справьтесь."
+    },
+    {
+      "id": "gap-phrase-004",
+      "group": "phrase-gaps",
+      "input": "acquit cat well.",
+      "raw_cp866_hex": "e5aee0aee8ae20e1afe0a0a2ece2a5e1ec2e0d0a",
+      "raw_sha256": "50c1c502751ed5d8f280c80fcfbcd50750f21dd36ef29d7a6d57f526c806d13d",
+      "translation": "хорошо справьтесь."
+    },
+    {
+      "id": "gap-phrase-005",
+      "group": "phrase-gaps",
+      "input": "act on cat behalf.",
+      "raw_cp866_hex": "a7a0a4a5a9e1e2a2e3a9e2a520aee220a8aca5ada820aaaee8aaa82e0d0a",
+      "raw_sha256": "895d47098e054fa36ac481399352e5bbf5765c20ce42d474ad0ff224bc7ae49c",
+      "translation": "задействуйте от имени кошки."
+    },
+    {
+      "id": "gap-phrase-006",
+      "group": "phrase-gaps",
+      "input": "affect cat interests.",
+      "raw_cp866_hex": "a7a0a4a5a2a0e2ec20a8ade2a5e0a5e1eb20aaaee8aaa82e0d0a",
+      "raw_sha256": "fcf71dccd9c7011ccc8cf644f2c0835408c27f4d4c2b4ed5204075f47fc0f443",
+      "translation": "задевать интересы кошки."
+    },
+    {
+      "id": "gap-phrase-007",
+      "group": "phrase-gaps",
+      "input": "affected cat item.",
+      "raw_cp866_hex": "e0a0a7a4a5ab20a0aae2a8a2adaea920aaaee8aaa82e0d0a",
+      "raw_sha256": "32c8f7805b16993952b74cf7de3563347f96c26e9db862f3024583144f6e86aa",
+      "translation": "раздел активной кошки."
+    },
+    {
+      "id": "gap-phrase-008",
+      "group": "phrase-gaps",
+      "input": "against cat will.",
+      "raw_cp866_hex": "afe0aee2a8a220a2aeaba820aaaee8aaa82e0d0a",
+      "raw_sha256": "56768d4410630275210ff22e50763bfe684d4af30316cd747775fb7b635585da",
+      "translation": "против воли кошки."
+    },
+    {
+      "id": "gap-phrase-009",
+      "group": "phrase-gaps",
+      "input": "aim cat efforts at.",
+      "raw_cp866_hex": "ada0afe0a0a2ece2a520e3e1a8aba8ef20ada02e0d0a",
+      "raw_sha256": "f400cd48444ca86b1698229709efcb80b744b02cc22226b03f94bacd32e3dcf4",
+      "translation": "направьте усилия на."
+    },
+    {
+      "id": "gap-phrase-010",
+      "group": "phrase-gaps",
+      "input": "all cat concerned.",
+      "raw_cp866_hex": "a2e1a520a7a0a8ade2a5e0a5e1aea2a0adadeba520aaaee8aaa02e0d0a",
+      "raw_sha256": "f05163105e36bc35c9c3018fb8cd6e21bb5a2503fb3d4a4d9f15b5025a068ca2",
+      "translation": "все заинтересованные кошка."
+    },
+    {
+      "id": "gap-phrase-011",
+      "group": "phrase-gaps",
+      "input": "aply cat to.",
+      "raw_cp866_hex": "afe0a8aca5ada8e2a5e1ec20aaaee8aaaea920aa2e0d0a",
+      "raw_sha256": "ba0c0e6e197e29a4c628e3caef434b33ad909e9609b27af38bd493d5ec4a12c7",
+      "translation": "применитесь кошкой к."
+    },
+    {
+      "id": "gap-phrase-012",
+      "group": "phrase-gaps",
+      "input": "apply cat to.",
+      "raw_cp866_hex": "afe0a8aca5ada8e2a5e1ec20aaaee8aaaea920aa2e0d0a",
+      "raw_sha256": "ba0c0e6e197e29a4c628e3caef434b33ad909e9609b27af38bd493d5ec4a12c7",
+      "translation": "применитесь кошкой к."
+    },
+    {
+      "id": "gap-phrase-013",
+      "group": "phrase-gaps",
+      "input": "as much as cat times.",
+      "raw_cp866_hex": "a220aaaee8aaa020e0a0a72e0d0a",
+      "raw_sha256": "d34a92d0a4a821bddad20cb4b676d1758eeadef80ff2e816b7c489d5053afd56",
+      "translation": "в кошка раз."
+    },
+    {
+      "id": "gap-phrase-014",
+      "group": "phrase-gaps",
+      "input": "as cat please.",
+      "raw_cp866_hex": "aaa0aa7e20e3a3aea4adae2e0d0a",
+      "raw_sha256": "ac437858dc253fc5ebd89a8d31ee91a3674c751fa6f7fba4d052c3a64dc00038",
+      "translation": "как~ угодно."
+    },
+    {
+      "id": "gap-phrase-015",
+      "group": "phrase-gaps",
+      "input": "assume cat responsibility for.",
+      "raw_cp866_hex": "a2aea7ecaca8e2a520ada020e1a5a1ef20aee2a2a5e2e1e2a2a5adadaee1e2ec20a7a02e0d0a",
+      "raw_sha256": "b1deba1d196dd3c3c3fdb834d2a430da4dec40f63ca45e3dde7b7c50568dc2a3",
+      "translation": "возьмите на себя ответственность за."
+    },
+    {
+      "id": "gap-phrase-016",
+      "group": "phrase-gaps",
+      "input": "at a cat lower.",
+      "raw_cp866_hex": "afe0a820a1aeaba5a520ada8a7aaa8a92e0d0a",
+      "raw_sha256": "427f1212b32710859194ef2b911227ddd2923bc67e35be61ae0fcc1b42b292c4",
+      "translation": "при более низкий."
+    },
+    {
+      "id": "gap-phrase-017",
+      "group": "phrase-gaps",
+      "input": "at the cat option.",
+      "raw_cp866_hex": "afae20a2eba1aee0e320aaaee8aaa82e0d0a",
+      "raw_sha256": "10e6e4958b4a7fb8d944d1eb74194308644382a360fb02863bfe4e5bbeb78588",
+      "translation": "по выбору кошки."
+    },
+    {
+      "id": "gap-phrase-018",
+      "group": "phrase-gaps",
+      "input": "at cat convenience.",
+      "raw_cp866_hex": "aa20aaaee8aaa020e3e1abe3a3a0ac2e0d0a",
+      "raw_sha256": "3248962a6af3355312ccf84225475f97f62cb20918bbef7eb5b62bb48b2b5efc",
+      "translation": "к кошка услугам."
+    },
+    {
+      "id": "gap-phrase-019",
+      "group": "phrase-gaps",
+      "input": "at cat cost.",
+      "raw_cp866_hex": "a7a020e1e7a5e220aaaee8aaa82e0d0a",
+      "raw_sha256": "b7e9e5438dd409b388a1b1964d2509e5a3fd01cf5c7cad51b01de062c56701a0",
+      "translation": "за счет кошки."
+    },
+    {
+      "id": "gap-phrase-020",
+      "group": "phrase-gaps",
+      "input": "avail cat of.",
+      "raw_cp866_hex": "a2aee1afaeabeca7e3a9e2a5e1ec2e0d0a",
+      "raw_sha256": "486941242bbb929e0941d645fd721c35a291dc9043dd53481a6943877ff41a4f",
+      "translation": "воспользуйтесь."
+    },
+    {
+      "id": "gap-phrase-021",
+      "group": "phrase-gaps",
+      "input": "be of cat importance.",
+      "raw_cp866_hex": "a8aca5a9e2a520a7ada0e7a5ada8a520aaaee8aaa82e0d0a",
+      "raw_sha256": "c9754e3ec09dea4ef41867de1469aee02a2f892f17bf91ed044735aac3d0eb31",
+      "translation": "имейте значение кошки."
+    },
+    {
+      "id": "gap-phrase-022",
+      "group": "phrase-gaps",
+      "input": "be cat anxious to.",
+      "raw_cp866_hex": "aaaee8aaa020e5aee7a5e22e0d0a",
+      "raw_sha256": "983698f42c0474d8c9496369b761be8bd536b6b45c5eed870825910aad782909",
+      "translation": "кошка хочет."
+    },
+    {
+      "id": "gap-phrase-023",
+      "group": "phrase-gaps",
+      "input": "be cat aware of.",
+      "raw_cp866_hex": "aaaee8aaa020a7ada0a5e220ae2e0d0a",
+      "raw_sha256": "59f525d5fe7a93acef6080430f8cc362ada9e35fed2bbd9e59b1c8eeced6d49a",
+      "translation": "кошка знает о."
+    },
+    {
+      "id": "gap-phrase-024",
+      "group": "phrase-gaps",
+      "input": "be cat careful.",
+      "raw_cp866_hex": "aaaee8aaa020aee1e2aee0aea6ada0ef2e0d0a",
+      "raw_sha256": "8b9b017dc456a5cc78c3ae5d836fa3d24b1a883f8cde70c016f9f22de747e947",
+      "translation": "кошка осторожная."
+    },
+    {
+      "id": "gap-phrase-025",
+      "group": "phrase-gaps",
+      "input": "be cat certain to.",
+      "raw_cp866_hex": "aaaee8aaa020ada5e1aeacada5adadae2e0d0a",
+      "raw_sha256": "b05f68b6c09c8d72e2898a577dbaf8adc3733f9a836af4f8d86412e0ba167245",
+      "translation": "кошка несомненно."
+    },
+    {
+      "id": "gap-phrase-026",
+      "group": "phrase-gaps",
+      "input": "be cat disclaimed.",
+      "raw_cp866_hex": "aee2a2a5e0a3ade3e2ebac20aaaee8aaa02e0d0a",
+      "raw_sha256": "f30870c9829de5f2fde3a75fa4099665678e47ca907ece2394408ff9d673c1cd",
+      "translation": "отвергнутым кошка."
+    },
+    {
+      "id": "gap-phrase-027",
+      "group": "phrase-gaps",
+      "input": "be cat intended to.",
+      "raw_cp866_hex": "aaaee8aaa020e1aea1a8e0a0a5e2e1ef2e0d0a",
+      "raw_sha256": "e776b6973a49549823a4abcefd7b03d524322110a00e5981e4a503f88a3a9381",
+      "translation": "кошка собирается."
+    },
+    {
+      "id": "gap-phrase-028",
+      "group": "phrase-gaps",
+      "input": "be cat interesting.",
+      "raw_cp866_hex": "aaaee8aaa020a8ade2a5e0a5e1ada0ef2e0d0a",
+      "raw_sha256": "856ed71ef70fe9e2d259fdcc892498257c99664299ec88057e8f1b69cad3f34a",
+      "translation": "кошка интересная."
+    },
+    {
+      "id": "gap-phrase-029",
+      "group": "phrase-gaps",
+      "input": "be cat likely to.",
+      "raw_cp866_hex": "aaaee8aaa020a2a5e0aeefe2adae2e0d0a",
+      "raw_sha256": "cb19f2f34b291945382a48f55307933f668e2f65df9e225a25d50992e3a3286c",
+      "translation": "кошка вероятно."
+    },
+    {
+      "id": "gap-phrase-030",
+      "group": "phrase-gaps",
+      "input": "be cat strained.",
+      "raw_cp866_hex": "aaaee8aaa020ada0e2efade3e2a0ef2e0d0a",
+      "raw_sha256": "a1e5994bfffb7aedfb17dee491f202f0a0f19da8ee8200543ad38f9899371fda",
+      "translation": "кошка натянутая."
+    },
+    {
+      "id": "gap-phrase-031",
+      "group": "phrase-gaps",
+      "input": "be cat sure of.",
+      "raw_cp866_hex": "aaaee8aaa020e3a2a5e0a5adada0ef20a22e0d0a",
+      "raw_sha256": "24787d2934c5cf6813687b2cc85a15bad9df61a53ce9b3cc2840de7839eb15c7",
+      "translation": "кошка уверенная в."
+    },
+    {
+      "id": "gap-phrase-032",
+      "group": "phrase-gaps",
+      "input": "be cat sure to.",
+      "raw_cp866_hex": "aaaee8aaa020aea1efa7a0e2a5abecadae2e0d0a",
+      "raw_sha256": "09d470be8d70a56059491b4eb43076e109f5e686baf4cc4ac676a8dd1fe81438",
+      "translation": "кошка обязательно."
+    },
+    {
+      "id": "gap-phrase-033",
+      "group": "phrase-gaps",
+      "input": "be cat tense.",
+      "raw_cp866_hex": "aaaee8aaa020ada0afe0efa6a5adada0ef2e0d0a",
+      "raw_sha256": "c7661c36c8fce73a4c9acb7578be4737a0b601704c3d912d4bc2bb07c959afe6",
+      "translation": "кошка напряженная."
+    },
+    {
+      "id": "gap-phrase-034",
+      "group": "phrase-gaps",
+      "input": "be cat under arrest.",
+      "raw_cp866_hex": "aaaee8aaa020afaea420a0e0a5e1e2aeac2e0d0a",
+      "raw_sha256": "cb0f0585cbfcadc41ceed7ffc31d66a99268270f16622be7b4de297789b3fd6b",
+      "translation": "кошка под арестом."
+    },
+    {
+      "id": "gap-phrase-035",
+      "group": "phrase-gaps",
+      "input": "be cat unlikely to.",
+      "raw_cp866_hex": "aaaee8aaa020a2e0efa42daba82e0d0a",
+      "raw_sha256": "7fcbc6f52f22c0d8293677bd3423380ee8c9ec571967f13c0aae03455891f3e0",
+      "translation": "кошка вряд-ли."
+    },
+    {
+      "id": "gap-phrase-036",
+      "group": "phrase-gaps",
+      "input": "bear cat in mind.",
+      "raw_cp866_hex": "a8aca5a9e2a520aaaee8aae320a220a2a8a4e32e0d0a",
+      "raw_sha256": "9ba61887fa37072c789691c0461a1d4a4f819d3e7e59dd5f16ae2fefc4a5ca78",
+      "translation": "имейте кошку в виду."
+    },
+    {
+      "id": "gap-phrase-037",
+      "group": "phrase-gaps",
+      "input": "bide cat time.",
+      "raw_cp866_hex": "a2eba6a8a4a0e2ec20afaea4e5aea4efe9a8a920acaeaca5ade22e0d0a",
+      "raw_sha256": "0e0300b3ee3b6ed4c0f16cba42e0e87787009a9c590f059de9eeafac408dddd6",
+      "translation": "выжидать подходящий момент."
+    },
+    {
+      "id": "gap-phrase-038",
+      "group": "phrase-gaps",
+      "input": "board of cat.",
+      "raw_cp866_hex": "e1aea2a5e220aaaee8aaa82e0d0a",
+      "raw_sha256": "8c9f818c02c970b11dbc37656ac063c4ccd3f4962d26e863b9520439c52dedb1",
+      "translation": "совет кошки."
+    },
+    {
+      "id": "gap-phrase-039",
+      "group": "phrase-gaps",
+      "input": "bring cat back into.",
+      "raw_cp866_hex": "a2aea7a2e0a0e2a8e2a520aaaee8aae320a22e0d0a",
+      "raw_sha256": "54c052c8465249a90d705f39d0b243925478d001cb6a4b0cce86681318c8cd29",
+      "translation": "возвратите кошку в."
+    },
+    {
+      "id": "gap-phrase-040",
+      "group": "phrase-gaps",
+      "input": "brush cat hair.",
+      "raw_cp866_hex": "afe0a8e7a5e1eba2a0e2ec20aaaee8aaa020a2aeabaee1eb2e0d0a",
+      "raw_sha256": "bed32d0ecb3fa6d469d211aa57d88da193e459aefdfe7f9d00517674722cff7d",
+      "translation": "причесывать кошка волосы."
+    },
+    {
+      "id": "gap-phrase-041",
+      "group": "phrase-gaps",
+      "input": "burning cat fuels.",
+      "raw_cp866_hex": "e2aeafaba8a2ae20aaaee8aaa820e1a6a8a3a0ada8ef2e0d0a",
+      "raw_sha256": "5fa3e460222829e622a33581e4bcd923d74963f51a4414c87d93717bab7f83e0",
+      "translation": "топливо кошки сжигания."
+    },
+    {
+      "id": "gap-phrase-042",
+      "group": "phrase-gaps",
+      "input": "catch cat napping.",
+      "raw_cp866_hex": "a7a0e1e2a0adece2a520aaaee8aae320a2e0a0e1afabaee52e0d0a",
+      "raw_sha256": "2f0b3fba7849ed4ee73e2ff9385f4e61890ff053c68f5bdab33dfaf42e61aaea",
+      "translation": "застаньте кошку врасплох."
+    },
+    {
+      "id": "gap-phrase-043",
+      "group": "phrase-gaps",
+      "input": "catch cat off guard.",
+      "raw_cp866_hex": "a7a0e1e2a0adece2a520aaaee8aae320a2e0a0e1afabaee52e0d0a",
+      "raw_sha256": "2f0b3fba7849ed4ee73e2ff9385f4e61890ff053c68f5bdab33dfaf42e61aaea",
+      "translation": "застаньте кошку врасплох."
+    },
+    {
+      "id": "gap-phrase-044",
+      "group": "phrase-gaps",
+      "input": "change cat from.",
+      "raw_cp866_hex": "a7a0aca5ada8e2a520aaaee8aae320e12e0d0a",
+      "raw_sha256": "02e3576ceb25fcc3cf3ab78ef7d07da8fd05baf0247fcbfcaeaf4b70953a9492",
+      "translation": "замените кошку с."
+    },
+    {
+      "id": "gap-phrase-045",
+      "group": "phrase-gaps",
+      "input": "change cat mind.",
+      "raw_cp866_hex": "a8a7aca5ada8e2a520e0a5e8a5ada8a520aaaee8aaa82e0d0a",
+      "raw_sha256": "616a96e865a508e612783b6e15c54c26fe02920cbd6d53c9563ce1eb0cf895f7",
+      "translation": "измените решение кошки."
+    },
+    {
+      "id": "gap-phrase-046",
+      "group": "phrase-gaps",
+      "input": "clear cat throat.",
+      "raw_cp866_hex": "aee2aaa0e8aba8a2a0e2ece1ef2e0d0a",
+      "raw_sha256": "9002d475353203a9581dfcfe3de28c74a0dcb44ad388705870a0b5f082469b3f",
+      "translation": "откашливаться."
+    },
+    {
+      "id": "gap-phrase-047",
+      "group": "phrase-gaps",
+      "input": "come to cat attention.",
+      "raw_cp866_hex": "aea1ada0e0e3a6a8a2a0e2ecada8a52e0d0a",
+      "raw_sha256": "7e577063092c36dc7f2a41c98933f96948ffe7c7cd63acddd489a1f76f4a0575",
+      "translation": "обнаруживатьние."
+    },
+    {
+      "id": "gap-phrase-048",
+      "group": "phrase-gaps",
+      "input": "come cat to.",
+      "raw_cp866_hex": "afa5e0a5a9a4a8e2a520aaaee8aae320aa2e0d0a",
+      "raw_sha256": "40a7882ee7178bc4766b9186a0c5909cf8b94c9f059dc7187f294eb9e800de89",
+      "translation": "перейдите кошку к."
+    },
+    {
+      "id": "gap-phrase-049",
+      "group": "phrase-gaps",
+      "input": "communicate cat with.",
+      "raw_cp866_hex": "afaeaea1e9a0a9e2a5e1ec20aaaee8aaaea920e12e0d0a",
+      "raw_sha256": "f103e1f48d3b099816cb1efc2bba769d8800e3be3797a4710aa19f95b7583511",
+      "translation": "пообщайтесь кошкой с."
+    },
+    {
+      "id": "gap-phrase-050",
+      "group": "phrase-gaps",
+      "input": "concern cat with.",
+      "raw_cp866_hex": "a7a0a9aca8e2a5e1ec2e0d0a",
+      "raw_sha256": "dfc88c5ae55eeb77c5710c66460d485e128d93b750101731bd575bba7f85a2e1",
+      "translation": "займитесь."
+    },
+    {
+      "id": "gap-phrase-051",
+      "group": "phrase-gaps",
+      "input": "confine cat of.",
+      "raw_cp866_hex": "aea3e0a0ada8e7ece2a52e0d0a",
+      "raw_sha256": "ba207dbaef770b50e31f7ba259f82a55f18f1fc0683257e0586d5908c79eac0f",
+      "translation": "ограничьте."
+    },
+    {
+      "id": "gap-phrase-052",
+      "group": "phrase-gaps",
+      "input": "cut cat dead.",
+      "raw_cp866_hex": "afe0aea8a3adaee0a8e0e3a9e2a52e0d0a",
+      "raw_sha256": "a5ec68abae9d9882206ccbd9db0282cb13677cc4e2d66299e950f359f80786d4",
+      "translation": "проигнорируйте."
+    },
+    {
+      "id": "gap-phrase-053",
+      "group": "phrase-gaps",
+      "input": "cut cat payrolls.",
+      "raw_cp866_hex": "e1e0a5a7a0a5acaea520a7a0e0afaba0e2e32e0d0a",
+      "raw_sha256": "2c4206bee90312e0268fbad96b54aa11ea9475a47f7b87c493955025613e2afd",
+      "translation": "срезаемое зарплату."
+    },
+    {
+      "id": "gap-phrase-054",
+      "group": "phrase-gaps",
+      "input": "debar cat the right.",
+      "raw_cp866_hex": "aee2aaa0a6a8e2a520aaaee8aaa520a220afe0a0a2a520ada02e0d0a",
+      "raw_sha256": "caed078802aae31dd2cee417e596b4d53dbaa66d6c0a7786e9929dab91288738",
+      "translation": "откажите кошке в праве на."
+    },
+    {
+      "id": "gap-phrase-055",
+      "group": "phrase-gaps",
+      "input": "debris cat thrown around.",
+      "raw_cp866_hex": "e0a0a7a1e0aee1a0adadeba920aea1abaeacaaa82e0d0a",
+      "raw_sha256": "14b964b6aaa449d9b49818bc8d448971abccd8b2849b955ef4bced0418abdf9d",
+      "translation": "разбросанный обломки."
+    },
+    {
+      "id": "gap-phrase-056",
+      "group": "phrase-gaps",
+      "input": "default cat parameters.",
+      "raw_cp866_hex": "e3e1e2a0adaea2a8e2a520afae20e3acaeabe7a0ada8ee20afa0e0a0aca5e2e0eb20aaaee8aaa82e0d0a",
+      "raw_sha256": "2e91047f7e357af2976928c571078d245edee1e970e480dc32c96897c85d13fb",
+      "translation": "установите по умолчанию параметры кошки."
+    },
+    {
+      "id": "gap-phrase-057",
+      "group": "phrase-gaps",
+      "input": "deter cat from trying.",
+      "raw_cp866_hex": "e3a4a5e0a6a8e2a520aee220afaeafebe2aeaa2e0d0a",
+      "raw_sha256": "a55618f3aecb87b96e2493cbf6b3174dc17cefea138d47fb84247452ffdb4a18",
+      "translation": "удержите от попыток."
+    },
+    {
+      "id": "gap-phrase-058",
+      "group": "phrase-gaps",
+      "input": "deter cat from trying again.",
+      "raw_cp866_hex": "e3a4a5e0a6a8e2a520aee220afaea2e2aee0adebe520afaeafebe2aeaa2e0d0a",
+      "raw_sha256": "4c39534ebe92984d723dc979c30b290fbc95edb83cf5176b6755dfa58d1bf00b",
+      "translation": "удержите от повторных попыток."
+    },
+    {
+      "id": "gap-phrase-059",
+      "group": "phrase-gaps",
+      "input": "distinguish cat by.",
+      "raw_cp866_hex": "aee2aba8e7a8e2a5e1ec2e0d0a",
+      "raw_sha256": "9261efeac9e3e5022a846601597ad4b0c7bd514b6313d5e9d9d9af021058addd",
+      "translation": "отличитесь."
+    },
+    {
+      "id": "gap-phrase-060",
+      "group": "phrase-gaps",
+      "input": "do cat a favour.",
+      "raw_cp866_hex": "aeaaa0a6a8e2a520aca8abaee1e2ec20aaaee8aaa82e0d0a",
+      "raw_sha256": "982add401ea66369b21d87519cbdc28795a35409b32b192f85bb024b2ab109a7",
+      "translation": "окажите милость кошки."
+    },
+    {
+      "id": "gap-phrase-061",
+      "group": "phrase-gaps",
+      "input": "do cat best.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520a2e1a520a2aea7acaea6adaea52e0d0a",
+      "raw_sha256": "1e7af70329214dd7f9899bde43b4f9721a1ff27bcc2518f7c9858cc48b55cacd",
+      "translation": "сделайте все возможное."
+    },
+    {
+      "id": "gap-phrase-062",
+      "group": "phrase-gaps",
+      "input": "do cat bit.",
+      "raw_cp866_hex": "a8e1afaeabada8e2a520e1a2aea920a4aeaba32e0d0a",
+      "raw_sha256": "4339252b1181331427ff47138203cc6125d45e26a5bb5edfe68285dd8306e9c9",
+      "translation": "исполните свой долг."
+    },
+    {
+      "id": "gap-phrase-063",
+      "group": "phrase-gaps",
+      "input": "do cat by.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520e120afaeacaee9ecee2e0d0a",
+      "raw_sha256": "d5b61d89871b3557e3d2cfe4f167f5fa0d7e3119bb7cbdd3e3c6e9308ed8413c",
+      "translation": "сделайте с помощью."
+    },
+    {
+      "id": "gap-phrase-064",
+      "group": "phrase-gaps",
+      "input": "do cat by hand.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520a2e0e3e7ade3ee2e0d0a",
+      "raw_sha256": "48b74165a7d5e8148f6920aacbc4c2efe946f06f86d2a0f027a564abce160eb3",
+      "translation": "сделайте вручную."
+    },
+    {
+      "id": "gap-phrase-065",
+      "group": "phrase-gaps",
+      "input": "do cat duty.",
+      "raw_cp866_hex": "a2ebafaeabada8e2a520a4aeaba320aaaee8aaa82e0d0a",
+      "raw_sha256": "ae25d5c7d677ef73f49d589768ec1534178ead0f447797ff41de5a8d11b52755",
+      "translation": "выполните долг кошки."
+    },
+    {
+      "id": "gap-phrase-066",
+      "group": "phrase-gaps",
+      "input": "do cat endeavours.",
+      "raw_cp866_hex": "afe0a8abaea6a8e2a520e1a8abeb2e0d0a",
+      "raw_sha256": "f4a0f1481a3c8b938ac5233bf127bf1dcb57266adc6e86af451824114d5741e5",
+      "translation": "приложите силы."
+    },
+    {
+      "id": "gap-phrase-067",
+      "group": "phrase-gaps",
+      "input": "do cat level best.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520a2e1a520a2aea7acaea6adaea52e0d0a",
+      "raw_sha256": "1e7af70329214dd7f9899bde43b4f9721a1ff27bcc2518f7c9858cc48b55cacd",
+      "translation": "сделайте все возможное."
+    },
+    {
+      "id": "gap-phrase-068",
+      "group": "phrase-gaps",
+      "input": "do cat with.",
+      "raw_cp866_hex": "aaaee8aaa020e3a4aea2aba5e2a2aee0efa5e2e1ef2e0d0a",
+      "raw_sha256": "e74fedfa405ef8a2b51cbb89d683a7290bf878f7dc2bfb5d89b24009fdb654c9",
+      "translation": "кошка удовлетворяется."
+    },
+    {
+      "id": "gap-phrase-069",
+      "group": "phrase-gaps",
+      "input": "draw cat attention to.",
+      "raw_cp866_hex": "afe0a8a2aba5aaa8e2a520a2ada8aca0ada8a520aa2e0d0a",
+      "raw_sha256": "1980c39bb3a887f36f1a8e1ae4b1ecdcc5641ebbefdc0ae64554a288ea7fd776",
+      "translation": "привлеките внимание к."
+    },
+    {
+      "id": "gap-phrase-070",
+      "group": "phrase-gaps",
+      "input": "eat cat heart out.",
+      "raw_cp866_hex": "a8a7a2a5a4a8e2a52e0d0a",
+      "raw_sha256": "a5a43c2572bf57de784fa78c0299f1eaf7ec15f473ef6d090e79e767d192f248",
+      "translation": "изведите."
+    },
+    {
+      "id": "gap-phrase-071",
+      "group": "phrase-gaps",
+      "input": "elect cat to.",
+      "raw_cp866_hex": "afe0a5a4afaee7e2a8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "13b3d306fa4b1dcce26d1175637058b2ee44cf836d1bc1a4994034c164834937",
+      "translation": "предпочтите кошку."
+    },
+    {
+      "id": "gap-phrase-072",
+      "group": "phrase-gaps",
+      "input": "enabled cat to.",
+      "raw_cp866_hex": "a4a0ada020a2aea7acaea6adaee1e2ec20aaaee8aaa82e0d0a",
+      "raw_sha256": "2bc02315ab6f4c631f13755477491df3db9312faedcf30d77c78a4dfc01c202e",
+      "translation": "дана возможность кошки."
+    },
+    {
+      "id": "gap-phrase-073",
+      "group": "phrase-gaps",
+      "input": "endorse cat by.",
+      "raw_cp866_hex": "e3e2a2a5e0a4a8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "b738f46a791cc8d55bcf89ab97dd17fdf84297f068219fd2ac3cc74eb7e36101",
+      "translation": "утвердите кошку."
+    },
+    {
+      "id": "gap-phrase-074",
+      "group": "phrase-gaps",
+      "input": "enter cat mind.",
+      "raw_cp866_hex": "afe0a8a4a8e2a520a220a3aeabaea2e32e0d0a",
+      "raw_sha256": "21a91d6d126ebf447d21f29d8520dfdeeafdaeb90f9b193f6d03d514f7685765",
+      "translation": "придите в голову."
+    },
+    {
+      "id": "gap-phrase-075",
+      "group": "phrase-gaps",
+      "input": "exceed cat worst anticipations.",
+      "raw_cp866_hex": "afe0a5a2a7aea9a4a8e2a520ada0a8e5e3a4e8a8a520aeafa0e1a5ada8ef2e0d0a",
+      "raw_sha256": "0018f73bfef9a97851a952c9f32bc8a8c0f665c014d57229e6622d3bdd17ab1f",
+      "translation": "превзойдите наихудшие опасения."
+    },
+    {
+      "id": "gap-phrase-076",
+      "group": "phrase-gaps",
+      "input": "figment of cat imagination.",
+      "raw_cp866_hex": "aaaee8aaa020a2aeaea1e0a0a6a5ada8ef20afabaea4a02e0d0a",
+      "raw_sha256": "171fcfe10be0056c518e06a2499f3d2465f46f43f224d0770beb69a9468344f3",
+      "translation": "кошка воображения плода."
+    },
+    {
+      "id": "gap-phrase-077",
+      "group": "phrase-gaps",
+      "input": "find cat account in.",
+      "raw_cp866_hex": "afaeabe3e7a8e2a520a2eba3aea4e320aee22e0d0a",
+      "raw_sha256": "ad335c77e21519abe9f69055f20c6edd37aadd6e052c514cca5b60a022bfe37d",
+      "translation": "получите выгоду от."
+    },
+    {
+      "id": "gap-phrase-078",
+      "group": "phrase-gaps",
+      "input": "find cat easier.",
+      "raw_cp866_hex": "e1e7a8e2a0a9e2a520aba5a3e7a52e0d0a",
+      "raw_sha256": "cebdb8501ef34a9b39fc265d02a556c8921b79513f4714c39878fb26f21a2d21",
+      "translation": "считайте легче."
+    },
+    {
+      "id": "gap-phrase-079",
+      "group": "phrase-gaps",
+      "input": "find cat way.",
+      "raw_cp866_hex": "afaeabe3e7a8e2a520a4aee1e2e3af2e0d0a",
+      "raw_sha256": "413c023e65b01e5c6e49558d1ce2b8a27c9d51770b6932e362574676e9710b28",
+      "translation": "получите доступ."
+    },
+    {
+      "id": "gap-phrase-080",
+      "group": "phrase-gaps",
+      "input": "fit cat requirements.",
+      "raw_cp866_hex": "e1aeaee2a2a5e2e1e2a2e3a9e2a520e2e0a5a1aea2a0ada8efac20aaaee8aaa82e0d0a",
+      "raw_sha256": "942efc20a1771a8b5b1445791fe3792c401f5aa14ff66f9de72d24ddab02b191",
+      "translation": "соответствуйте требованиям кошки."
+    },
+    {
+      "id": "gap-phrase-081",
+      "group": "phrase-gaps",
+      "input": "for cat own account.",
+      "raw_cp866_hex": "a7a020e1aea1e1e2a2a5adadeba920e1e7a5e220aaaee8aaa82e0d0a",
+      "raw_sha256": "258ed78e157fb54da18d4305c25a3ce78d6c951284a7b8152e775badd93dd218",
+      "translation": "за собственный счет кошки."
+    },
+    {
+      "id": "gap-phrase-082",
+      "group": "phrase-gaps",
+      "input": "for cat sake.",
+      "raw_cp866_hex": "e0a0a4a820aaaee8aaa82e0d0a",
+      "raw_sha256": "1192c5c0f16d5ec02798c28e566e91a285c745e8287c843d708af9b4584d9462",
+      "translation": "ради кошки."
+    },
+    {
+      "id": "gap-phrase-083",
+      "group": "phrase-gaps",
+      "input": "forgive cat for.",
+      "raw_cp866_hex": "afe0aee1e2a8e2a520aaaee8aae320a7a02e0d0a",
+      "raw_sha256": "b9e7262b95a3f2448a556a8a0f5ecb7301066b603b691499af37d66cb4008a5f",
+      "translation": "простите кошку за."
+    },
+    {
+      "id": "gap-phrase-084",
+      "group": "phrase-gaps",
+      "input": "forward cat to.",
+      "raw_cp866_hex": "afa5e0a5e8aba8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "9455e8e838001a115ecaa118807ba1a1a434f54bed9c99e82c1bd8b3c50f48c7",
+      "translation": "перешлите кошку."
+    },
+    {
+      "id": "gap-phrase-085",
+      "group": "phrase-gaps",
+      "input": "gain cat end.",
+      "raw_cp866_hex": "a4aee1e2a8a3ada8e2a520e6a5aba82e0d0a",
+      "raw_sha256": "30282281eb4e831110fc6c1d03b1f64e1e709f7d0d6b7533f907b29eb9c1ba77",
+      "translation": "достигните цели."
+    },
+    {
+      "id": "gap-phrase-086",
+      "group": "phrase-gaps",
+      "input": "get a cat system.",
+      "raw_cp866_hex": "e1aea7a4a0a9e2a520e1a8e1e2a5aceb20aaaee8aaa82e0d0a",
+      "raw_sha256": "5780d25cc6651dd5e1112465907752b19a952884d004755442b916dba097c0b0",
+      "translation": "создайте системы кошки."
+    },
+    {
+      "id": "gap-phrase-087",
+      "group": "phrase-gaps",
+      "input": "get on cat soapbox.",
+      "raw_cp866_hex": "aee0a0e2aee0e1e2a2e3a9e2a52e0d0a",
+      "raw_sha256": "aec5abd3dfa58602ae9b96434151e1d7087f1a65ca95e5d0b6c21ee539f42b5f",
+      "translation": "ораторствуйте."
+    },
+    {
+      "id": "gap-phrase-088",
+      "group": "phrase-gaps",
+      "input": "get cat hands on.",
+      "raw_cp866_hex": "afe0a8aea1e0a5e2a8e2a52e0d0a",
+      "raw_sha256": "055ac6789681567fc892217344762f181545ece5730418b81afa8ff4505defc1",
+      "translation": "приобретите."
+    },
+    {
+      "id": "gap-phrase-089",
+      "group": "phrase-gaps",
+      "input": "get cat informed.",
+      "raw_cp866_hex": "aaaee8aaa020aee1a2a5a4aeacaba5adada0ef2e0d0a",
+      "raw_sha256": "28545a4716599dea672e5132ff465f92bd613f2ffe7221f126ad0266dcb21729",
+      "translation": "кошка осведомленная."
+    },
+    {
+      "id": "gap-phrase-090",
+      "group": "phrase-gaps",
+      "input": "get cat inserted.",
+      "raw_cp866_hex": "aaaee8aaa020a2aaabeee7a0a5e2e1ef2e0d0a",
+      "raw_sha256": "0da0357b69aa1f2fd07d82a71645ff0673eb499ce0ee07e558f8606f3602b6f3",
+      "translation": "кошка включается."
+    },
+    {
+      "id": "gap-phrase-091",
+      "group": "phrase-gaps",
+      "input": "get cat up to.",
+      "raw_cp866_hex": "afe0a8aea1e0a5e2a8e2a52e0d0a",
+      "raw_sha256": "055ac6789681567fc892217344762f181545ece5730418b81afa8ff4505defc1",
+      "translation": "приобретите."
+    },
+    {
+      "id": "gap-phrase-092",
+      "group": "phrase-gaps",
+      "input": "give cat a push.",
+      "raw_cp866_hex": "e2aeabaaada8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "4193014186e32ee491ed9fb816813ea597665f20986553e2dfaff0cd153c3301",
+      "translation": "толкните кошку."
+    },
+    {
+      "id": "gap-phrase-093",
+      "group": "phrase-gaps",
+      "input": "glass of cat.",
+      "raw_cp866_hex": "e1e2a5aaabae20aaaee8aaa82e0d0a",
+      "raw_sha256": "bc53e1ef1e5f0b5119f53ba103491e5f3933249b46c5869a8d3a984506f3e159",
+      "translation": "стекло кошки."
+    },
+    {
+      "id": "gap-phrase-094",
+      "group": "phrase-gaps",
+      "input": "go cat own gate.",
+      "raw_cp866_hex": "a7a0a4a5a9e1e2a2e3a9e2a520e1a0acaee1e2aeefe2a5abecadae2e0d0a",
+      "raw_sha256": "92fb75697007caf06a9d78c226ede2de5ef2ff097bb373c4c10bce095a66e37c",
+      "translation": "задействуйте самостоятельно."
+    },
+    {
+      "id": "gap-phrase-095",
+      "group": "phrase-gaps",
+      "input": "go cat own way.",
+      "raw_cp866_hex": "a7a0a4a5a9e1e2a2e3a9e2a520e1a0acaee1e2aeefe2a5abecadae2e0d0a",
+      "raw_sha256": "92fb75697007caf06a9d78c226ede2de5ef2ff097bb373c4c10bce095a66e37c",
+      "translation": "задействуйте самостоятельно."
+    },
+    {
+      "id": "gap-phrase-096",
+      "group": "phrase-gaps",
+      "input": "have cat hair cut.",
+      "raw_cp866_hex": "afaee1e2e0a8a3a8e2a5e1ec2e0d0a",
+      "raw_sha256": "bba525a2ab7cb96ba7118aa9dd8230337244aa632ff8287285104b8cb0ad15d0",
+      "translation": "постригитесь."
+    },
+    {
+      "id": "gap-phrase-097",
+      "group": "phrase-gaps",
+      "input": "hold cat talks.",
+      "raw_cp866_hex": "afe0aea2a5a4a8e2a520afa5e0a5a3aea2aee0eb20aaaee8aaa82e0d0a",
+      "raw_sha256": "9bdf5892306c7d5728b56e28feb4b986b5655cfb8024129057af1927767ce640",
+      "translation": "проведите переговоры кошки."
+    },
+    {
+      "id": "gap-phrase-098",
+      "group": "phrase-gaps",
+      "input": "in one of cat ways.",
+      "raw_cp866_hex": "aea4ada8ac20a8a720e1afaee1aea1a020aaaee8aaa82e0d0a",
+      "raw_sha256": "c9037c2f7d4dfe2d487d65f8d6ed3ee16311fb96fca4ff82901151b076e3bff6",
+      "translation": "одним из способа кошки."
+    },
+    {
+      "id": "gap-phrase-099",
+      "group": "phrase-gaps",
+      "input": "in order cat to.",
+      "raw_cp866_hex": "aaaee8aaa020a4abef20e2aea3ae2c20e7e2aea1eb2e0d0a",
+      "raw_sha256": "36c3706bfad39dd5a419b67350f1a28635d6a807ae56cde5b58c50aee1ad96bf",
+      "translation": "кошка для того, чтобы."
+    },
+    {
+      "id": "gap-phrase-100",
+      "group": "phrase-gaps",
+      "input": "industry specific cat dictionaries.",
+      "raw_cp866_hex": "e2a5aca0e2a8e7a5e1aaa8a520e1abaea2a0e0a820aaaee8aaa82e0d0a",
+      "raw_sha256": "579c116af0c0894a4a35eae4bfa76fb322a3ab30e6b5dc89c3268e1506802e06",
+      "translation": "тематические словари кошки."
+    },
+    {
+      "id": "gap-phrase-101",
+      "group": "phrase-gaps",
+      "input": "industry specific cat dictionary.",
+      "raw_cp866_hex": "e2a5aca0e2a8e7a5e1aaa8a920e1abaea2a0e0ec20aaaee8aaa82e0d0a",
+      "raw_sha256": "31bf1d73a7dd4f0d93b4bbac52f6c45beefa8fbdf484c2ea675b47fc96ecc094",
+      "translation": "тематический словарь кошки."
+    },
+    {
+      "id": "gap-phrase-102",
+      "group": "phrase-gaps",
+      "input": "instruct cat on.",
+      "raw_cp866_hex": "afe0aea8ade1e2e0e3aae2a8e0e3a9e2a520aaaee8aae320aee2adaee1a8e2a5abecadae2e0d0a",
+      "raw_sha256": "864c32d1706d668865819ba6be252b92aaae88f899bb38514349b778ed65fde0",
+      "translation": "проинструктируйте кошку относительно."
+    },
+    {
+      "id": "gap-phrase-103",
+      "group": "phrase-gaps",
+      "input": "investment from cat to.",
+      "raw_cp866_hex": "a2aaaba0a420aee220aaaee8aaa820a4ae2e0d0a",
+      "raw_sha256": "90aede6afa3914a4eb98e47926a649b186c0cc32ec069e390d6766ad7ab49366",
+      "translation": "вклад от кошки до."
+    },
+    {
+      "id": "gap-phrase-104",
+      "group": "phrase-gaps",
+      "input": "it behooves cat to.",
+      "raw_cp866_hex": "aaaee8aaa020ada0a4aba5a6a8e22e0d0a",
+      "raw_sha256": "d67b5b9e9c861f567f39d82fe96799fd6a499b54a6ed0e327d662771785b5241",
+      "translation": "кошка надлежит."
+    },
+    {
+      "id": "gap-phrase-105",
+      "group": "phrase-gaps",
+      "input": "it cat a bargain.",
+      "raw_cp866_hex": "ede2ae20aee7a5adec20a4a5e8a5a2ae2e0d0a",
+      "raw_sha256": "bb9ca69912347241fd16c4945e1fbbae9dbe44ef36ad7484c739ff9f93213547",
+      "translation": "это очень дешево."
+    },
+    {
+      "id": "gap-phrase-106",
+      "group": "phrase-gaps",
+      "input": "keep cat company.",
+      "raw_cp866_hex": "e1aee1e2a0a2ece2a520aaaee8aae320aaaeacafa0ada8ee2e0d0a",
+      "raw_sha256": "bcdd0eea82f1c7bf22593075eacb035f4e04fc07ae4333b350ff0beff252e6ed",
+      "translation": "составьте кошку компанию."
+    },
+    {
+      "id": "gap-phrase-107",
+      "group": "phrase-gaps",
+      "input": "keep cat posted on.",
+      "raw_cp866_hex": "afe0aea8ade4aee0aca8e0e3a9e2a520ae2e0d0a",
+      "raw_sha256": "03d4235b608ca70a890b63c03efba25e49b1ed3b7e871f058bf52175b845d3c4",
+      "translation": "проинформируйте о."
+    },
+    {
+      "id": "gap-phrase-108",
+      "group": "phrase-gaps",
+      "input": "largest cat possible.",
+      "raw_cp866_hex": "afe0a5a4a5abecadae20a2aea7acaea6adeba92e0d0a",
+      "raw_sha256": "9625192f79f2d34ecb0f117c4d801828acf4f3eea166b488abfb4e8f1e272cf8",
+      "translation": "предельно возможный."
+    },
+    {
+      "id": "gap-phrase-109",
+      "group": "phrase-gaps",
+      "input": "latest cat possible.",
+      "raw_cp866_hex": "e1a0aceba920afaee1aba5a4ada8a92e0d0a",
+      "raw_sha256": "3395b6cd0da24e9e0c4f2bbaf784c46ad23843fe7592b75c057aa47b24dec4a1",
+      "translation": "самый последний."
+    },
+    {
+      "id": "gap-phrase-110",
+      "group": "phrase-gaps",
+      "input": "leave your cat alone.",
+      "raw_cp866_hex": "aee1e2a0a2ece2a520a2a0e8e320aaaee8aae320a220afaeaaaea52e0d0a",
+      "raw_sha256": "1a7b136a24a652728990e110571639b0cc86827517d68c3bb4ca94e192d308db",
+      "translation": "оставьте вашу кошку в покое."
+    },
+    {
+      "id": "gap-phrase-111",
+      "group": "phrase-gaps",
+      "input": "let cat know.",
+      "raw_cp866_hex": "e1aeaea1e9a5ada8a52e0d0a",
+      "raw_sha256": "ef7a128efa38ac271207f94b9bcb1b1807fb756c145fb74d7b4852792b0c63a1",
+      "translation": "сообщение."
+    },
+    {
+      "id": "gap-phrase-112",
+      "group": "phrase-gaps",
+      "input": "look cat like.",
+      "raw_cp866_hex": "a2eba3abefa4a8e2a520aaaee8aaaea920aaa0aa2e0d0a",
+      "raw_sha256": "b926e047f64739d9e50cfcd7ed140e24c8c35f154635fca573575cf5311d781a",
+      "translation": "выглядите кошкой как."
+    },
+    {
+      "id": "gap-phrase-113",
+      "group": "phrase-gaps",
+      "input": "look cat up.",
+      "raw_cp866_hex": "ada0a9a4a8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "1f7013eda8984f9d76886c8fd256b3c827d3452f2c260cc852a1a4df0a8d3a1c",
+      "translation": "найдите кошку."
+    },
+    {
+      "id": "gap-phrase-114",
+      "group": "phrase-gaps",
+      "input": "lose cat time.",
+      "raw_cp866_hex": "a4a0e0aeac20afaee2a5e0efa9e2a520a2e0a5acef2e0d0a",
+      "raw_sha256": "e264b74d95bb40c9eb2a205906b9992a708c75b5e39651dd21eb007718c0464c",
+      "translation": "даром потеряйте время."
+    },
+    {
+      "id": "gap-phrase-115",
+      "group": "phrase-gaps",
+      "input": "lost cat at.",
+      "raw_cp866_hex": "afaee2a5e0efadada0ef20aaaee8aaa020e32e0d0a",
+      "raw_sha256": "88ad0984832911cf8b946a1efca7e5cd484fe2adb2c6c4d256f47c6deb3b1cbd",
+      "translation": "потерянная кошка у."
+    },
+    {
+      "id": "gap-phrase-116",
+      "group": "phrase-gaps",
+      "input": "make up cat mind.",
+      "raw_cp866_hex": "e0a5e8a8e2a52e0d0a",
+      "raw_sha256": "7effe4c6a1f653eaa6ab8cd77585c0a1578cbdfac2cc769092d4036b7ebbabd1",
+      "translation": "решите."
+    },
+    {
+      "id": "gap-phrase-117",
+      "group": "phrase-gaps",
+      "input": "make cat a snap.",
+      "raw_cp866_hex": "e3afe0aee1e2a8e2a52e0d0a",
+      "raw_sha256": "aac902694b43397d2c443be411d659f1a4078b36674ec0ab51f5602dd8ce084f",
+      "translation": "упростите."
+    },
+    {
+      "id": "gap-phrase-118",
+      "group": "phrase-gaps",
+      "input": "make cat easy.",
+      "raw_cp866_hex": "aea1aba5a3e7a8e2a52e0d0a",
+      "raw_sha256": "a1227d24b8c3b4d313e66c3204adf5f73882c9f427b96903caacf0b2dc663f38",
+      "translation": "облегчите."
+    },
+    {
+      "id": "gap-phrase-119",
+      "group": "phrase-gaps",
+      "input": "make cat familiar with.",
+      "raw_cp866_hex": "afaea7ada0aaaeacece2a520aaaee8aae320e12e0d0a",
+      "raw_sha256": "619ff47d2b3bb4128a9ba2d4fa01dc5f902e073b66b78aa1be8da12491073b0c",
+      "translation": "познакомьте кошку с."
+    },
+    {
+      "id": "gap-phrase-120",
+      "group": "phrase-gaps",
+      "input": "make cat possible.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520aaaee8aae320a2aea7acaea6ade3ee2e0d0a",
+      "raw_sha256": "98108dd9d4bdf9c0ce4c6eba41fddbb5983a805ee6e1cafd9f002a075547e6d2",
+      "translation": "сделайте кошку возможную."
+    },
+    {
+      "id": "gap-phrase-121",
+      "group": "phrase-gaps",
+      "input": "make cat way to.",
+      "raw_cp866_hex": "ada0afe0a0a2ece2a5e1ec20a22e0d0a",
+      "raw_sha256": "ed98dbad302187aea73268d5058ba375913b6b6a8e28477128fdac97cc4f75c9",
+      "translation": "направьтесь в."
+    },
+    {
+      "id": "gap-phrase-122",
+      "group": "phrase-gaps",
+      "input": "means there is cat not.",
+      "raw_cp866_hex": "aea7ada0e7a0a5e220e7e2ae20ada5e22e0d0a",
+      "raw_sha256": "5f2eb8c85342d14f7fbf811362b169a552f84ea839a991fbad39684fc7ae1b8b",
+      "translation": "означает что нет."
+    },
+    {
+      "id": "gap-phrase-123",
+      "group": "phrase-gaps",
+      "input": "meet cat goal.",
+      "raw_cp866_hex": "a4aee1e2a8a3ada8e2a520e6a5aba820aaaee8aaa82e0d0a",
+      "raw_sha256": "b1598661ab274ad81b2ffe57d9f8b367258d4bf8f577bf1472346ca58a93217a",
+      "translation": "достигните цели кошки."
+    },
+    {
+      "id": "gap-phrase-124",
+      "group": "phrase-gaps",
+      "input": "meet cat liabilities.",
+      "raw_cp866_hex": "a2ebafaeabada8e2a520aea1efa7a0e2a5abece1e2a2a020aaaee8aaa82e0d0a",
+      "raw_sha256": "e60568bf5f1fc0196f7d116642c70ea5ed06fc680e308c055448cdf098a8c784",
+      "translation": "выполните обязательства кошки."
+    },
+    {
+      "id": "gap-phrase-125",
+      "group": "phrase-gaps",
+      "input": "meet cat liability.",
+      "raw_cp866_hex": "a2ebafaeabada8e2a520aea1efa7a0e2a5abece1e2a2ae20aaaee8aaa82e0d0a",
+      "raw_sha256": "915a70e54fa5bca7464085a3a0b8cfa7b7a85817413f37d916e82824be84d887",
+      "translation": "выполните обязательство кошки."
+    },
+    {
+      "id": "gap-phrase-126",
+      "group": "phrase-gaps",
+      "input": "meet cat obligations.",
+      "raw_cp866_hex": "a2ebafaeabada8e2a520aea1efa7a0e2a5abece1e2a2a020aaaee8aaa82e0d0a",
+      "raw_sha256": "e60568bf5f1fc0196f7d116642c70ea5ed06fc680e308c055448cdf098a8c784",
+      "translation": "выполните обязательства кошки."
+    },
+    {
+      "id": "gap-phrase-127",
+      "group": "phrase-gaps",
+      "input": "mend cat ways.",
+      "raw_cp866_hex": "a8e1afe0a0a2ece2a52e0d0a",
+      "raw_sha256": "e16ff6aab998611f2f4adae25c6ebc53804d80aff89cd3cd564467a6a49640a7",
+      "translation": "исправьте."
+    },
+    {
+      "id": "gap-phrase-128",
+      "group": "phrase-gaps",
+      "input": "of cat own accord.",
+      "raw_cp866_hex": "a4aea1e0aea2aeabecadae2e0d0a",
+      "raw_sha256": "aaa267843c4c59e3dc06249aa0d65ac5ed93e1ce721cd2aa185cf68806baa93e",
+      "translation": "добровольно."
+    },
+    {
+      "id": "gap-phrase-129",
+      "group": "phrase-gaps",
+      "input": "on cat behalf.",
+      "raw_cp866_hex": "aee220a8aca5ada820aaaee8aaa82e0d0a",
+      "raw_sha256": "9b72bb1c17ae1438075bd458cd194f3f8633159d588f04dc6398f63a0555925f",
+      "translation": "от имени кошки."
+    },
+    {
+      "id": "gap-phrase-130",
+      "group": "phrase-gaps",
+      "input": "one cat per.",
+      "raw_cp866_hex": "aea4ada820aaaee8aaa820ada02e0d0a",
+      "raw_sha256": "4d25e1ae70f78a8d828f495324a46412803bf4ccf8fc9cd61e5d41752d200b14",
+      "translation": "одни кошки на."
+    },
+    {
+      "id": "gap-phrase-131",
+      "group": "phrase-gaps",
+      "input": "perform cat duties.",
+      "raw_cp866_hex": "a2ebafaeabada8e2a520aea1efa7a0adadaee1e2a820aaaee8aaa82e0d0a",
+      "raw_sha256": "ac4e1c7e654d3a3ed13d53d7b4ab3efdca1606feb82bd34d215f446b6d1a25dd",
+      "translation": "выполните обязанности кошки."
+    },
+    {
+      "id": "gap-phrase-132",
+      "group": "phrase-gaps",
+      "input": "pit cat against.",
+      "raw_cp866_hex": "a2ebe1e2a0a2ece2a520aaaee8aae320afe0aee2a8a22e0d0a",
+      "raw_sha256": "f18cb6661c29fb4f2153ae3b8b7a85cb0a58363ff7ec6234c083eebfc446caf4",
+      "translation": "выставьте кошку против."
+    },
+    {
+      "id": "gap-phrase-133",
+      "group": "phrase-gaps",
+      "input": "present cat condolences.",
+      "raw_cp866_hex": "afe0a8ada5e1a8e2a520aaaee8aae320e1aea1aeaba5a7adaea2a0ada8ef2e0d0a",
+      "raw_sha256": "d085933f3d84b9222a2fcb6460ce11a4ed4277ac8947d4f7ede2afc0a2905922",
+      "translation": "принесите кошку соболезнования."
+    },
+    {
+      "id": "gap-phrase-134",
+      "group": "phrase-gaps",
+      "input": "present cat with.",
+      "raw_cp866_hex": "afe0a5afaea4ada5e1a8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "8fea472305e51339aa231e4f2810665add71e8f2e326de5d6ea563ce64130d6c",
+      "translation": "преподнесите кошку."
+    },
+    {
+      "id": "gap-phrase-135",
+      "group": "phrase-gaps",
+      "input": "prevent cat from.",
+      "raw_cp866_hex": "afe0a5a4aee5e0a0ada8e2a520aee22e0d0a",
+      "raw_sha256": "7ad7ec1eda476c826fa7711202298a581c01f09960b9f80bc9f633a765b4c8d8",
+      "translation": "предохраните от."
+    },
+    {
+      "id": "gap-phrase-136",
+      "group": "phrase-gaps",
+      "input": "prevent cat from happening.",
+      "raw_cp866_hex": "ada520a4a0a2a0a9e2a520afe0aea8a7aea9e2a82e0d0a",
+      "raw_sha256": "8dd7411b1163c40fe8b2bd5f4eabca75fbcaf107e229791ae0d0e64f9ca3e189",
+      "translation": "не давайте произойти."
+    },
+    {
+      "id": "gap-phrase-137",
+      "group": "phrase-gaps",
+      "input": "provide cat to.",
+      "raw_cp866_hex": "afe0a5a4aee1e2a0a2abefa9e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "40e55b9bb47d174190a31ebf3beea20074dea8e75666ead2f75fec96860c9846",
+      "translation": "предоставляйте кошку."
+    },
+    {
+      "id": "gap-phrase-138",
+      "group": "phrase-gaps",
+      "input": "provide cat with.",
+      "raw_cp866_hex": "aea1a5e1afa5e7ece2a520aaaee8aae32e0d0a",
+      "raw_sha256": "75e466bd574d493529288362aef6652195eae106fd88f951a95fd03f8a3f9cc7",
+      "translation": "обеспечьте кошку."
+    },
+    {
+      "id": "gap-phrase-139",
+      "group": "phrase-gaps",
+      "input": "pursue cat own end.",
+      "raw_cp866_hex": "afe0a5e1aba5a4e3a9e2a520e1a2aea820e1aea1e1e2a2a5adadeba520e6a5aba82e0d0a",
+      "raw_sha256": "70eafb9d43d68108882e633925e18f07b3f68f4456b294c1eac1a36781466671",
+      "translation": "преследуйте свои собственные цели."
+    },
+    {
+      "id": "gap-phrase-140",
+      "group": "phrase-gaps",
+      "input": "ranging from cat to.",
+      "raw_cp866_hex": "a8a7aca5adefe2a5ada8a520aee220aaaee8aaa820a4ae2e0d0a",
+      "raw_sha256": "574a4ce6c3979f5be790094168d474b0ce9f483ee55b4fb8d29c10eec660345b",
+      "translation": "изменятение от кошки до."
+    },
+    {
+      "id": "gap-phrase-141",
+      "group": "phrase-gaps",
+      "input": "rely cat on.",
+      "raw_cp866_hex": "afaeaba0a3a0a9e2a5e1ec20aaaee8aaa020ada02e0d0a",
+      "raw_sha256": "7f72e59f2a58cf0d6121c4e8fb178c610f85eac922dda03b9f4617e1ea5a85a7",
+      "translation": "полагайтесь кошка на."
+    },
+    {
+      "id": "gap-phrase-142",
+      "group": "phrase-gaps",
+      "input": "rely cat upon.",
+      "raw_cp866_hex": "afaeaba0a3a0a9e2a5e1ec20aaaee8aaa020ada02e0d0a",
+      "raw_sha256": "7f72e59f2a58cf0d6121c4e8fb178c610f85eac922dda03b9f4617e1ea5a85a7",
+      "translation": "полагайтесь кошка на."
+    },
+    {
+      "id": "gap-phrase-143",
+      "group": "phrase-gaps",
+      "input": "rename cat back to.",
+      "raw_cp866_hex": "afa5e0a5a8aca5ade3a9e2a520aaaee8aae320e1adaea2a020a22e0d0a",
+      "raw_sha256": "2b6925d75d1c9caad477470be29b7dcab8f90797a440524e72ddd793cfe458f2",
+      "translation": "переименуйте кошку снова в."
+    },
+    {
+      "id": "gap-phrase-144",
+      "group": "phrase-gaps",
+      "input": "replace cat with.",
+      "raw_cp866_hex": "a7a0aca5ada8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "028a9388c7c5bf5d0b1dc56799be18d23950b3092e2da0bd142afdd2563ed6c5",
+      "translation": "замените кошку."
+    },
+    {
+      "id": "gap-phrase-145",
+      "group": "phrase-gaps",
+      "input": "report cat on.",
+      "raw_cp866_hex": "e1aeaea1e9a5ada8a520ae2e0d0a",
+      "raw_sha256": "bad30652b56b110825009c8f85c998600df4a9570bafd703c916a900364da9cc",
+      "translation": "сообщение о."
+    },
+    {
+      "id": "gap-phrase-146",
+      "group": "phrase-gaps",
+      "input": "reported cat on.",
+      "raw_cp866_hex": "e1aeaea1e9a5ada020aaaee8aaa020ae2e0d0a",
+      "raw_sha256": "ad677d69857bb107be5f13a6f80640ff4b84e0e3c9b25906ef3372d81233d57e",
+      "translation": "сообщена кошка о."
+    },
+    {
+      "id": "gap-phrase-147",
+      "group": "phrase-gaps",
+      "input": "return cat call.",
+      "raw_cp866_hex": "afa5e0a5a7a2aeada8e2a52e0d0a",
+      "raw_sha256": "a90b29c6388b43e2260b58bdbda84eb476f5d34d0a00563a38907119c2e3ee3a",
+      "translation": "перезвоните."
+    },
+    {
+      "id": "gap-phrase-148",
+      "group": "phrase-gaps",
+      "input": "see cat off.",
+      "raw_cp866_hex": "e1acaee2e0a82e0d0a",
+      "raw_sha256": "3974495075981d4739eb572d765329686b6d5cd6b3e49e6db49714faa1e3be7e",
+      "translation": "смотри."
+    },
+    {
+      "id": "gap-phrase-149",
+      "group": "phrase-gaps",
+      "input": "selfcat.",
+      "raw_cp866_hex": "e1a0acaeaaaee8aaa02e0d0a",
+      "raw_sha256": "f46db66d5e80a7824fafe8f9eff36bb7b2263439f9fa2b3140a351963a8cffc4",
+      "translation": "самокошка."
+    },
+    {
+      "id": "gap-phrase-150",
+      "group": "phrase-gaps",
+      "input": "send cat back.",
+      "raw_cp866_hex": "a2aea7a2e0a0e2a8e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "9aa4a5c11e3e90bf078e8ba17c24b7a877c774ca7da043d51b4b440b607bd786",
+      "translation": "возвратите кошку."
+    },
+    {
+      "id": "gap-phrase-151",
+      "group": "phrase-gaps",
+      "input": "send cat order.",
+      "raw_cp866_hex": "aee2afe0a0a2ece2a520a7a0aaa0a72e0d0a",
+      "raw_sha256": "34e19fc3d5347ce201af0adeba8a252e48aefda44af04fae2389b58f49aa2d16",
+      "translation": "отправьте заказ."
+    },
+    {
+      "id": "gap-phrase-152",
+      "group": "phrase-gaps",
+      "input": "send cat order to.",
+      "raw_cp866_hex": "aee2afe0a0a2ece2a520a7a0aaa0a720a22e0d0a",
+      "raw_sha256": "e94c496fc4d93493c568b4e8bdd034f635ebaf288e31928a055b4d66c18c5d47",
+      "translation": "отправьте заказ в."
+    },
+    {
+      "id": "gap-phrase-153",
+      "group": "phrase-gaps",
+      "input": "set cat aside.",
+      "raw_cp866_hex": "aee2aaabaeada5ada8a52e0d0a",
+      "raw_sha256": "e2d9258e98757d3f9baded0184108284d416187d7b2e324ebaaa0a48970a8d3f",
+      "translation": "отклонение."
+    },
+    {
+      "id": "gap-phrase-154",
+      "group": "phrase-gaps",
+      "input": "set cat up with.",
+      "raw_cp866_hex": "e3e1e2a0adaea2a8e2a520aaaee8aae320e12e0d0a",
+      "raw_sha256": "a3e23f509ddadb30c650cbe1671add0c2ba451e69d909dde18dda6d02933d67a",
+      "translation": "установите кошку с."
+    },
+    {
+      "id": "gap-phrase-155",
+      "group": "phrase-gaps",
+      "input": "settle cat account.",
+      "raw_cp866_hex": "e3afaba0e2a8e2a520afae20e1e7a5e2e32e0d0a",
+      "raw_sha256": "80c54ecd3e57207483bb18a64e8b702c3f19c661cdd83b22d670d0dc4ecfe226",
+      "translation": "уплатите по счету."
+    },
+    {
+      "id": "gap-phrase-156",
+      "group": "phrase-gaps",
+      "input": "share cat concern.",
+      "raw_cp866_hex": "e0a0a7a4a5aba8e2a520a8ade2a5e0a5e1eb20aaaee8aaa82e0d0a",
+      "raw_sha256": "e3f9bc8c8a58f8f142c8dee55128d936ee5847bf42a2438a290bd7b729539023",
+      "translation": "разделите интересы кошки."
+    },
+    {
+      "id": "gap-phrase-157",
+      "group": "phrase-gaps",
+      "input": "show cat the way.",
+      "raw_cp866_hex": "afe0aea2aea6a0a9e2a520aaaee8aae32e0d0a",
+      "raw_sha256": "58cc59cc5f0642bc35a18da9c5d6b884cd5874424d46f104acf974cfdf21fbb2",
+      "translation": "провожайте кошку."
+    },
+    {
+      "id": "gap-phrase-158",
+      "group": "phrase-gaps",
+      "input": "speak cat to the.",
+      "raw_cp866_hex": "e1aaa0a6a8e2a520aaaee8aae320e12e0d0a",
+      "raw_sha256": "76586b8c7b3852c3019bc1d2ed3adb4c908d78306e10c5c3fbcb607743aa4f23",
+      "translation": "скажите кошку с."
+    },
+    {
+      "id": "gap-phrase-159",
+      "group": "phrase-gaps",
+      "input": "submit cat payment.",
+      "raw_cp866_hex": "afe0aea8a7a2a5a4a8e2a520aeafaba0e2e320aaaee8aaa82e0d0a",
+      "raw_sha256": "041666ab300def580e260c9affb009669374a41969269bffd8bf32499b23e733",
+      "translation": "произведите оплату кошки."
+    },
+    {
+      "id": "gap-phrase-160",
+      "group": "phrase-gaps",
+      "input": "supply cat with.",
+      "raw_cp866_hex": "aea1a5e1afa5e7ece2a520aaaee8aae32e0d0a",
+      "raw_sha256": "75e466bd574d493529288362aef6652195eae106fd88f951a95fd03f8a3f9cc7",
+      "translation": "обеспечьте кошку."
+    },
+    {
+      "id": "gap-phrase-161",
+      "group": "phrase-gaps",
+      "input": "take cat advantage of.",
+      "raw_cp866_hex": "a8aca5a9e2a520afe0a5a8ace3e9a5e1e2a2ae20aaaee8aaa820afa5e0a5a42e0d0a",
+      "raw_sha256": "d02e5032063ae6bbb184e45e59e428e843cefb6b3580ba508d07cbe9da4bafab",
+      "translation": "имейте преимущество кошки перед."
+    },
+    {
+      "id": "gap-phrase-162",
+      "group": "phrase-gaps",
+      "input": "take cat at its face value.",
+      "raw_cp866_hex": "afe0a8aca8e2a520aaaee8aae320a7a020e7a8e1e2e3ee20acaeada5e2e32e0d0a",
+      "raw_sha256": "a565e95534dde0de1cf8b72637b08fafd3bdf289842af6e48f47d0dd5559ec7a",
+      "translation": "примите кошку за чистую монету."
+    },
+    {
+      "id": "gap-phrase-163",
+      "group": "phrase-gaps",
+      "input": "take cat breath.",
+      "raw_cp866_hex": "afa5e0a5a2a5a4a8e2a520a4e3e52e0d0a",
+      "raw_sha256": "8c694ebede7befeaa1ae636f1d46046a9ed103adbe4090c0a8d31e88ea881602",
+      "translation": "переведите дух."
+    },
+    {
+      "id": "gap-phrase-164",
+      "group": "phrase-gaps",
+      "input": "take cat for.",
+      "raw_cp866_hex": "afe0a8aca8e2a520aaaee8aae320a7a02e0d0a",
+      "raw_sha256": "3b494b385484609e6b63f0debd4db95dc10082f71b507a7f7133c50947479a7b",
+      "translation": "примите кошку за."
+    },
+    {
+      "id": "gap-phrase-165",
+      "group": "phrase-gaps",
+      "input": "take cat measures.",
+      "raw_cp866_hex": "afe0a8aca8e2a520aca5e0eb20aaaee8aaa82e0d0a",
+      "raw_sha256": "44beb94743b9336f3ece6530ca50bb31e2f4eb03e4ecba0ffb206fa267c596ed",
+      "translation": "примите меры кошки."
+    },
+    {
+      "id": "gap-phrase-166",
+      "group": "phrase-gaps",
+      "input": "take cat out of.",
+      "raw_cp866_hex": "e3a1a5e0a8e2a520aaaee8aae320a8a72e0d0a",
+      "raw_sha256": "e63dd3e72d9a81db259587e1697d6a5d2e020f47695977803705b711451f6380",
+      "translation": "уберите кошку из."
+    },
+    {
+      "id": "gap-phrase-167",
+      "group": "phrase-gaps",
+      "input": "take cat photographs.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520e4aee2aea3e0a0e4a8a82e0d0a",
+      "raw_sha256": "c34b2ad40e788a63a3ca01f7d0e9ad00f8e264455a91f1059c668e1fb6eec440",
+      "translation": "сделайте фотографии."
+    },
+    {
+      "id": "gap-phrase-168",
+      "group": "phrase-gaps",
+      "input": "take cat photographs of.",
+      "raw_cp866_hex": "e1a4a5aba0a9e2a520e4aee2aea3e0a0e4a8a820e12e0d0a",
+      "raw_sha256": "f3760cf03cd7914c1536583a1b11fd4cdc19ba502430aef23f54d15988d7f583",
+      "translation": "сделайте фотографии с."
+    },
+    {
+      "id": "gap-phrase-169",
+      "group": "phrase-gaps",
+      "input": "take cat rights away.",
+      "raw_cp866_hex": "aee2a1a5e0a8e2a520afe0a0a2a020aaaee8aaa82e0d0a",
+      "raw_sha256": "9c74db78ef828430fefd2e148f4b9922ffb342ea6b47b89277c197636f5764fe",
+      "translation": "отберите права кошки."
+    },
+    {
+      "id": "gap-phrase-170",
+      "group": "phrase-gaps",
+      "input": "term of cat paragraph.",
+      "raw_cp866_hex": "e3e1abaea2a8a520e0a0a7a4a5aba020aaaee8aaa82e0d0a",
+      "raw_sha256": "52071001688b6ff01fd5f9d6c8a618210ae411a3801d4939368f5cc2d472992a",
+      "translation": "условие раздела кошки."
+    },
+    {
+      "id": "gap-phrase-171",
+      "group": "phrase-gaps",
+      "input": "throw cat into melting-pot.",
+      "raw_cp866_hex": "afaea4a2a5e0a3ada8e2a520aaaee0a5adadaeace320afe0a5aea1e0a0a7aea2a0ada8ee2e0d0a",
+      "raw_sha256": "08d39e2de98b5b81e562a926ba7e35100f34c229344609fa324aafdf7adbdad7",
+      "translation": "подвергните коренному преобразованию."
+    },
+    {
+      "id": "gap-phrase-172",
+      "group": "phrase-gaps",
+      "input": "tie cat up in knots.",
+      "raw_cp866_hex": "afaee1e2a0a2ece2a520a220a7a0e2e0e3a4ada8e2a5abecadaea520afaeabaea6a5ada8a52e0d0a",
+      "raw_sha256": "0ebbf72d0a26c18cca6ab7dfdbff61cca20dedc599fb4cb6b660cb9c693d63b3",
+      "translation": "поставьте в затруднительное положение."
+    },
+    {
+      "id": "gap-phrase-173",
+      "group": "phrase-gaps",
+      "input": "to cat account.",
+      "raw_cp866_hex": "a7a020e1e7a5e220aaaee8aaa82e0d0a",
+      "raw_sha256": "b7e9e5438dd409b388a1b1964d2509e5a3fd01cf5c7cad51b01de062c56701a0",
+      "translation": "за счет кошки."
+    },
+    {
+      "id": "gap-phrase-174",
+      "group": "phrase-gaps",
+      "input": "turn cat back on.",
+      "raw_cp866_hex": "a2aaabeee7a8e2a520aaaee8aae320e1adaea2a02e0d0a",
+      "raw_sha256": "20de7d7487ab7221e25e29d8398500f8b72e135411fa5a2fdc5443c9673705c9",
+      "translation": "включите кошку снова."
+    },
+    {
+      "id": "gap-phrase-175",
+      "group": "phrase-gaps",
+      "input": "turn cat efforts to.",
+      "raw_cp866_hex": "ada0afe0a0a2ece2a520e3e1a8aba8ef20aaaee8aaa820ada02e0d0a",
+      "raw_sha256": "bb4be53bdf35f4d2ebf2a1c975f66cbc6c10b1268d0fc95c7f02317786c3671d",
+      "translation": "направьте усилия кошки на."
+    },
+    {
+      "id": "gap-phrase-176",
+      "group": "phrase-gaps",
+      "input": "under cat agreement.",
+      "raw_cp866_hex": "afae20e1aea3aba0e8a5ada8efac20aaaee8aaa82e0d0a",
+      "raw_sha256": "ab918f0f61f1eeea325b375beac951f2d7417dfaa2f69509f143281b5bdb35b3",
+      "translation": "по соглашениям кошки."
+    },
+    {
+      "id": "gap-phrase-177",
+      "group": "phrase-gaps",
+      "input": "under cat conditions.",
+      "raw_cp866_hex": "afe0a820e3e1abaea2a8a920aaaee8aaa82e0d0a",
+      "raw_sha256": "f1527c18b9ac1b336dd00c53a0cb1d0bd91c4160ee706fbc6fd1da1cef8acf65",
+      "translation": "при условий кошки."
+    },
+    {
+      "id": "gap-phrase-178",
+      "group": "phrase-gaps",
+      "input": "united cat states.",
+      "raw_cp866_hex": "e8e2a0e2eb20e1aea5a4a8ada5adadaea920aaaee8aaa82e0d0a",
+      "raw_sha256": "8d456051bd2c5676f1939b7239c275ef279a4e725b1a600b65ee557d191a1e94",
+      "translation": "штаты соединенной кошки."
+    },
+    {
+      "id": "gap-phrase-179",
+      "group": "phrase-gaps",
+      "input": "upon cat of.",
+      "raw_cp866_hex": "afae20aaaee8aaa52e0d0a",
+      "raw_sha256": "6d8f5c2040d875a45fd7392ae2fb9f4869552bf07980a50fdf5456c444add2e5",
+      "translation": "по кошке."
+    },
+    {
+      "id": "gap-phrase-180",
+      "group": "phrase-gaps",
+      "input": "vary between cat and.",
+      "raw_cp866_hex": "a8a7aca5ada8e2a5e1ec20a220afe0a5a4a5aba0e520aee220aaaee8aaa820a4ae2e0d0a",
+      "raw_sha256": "7eeca00f5da43460e29372836cbdd178c872d2d8a42628a36c254bb1cbf51b07",
+      "translation": "изменитесь в пределах от кошки до."
+    },
+    {
+      "id": "review-extra-181",
+      "group": "regression",
+      "input": "The houses' doors are open.",
+      "raw_cp866_hex": "84a2a5e0a87b312ea2e5aea47d20a4aeacaea220aee2aae0ebe2eb2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f72733a20706879736963616c20646f6f72202d2084a2a5e0a83b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "41cce67fe9ddf66dd1f318c8989b851a96a9eb06201be648d06939a189174163",
+      "translation": "Двери{1.вход} домов открыты."
+    },
+    {
+      "id": "review-extra-182",
+      "group": "regression",
+      "input": "The classes' names are here.",
+      "raw_cp866_hex": "88aca5ada020aaaba0e1e1aea2202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "ae36abc526b8fc85d7a9693d5075db6cb1a36c45c8d0dce1fe26cc3e2ba57d08",
+      "translation": "Имена классов - здесь."
+    },
+    {
+      "id": "review-extra-183",
+      "group": "regression",
+      "input": "The babies' names are here.",
+      "raw_cp866_hex": "6261626965732720a8aca5ada0202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "54488fda5342e3cbb5bf84b041bc2b181892a13c336b756e52ee8acb797845fe",
+      "translation": "babies' имена - здесь."
+    },
+    {
+      "id": "review-extra-184",
+      "group": "regression",
+      "input": "The ladies' books are here.",
+      "raw_cp866_hex": "8aada8a3a820afa0e0ada5a9202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "f9ee98ce490ecfc05a2de0325fd848d94879b6c2073ed3796919b9b817bf9d37",
+      "translation": "Книги парней - здесь."
+    },
+    {
+      "id": "review-extra-185",
+      "group": "regression",
+      "input": "The cities' names are here.",
+      "raw_cp866_hex": "6369746965732720a8aca5ada0202d20a7a4a5e1ec2e0d0a",
+      "raw_sha256": "54da5bb21a6049876059a2eb46fa1c47305bc6bc13ba29295065e82582ebc3f7",
+      "translation": "cities' имена - здесь."
+    },
+    {
+      "id": "review-extra-186",
+      "group": "regression",
+      "input": "He bears it in mind.",
+      "raw_cp866_hex": "8ead20a8aca5a5e220ede2ae20a220a2a8a4e32e0d0a",
+      "raw_sha256": "96499f1f1051ed5511e56efa987183c2a66b6e0073bb3a33b27e4524f5bcfaf7",
+      "translation": "Он имеет это в виду."
+    },
+    {
+      "id": "review-extra-187",
+      "group": "regression",
+      "input": "He takes the cat home.",
+      "raw_cp866_hex": "8ead20a1a5e0a5e220a4aeac20aaaee8aaa82e0d0a",
+      "raw_sha256": "37ca01083df65d14df475a87f1438b38e1d018814a41052c2c926d4c44f4e78c",
+      "translation": "Он берет дом кошки."
+    },
+    {
+      "id": "review-extra-188",
+      "group": "regression",
+      "input": "He is very sure of it.",
+      "raw_cp866_hex": "8ead20aee7a5adec20e3a2a5e0a5ad20a220ede2ae2e0d0a",
+      "raw_sha256": "d9d5d9bfc9a2e514cef4459de4e1e4c693727670755369522a8282f47dbe6298",
+      "translation": "Он очень уверен в это."
+    },
+    {
+      "id": "review-extra-189",
+      "group": "regression",
+      "input": "We are aware of the problem.",
+      "raw_cp866_hex": "8ceb20a7ada0a5ac20ae20afe0aea1aba5aca52e0d0a",
+      "raw_sha256": "e06695bdb79517a18e5ed0c698431fe2a52b8ec22abf4b7a4f7a04b4024b4dd7",
+      "translation": "Мы знаем о проблеме."
+    }
+  ]
+}

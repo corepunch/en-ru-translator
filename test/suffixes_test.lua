@@ -41,11 +41,76 @@ assert(rows[33].ending == 'ly' and rows[33].selector == 'D')
 
 local no_root = lexicon.from_bytes('word*Nслово\n')
 local result, reason = lexicon.lookup(no_root, 'unknownness')
-assert(result == nil and reason:find('native suffix row ness/N00', 1, true))
+assert(result == nil and reason == nil)
+
+-- Derivational nouns do not invent a stem. Adjectives and possessives do.
+-- The surface word is still marked as a noun when the ending is N-class.
+local derived = lexicon.from_bytes('strong*Aпрочный\nsoft*Dмягко\ncat*Nкошка\ndog*Nсобака\nbusy*Aзанятый\n')
+result, reason = lexicon.lookup(derived, 'strongness')
+assert(result == nil and reason == nil)
+local surface = assert(lexicon.surface_noun('strongness'))
+assert(surface.tag == 'N' and surface.ending == 'ness' and surface.selector == 'N00')
+assert(surface.fields.number == 0 and surface.fields.case_mask == 0)
+assert(lexicon.surface_noun('xyzment').ending == 'ment')
+assert(lexicon.surface_noun('stronger') == nil)
+assert(lexicon.surface_noun('books') == nil)
+assert(lexicon.surface_noun("cat's") == nil)
+assert(lexicon.surface_noun('xyzzy') == nil)
+local noun_matrix=0
+for _,ending in ipairs({'ness','ment','ion','ence','ance','enc','anc','ity','age','ure','ag','nes','or','ur'}) do
+  for _,stem in ipairs({'xyz','strong','foo','unrecognized'}) do
+    for _,source in ipairs({stem..ending,(stem..ending):upper(),stem:sub(1,1):upper()..stem:sub(2)..ending}) do
+      local result=lexicon.analyze(no_root,source).vector[1]
+      local shadowed=ending=='nes' -- Earlier plural -es wins before truncated -nes.
+      assert(result.source==source and result.tag==string.byte(shadowed and '?' or 'N') and result.previous_tag==0,source)
+      assert(result.reading_state==(shadowed and 0 or 1) and result.person==3 and result.number==0 and result.case_mask==0,source)
+      noun_matrix=noun_matrix+1
+    end
+  end
+end
+assert(noun_matrix==168)
+local analyzed = lexicon.analyze(derived, 'strongness')
+local marked
+local node = analyzed.root.next
+while node do
+  if node.source == 'strongness' then marked = node end
+  node = node.next
+end
+assert(marked and marked.tag == string.byte('N') and marked.previous_tag == 0)
+assert(marked.reading_state == 1 and marked.person == 3 and marked.gender == 1)
+assert(marked.number == 0 and marked.case_mask == 0)
+local hyphenated = lexicon.analyze(no_root, 'foo-ness')
+local left
+node = hyphenated.root.next
+while node do
+  if node.source == 'foo-ness' then left = node end
+  node = node.next
+end
+assert(left and left.tag == string.byte('N') and left.surface_compound)
+result = assert(lexicon.lookup(derived, 'stronger'))
+assert(result.candidate == 'strong' and result.tag == 'A' and result.native_suffix == 'er')
+assert(result.fields.marker == 0x61 and result.fields.tense == 1)
+result = assert(lexicon.lookup(derived, 'strongest'))
+assert(result.candidate == 'strong' and result.fields.tense == 2 and result.fields.marker == 0x61)
+result = assert(lexicon.lookup(derived, "cat's"))
+assert(result.candidate == 'cat' and result.tag == 'N' and result.native_suffix == "'s")
+assert(result.fields.number == 0 and result.fields.case_mask == 2)
+result = assert(lexicon.lookup(derived, "dogs'"))
+assert(result.candidate == 'dog' and result.native_suffix == "s'")
+assert(result.fields.number == 1 and result.fields.case_mask == 2)
+result = assert(lexicon.lookup(derived, 'busier'))
+assert(result.candidate == 'busy' and result.native_suffix == 'ier' and result.fields.tense == 1)
+local possessives=lexicon.from_bytes('city*Nгород\nhouse*Nдом\nclass*Nкласс\n')
+for source,stem in pairs({["cities'"]='city',["houses'"]='house',["classes'"]='class'}) do
+  local found=assert(lexicon.lookup(possessives,source))
+  assert(found.candidate==stem and found.fields.number==1 and found.fields.case_mask==2)
+end
 
 local duplicate = lexicon.from_bytes('book*Zкнига\nbook*Nкнижка\n')
 result, reason = lexicon.lookup(duplicate, 'books')
-assert(result == nil and reason == 'duplicate dictionary key: book')
+assert(result.record == duplicate.records[1] and reason == nil)
+result = assert(lexicon.lookup(duplicate, 'books', {dictionary_entry = function() return 2 end}))
+assert(result.record == duplicate.records[2])
 
 -- E and G try the unmodified truncated stem before the native auxiliary-e
 -- form; doubled consonants instead reduce once and preserve the repeated byte.

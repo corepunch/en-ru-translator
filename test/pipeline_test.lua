@@ -17,6 +17,9 @@ local cases = {
   {'He said, "I agree."', 'Он сказал, "Я соглашаюсь{1.согласовывать}."'},
   {'He said: "Go."', 'Он сказал: "Идти."'},
   {'ABC-123.', 'ABC-123.'},
+  {'The xyzness is deep.', 'xyzness глубоко.'},
+  {'The strongness is deep.', 'strongness глубоко.'},
+  {'The xyzzy is deep.', 'xyzzy глубок.'},
 }
 
 for _, case in ipairs(cases) do

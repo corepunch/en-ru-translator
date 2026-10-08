@@ -25,7 +25,16 @@ local function match_pattern(pattern, start, view)
     end
     local function alternatives()
       if lexical then
-        assert(not has('`!', pattern:sub(p, p)), 'embedded lexical alternatives are not ported')
+        local choices = {}
+        while has('`!', pattern:sub(p, p)) do
+          local delimiter = pattern:sub(p, p)
+          p = p + 1
+          local value = read_until(delimiter)
+          if p > #pattern then return false end
+          choices[#choices + 1] = {delimiter, value}
+          p = p + 1
+        end
+        return choices
       elseif view.skip_alternatives then
         local count = 0
         while pattern:sub(p, p) == '`' and count < 10 do
@@ -40,6 +49,14 @@ local function match_pattern(pattern, start, view)
     local function member(set, tag)
       return view.null_matches and tag == '\0' or has(set, tag)
     end
+    local function accepts(classes, choices, index, tag)
+      if member(classes, tag or view.tag(index)) then return true end
+      for _, choice in ipairs(type(choices) == 'table' and choices or {}) do
+        if choice[1] == '`' and view.word(index, choice[2])
+            or choice[1] == '!' and view.text(index, choice[2] .. ')') then return true end
+      end
+      return false
+    end
     while p <= #pattern do
       local c = pattern:sub(p, p)
       if c == '~' then neg = true
@@ -48,11 +65,13 @@ local function match_pattern(pattern, start, view)
         p = p + 1
         local classes = read_until(lexical and ']`!' or ']`')
         if not lexical and p > #pattern then return 0 end
-        if not alternatives() then return 0 end
+        local choices = alternatives()
+        if not choices or pattern:sub(p, p) ~= ']' then return 0 end
         if lexical and classes == '$' then
           i = i + 1
         else
-          if classes ~= '' and member(classes, view.tag(i)) == neg then return 0 end
+          if (classes ~= '' or type(choices) == 'table' and #choices > 0)
+              and accepts(classes, choices, i) == neg then return 0 end
           i, neg = i + 1, false
         end
       elseif lexical and (c == '`' or c == '!') then
@@ -65,21 +84,24 @@ local function match_pattern(pattern, start, view)
       elseif c == '<' then
         p = p + 1
         local classes = read_until(lexical and '>`!' or '>`')
-        if p > #pattern or not alternatives() then return 0 end
+        local choices = alternatives()
+        if p > #pattern or not choices or pattern:sub(p, p) ~= '>' then return 0 end
         local cache = view.cache(i)
         local anchor, width = nil, 1
         local next_c = pattern:sub(p + 1, p + 1)
         if next_c == '[' or lexical and has('`!', next_c) then
           p = p + 2
-          local sought = read_until(lexical and ']`!' or ']`')
+          local sought = read_until(next_c == '[' and (lexical and ']`!' or ']`') or next_c)
           if p > #pattern then return 0 end
-          local close = pattern:sub(p, p)
+          local anchor_choices = next_c == '[' and alternatives() or nil
+          local close = next_c == '[' and ']' or next_c
+          if next_c == '[' and (not anchor_choices or pattern:sub(p,p) ~= ']') then return 0 end
           if close == '!' then sought = sought .. ')' end
           p = p - 1
           for offset = 0, #cache - 1 do
             local hit = lexical and close == '`' and view.word(i + offset, sought)
               or lexical and close == '!' and view.text(i + offset, sought)
-              or (not lexical or close == ']') and has(sought, cache:sub(offset + 1, offset + 1))
+              or (not lexical or close == ']') and accepts(sought, anchor_choices, i + offset, cache:sub(offset + 1, offset + 1))
             if hit then anchor = offset; break end
           end
         else
@@ -91,9 +113,9 @@ local function match_pattern(pattern, start, view)
         if anchor == 0 then
           if neg then return 0 end
         else
-          if classes:sub(1, 1) ~= '$' and classes ~= '' then
+          if classes:sub(1, 1) ~= '$' and (classes ~= '' or type(choices) == 'table' and #choices > 0) then
             for offset = 1, anchor do
-              if has(classes, cache:sub(offset, offset)) == neg then return 0 end
+              if accepts(classes, choices, i + offset - 1, cache:sub(offset, offset)) == neg then return 0 end
             end
           end
           neg = false
@@ -206,9 +228,22 @@ function matching.replace(vector, first, last, pattern, action, state)
       if has('[`!', next_c) then
         p = p + 2
         local start = p
-        skip_pattern(']`!')
+        skip_pattern(next_c == '[' and ']`!' or next_c)
         if p > #pattern then return removed end
         local sought, close = pattern:sub(start, p - 1), pattern:sub(p, p)
+        local choices={}
+        if next_c=='[' then
+          while has('`!',pattern:sub(p,p)) do
+            local delimiter=pattern:sub(p,p)
+            p=p+1;start=p
+            skip_pattern(delimiter)
+            if p>#pattern then return removed end
+            choices[#choices+1]={delimiter,pattern:sub(start,p-1)}
+            p=p+1
+          end
+          if pattern:sub(p,p)~=']' then return removed end
+          close=']'
+        end
         if close == '!' then sought = sought .. ')' end
         local found
         for j = i, last do
@@ -218,6 +253,10 @@ function matching.replace(vector, first, last, pattern, action, state)
           local ok = (close == '`' and word(node, sought))
             or (close == '!' and (node.reading or ''):find(sought, 1, true))
             or (close == ']' and has(sought, cached))
+          for _,choice in ipairs(choices) do
+            ok=ok or choice[1]=='`' and word(node,choice[2])
+              or choice[1]=='!' and has(node.reading or '',choice[2]..')')
+          end
           if ok then found = j; break end
         end
         if not found then return removed end

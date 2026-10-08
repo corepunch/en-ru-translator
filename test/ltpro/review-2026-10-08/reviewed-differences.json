@@ -1,0 +1,320 @@
+{
+  "noun-endings-004": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "11c98c2e4f38d68c4c0683d02a35270497078723e9b44c318736e437135753f2",
+    "expected_lua": "foo-ness глубоко."
+  },
+  "noun-endings-009": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "21741ac203038639e6644a47df1c6b7dbb949d09ab62ea9852906e560de75479",
+    "expected_lua": "foo-ment глубоко."
+  },
+  "noun-endings-019": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "be04cd605adbc78e2d4f1cd735e8216cdf507ca4e549bea92f8ec76ffbabe05c",
+    "expected_lua": "foo-ence глубоко."
+  },
+  "noun-endings-024": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "b97d96d08d284135e61e35fa8e9e8eebab5c66905adb3d6f420d632a6b944c9c",
+    "expected_lua": "foo-ance глубоко."
+  },
+  "noun-endings-029": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "6ade0b037f64973c013df7ecf9be4abd1a2d194e45467323f93431b0b1977240",
+    "expected_lua": "foo-enc глубоко."
+  },
+  "noun-endings-030": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "97dae13fa7802dfe72011aa5c234479d185e361e5662e805e83a4bc2dd6f9356",
+    "expected_lua": "enc-foo глубоко."
+  },
+  "noun-endings-034": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "b662206a0a671b55df8b26f2dee82c5afb3da0e20a2cf358191a4e2425951452",
+    "expected_lua": "foo-anc глубоко."
+  },
+  "noun-endings-035": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "ad82610c2b6f61164809287fa058d6368d98adfbcfb1158c8b31601d097c978a",
+    "expected_lua": "anc-foo глубоко."
+  },
+  "noun-endings-039": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "29d8000856a94edfce856f55f0519ebd06e179d1b6847a2b19000d65327bc7f2",
+    "expected_lua": "foo-ity глубоко."
+  },
+  "noun-endings-040": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "3b24f85cf0d925056f3d6b1b872859db8dbcb6dfaf9892cca7927250bbfa7487",
+    "expected_lua": "ity-foo глубоко."
+  },
+  "noun-endings-049": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "e34aeb554c35ad5063f790fbe23dd4db79018ef29fb3c5a57fc4141d966cd403",
+    "expected_lua": "foo-ure глубоко."
+  },
+  "noun-endings-050": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "88f0aa9b6b0582ead3ab349432a6a9e6de259c3f83f66a22280cd9fd4406fb8b",
+    "expected_lua": "ure-foo глубоко."
+  },
+  "noun-endings-060": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "04558239e1d8bf91b007258c5380157a464343b988ffd419d82777da8c8d0448",
+    "expected_lua": "nes-foo глубоко."
+  },
+  "noun-endings-065": {
+    "classification": "intentional_difference",
+    "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement.",
+    "oracle_raw_sha256": "7381eb0cd32cedc50287c4c906956751f030f3366f0a6e77da7fb8e33572701e",
+    "expected_lua": "Или-foo глубокое."
+  },
+  "noun-endings-069": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "20efe6b382c934f92ac8a369b19f84bc729276fac86c49ca7c7550f4bcefe2c8",
+    "expected_lua": "foo-ur глубоко."
+  },
+  "noun-endings-070": {
+    "classification": "intentional_difference",
+    "reason": "Lua treats a compound with an unrecognized bare noun ending and no known component as one surface noun. It receives ordinary noun agreement, rather than the original split-token suffix side effects. Plain-word suffix cases are tested separately and match the captured executable.",
+    "oracle_raw_sha256": "06797425b3976669081a784c5f0ddadb7dac5aa176b68c42168fec3ed38797f0",
+    "expected_lua": "ur-foo глубоко."
+  },
+  "possessives-006": {
+    "classification": "intentional_difference",
+    "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form.",
+    "oracle_raw_sha256": "54da5bb21a6049876059a2eb46fa1c47305bc6bc13ba29295065e82582ebc3f7",
+    "expected_lua": "Имена городов - здесь."
+  },
+  "compounds-005": {
+    "classification": "intentional_difference",
+    "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement.",
+    "oracle_raw_sha256": "ff1f5cb459e937f4c2017aaf3e29cd2fb61e93b3733a4b02d8c540ad14395188",
+    "expected_lua": "Бар{1.полоса;брусок;адвокатура;суд}-ness глубок."
+  },
+  "compounds-006": {
+    "classification": "intentional_difference",
+    "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement.",
+    "oracle_raw_sha256": "13f6e210eb9a6123ba2406a9b6d14e6f66a7f3de1309dfc853e70972b04d2324",
+    "expected_lua": "Азбука-ness глубока."
+  },
+  "compounds-007": {
+    "classification": "intentional_difference",
+    "reason": "Lua translates known compound components independently and preserves the separator. It does not apply the original bare-ending compound reorder or its special noun-sense forcing; ordinary Lua grammar determines agreement.",
+    "oracle_raw_sha256": "cba7ab7914c065a5c21b275272afcde5046eace5b08e466d9fc4457d9cc5e89f",
+    "expected_lua": "ness-преграждать глубокое."
+  },
+  "prefixes-002": {
+    "classification": "intentional_difference",
+    "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen.",
+    "oracle_raw_sha256": "cec7e0ffac274b58b4e6220cf28cd3d3277a5dccd308c38c8221f36df17ea1b4",
+    "expected_lua": "Непрочный хорошее."
+  },
+  "prefixes-003": {
+    "classification": "intentional_difference",
+    "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen.",
+    "oracle_raw_sha256": "dd5241ce2acb84850c0751549e9a6b626a3e17f162371c9d7a3c598c163f83ba",
+    "expected_lua": "Некошка хорошая."
+  },
+  "prefixes-004": {
+    "classification": "intentional_difference",
+    "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen.",
+    "oracle_raw_sha256": "f2bab274fbf4b09070ffd7726c503802f3255e6b50d85e0239be8084fb1fb9e9",
+    "expected_lua": "Подкошка хорошая."
+  },
+  "prefixes-005": {
+    "classification": "intentional_difference",
+    "reason": "Lua inflects the recognized stem before joining the translated prefix and capitalizes the resulting word once. The original capitalizes the prefix and stem separately and can retain the English prefix hyphen.",
+    "oracle_raw_sha256": "3d451b7d963d6a3737c0c15d9c00d6ef01ce99afedfc4237c0fdfe63c3dc5398",
+    "expected_lua": "Подкошки хорошие."
+  },
+  "prefixes-014": {
+    "classification": "intentional_difference",
+    "reason": "The recognized virus stem remains singular when prefixed with anti. The original antivirus capture unexpectedly becomes plural, while the unprefixed virus control is singular in both engines.",
+    "oracle_raw_sha256": "5ce29d39c112997b8f1de5b80c8a392454dc2f7ac32c22b9c5b93295c2235131",
+    "expected_lua": "Антивирус хороший."
+  },
+  "phrases-007": {
+    "classification": "known_limitation",
+    "reason": "The supplied at ~ convenience reading contains untagged literal услугам and does not supply enough case/number information for correct Russian possessive agreement. Both captured original and Lua output are awkward; Lua also uses ordinary casing for phrase components. This is an inherited phrase/morphology limitation, not a claim of correct Russian.",
+    "oracle_raw_sha256": "3a47097726e6553741cc4dc220abc433f27123fbe5fbc7646a8d655e26cd0306",
+    "expected_lua": "К ваше услугам."
+  },
+  "phrases-011": {
+    "classification": "intentional_difference",
+    "reason": "The shipped swiss army knife W reading omits the first selector. Lua preserves its full untagged text; the original drops the first Cyrillic letter. No original dictionary bytes were changed.",
+    "oracle_raw_sha256": "f03be2f770531099cadeab87dc388d3522c1947e160d5d292b6da9030d4fd789",
+    "expected_lua": "Армейский Нож - здесь."
+  },
+  "directives-005": {
+    "classification": "intentional_difference",
+    "reason": "A delimited protected span closes before adjacent punctuation. Lua prints its literal contents and comma; the captured executable leaks the closing ~} marker.",
+    "oracle_raw_sha256": "f14d1ca8fde9fa02f653248a044868b87140304fd151165bcc6e3f5f60f98b22",
+    "expected_lua": "one, two."
+  },
+  "directives-006": {
+    "classification": "intentional_difference",
+    "reason": "Lua implements the documented list controls using independent translated items, tabs, and newlines. The supplied executable capture prints the control text literally. List formatting is an explicit Lua feature contract.",
+    "oracle_raw_sha256": "80aacbb6001e08f929fb38e48cfbd941a509c228510a59a0c796c8e271e43d06",
+    "expected_lua": "кошка\tсобака\nкнига"
+  },
+  "directives-007": {
+    "classification": "intentional_difference",
+    "reason": "Lua implements the documented list controls using independent translated items, tabs, and newlines. The supplied executable capture prints the control text literally. List formatting is an explicit Lua feature contract.",
+    "oracle_raw_sha256": "3cbe3438d18086a3c3db0c5b1925e090c747ea70753efa336073f28fcaccdeb3",
+    "expected_lua": "кошка\nсобака"
+  },
+  "directives-008": {
+    "classification": "intentional_difference",
+    "reason": "Lua implements the documented list controls using independent translated items, tabs, and newlines. The supplied executable capture prints the control text literally. List formatting is an explicit Lua feature contract.",
+    "oracle_raw_sha256": "afe971652eb7fd13ea51b492672e8d9590f4f000682429cb62b8039f734ebc7d",
+    "expected_lua": "кошка\tсобака\nДве книги."
+  },
+  "gap-phrase-014": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "ac437858dc253fc5ebd89a8d31ee91a3674c751fa6f7fba4d052c3a64dc00038",
+    "expected_lua": "как кошка угодно."
+  },
+  "gap-phrase-055": {
+    "classification": "intentional_difference",
+    "reason": "Plural information from the head entry survives phrase distribution, giving plural adjective agreement with обломки. The captured executable emits a singular adjective before the plural noun.",
+    "oracle_raw_sha256": "14b964b6aaa449d9b49818bc8d448971abccd8b2849b955ef4bced0418abdf9d",
+    "expected_lua": "разбросанные обломки."
+  },
+  "gap-phrase-057": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "a55618f3aecb87b96e2493cbf6b3174dc17cefea138d47fb84247452ffdb4a18",
+    "expected_lua": "удержите кошку от попыток."
+  },
+  "gap-phrase-058": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "4c39534ebe92984d723dc979c30b290fbc95edb83cf5176b6755dfa58d1bf00b",
+    "expected_lua": "удержите кошку от повторных попыток."
+  },
+  "gap-phrase-064": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "48b74165a7d5e8148f6920aacbc4c2efe946f06f86d2a0f027a564abce160eb3",
+    "expected_lua": "сделайте кошку вручную."
+  },
+  "gap-phrase-093": {
+    "classification": "intentional_difference",
+    "reason": "Lua recognizes the literal/patterned glass of phrase and selects стакан. The original captured output uses the separate glass entry meaning стекло. This is the documented phrase-precedence policy.",
+    "oracle_raw_sha256": "bc53e1ef1e5f0b5119f53ba103491e5f3933249b46c5869a8d3a984506f3e159",
+    "expected_lua": "стакан кошки."
+  },
+  "gap-phrase-135": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "7ad7ec1eda476c826fa7711202298a581c01f09960b9f80bc9f633a765b4c8d8",
+    "expected_lua": "предохраните кошку от."
+  },
+  "gap-phrase-136": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "8dd7411b1163c40fe8b2bd5f4eabca75fbcaf107e229791ae0d0e64f9ca3e189",
+    "expected_lua": "не давайте кошке произойти."
+  },
+  "gap-phrase-151": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "34e19fc3d5347ce201af0adeba8a252e48aefda44af04fae2389b58f49aa2d16",
+    "expected_lua": "отправьте заказ кошки."
+  },
+  "gap-phrase-167": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "c34b2ad40e788a63a3ca01f7d0e9ad00f8e264455a91f1059c668e1fb6eec440",
+    "expected_lua": "сделайте фотографии кошки."
+  },
+  "gap-phrase-168": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "f3760cf03cd7914c1536583a1b11fd4cdc19ba502430aef23f54d15988d7f583",
+    "expected_lua": "сделайте фотографии кошки с."
+  },
+  "review-extra-183": {
+    "classification": "intentional_difference",
+    "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form.",
+    "oracle_raw_sha256": "54488fda5342e3cbb5bf84b041bc2b181892a13c336b756e52ee8acb797845fe",
+    "expected_lua": "Имена младенцев - здесь."
+  },
+  "review-extra-184": {
+    "classification": "known_limitation",
+    "reason": "Lua restores ladies' to lady rather than lad, avoiding the original translation парней. BASE.RUS contains no дама noun paradigm, so its inflection remains unavailable. Both engines also emit uninflected дама in the expanded books-of-the-ladies control. This missing dictionary morphology is a known language limitation.",
+    "oracle_raw_sha256": "f9ee98ce490ecfc05a2de0325fd848d94879b6c2073ed3796919b9b817bf9d37",
+    "expected_lua": "Книги дама - здесь."
+  },
+  "review-extra-185": {
+    "classification": "intentional_difference",
+    "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form.",
+    "oracle_raw_sha256": "54da5bb21a6049876059a2eb46fa1c47305bc6bc13ba29295065e82582ebc3f7",
+    "expected_lua": "Имена городов - здесь."
+  },
+  "natural-013": {
+    "classification": "known_limitation",
+    "reason": "The supplied at ~ convenience reading contains untagged literal услугам and does not supply enough case/number information for correct Russian possessive agreement. Both captured original and Lua output are awkward; Lua also uses ordinary casing for phrase components. This is an inherited phrase/morphology limitation, not a claim of correct Russian.",
+    "oracle_raw_sha256": "3a47097726e6553741cc4dc220abc433f27123fbe5fbc7646a8d655e26cd0306",
+    "expected_lua": "К ваше услугам."
+  },
+  "natural-014": {
+    "classification": "intentional_difference",
+    "reason": "An explicit ~ in a selected phrase reading reinserts its captured words, with normal lexical analysis and agreement. The original drops some of these captures or leaves a literal tilde. Readings without an output ~ consume the capture; those idiom cases now agree with the original.",
+    "oracle_raw_sha256": "3ff868810c3073866164b5f6d417ff4458c025e17590ca76ef202eba3aae6afc",
+    "expected_lua": "Она делает ее фотографии."
+  },
+  "natural-027": {
+    "classification": "known_limitation",
+    "reason": "Lua restores ladies' to lady rather than lad, avoiding the original translation парней. BASE.RUS contains no дама noun paradigm, so its inflection remains unavailable. Both engines also emit uninflected дама in the expanded books-of-the-ladies control. This missing dictionary morphology is a known language limitation.",
+    "oracle_raw_sha256": "f9ee98ce490ecfc05a2de0325fd848d94879b6c2073ed3796919b9b817bf9d37",
+    "expected_lua": "Книги дама - здесь."
+  },
+  "natural-029": {
+    "classification": "intentional_difference",
+    "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form.",
+    "oracle_raw_sha256": "54488fda5342e3cbb5bf84b041bc2b181892a13c336b756e52ee8acb797845fe",
+    "expected_lua": "Имена младенцев - здесь."
+  },
+  "natural-030": {
+    "classification": "intentional_difference",
+    "reason": "Plural possessive -ies' restores the English -y stem before dictionary lookup. The captured executable leaves cities'/babies' untranslated; Lua translates city/baby and applies plural genitive morphology. The expanded of-the-cities control verifies the same noun form.",
+    "oracle_raw_sha256": "54da5bb21a6049876059a2eb46fa1c47305bc6bc13ba29295065e82582ebc3f7",
+    "expected_lua": "Имена городов - здесь."
+  },
+  "natural-040": {
+    "classification": "known_limitation",
+    "reason": "Lua expands stacked contractions fully; the original leaves shouldn't/We'd untranslated. The resulting Lua output equals the captured original for the expanded should not have/would have control, including its inherited modal/perfect or conditional grammar defect. Expansion is supported, but the Russian result is not claimed to be correct.",
+    "oracle_raw_sha256": "2e89862bf8c2213d77caa485db81f6d4240a46befcec2fdcafe47d4cd9284de2",
+    "expected_lua": "Они не должны пришли."
+  },
+  "natural-041": {
+    "classification": "known_limitation",
+    "reason": "Lua expands stacked contractions fully; the original leaves shouldn't/We'd untranslated. The resulting Lua output equals the captured original for the expanded should not have/would have control, including its inherited modal/perfect or conditional grammar defect. Expansion is supported, but the Russian result is not claimed to be correct.",
+    "oracle_raw_sha256": "2b5679194cf3657bf79bb2a4c0c9ec52261fec73ba5541f3227c3df8e5a46e72",
+    "expected_lua": "Мы будем работать."
+  },
+  "control-008": {
+    "classification": "intentional_difference",
+    "reason": "The recognized virus stem remains singular when prefixed with anti. The original antivirus capture unexpectedly becomes plural, while the unprefixed virus control is singular in both engines.",
+    "oracle_raw_sha256": "5ce29d39c112997b8f1de5b80c8a392454dc2f7ac32c22b9c5b93295c2235131",
+    "expected_lua": "Антивирус хороший."
+  }
+}

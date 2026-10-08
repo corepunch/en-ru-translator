@@ -7,12 +7,49 @@ supplied unpacked `LTGOLD/LTPRO.EXE`, `BASE.DIC`, and `BASE.RUS`.
 
 ```sh
 sh test/run_all.sh
+```
+
+This is the required feature regression suite; it does not require DOSBox or
+memory-operation parity. New feature expectations describe the documented Lua
+behavior. Existing captured expectations remain useful regressions, not a demand
+that new features reproduce every DOS quirk.
+
+Coverage includes meanings output, suffixes and compounds, prefix derivation,
+duplicate-entry callbacks, lexical class alternatives, phrase captures and W
+selectors, domain preferences, protected/transliterated text, list directives,
+and API/CLI integration. `phrase_inventory_test.lua` also analyzes 8,940 multiword
+W entries (using `cat` for gaps) to catch unsupported branches. It checks safe
+analysis, not linguistic correctness of every generated sentence.
+
+## Expanded executable review
+
+```sh
+python3 -m unittest discover -s test -p 'feature_review_test.py'
+python3 tools/ltpro_feature_review.py --report /tmp/ltpro-feature-review.json
+```
+
+The [2026-10-08 review](test/ltpro/review-2026-10-08/README.md) contains 627
+freshly captured cases (611 distinct inputs), including `-ness`, `'re`, `'ve`,
+other contractions, all 180 phrase-gap keys, and expanded grammatical controls.
+Each original executable output was captured twice with identical bytes. The
+runner verifies provenance and requires exact outputs for both oracle matches
+and individually reviewed Lua differences. A changed output or execution error
+fails; a documented known limitation does not. Successful execution therefore
+means no unreviewed regressions, not universally correct Russian.
+
+The checked-in result is 574 exact matches, 47 intentional differences and 6
+known-limitation cases, with zero unexpected changes or errors. Use
+`--strict-oracle` to fail on any difference, including intentional Lua behavior.
+See the review for separate original/Lua outputs and remaining quality issues.
+
+## Optional historical comparisons
+
+```sh
 python3 tools/ltpro_pipeline_probe.py
 python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/holdout_cases.json --reference test/ltpro/holdout_reference.json
 python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/macro_cases.json --reference test/ltpro/macro_reference.json
 ```
 
-The shell runner executes the Lua module tests and CLI integration checks.
 The Python probe verifies asset/input/raw-output hashes before comparing the
 single engine against the 77 original, 20 holdout and 26 lexical-macro captured inputs. It never
 silently recaptures expected output. The old parser/compiler tests and custom
@@ -72,6 +109,8 @@ New full-program references require DOSBox-X and `tools/ltpro_capture.py`.
 [Corpus provenance](test/ltpro/README.md) documents the capture profile and assets.
 Keep expected outputs and original assets unchanged during refactoring. Corpus
 parity does not establish support for every historical grammar or lexical path.
+Intentional differences introduced by the Lua feature policies should be assessed
+against those policies; do not change stored captures to hide them.
 
 `macros_test.lua` audits all 5,801 literal dictionary entries containing `=` or
 `%`, including phrase readings and redirects. The reading probe checks 2,784

@@ -5,6 +5,7 @@ local text = require 'core.text'
 local prefixes = require 'core.prefixes'
 local directives = require 'core.directives'
 local phrase_patterns = require 'core.phrase_patterns'
+local special_cases = require 'core.special_cases'
 
 local lexicon = {}
 
@@ -804,7 +805,10 @@ local function decode(dictionary,records,index,options)
 		if kind == "X" then fresh.marker = 0x27 end
 		table.insert(records, index + 1, fresh)
 	end
-  local entry,resolved=resolve(dictionary,source,options)
+  local special_reading=special_cases.english_noun(source)
+  local entry,resolved
+  if special_reading then entry={value=special_reading};resolved=source
+  else entry,resolved=resolve(dictionary,source,options) end
   if resolved~=source then
     source=resolved
     node.source, node.source_length = source, #source

@@ -57,9 +57,9 @@ lua init.lua "There is a small mailbox here."
 
 ## Step 3: Fixes applied
 
-### 3a. New vocabulary — `data/DUNGEON.DIC`
+### 3a. New vocabulary — `reference/DUNGEON.DIC`
 
-A domain-specific overlay dictionary loaded with `--dict=data/DUNGEON.DIC`. It is read
+A domain-specific overlay dictionary loaded with `--dict=reference/DUNGEON.DIC`. It is read
 after `BASE.DIC`; entries with the same key override the base dictionary.
 
 **Key entries for these sentences:**
@@ -141,8 +141,8 @@ whose base form is not in `BASE.RUS`.
 
 ```sh
 lua init.lua "You are standing in an open field west of a white house, with a boarded front door." \
-  --dict=data/DUNGEON.DIC
-lua init.lua "There is a small mailbox here." --dict=data/DUNGEON.DIC
+  --dict=reference/DUNGEON.DIC
+lua init.lua "There is a small mailbox here." --dict=reference/DUNGEON.DIC
 ```
 
 **Output:**
@@ -171,9 +171,9 @@ lua init.lua "There is a small mailbox here." --dict=data/DUNGEON.DIC
 
 ## How to add more vocabulary
 
-1. Open `data/DUNGEON.DIC` (or create a new overlay file).
+1. Open `reference/DUNGEON.DIC` (or create a new overlay file).
 2. Add entries in the format `english_word*CODE` (UTF-8 is fine; the loader re-encodes to CP866).
-3. Load with `--dict=data/DUNGEON.DIC`.
+3. Load with `--dict=reference/DUNGEON.DIC`.
 
 **Simple noun:**
 ```

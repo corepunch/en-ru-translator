@@ -47,9 +47,9 @@ Build the binary databases:
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
-/tmp/openrussian_db build data/openrussian-poc/source \
-  data/openrussian-poc/BASE.DIC data/openrussian-poc/BASE.RUS \
-  data/openrussian-poc/BASE.MORPH
+/tmp/openrussian_db build reference/openrussian/source \
+  reference/openrussian/BASE.DIC reference/openrussian/BASE.RUS \
+  reference/openrussian/BASE.MORPH
 ```
 
 `info FILE` reports the binary image size and record count; `find FILE HEADWORD`
@@ -82,18 +82,18 @@ python3 tools/ltpro_pipeline_probe.py \
   --cases test/ltpro/openrussian-cases.json \
   --reference test/ltpro/openrussian-reference.json \
   --data LTGOLD \
-  --dictionary data/openrussian-poc/BASE.DIC \
-  --russian data/openrussian-poc/BASE.RUS
+  --dictionary reference/openrussian/BASE.DIC \
+  --russian reference/openrussian/BASE.RUS
 python3 tools/ltpro_pipeline_probe.py \
   --cases test/ltpro/openrussian-phrase-cases.json \
   --reference test/ltpro/openrussian-phrase-reference.json \
   --data LTGOLD \
-  --dictionary data/openrussian-poc/BASE.DIC \
-  --russian data/openrussian-poc/BASE.RUS
+  --dictionary reference/openrussian/BASE.DIC \
+  --russian reference/openrussian/BASE.RUS
 python3 tools/ltpro_pipeline_probe.py \
   --cases test/ltpro/openrussian-full-cases.json \
   --reference test/ltpro/openrussian-full-reference.json \
   --data LTGOLD \
-  --dictionary data/openrussian-poc/BASE.DIC \
-  --russian data/openrussian-poc/BASE.RUS
+  --dictionary reference/openrussian/BASE.DIC \
+  --russian reference/openrussian/BASE.RUS
 ```

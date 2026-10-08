@@ -20,7 +20,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "data/openrussian-poc"
+DATA = ROOT / "reference/openrussian"
 SOURCE = DATA / "source"
 MANIFEST_PATH = DATA / "source-manifest.json"
 TABLES = ("nouns", "verbs", "adjectives", "others")

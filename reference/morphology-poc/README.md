@@ -22,7 +22,7 @@ and record its XML checksum and revision.
 ## Reproduce and use
 
 ```sh
-python3 -m pip install -r data/morphology-poc/requirements.txt
+python3 -m pip install -r reference/morphology-poc/requirements.txt
 python3 tools/export_opencorpora_poc.py
 lua tools/open_morphology_poc.lua
 ```

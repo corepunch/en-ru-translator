@@ -3,7 +3,7 @@
 
 Install the exact source snapshot with:
 
-    python3 -m pip install -r data/morphology-poc/requirements.txt
+    python3 -m pip install -r reference/morphology-poc/requirements.txt
     python3 tools/export_opencorpora_poc.py
 
 The resulting Lua file contains only source dictionary forms and grammemes;
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "data/morphology-poc/lexemes.lua"
+OUTPUT = ROOT / "reference/morphology-poc/lexemes.lua"
 
 # Representative OpenCorpora entries from issue 9. The requested POS prevents
 # homographs such as "мочь" from silently selecting the first parse.
@@ -51,7 +51,7 @@ def main() -> int:
     try:
         import pymorphy3
     except ImportError:
-        print("Install the pinned packages in data/morphology-poc/requirements.txt", file=sys.stderr)
+        print("Install the pinned packages in reference/morphology-poc/requirements.txt", file=sys.stderr)
         return 2
 
     morph = pymorphy3.MorphAnalyzer(lang="ru")

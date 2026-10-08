@@ -24,7 +24,11 @@ local cases = {
 
 for _, case in ipairs(cases) do
   local input, expected = table.unpack(case)
-  local actual, state = engine.translate(input, {data_dir = 'LTGOLD'})
+  local actual, state = engine.translate(input, {
+    data_dir = 'LTGOLD',
+    dictionary = 'LTGOLD/BASE.DIC',
+    russian = 'LTGOLD/BASE.RUS',
+  })
   assert(actual == expected, string.format('%q => %q, expected %q', input, actual, expected))
   if input == 'ABC-123.' then
     assert(state.stages.lexical_word_count == 0 and not state.stages.T1 and not state.stages.numeric)

@@ -6,6 +6,7 @@ local engine = require 'core.engine'
 local usage = [[Usage: lua init.lua [--data DIR] [--exe FILE] [--dic FILE] [--rus FILE] [sentence]
        printf '%s' 'English sentence.' | lua init.lua [asset options]
 
+--data selects runtime assets; OpenRussian dictionaries are used by default.
 Input and output are UTF-8. The translator accepts one sentence;
 it does not split multiple sentences. Asset options accept paths.
 Inline {~text~} preserves text; {~=text~} transliterates it.

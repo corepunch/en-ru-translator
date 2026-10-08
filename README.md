@@ -7,13 +7,15 @@ the translation code without DOSBox or process snapshots.
 
 ## Run
 
-Requires Lua 5.3+ and the supplied unpacked `LTPRO.EXE`, `BASE.DIC`, and `BASE.RUS`
-in `LTGOLD/` (original assets are not tracked).
+Requires Lua 5.3+, the OpenRussian dictionaries in `reference/openrussian/`,
+and the supplied unpacked `LTPRO.EXE` in `LTGOLD/` (the original executable is
+not tracked). OpenRussian `BASE.DIC`, `BASE.RUS`, and `BASE.MORPH` are used by
+default; the executable and prefix rules remain in `LTGOLD/`.
 
 ```sh
 lua init.lua "She can speak Russian."
 printf '%s' "Two books." | lua init.lua
-lua init.lua --data /path/to/assets "The door is open."
+lua init.lua --data /path/to/runtime-assets "The door is open."
 lua init.lua --exe /path/to/LTPRO.EXE --dic /path/to/BASE.DIC --rus /path/to/BASE.RUS "Two books."
 ```
 
@@ -27,7 +29,7 @@ The API also exposes it as `state.meanings_text` (UTF-8) and `state.meanings`
 
 ```lua
 local engine = require 'core.engine'
-local text, state = engine.translate('He is in the house.', {data_dir = 'LTGOLD'})
+local text, state = engine.translate('He is in the house.')
 assert(text == 'Он - в доме.')
 ```
 
@@ -94,8 +96,8 @@ loads assets and composes the stages. See [the pipeline](docs/pipeline.md).
 
 The older parser/compiler, custom dictionary overlays and debug CLI were retired.
 `init.lua` always uses the recovered engine; the old `--ltpro` switch and
-`core.ltpro.*` namespace are removed. Historical overlay files in `data/` remain
-as reference material and are not loaded. The overlay editing utilities were
+`core.ltpro.*` namespace are removed. Historical overlay files in `reference/`
+remain as reference material and are not loaded. The overlay editing utilities were
 also retired. Original binary names remain in research tooling for provenance.
 
 ## Verification and limits

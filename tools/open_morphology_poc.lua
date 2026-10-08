@@ -1,5 +1,5 @@
 local morphology = require 'core.open_morphology'
-local data = dofile('data/morphology-poc/lexemes.lua')
+local data = dofile('reference/morphology-poc/lexemes.lua')
 local provider = morphology.new(data)
 
 local examples = {

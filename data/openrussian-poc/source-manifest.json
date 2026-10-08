@@ -1,0 +1,44 @@
+{
+  "source": "OpenRussian dictionary dataset",
+  "source_url": "https://github.com/Badestrand/russian-dictionary",
+  "repository_commit": "50e210c4803237779cb562bc1abcea529066031c",
+  "commit_date": "2021-08-09T10:43:51Z",
+  "license": "CC-BY-SA-4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "files": {
+    "nouns": {
+      "url": "https://raw.githubusercontent.com/Badestrand/russian-dictionary/50e210c4803237779cb562bc1abcea529066031c/nouns.csv",
+      "sha256": "c388f9e6dde51932832be8d7e9afdbe9f0acee72fcf70677f0fe25ea61293c84",
+      "bytes": 8378501,
+      "rows": 26982
+    },
+    "verbs": {
+      "url": "https://raw.githubusercontent.com/Badestrand/russian-dictionary/50e210c4803237779cb562bc1abcea529066031c/verbs.csv",
+      "sha256": "8659de6799b949fb35f080b08088fb7d347ed300490954ebb380a31642646e1d",
+      "bytes": 5650332,
+      "rows": 14871
+    },
+    "adjectives": {
+      "url": "https://raw.githubusercontent.com/Badestrand/russian-dictionary/50e210c4803237779cb562bc1abcea529066031c/adjectives.csv",
+      "sha256": "89ab5d10dcd2f21f6b485de704aef372f32251468e3aa96f18b21e259f26b80a",
+      "bytes": 8343334,
+      "rows": 11941
+    }
+  },
+  "scope": "Nouns, verbs and adjectives with English glosses and explicitly named inflection slots.",
+  "caveat": "The upstream README describes these checked-in CSVs as outdated backup exports. Use this pinned snapshot for reproducible prototype work; refresh from the current OpenRussian database before production adoption.",
+  "sample_files": {
+    "nouns": {
+      "sha256": "de9aace7376bf248cd347a5a4516d8bac26a37821a87c1b1cbd16a2c44045250",
+      "bytes": 2003
+    },
+    "verbs": {
+      "sha256": "25c5b931b5748fbfe972928d36c63c6a814cb70731899bf1f1cf82ef0766866f",
+      "bytes": 2581
+    },
+    "adjectives": {
+      "sha256": "933b4f55177ce878d3a33abcdcba633f4dbf62a7a9f19e88c99eb8f2cc987856",
+      "bytes": 829
+    }
+  }
+}

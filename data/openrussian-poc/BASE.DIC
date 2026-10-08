@@ -1,0 +1,59 @@
+# format	en-ru-dic	1
+# source	OpenRussian dictionary dataset
+# source_commit	50e210c4803237779cb562bc1abcea529066031c
+# license	CC-BY-SA-4.0
+english	russian_id	pos	sense	sense_index	source_file	source_row
+person	n-000002	noun	person, people	1	nouns.csv	2
+people	n-000002	noun	person, people	1	nouns.csv	2
+man	n-000002	noun	man	2	nouns.csv	2
+time	n-000004	noun	time, times, tense	1	nouns.csv	4
+times	n-000004	noun	time, times, tense	1	nouns.csv	4
+tense	n-000004	noun	time, times, tense	1	nouns.csv	4
+table	n-000032	noun	table, desk, board	1	nouns.csv	32
+desk	n-000032	noun	table, desk, board	1	nouns.csv	32
+board	n-000032	noun	table, desk, board	1	nouns.csv	32
+diet	n-000032	noun	diet, cooking, cuisine	2	nouns.csv	32
+cooking	n-000032	noun	diet, cooking, cuisine	2	nouns.csv	32
+cuisine	n-000032	noun	diet, cooking, cuisine	2	nouns.csv	32
+department	n-000032	noun	department, section	3	nouns.csv	32
+section	n-000032	noun	department, section	3	nouns.csv	32
+child	n-000037	noun	child, kid	1	nouns.csv	37
+kid	n-000037	noun	child, kid	1	nouns.csv	37
+window	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+casement-window	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+window-sill	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+gap	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+opening	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+port	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+slot	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+free period	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+break	n-000051	noun	window, casement-window, window-sill, gap, opening, port, slot, free period, break	1	nouns.csv	51
+book	n-000060	noun	book, volume	1	nouns.csv	60
+volume	n-000060	noun	book, volume	1	nouns.csv	60
+way	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+track	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+path	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+race	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+journey	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+voyage	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+passage	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+duct	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+means	n-000075	noun	way, track, path, race, journey, voyage, passage, duct, means	1	nouns.csv	75
+be	v-000002	verb	be	1	verbs.csv	2
+be able	v-000004	verb	be able, can	1	verbs.csv	4
+can	v-000004	verb	be able, can	1	verbs.csv	4
+eat	v-000007	verb	eat	1	verbs.csv	7
+want	v-000008	verb	want	1	verbs.csv	8
+to feel like	v-000008	verb	to feel like	2	verbs.csv	8
+go	v-000010	verb	go, walk	1	verbs.csv	10
+walk	v-000010	verb	go, walk	1	verbs.csv	10
+give	v-000030	verb	give	1	verbs.csv	30
+write	v-000043	verb	write	1	verbs.csv	43
+paint	v-000043	verb	paint	2	verbs.csv	43
+read	v-000062	verb	read	1	verbs.csv	62
+learn	v-000209	verb	learn, study, be an apprentice	1	verbs.csv	209
+study	v-000209	verb	learn, study, be an apprentice	1	verbs.csv	209
+be an apprentice	v-000209	verb	learn, study, be an apprentice	1	verbs.csv	209
+pee	v-014542	verb	pee, piss	1	verbs.csv	14542
+piss	v-014542	verb	pee, piss	1	verbs.csv	14542
+white	a-000024	adjective	white	1	adjectives.csv	24

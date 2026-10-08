@@ -1,0 +1,23 @@
+{
+  "source": "OpenCorpora Russian morphological dictionary",
+  "source_url": "https://opencorpora.org/?page=downloads",
+  "source_format_version": "0.92",
+  "source_revision": "417150",
+  "compiled_snapshot": {
+    "package": "pymorphy3-dicts-ru",
+    "version": "2.4.417150.4580142",
+    "release_url": "https://pypi.org/project/pymorphy3-dicts-ru/2.4.417150.4580142/",
+    "artifact": "pymorphy3-dicts-ru-2.4.417150.4580142.tar.gz",
+    "artifact_url": "https://files.pythonhosted.org/packages/ba/13/02ffe6893a777add5c8a43f212f31a3f6a03e7d44a484cf7b5ac5381fddb/pymorphy3-dicts-ru-2.4.417150.4580142.tar.gz",
+    "sha256": "39ab379d4ca905bafed50f5afc3a3de6f9643605776fbcabc4d3088d4ed382b0",
+    "package_built_at": "2022-01-08T22:09:24.565962"
+  },
+  "data_license": "CC BY-SA 3.0",
+  "data_license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "compiler": {
+    "package": "pymorphy3",
+    "version": "2.0.6",
+    "license": "MIT"
+  },
+  "scope": "Russian morphology only; no English translations are included."
+}

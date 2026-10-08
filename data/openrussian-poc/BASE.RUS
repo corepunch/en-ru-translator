@@ -1,0 +1,244 @@
+# format	en-ru-rus	1
+# source	OpenRussian dictionary dataset
+# source_commit	50e210c4803237779cb562bc1abcea529066031c
+# license	CC-BY-SA-4.0
+id	pos	lemma	accented_lemma	gender	animate	indeclinable	sg_only	pl_only	aspect	partner	slot	variant	form	source_form	source_file	source_row
+n-000002	noun	человек	челове'к	m	1	0	0	0			sg_nom	1	человек	челове'к	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			sg_gen	1	человека	челове'ка	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			sg_dat	1	человеку	челове'ку	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			sg_acc	1	человека	челове'ка	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			sg_inst	1	человеком	челове'ком	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			sg_prep	1	человеке	челове'ке	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			pl_nom	1	люди	лю'ди	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			pl_gen	1	людей	люде'й	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			pl_dat	1	людям	лю'дям	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			pl_acc	1	людей	люде'й	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			pl_inst	1	людьми	людьми'	nouns.csv	2
+n-000002	noun	человек	челове'к	m	1	0	0	0			pl_prep	1	людях	лю'дях	nouns.csv	2
+n-000004	noun	время	вре'мя	n	0	0	0	0			sg_nom	1	время	вре'мя	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			sg_gen	1	времени	вре'мени	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			sg_dat	1	времени	вре'мени	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			sg_acc	1	время	вре'мя	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			sg_inst	1	временем	вре'менем	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			sg_prep	1	времени	вре'мени	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			pl_nom	1	времена	времена'	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			pl_gen	1	времён	времён	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			pl_dat	1	временам	времена'м	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			pl_acc	1	времена	времена'	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			pl_inst	1	временами	времена'ми	nouns.csv	4
+n-000004	noun	время	вре'мя	n	0	0	0	0			pl_prep	1	временах	времена'х	nouns.csv	4
+n-000032	noun	стол	стол	m	0	0	0	0			sg_nom	1	стол	сто'л	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			sg_gen	1	стола	стола'	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			sg_dat	1	столу	столу'	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			sg_acc	1	стол	сто'л	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			sg_inst	1	столом	столо'м	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			sg_prep	1	столе	столе'	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			pl_nom	1	столы	столы'	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			pl_gen	1	столов	столо'в	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			pl_dat	1	столам	стола'м	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			pl_acc	1	столы	столы'	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			pl_inst	1	столами	стола'ми	nouns.csv	32
+n-000032	noun	стол	стол	m	0	0	0	0			pl_prep	1	столах	стола'х	nouns.csv	32
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			sg_nom	1	ребёнок	ребёнок	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			sg_gen	1	ребёнка	ребёнка	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			sg_dat	1	ребёнку	ребёнку	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			sg_acc	1	ребёнка	ребёнка	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			sg_inst	1	ребёнком	ребёнком	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			sg_prep	1	ребёнке	ребёнке	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			pl_nom	1	дети	де'ти	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			pl_gen	1	детей	дете'й	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			pl_dat	1	детям	де'тям	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			pl_acc	1	детей	дете'й	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			pl_inst	1	детьми	детьми'	nouns.csv	37
+n-000037	noun	ребёнок	ребёнок	m	1	0	0	0			pl_prep	1	детях	де'тях	nouns.csv	37
+n-000051	noun	окно	окно'	n	0	0	0	0			sg_nom	1	окно	окно'	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			sg_gen	1	окна	окна'	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			sg_dat	1	окну	окну'	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			sg_acc	1	окно	окно'	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			sg_inst	1	окном	окно'м	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			sg_prep	1	окне	окне'	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			pl_nom	1	окна	о'кна	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			pl_gen	1	окон	о'кон	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			pl_dat	1	окнам	о'кнам	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			pl_acc	1	окна	о'кна	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			pl_inst	1	окнами	о'кнами	nouns.csv	51
+n-000051	noun	окно	окно'	n	0	0	0	0			pl_prep	1	окнах	о'кнах	nouns.csv	51
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_nom	1	книга	кни'га	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_gen	1	книги	кни'ги	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_dat	1	книге	кни'ге	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_acc	1	книгу	кни'гу	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_inst	1	книгой	кни'гой	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_inst	2	книгою	кни'гою	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			sg_prep	1	книге	кни'ге	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			pl_nom	1	книги	кни'ги	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			pl_gen	1	книг	кни'г	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			pl_dat	1	книгам	кни'гам	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			pl_acc	1	книги	кни'ги	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			pl_inst	1	книгами	кни'гами	nouns.csv	60
+n-000060	noun	книга	кни'га	f	0	0	0	0			pl_prep	1	книгах	кни'гах	nouns.csv	60
+n-000075	noun	путь	путь	m	0	0	0	0			sg_nom	1	путь	путь	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			sg_gen	1	пути	пути'	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			sg_dat	1	пути	пути'	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			sg_acc	1	путь	путь	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			sg_inst	1	путём	путём	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			sg_prep	1	пути	пути'	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			pl_nom	1	пути	пути'	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			pl_gen	1	путей	путе'й	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			pl_dat	1	путям	путя'м	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			pl_acc	1	пути	пути'	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			pl_inst	1	путями	путя'ми	nouns.csv	75
+n-000075	noun	путь	путь	m	0	0	0	0			pl_prep	1	путях	путя'х	nouns.csv	75
+v-000002	verb	быть	быть						imperfective		imperative_sg	1	будь	бу'дь	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		imperative_pl	1	будьте	бу'дьте	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		past_m	1	был	бы'л	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		past_f	1	была	была'	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		past_n	1	было	бы'ло	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		past_pl	1	были	бы'ли	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		presfut_sg1	1	есть	есть	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		presfut_sg2	1	есть	есть	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		presfut_sg3	1	есть	есть	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		presfut_pl1	1	есть	есть	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		presfut_pl2	1	есть	есть	verbs.csv	2
+v-000002	verb	быть	быть						imperfective		presfut_pl3	1	есть	есть	verbs.csv	2
+v-000004	verb	мочь	мочь						imperfective	смочь	imperative_sg	1	моги	моги'	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	imperative_pl	1	могите	моги'те	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	past_m	1	мог	мо'г	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	past_f	1	могла	могла'	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	past_n	1	могло	могло'	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	past_pl	1	могли	могли'	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	presfut_sg1	1	могу	могу'	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	presfut_sg2	1	можешь	мо'жешь	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	presfut_sg3	1	может	мо'жет	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	presfut_pl1	1	можем	мо'жем	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	presfut_pl2	1	можете	мо'жете	verbs.csv	4
+v-000004	verb	мочь	мочь						imperfective	смочь	presfut_pl3	1	могут	мо'гут	verbs.csv	4
+v-000007	verb	есть	есть						imperfective	съесть;поесть	imperative_sg	1	ешь	е'шь	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	imperative_pl	1	ешьте	е'шьте	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	past_m	1	ел	е'л	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	past_f	1	ела	е'ла	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	past_n	1	ело	е'ло	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	past_pl	1	ели	е'ли	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	presfut_sg1	1	ем	е'м	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	presfut_sg2	1	ешь	е'шь	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	presfut_sg3	1	ест	е'ст	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	presfut_pl1	1	едим	еди'м	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	presfut_pl2	1	едите	еди'те	verbs.csv	7
+v-000007	verb	есть	есть						imperfective	съесть;поесть	presfut_pl3	1	едят	едя'т	verbs.csv	7
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	imperative_sg	1	хоти	хоти'	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	imperative_pl	1	хотите	хоти'те	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	past_m	1	хотел	хоте'л	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	past_f	1	хотела	хоте'ла	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	past_n	1	хотело	хоте'ло	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	past_pl	1	хотели	хоте'ли	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	presfut_sg1	1	хочу	хочу'	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	presfut_sg2	1	хочешь	хо'чешь	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	presfut_sg3	1	хочет	хо'чет	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	presfut_pl1	1	хотим	хоти'м	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	presfut_pl2	1	хотите	хоти'те	verbs.csv	8
+v-000008	verb	хотеть	хоте'ть						imperfective	захотеть	presfut_pl3	1	хотят	хотя'т	verbs.csv	8
+v-000010	verb	идти	идти'						imperfective	-	imperative_sg	1	иди	иди'	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	imperative_pl	1	идите	иди'те	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	past_m	1	шёл	шёл	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	past_f	1	шла	шла'	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	past_n	1	шло	шло'	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	past_pl	1	шли	шли'	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	presfut_sg1	1	иду	иду'	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	presfut_sg2	1	идёшь	идёшь	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	presfut_sg3	1	идёт	идёт	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	presfut_pl1	1	идём	идём	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	presfut_pl2	1	идёте	идёте	verbs.csv	10
+v-000010	verb	идти	идти'						imperfective	-	presfut_pl3	1	идут	иду'т	verbs.csv	10
+v-000030	verb	дать	дать						perfective	давать	imperative_sg	1	дай	да'й	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	imperative_pl	1	дайте	да'йте	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	past_m	1	дал	да'л	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	past_f	1	дала	дала'	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	past_n	1	дало	да'ло	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	past_n	2	дало	дало'	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	past_pl	1	дали	да'ли	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	presfut_sg1	1	дам	да'м	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	presfut_sg2	1	дашь	да'шь	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	presfut_sg3	1	даст	да'ст	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	presfut_pl1	1	дадим	дади'м	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	presfut_pl2	1	дадите	дади'те	verbs.csv	30
+v-000030	verb	дать	дать						perfective	давать	presfut_pl3	1	дадут	даду'т	verbs.csv	30
+v-000043	verb	писать	писа'ть						imperfective	написать	imperative_sg	1	пиши	пиши'	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	imperative_pl	1	пишите	пиши'те	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	past_m	1	писал	писа'л	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	past_f	1	писала	писа'ла	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	past_n	1	писало	писа'ло	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	past_pl	1	писали	писа'ли	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	presfut_sg1	1	пишу	пишу'	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	presfut_sg2	1	пишешь	пи'шешь	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	presfut_sg3	1	пишет	пи'шет	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	presfut_pl1	1	пишем	пи'шем	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	presfut_pl2	1	пишете	пи'шете	verbs.csv	43
+v-000043	verb	писать	писа'ть						imperfective	написать	presfut_pl3	1	пишут	пи'шут	verbs.csv	43
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	imperative_sg	1	читай	чита'й	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	imperative_pl	1	читайте	чита'йте	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	past_m	1	читал	чита'л	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	past_f	1	читала	чита'ла	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	past_n	1	читало	чита'ло	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	past_pl	1	читали	чита'ли	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	presfut_sg1	1	читаю	чита'ю	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	presfut_sg2	1	читаешь	чита'ешь	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	presfut_sg3	1	читает	чита'ет	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	presfut_pl1	1	читаем	чита'ем	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	presfut_pl2	1	читаете	чита'ете	verbs.csv	62
+v-000062	verb	читать	чита'ть						imperfective	прочитать;почитать;прочесть	presfut_pl3	1	читают	чита'ют	verbs.csv	62
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	imperative_sg	1	учись	учи'сь	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	imperative_pl	1	учитесь	учи'тесь	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	past_m	1	учился	учи'лся	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	past_f	1	училась	учи'лась	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	past_n	1	училось	учи'лось	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	past_pl	1	учились	учи'лись	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	presfut_sg1	1	учусь	учу'сь	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	presfut_sg2	1	учишься	у'чишься	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	presfut_sg3	1	учится	у'чится	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	presfut_pl1	1	учимся	у'чимся	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	presfut_pl2	1	учитесь	у'читесь	verbs.csv	209
+v-000209	verb	учиться	учи'ться						imperfective	выучиться;научиться	presfut_pl3	1	учатся	у'чатся	verbs.csv	209
+v-014542	verb	писать	пи'сать						imperfective	пописать	imperative_sg	1	писай	пи'сай	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	imperative_pl	1	писайте	пи'сайте	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	past_m	1	писал	пи'сал	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	past_f	1	писала	пи'сала	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	past_n	1	писало	пи'сало	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	past_pl	1	писали	пи'сали	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	presfut_sg1	1	писаю	пи'саю	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	presfut_sg2	1	писаешь	пи'саешь	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	presfut_sg3	1	писает	пи'сает	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	presfut_pl1	1	писаем	пи'саем	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	presfut_pl2	1	писаете	пи'саете	verbs.csv	14542
+v-014542	verb	писать	пи'сать						imperfective	пописать	presfut_pl3	1	писают	пи'сают	verbs.csv	14542
+a-000024	adjective	белый	бе'лый								short_m	1	бел	бе'л	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								short_f	1	бела	бела'	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								short_n	1	бело	бе'ло	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								short_n	2	бело	бело'	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								short_pl	1	белы	бе'лы	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								short_pl	2	белы	белы'	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_nom	1	белый	бе'лый	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_gen	1	белого	бе'лого	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_dat	1	белому	бе'лому	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_acc	1	белый	бе'лый	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_acc	2	белого	бе'лого	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_inst	1	белым	бе'лым	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_m_prep	1	белом	бе'лом	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_nom	1	белая	бе'лая	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_gen	1	белой	бе'лой	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_dat	1	белой	бе'лой	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_acc	1	белую	бе'лую	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_inst	1	белой	бе'лой	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_inst	2	белою	бе'лою	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_f_prep	1	белой	бе'лой	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_n_nom	1	белое	бе'лое	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_n_gen	1	белого	бе'лого	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_n_dat	1	белому	бе'лому	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_n_acc	1	белое	бе'лое	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_n_inst	1	белым	бе'лым	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_n_prep	1	белом	бе'лом	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_nom	1	белые	бе'лые	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_gen	1	белых	бе'лых	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_dat	1	белым	бе'лым	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_acc	1	белые	бе'лые	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_acc	2	белых	бе'лых	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_inst	1	белыми	бе'лыми	adjectives.csv	24
+a-000024	adjective	белый	бе'лый								decl_pl_prep	1	белых	бе'лых	adjectives.csv	24

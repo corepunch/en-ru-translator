@@ -1,9 +1,20 @@
 local engine = require 'core.engine'
 local output = require 'core.output'
 local encoding = require 'core.encoding'
+local function bytes(path)
+  local file = assert(io.open(path, 'rb'))
+  local value = file:read('*a')
+  file:close()
+  return value
+end
+local legacy_dictionary = bytes('LTGOLD/BASE.DIC')
+local legacy_russian = bytes('LTGOLD/BASE.RUS')
+local legacy_options = {dictionary=legacy_dictionary,russian=legacy_russian}
 
-local plain = engine.translate('He said, "I agree."')
-local expanded, state = engine.translate('He said, "I agree."', {meanings = true})
+local plain = engine.translate('He said, "I agree."', legacy_options)
+local expanded, state = engine.translate('He said, "I agree."', {
+  dictionary=legacy_dictionary,russian=legacy_russian,meanings=true,
+})
 assert(state.meanings_text:find('agree', 1, true))
 assert(state.meanings_text:find('согласовывать', 1, true))
 assert(expanded == plain .. '\n\n' .. state.meanings_text)

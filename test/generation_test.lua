@@ -1,7 +1,7 @@
 local generation = require 'core.generation'
 local output = require 'core.output'
 local nodes = require 'core.nodes'
-local state={assets={}}
+local state={assets={},russian={openrussian_forms={},source_forms={}}}
 function state.assets:paradigm() return 2,'x - =' end
 function state.assets:string(at) return at==0x5F7 and ' ' or '' end
 assert(generation.case(0)==0 and generation.case(1)==0)

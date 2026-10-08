@@ -2,6 +2,12 @@ local engine = require 'core.engine'
 local lexicon = require 'core.lexicon'
 local transliteration = require 'core.transliteration'
 local encoding = require 'core.encoding'
+local function bytes(path)
+  local file = assert(io.open(path, 'rb'))
+  local value = file:read('*a')
+  file:close()
+  return value
+end
 assert(engine.translate('{~Keep  My TEXT!~}') == 'Keep  My TEXT!')
 assert(engine.translate('{~' .. string.rep('long ', 30) .. '~}') == string.rep('long ', 30))
 assert(engine.translate('{~=John Smith~}') == encoding.decode(transliteration.convert('John Smith', true)))
@@ -28,6 +34,10 @@ assert(engine.translate('{~\\2')=='')
 assert(not pcall(engine.translate,'{~\\0 cat'))
 assert(not pcall(engine.translate,'{~\\11 cat'))
 assert(not pcall(engine.translate,'{~\\x cat'))
-local gloss=engine.translate('{~\\1 agree', {meanings=true})
+local gloss=engine.translate('{~\\1 agree', {
+  meanings=true,
+  dictionary=bytes('LTGOLD/BASE.DIC'),
+  russian=bytes('LTGOLD/BASE.RUS'),
+})
 assert(gloss:find('agree',1,true))
 print('directives_test: passed')

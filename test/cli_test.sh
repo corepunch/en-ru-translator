@@ -3,16 +3,17 @@
 set -eu
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
-expected='Он - в доме.'
-[ "$(lua init.lua 'He is in the house.')" = "$expected" ]
-[ "$(printf '%s' 'He is in the house.' | lua init.lua --data=LTGOLD)" = "$expected" ]
-[ "$(lua init.lua --exe LTGOLD/LTPRO.EXE --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'He is in the house.')" = "$expected" ]
+expected_openrussian='Он являлись в дом.'
+expected_ltech='Он - в доме.'
+[ "$(lua init.lua 'He is in the house.')" = "$expected_openrussian" ]
+[ "$(printf '%s' 'He is in the house.' | lua init.lua --data=LTGOLD)" = "$expected_openrussian" ]
+[ "$(lua init.lua --exe LTGOLD/LTPRO.EXE --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'He is in the house.')" = "$expected_ltech" ]
 lua init.lua --help > "$scratch/help"
-lua init.lua --meanings 'I agree.' > "$scratch/meanings"
+lua init.lua --dic LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS --meanings 'I agree.' > "$scratch/meanings"
 case "$(cat "$scratch/meanings")" in *agree*) ;; *) exit 1 ;; esac
 [ "$(lua init.lua '{~Keep  CASE~}.')" = 'Keep  CASE.' ]
 [ "$(lua init.lua '{~\2 {~one~} {~two~}')" = "$(printf 'one\ttwo')" ]
-case "$(lua init.lua --domain=инф admission)" in доступ*) ;; *) exit 1 ;; esac
+case "$(lua init.lua --dic LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS --domain=инф admission)" in доступ*) ;; *) exit 1 ;; esac
 lua init.lua --no-prefixes 'Two books.' > "$scratch/no-prefixes"
 lua init.lua --prefixes LTGOLD/ERPREFIX.PRE 'Two books.' > "$scratch/prefixes"
 cmp "$scratch/no-prefixes" "$scratch/prefixes"

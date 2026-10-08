@@ -228,9 +228,22 @@ function matching.replace(vector, first, last, pattern, action, state)
       if has('[`!', next_c) then
         p = p + 2
         local start = p
-        skip_pattern(']`!')
+        skip_pattern(next_c == '[' and ']`!' or next_c)
         if p > #pattern then return removed end
         local sought, close = pattern:sub(start, p - 1), pattern:sub(p, p)
+        local choices={}
+        if next_c=='[' then
+          while has('`!',pattern:sub(p,p)) do
+            local delimiter=pattern:sub(p,p)
+            p=p+1;start=p
+            skip_pattern(delimiter)
+            if p>#pattern then return removed end
+            choices[#choices+1]={delimiter,pattern:sub(start,p-1)}
+            p=p+1
+          end
+          if pattern:sub(p,p)~=']' then return removed end
+          close=']'
+        end
         if close == '!' then sought = sought .. ')' end
         local found
         for j = i, last do
@@ -240,6 +253,10 @@ function matching.replace(vector, first, last, pattern, action, state)
           local ok = (close == '`' and word(node, sought))
             or (close == '!' and (node.reading or ''):find(sought, 1, true))
             or (close == ']' and has(sought, cached))
+          for _,choice in ipairs(choices) do
+            ok=ok or choice[1]=='`' and word(node,choice[2])
+              or choice[1]=='!' and has(node.reading or '',choice[2]..')')
+          end
           if ok then found = j; break end
         end
         if not found then return removed end

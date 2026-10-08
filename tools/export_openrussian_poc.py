@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the small DIC/RUS proof of concept from a pinned OpenRussian snapshot.
 
-Given all three upstream CSVs in a directory, run:
+Given the four upstream CSVs in a directory, run:
 
     python3 tools/export_openrussian_poc.py --full-snapshot /path/to/csvs
 
@@ -63,7 +63,7 @@ def write_tsv(path: Path, fields: list[str], rows: list[dict[str, str]]) -> None
 
 
 def extract_snapshot(source_dir: Path, expected: dict) -> None:
-    for name in SAMPLE_WORDS:
+    for name in (*SAMPLE_WORDS, "others"):
         path = source_dir / f"{name}.csv"
         if not path.is_file():
             raise SystemExit(f"Missing pinned source file: {path}")
@@ -74,9 +74,11 @@ def extract_snapshot(source_dir: Path, expected: dict) -> None:
         fields, rows = read_tsv(path)
         selected = []
         for line, row in enumerate(rows, start=2):
-            if row.get("bare") in SAMPLE_WORDS[name]:
+            if (name == "others" and " " in (row.get("bare") or "").strip()) or (
+                name != "others" and row.get("bare") in SAMPLE_WORDS[name]
+            ):
                 selected.append({**row, "source_row": str(line)})
-        absent = sorted(set(SAMPLE_WORDS[name]) - {row["bare"] for row in selected})
+        absent = sorted(set(SAMPLE_WORDS.get(name, [])) - {row["bare"] for row in selected})
         if absent:
             raise SystemExit(f"Pinned {name}.csv is missing sample lemmas: {', '.join(absent)}")
         write_tsv(SOURCE / f"{name}.tsv", fields + ["source_row"], selected)
@@ -85,14 +87,14 @@ def extract_snapshot(source_dir: Path, expected: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--full-snapshot", type=Path,
-                        help="directory containing pinned nouns.csv, verbs.csv, adjectives.csv")
+                        help="directory containing pinned nouns.csv, verbs.csv, adjectives.csv, others.csv")
     args = parser.parse_args()
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     if args.full_snapshot:
         extract_snapshot(args.full_snapshot, manifest["files"])
 
     sample_hashes = {}
-    for name in SAMPLE_WORDS:
+    for name in (*SAMPLE_WORDS, "others"):
         path = SOURCE / f"{name}.tsv"
         if not path.is_file():
             raise SystemExit(f"Missing sample source excerpt: {path}")
@@ -103,14 +105,18 @@ def main() -> int:
     elif manifest.get("sample_files") != sample_hashes:
         raise SystemExit("Sample source excerpt checksum differs from source-manifest.json")
 
-    for name in SAMPLE_WORDS:
+    for name in (*SAMPLE_WORDS, "others"):
         path = SOURCE / f"{name}.tsv"
         if not path.is_file():
             raise SystemExit(f"Missing sample source excerpt: {path}")
         _fields, rows = read_tsv(path)
-        absent = sorted(set(SAMPLE_WORDS[name]) - {row["bare"] for row in rows})
-        if absent:
-            raise SystemExit(f"Sample excerpt lacks {name}: {', '.join(absent)}")
+        if name == "others":
+            if not rows or any(" " not in (row.get("bare") or "").strip() for row in rows):
+                raise SystemExit("OpenRussian others excerpt must contain only multiword expressions")
+        else:
+            absent = sorted(set(SAMPLE_WORDS[name]) - {row["bare"] for row in rows})
+            if absent:
+                raise SystemExit(f"Sample excerpt lacks {name}: {', '.join(absent)}")
 
     print("OpenRussian source excerpts are ready for the C binary dictionary builder")
     return 0

@@ -93,6 +93,13 @@ static void lower_ascii(char *text) { for(;*text;text++)if(*text>='A'&&*text<='Z
 static int is_empty(const char *s) { return !s||!*s; }
 
 static void add_english_alias(Records *dic,const char *alias,const char *pos,const char *lemma,const char *aspect,int plural) {
+  /* OpenRussian's `others` table includes fixed expressions. Emit those as
+   * literal phrase readings; they do not have an inflectional POS adapter. */
+  if(!strcmp(pos,"other")) {
+    size_t alias_len,lemma_len;unsigned char *key=to_cp866(alias,&alias_len),*lemma_bytes=to_cp866(lemma,&lemma_len);
+    unsigned char *value=allocate(lemma_len+4);value[0]='W';value[1]='#';memcpy(value+2,lemma_bytes,lemma_len);value[lemma_len+2]='#';
+    add_record(dic,key,alias_len,value,lemma_len+3);free(key);free(lemma_bytes);free(value);return;
+  }
   size_t lemma_len; unsigned char *encoded=to_cp866(lemma,&lemma_len);
   unsigned char *value=allocate(lemma_len+8); size_t used=0;
   if(!strcmp(pos,"noun")){value[used++]=plural?'n':'N';}
@@ -109,6 +116,7 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
     char *alias_save=NULL;
     for(char *alias=strtok_r(group,",",&alias_save);alias;alias=strtok_r(NULL,",",&alias_save)) {
       while(*alias==' '||*alias=='\t')alias++; size_t n=strlen(alias);while(n&&(alias[n-1]==' '||alias[n-1]=='\t'))alias[--n]=0;
+      while(n&&strchr(".!?;:",alias[n-1]))alias[--n]=0;
       if(!n)continue; lower_ascii(alias);
       int plural=!strcmp(pos,"noun")&&(!strcmp(alias,"people")||!strcmp(alias,"children"));
       add_english_alias(dic,alias,pos,lemma,aspect,plural);
@@ -144,7 +152,7 @@ static void add_forms(Records *rus,Fields *header,Fields *row,const char *table,
   size_t cap=id_len+32,used=0;
   for(size_t i=0;i<header->count;i++)cap+=strlen(header->items[i])+strlen(cell(row,i))+4;
   unsigned char *key=allocate(id_len+3),*direct=allocate(cap);
-  key[0]='@';key[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a';memcpy(key+2,id,id_len);
+  key[0]='@';key[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':!strcmp(pos,"other")?'o':'a';memcpy(key+2,id,id_len);
   for(size_t i=0;i<rus->count;i++)if(rus->items[i].key_len==id_len+2&&!memcmp(rus->items[i].key,key,id_len+2))fail("duplicate OpenRussian source_row id");
   direct[used++]='O';
   for(size_t i=0;i<header->count;i++) {
@@ -168,9 +176,11 @@ static void import_file(Records *source_dic,Records *source_rus,const char *path
   if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
   while((n=getline(&line,&cap,file))>=0) {
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
-    if(is_empty(lemma)||is_empty(english))continue;
+    if(is_empty(lemma)||(!strcmp(pos,"other")?!strchr(lemma,' '):is_empty(english)))continue;
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
-    add_russian_lexeme(source_rus,pos,lemma,g);parse_glosses(source_dic,english,pos,lemma,a);add_forms(source_rus,&header,&row,path,pos,lemma,g,a,cell(&row,source_row));
+    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g);
+    if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a);
+    add_forms(source_rus,&header,&row,path,pos,lemma,g,a,cell(&row,source_row));
   }
   free(line);fclose(file);
 }
@@ -206,6 +216,7 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
+  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,path,"other");
   /* English articles do not have Russian equivalents, but tagging them keeps
    * them out of the sentence skeleton so OpenRussian nouns and verbs agree. */
   add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");

@@ -21,9 +21,9 @@ function russian.from_bytes(bytes, overlay)
             local name,value=field:match('^([^=]+)=(.*)$')
             if name then fields[name]=value end
           end
-          local pos=key:match('^@([nva])')
+          local pos=key:match('^@([nvao])')
           local metadata=pos=='n' and fields.gender or fields.aspect
-          if pos and fields.bare and metadata then
+          if pos and fields.bare and (metadata or pos=='o') then
             local row={id=key:sub(3),pos=pos,lemma=fields.bare,metadata=metadata,columns=fields,forms={}}
             for slot,values in pairs(fields) do
               if slot:match('^sg_') or slot:match('^pl_') or slot:match('^imperative_') or
@@ -35,10 +35,12 @@ function russian.from_bytes(bytes, overlay)
               end
             end
             openrussian_rows[key]=row
-            local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
-            local by_lemma=by_pos[fields.bare] or {};by_pos[fields.bare]=by_lemma
-            if pos=='v' then by_lemma[metadata=='perfective' and 'pf' or 'ipf']=row
-            else by_pos[fields.bare]=row end
+            if pos~='o' then
+              local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
+              local by_lemma=by_pos[fields.bare] or {};by_pos[fields.bare]=by_lemma
+              if pos=='v' then by_lemma[metadata=='perfective' and 'pf' or 'ipf']=row
+              else by_pos[fields.bare]=row end
+            end
           end
         end
         local pos, aspect, slot, form = line:match('^.-%*Q(v)%*([^*]+)%*([^*]+)%*(.*)$')

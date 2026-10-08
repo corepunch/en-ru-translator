@@ -23,9 +23,15 @@
       "sha256": "89ab5d10dcd2f21f6b485de704aef372f32251468e3aa96f18b21e259f26b80a",
       "bytes": 8343334,
       "rows": 11941
+    },
+    "others": {
+      "url": "https://raw.githubusercontent.com/Badestrand/russian-dictionary/50e210c4803237779cb562bc1abcea529066031c/others.csv",
+      "sha256": "9f22a16b17fc9a564298112168b667fced11aafb254ccebf5b7544fc37cdaa92",
+      "bytes": 344444,
+      "rows": 5031
     }
   },
-  "scope": "Nouns, verbs and adjectives with English glosses and explicitly named inflection slots.",
+  "scope": "Nouns, verbs, adjectives, and multiword expressions with English glosses and named inflection slots where applicable.",
   "caveat": "The upstream README describes these checked-in CSVs as outdated backup exports. Use this pinned snapshot for reproducible prototype work; refresh from the current OpenRussian database before production adoption.",
   "sample_files": {
     "nouns": {
@@ -39,6 +45,10 @@
     "adjectives": {
       "sha256": "933b4f55177ce878d3a33abcdcba633f4dbf62a7a9f19e88c99eb8f2cc987856",
       "bytes": 829
+    },
+    "others": {
+      "sha256": "beb9743fa221ffb0fd150c0f8e3f6bf6f932830568cdfc720043c37b25360776",
+      "bytes": 2560
     }
   }
 }

@@ -16,9 +16,11 @@ files.
 
 The standalone DIC also contains a small set of hand-authored English grammar
 entries for articles and `I`, plus irregular plural aliases (`people`,
-`children`). Those keep the sample sentences parseable without loading the
-legacy English dictionary. The selected sample does not aim for general English
-vocabulary coverage.
+`children`). The `others` table contributes 24 multiword expression rows to
+the RUS image and their English glosses to DIC. Fixed expressions use a literal
+phrase reading; they remain ordinary binary dictionary records. These keep the
+sample sentences parseable without loading the legacy English dictionary. The
+selected sample does not aim for general English vocabulary coverage.
 
 ## Pinned source
 
@@ -57,8 +59,15 @@ Run sentence examples using the generated images:
 lua tools/openrussian_poc.lua
 ```
 
-The 20 sentence cases and their original LTPRO captures are in
+The 20 noun/verb sentence cases and their original LTPRO captures are in
 `test/ltpro/openrussian-cases.json` and `test/ltpro/openrussian-reference.json`.
+Four captured phrase cases are in `test/ltpro/openrussian-phrase-cases.json` and
+`test/ltpro/openrussian-phrase-reference.json`. The 20 noun/verb cases and four
+phrase cases pass exact paragraph comparison. Other imported expressions can
+differ from LTPRO's older English glosses or translations (for example,
+OpenRussian's `because` gloss translates as `потому что` while this LTPRO build
+uses `поскольку`); this small phrase sample does not claim that every
+OpenRussian expression reproduces LTPRO.
 Recheck exact parity while forcing the Lua engine to use only these generated
 DIC and RUS files:
 
@@ -77,7 +86,8 @@ explicitly. This POC's sample sentences currently match all 20 captured
 translations exactly; it is not a general-purpose English dictionary.
 
 The sample contains seven nouns, nine verb lemmas (including both `писать`
-homonyms), and one adjective. Sentence translation still uses the LTPRO
-executable for its grammar and sentence-processing tables, but does not load
+homonyms), one adjective, and 24 multiword expression rows. Sentence
+translation still uses the LTPRO executable for its grammar and
+sentence-processing tables, but does not load
 the legacy `BASE.DIC` or `BASE.RUS` files. To match LTPRO's preferred spelling,
 the importer normalizes source `ё` to `е` in the generated tables.

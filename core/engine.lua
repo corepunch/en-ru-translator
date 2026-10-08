@@ -57,11 +57,15 @@ function engine.run(input, options)
     local cell_options={}
     for key,value in pairs(options) do cell_options[key]=value end
     cell_options.meanings=false
+    local meaning_start=options.meaning_start or 1
+    local alternatives=0
     for _,section in ipairs(sections) do
       local items=section.columns and directives.items(section.input) or {section.input}
       local lines,row={},{}
       for index,item in ipairs(items) do
+        cell_options.meaning_start=meaning_start+alternatives
         local translated,state=engine.run(item,cell_options)
+        alternatives=alternatives+(state.alternatives or 0)
         states[#states+1]=state
         row[#row+1]=translated
         if options.meanings then
@@ -78,7 +82,7 @@ function engine.run(input, options)
     local result=table.concat(chunks,'\n')
     local meanings=table.concat(glossary,'\n')
     if meanings~='' then result=result..'\n\n'..meanings end
-    return result,{output=result,text=encoding.decode(result),sections=states,
+    return result,{output=result,text=encoding.decode(result),sections=states,alternatives=alternatives,
       meanings=options.meanings and meanings or nil,
       meanings_text=options.meanings and encoding.decode(meanings) or nil}
   end
@@ -89,6 +93,7 @@ function engine.run(input, options)
 
   local dic_bytes = engine.read_asset(dic_source, 'BASE.DIC')
   local state = engine.new_state(executable, rus_source)
+  state.meaning_start=options.meaning_start
   if options.domain then
     assert(type(options.domain) == 'string' and options.domain ~= '', 'domain must be a nonempty string')
     state.domain=encoding.encode(options.domain)

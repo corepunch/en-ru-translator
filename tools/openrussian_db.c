@@ -167,6 +167,31 @@ static void load_na_nouns(const char *path) {
   free(line);fclose(file);
 }
 static int is_na_noun(const char *lemma) { for(size_t i=0;i<na_noun_count;i++)if(!strcmp(na_nouns[i],lemma))return 1; return 0; }
+/* Curated imperfective verbs that LTGOLD codes without a partner. */
+static char **imperfective_only;static size_t imperfective_only_count;
+static void load_imperfective_only(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    imperfective_only=realloc(imperfective_only,(imperfective_only_count+1)*sizeof *imperfective_only);if(!imperfective_only)fail("out of memory");
+    if(!(imperfective_only[imperfective_only_count++]=strdup(line)))fail("out of memory");
+  }
+  free(line);fclose(file);
+}
+/* Curated "imperfective perfective" pairs the partner column lacks. */
+static char **partner_pairs;static size_t partner_pair_count;
+static void load_verb_partners(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    char *space=strchr(line,' ');if(!space||!space[1])fail("verb-partners.txt needs \"imperfective perfective\"");*space=0;
+    partner_pairs=realloc(partner_pairs,(partner_pair_count+2)*sizeof *partner_pairs);if(!partner_pairs)fail("out of memory");
+    if(!(partner_pairs[partner_pair_count++]=strdup(line))||!(partner_pairs[partner_pair_count++]=strdup(space+1)))fail("out of memory");
+  }
+  free(line);fclose(file);
+}
+static const char *curated_partner(const char *lemma) { for(size_t i=0;i+1<partner_pair_count;i+=2)if(!strcmp(partner_pairs[i],lemma))return partner_pairs[i+1]; return NULL; }
+static int is_imperfective_only(const char *lemma) { for(size_t i=0;i<imperfective_only_count;i++)if(!strcmp(imperfective_only[i],lemma))return 1; return 0; }
 
 #define LEXEME_SLOTS (1u<<18)
 static unsigned char **lexeme_slots;static size_t *lexeme_lengths;
@@ -199,6 +224,8 @@ static void load_verbs(const char *path) {
     verbs=realloc(verbs,(verb_count+1)*sizeof *verbs);if(!verbs)fail("out of memory");
     Verb *v=&verbs[verb_count++];v->lemma=strdup(cell(&row,bare));v->aspect=strdup(cell(&row,aspect));v->partner=strdup(cell(&row,partner));
     if(!v->lemma||!v->aspect||!v->partner)fail("out of memory");
+    /* The column mixes ; and , separators and keeps stress marks (поплы'ть). */
+    char *out=v->partner;for(char *p=v->partner;*p;p++){if(*p=='\''||*p==' ')continue;*out++=*p==','?';':*p;}*out=0;
   }
   /* Stable for duplicate lemmas: the first source row stays first. */
   for(size_t i=1;i<verb_count;i++){Verb v=verbs[i];size_t j=i;while(j&&strcmp(verbs[j-1].lemma,v.lemma)>0){verbs[j]=verbs[j-1];j--;}verbs[j]=v;}
@@ -216,12 +243,18 @@ static const Verb *find_perfective(const char *lemma) {
   for(;v<verbs+verb_count&&!strcmp(v->lemma,lemma);v++)if(!strcmp(v->aspect,"perfective"))return v;
   return NULL;
 }
+static const char *verb_aspect(const char *lemma) {
+  Verb key={(char *)lemma,NULL,NULL};const Verb *v=bsearch(&key,verbs,verb_count,sizeof *verbs,verb_compare);
+  if(!v)return "";while(v>verbs&&!strcmp(v[-1].lemma,lemma))v--;
+  return v->aspect;
+}
 /* The first perfective partner that names this verb back, else the first
  * perfective partner: видеть -> увидеть (not завидеть), говорить -> сказать. */
 static const char *perfective_partner(const char *lemma) {
   Verb key={(char *)lemma,NULL,NULL};const Verb *v=bsearch(&key,verbs,verb_count,sizeof *verbs,verb_compare);
   if(!v)return NULL;while(v>verbs&&!strcmp(v[-1].lemma,lemma))v--;
-  if(strcmp(v->aspect,"imperfective"))return NULL;
+  if(strcmp(v->aspect,"imperfective")||is_imperfective_only(lemma))return NULL;
+  const char *curated=curated_partner(lemma);if(curated)return curated;
   const char *fallback=NULL;char *copy=strdup(v->partner),*save=NULL;if(!copy)fail("out of memory");
   static char chosen[256];const char *result=NULL;
   for(char *p=strtok_r(copy,";",&save);p;p=strtok_r(NULL,";",&save)) {
@@ -245,8 +278,11 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
     value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
     value[used++]=0;
   } else if(!strcmp(pos,"verb")) {
-    value[used++]='V';value[used++]=0xc0;value[used++]=0x88;value[used++]=0;value[used++]=0;
-    const char *partner=perfective_partner(lemma);
+    /* LTGOLD's aspect flags: 0x04 perfective-only, 0x08 imperfective-only
+     * (no partner; analytic future буду работать). */
+    const char *partner=perfective_partner(lemma),*aspect=verb_aspect(lemma);
+    value[used++]='V';value[used++]=(unsigned char)(0xc0|(!strcmp(aspect,"perfective")?0x04:partner?0:0x08));
+    value[used++]=0x88;value[used++]=0;value[used++]=0;
     if(partner){size_t m;unsigned char *p=to_cp866(partner,&m);if(m>255)fail("verb partner too long");memcpy(value+used,p,m);used+=m;free(p);}
   }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
@@ -376,10 +412,20 @@ static int stem_has_noun(Records *db,const unsigned char *key,size_t len,const R
   }
   return 0;
 }
+/* New records go in after the scan: appending while scanning would leave an
+ * unsorted tail inside the binary-searched range. */
+static void append_pending(Records *db,Records *pending) {
+  for(size_t i=0;i<pending->count;i++) {
+    Record *r=&pending->items[i];size_t sequence=r->sequence;
+    add_record(db,r->key,r->key_len,r->value,r->value_len);db->items[db->count-1].sequence=sequence;
+    free(r->key);free(r->value);
+  }
+  free(pending->items);
+}
 static void add_s_form_homographs(Records *db) {
   for(size_t i=0;i<db->count;i++)db->items[i].sequence=db->items[i].sequence*2+2;
   qsort(db->items,db->count,sizeof(Record),record_compare);
-  size_t original=db->count;
+  size_t original=db->count;Records pending={0};
   for(size_t i=0;i<original;) {
     size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
     const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
@@ -392,11 +438,37 @@ static void add_s_form_homographs(Records *db) {
         size_t vlen=verb->value_len-3,nlen=head->value_len-1,len=1+vlen+1+nlen+1+stem;
         unsigned char *value=allocate(len),*key=allocate(n),*q=value;memcpy(key,k,n);
         *q++='z';memcpy(q,verb->value+3,vlen);q+=vlen;*q++='n';memcpy(q,head->value+1,nlen);q+=nlen;*q++='\\';memcpy(q,k,stem);
-        size_t first=head->sequence;add_record(db,key,n,value,len);db->items[db->count-1].sequence=first-1;free(key);free(value);
+        add_record(&pending,key,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;free(key);free(value);
       }
     }
     i=end;
   }
+  append_pending(db,&pending);
+}
+
+/* A word that is both noun and verb gets one record per reading, nouns first,
+ * and only the first record is used: "I'll work" printed "Я есть работой".
+ * Native LTGOLD codes such words as one ambiguous record with the verb reading
+ * first, `work*ZV.работать{...}N.работа`, and grammar chooses. Put the same
+ * record first for every one-word key whose first reading is a noun and that
+ * also has a verb reading. */
+static void add_verb_noun_homographs(Records *db) {
+  qsort(db->items,db->count,sizeof(Record),record_compare);
+  size_t original=db->count;Records pending={0};
+  for(size_t i=0;i<original;) {
+    size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
+    const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
+    int word=n>1;for(size_t j=0;j<n&&word;j++)if(!((k[j]>='a'&&k[j]<='z')||k[j]=='-'))word=0;
+    const Record *verb=word&&(head->value[0]=='N'||head->value[0]=='n')?stem_verb(db,k,n):NULL;
+    if(verb&&verb->value_len>3) {
+      size_t vlen=verb->value_len-3,nlen=head->value_len-1,len=3+vlen+2+nlen;
+      unsigned char *value=allocate(len),*key=allocate(n),*q=value;memcpy(key,k,n);
+      *q++='Z';*q++='V';*q++='.';memcpy(q,verb->value+3,vlen);q+=vlen;*q++=head->value[0];*q++='.';memcpy(q,head->value+1,nlen);
+      add_record(&pending,key,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;free(key);free(value);
+    }
+    i=end;
+  }
+  append_pending(db,&pending);
 }
 
 static void add_people_plural(Records *rus) {
@@ -461,15 +533,18 @@ static void command_build(int argc,char **argv) {
    * homonyms that become visible when importing the complete tables. */
   add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
   add_utf8_record(&source_dic,"i","R011я");
-  add_utf8_record(&source_dic,"want","e00хотеть");add_utf8_record(&source_dic,"wants","e00хотеть");
+  add_utf8_record(&source_dic,"want","V21хотеть");add_utf8_record(&source_dic,"wants","vхотеть");
   add_utf8_record(&source_dic,"can","e00мочь");
   snprintf(path,need,"%s/../na-nouns.txt",dir);load_na_nouns(path);
   snprintf(path,need,"%s/verbs.tsv",dir);load_verbs(path);
+  snprintf(path,need,"%s/../imperfective-only.txt",dir);load_imperfective_only(path);
+  snprintf(path,need,"%s/../verb-partners.txt",dir);load_verb_partners(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
   add_s_form_homographs(&source_dic);
+  add_verb_noun_homographs(&source_dic);
   add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
   printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);

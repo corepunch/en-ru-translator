@@ -45,6 +45,7 @@ she*R032она
 since*pРсJпосколькуDс тех пор
 they*R13они
 through*PВчерез
+to*B, чтобыJдля того, чтобыPВнаpВнаDкакL, которыйb.
 toward*PДк
 towards*PДк
 under*PТпод

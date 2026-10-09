@@ -75,7 +75,10 @@ function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gend
   if flags & 4 ~= 0 then source_slot = plural ~= 0 and 'imperative_pl' or 'imperative_sg'
   elseif past == 1 then
     source_slot = plural ~= 0 and 'past_pl' or ({[0]='past_n',[1]='past_m',[2]='past_f'})[gender]
-  elseif person ~= 0 then
+  elseif person ~= 0 and not (past == 2 and aspect == 0) then
+    -- An imperfective lemma's present/future slots are present tense. Its
+    -- future (the analytic auxiliary буду, from быть) comes from the native
+    -- paradigm; OpenRussian lists быть as есть in every one of those slots.
     local numbers = plural ~= 0 and 'pl' or 'sg'
     local persons = {[1]='1',[2]='2',[3]='3'}
     if persons[person] then source_slot = 'presfut_' .. numbers .. persons[person] end

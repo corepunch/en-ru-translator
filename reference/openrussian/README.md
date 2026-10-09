@@ -3,13 +3,13 @@
 The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
-indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,704 DIC
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 97,284 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies 60 reviewed structural word readings from
-`function-words.txt` (pronouns, auxiliaries, `not` and 45 prepositions),
+The checked-in `BASE.DIC` applies 61 reviewed structural word readings from
+`function-words.txt` (pronouns, auxiliaries, `not`, `to` and 45 prepositions),
 replacing all records for those exact keys, and 86 phrase entries from
-`phrases.txt`. It contains 95,611 DIC records after replacement.
+`phrases.txt`. It contains 97,185 DIC records after replacement.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and
@@ -91,6 +91,26 @@ aspect, so the future after `will` is `Мы увидим`, not the malformed `в
 clause-initial imperatives are perfective (`Сделай`), as in the original. An
 entry that must stay imperfective names it on both sides of the native `|`
 alternative (`get well soon*WVпоправляться|поправлятьсяDскорее`).
+
+Verb records also carry LTGOLD's aspect flags: `0x04` on perfective verbs and
+`0x08` on verbs with no partner, which `senses.lua` uses to force the aspect.
+An imperfective-only verb then takes the analytic future (`I'll work` →
+`Я буду работать`, as in the original). The future auxiliary comes from the
+native быть paradigm, since OpenRussian lists `есть` in every present/future
+slot. [`imperfective-only.txt`](imperfective-only.txt) lists the 152 imperfective
+verbs that LTGOLD codes without a partner although the source names one
+(`работать` would otherwise pair with `поработать`). The partner column mixes
+`;`/`,` and stress marks; [`verb-partners.txt`](verb-partners.txt) adds pairs it
+lacks (`идти пойти`).
+
+A one-word key whose first reading is a noun and that also has a verb reading
+gets LTGOLD's ambiguous record first, verb reading leading
+(`work*ZV.работатьN.работа`, like the original's `work*ZV.работать…N.работа…`),
+so grammar chooses: `Я работаю`, `Моя работа`. OpenRussian emits one record per
+reading with nouns first, and only the first is used, so 1,580 verbs such as
+`work`, `go` and `call` were unreachable. The builder's high-priority readings
+use native classes: `want*V21хотеть`, `wants*vхотеть` (`e` would allow a past
+reading).
 
 Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
 Such a literal shadowed suffix analysis of the verb's -s form (“He works” →

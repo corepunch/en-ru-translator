@@ -77,6 +77,43 @@ phrase:behind [,*] | He stayed behind, I think. ~> позади,
 phrase:inside [,*] | Come inside, please. ~> внутри,
 phrase:how XR[*] | How are you? => Как у тебя дела?
 phrase:what <X>`up`[*] | What's up? => Как дела?
+phrase:hi | Hi. => Привет.
+phrase:bye | Bye. => Пока.
+phrase:goodbye | Goodbye. => До свидания.
+phrase:good bye | Good bye. => До свидания.
+phrase:nice to meet you | Nice to meet you. => Приятно познакомиться.
+phrase:pleased to meet you | Pleased to meet you. => Приятно познакомиться.
+phrase:no `problem`[,*] | No problem. => Без проблем.
+phrase:have a nice day | Have a nice day. => Хорошего дня.
+phrase:have a good day | Have a good day. => Хорошего дня.
+phrase:have a good trip | Have a good trip. => Счастливого пути.
+phrase:bon voyage | Bon voyage. => Счастливого пути.
+phrase:bon appetit | Bon appetit. => Приятного аппетита.
+phrase:sweet dreams | Sweet dreams. => Сладких снов.
+phrase:happy holidays | Happy holidays. => С праздниками.
+phrase:happy easter | Happy easter. => С Пасхой.
+phrase:many thanks | Many thanks. => Большое спасибо.
+phrase:thank god | Thank God. => Слава богу.
+phrase:what a pity | What a pity. => Как жаль.
+phrase:what a shame | What a shame. => Как жаль.
+phrase:what time is it | What time is it? => Который час?
+phrase:at `the``moment`[j;,*] | At the moment. => В настоящий момент.
+phrase:at `last`[j;,*] | At last. => Наконец.
+phrase:right now | Right now. => Прямо сейчас.
+phrase:just in case | Just in case. => На всякий случай.
+phrase:for now | For now. => Пока.
+phrase:for free | For free. => Бесплатно.
+phrase:this morning | This morning. => Сегодня утром.
+phrase:at night | At night. => Ночью.
+phrase:in the morning | In the morning. => Утром.
+phrase:in the evening | In the evening. => Вечером.
+phrase:in the afternoon | In the afternoon. => Днём.
+phrase:wait a minute | Wait a minute. => Подожди минутку.
+phrase:never again | Never again. => Больше никогда.
+phrase:once upon a time | Once upon a time. => Однажды.
+phrase:as usual | As usual. => Как обычно.
+phrase:for sure | For sure. => Наверняка.
+phrase:in `the``end`[j;,*] | In the end. => В конце концов.
 phrase-context | good afternoon => добрый день
 phrase-context | GOOD AFTERNOON! => ДОБРЫЙ ДЕНЬ!
 phrase-context | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБО!
@@ -97,6 +134,30 @@ phrase-context | My pleasure is great. !> Пожалуйста
 phrase-context | After all the guests left. !> В конце концов
 phrase-context | It is not at all easy. !> нисколько
 phrase-context | Not at all. !> Совсем
+phrase-context | Hi, John. => Привет, John.
+phrase-context | GOODBYE! => ДО СВИДАНИЯ!
+phrase-context | Goodbye, my friend. ~> До свидания,
+phrase-context | Nice to meet you too. ~> Приятно познакомиться
+phrase-context | No problem, I will do it. ~> Без проблем,
+phrase-context | There is no problem. !> Без проблем
+phrase-context | No problems were found. !> Без проблем
+phrase-context | Have a nice day! => Хорошего дня!
+phrase-context | Thank God, you are here. ~> Слава богу,
+phrase-context | What time is it now? ~> час
+phrase-context | At the moment, he is busy. ~> В настоящий момент, он
+phrase-context | He is busy at the moment. ~> в настоящий момент.
+phrase-context | At the moment of impact. !> настоящий
+phrase-context | At last, we are home. ~> Наконец, мы
+phrase-context | He came at last. ~> наконец.
+phrase-context | At last year's meeting. !> Наконец
+phrase-context | I need it right now. ~> прямо сейчас.
+phrase-context | Take an umbrella just in case. ~> на всякий случай.
+phrase-context | He works at night. ~> ночью.
+phrase-context | I will call you in the morning. ~> утром.
+phrase-context | He was late as usual. ~> как обычно.
+phrase-context | In the end, he agreed. ~> В конце концов, он
+phrase-context | He agreed in the end. ~> в конце концов.
+phrase-context | In the end of the street. !> концов
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.

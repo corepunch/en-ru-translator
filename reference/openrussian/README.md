@@ -8,8 +8,8 @@ records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
 The checked-in `BASE.DIC` applies 57 reviewed structural word readings from
 `function-words.txt` (pronouns, auxiliaries and 45 prepositions), replacing all
-records for those exact keys, and 47 phrase entries from `phrases.txt`. It
-contains 95,435 DIC records after replacement.
+records for those exact keys, and 84 phrase entries from `phrases.txt`. It
+contains 95,459 DIC records after replacement.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and
@@ -151,8 +151,10 @@ original captures remain separate. The
 [dictionary-writing skill](../../skills/ltgold-dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
 
-The complete source has 27 `W` composites, eight native T4 subrules, and ten
-single-word `D` equivalents. There are no frozen multiword Russian payloads.
+The complete source has 50 `W` composites, 14 native T4 subrules, and 20
+single-word `D` equivalents. The only uninflected tail is the invariant
+infinitive in `nice to meet you*WDприятно познакомиться`: a `V` component would
+become imperative sentence-initially (`Приятно познакомься`).
 For example, `happy birthday*WPТсNденьPРNрождение` gives instrumental `день`
 and genitive `рождение`; `best wishes*WAнаилучшийnпожелание` agrees and declines
 after `with`. The structural `with*PТсJс помощью` reading supplies instrumental
@@ -183,6 +185,20 @@ otherwise, so “It is not at all easy” keeps its negation. The native
 answers thanks with `Пожалуйста.` without consuming “My pleasure is great.”
 The builder's literal `not at all`, `at all`, and `after all` readings are removed
 before import.
+
+The everyday batch adds farewells, wishes, and time adverbials. A single-word
+key needs its input class before `W` (`goodbye*DDWPРдоNсвидание`); a bare `W`
+reading printed `Рдо`. After a sentence-initial `P` preposition such as `at` or
+`in`, the comma is retagged `;`, so `at `last``, `at `the``moment`` and
+`in `the``end`` use `[j;,*]` (native `;` occurs in historical `[;:*]`).
+`in the end` is a boundary subrule so “In the end of the street” keeps its
+noun. `no `problem`[,*]` leaves “There is no problem.” alone; original LTPRO
+prints `Нет.` for “No problem.” because its own `no` handling wins. The
+“see you later” family is not added: native T4 rule ``[*,:;("]<D>`see` ``
+rewrites a sentence-initial `see` to `Vсмотри` after any head subrule, and a
+literal key would consume “I will see you later.” Original captures for the
+batch are reviewed differences in casing and morphology (`До Свидание`,
+`сладких сон`); Lua generates `До свидания`, `Сладких снов`.
 
 Original LTPRO differs from Lua for these subrules in two engine respects. It
 marks a matched comma so the next word is glued to it (`Нисколько,благодарности`),

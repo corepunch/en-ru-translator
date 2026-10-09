@@ -66,6 +66,9 @@ Each step takes seconds; do all of them.
 | Idiom swallows a longer sentence (“You are welcome to stay”) | Literal key | Boundary subrule ending `[*]` or `[,*]` |
 | Subrule never fires | Literal with the same first words wins lexically | Add that key to `removed-headwords.txt` |
 | Subrule fails only before a comma after a sentence-initial preposition | Comma retagged `j` | `[j,*]` |
+| Subrule fails before a comma after a sentence-initial `P` (`at`, `in`) | Comma retagged `;` | `[j;,*]` |
+| Single-word key prints a stray case letter (`Рдо`) | `W` reading without an input class | Prefix the class: `goodbye*DDWPРдоNсвидание` |
+| Sentence-initial `see …` subrule undone (`Смотри`) | Native T4 rule rewrites initial `see` to `Vсмотри` | Do not author it; the original behaves the same |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |
 | Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find reference/openrussian/BASE.RUS <lemma>` |

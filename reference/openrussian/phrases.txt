@@ -46,3 +46,40 @@ right away*Dнемедленно
 sooner or later*WDраноCилиDпоздно
 behind [,*]*$Dпозади
 inside [,*]*$Dвнутри
+hi*Dпривет
+bye*Dпока
+goodbye*DDWPРдоNсвидание
+good bye*WPРдоNсвидание
+nice to meet you*WDприятно познакомиться
+pleased to meet you*WDприятно познакомиться
+no `problem`[,*]*$DDWPРбезnпроблема\ \
+have a nice day*WPРAхорошийNдень
+have a good day*WPРAхорошийNдень
+have a good trip*WPРAсчастливыйNпуть
+bon voyage*WPРAсчастливыйNпуть
+bon appetit*WPРAприятныйNаппетит
+sweet dreams*WPРAсладкийnсон
+happy holidays*WPТсnпраздник
+happy easter*WPТсNПасха
+many thanks*WAбольшойNспасибо
+thank god*WNславаPДNбог
+what a pity*WDкакDжаль
+what a shame*WDкакDжаль
+what time is it*WOкоторыйNчас
+at `the``moment`[j;,*]*$DDWPВвAнастоящийNмомент\  \
+at `last`[j;,*]*$Dнаконец\ \
+right now*WDпрямоDсейчас
+just in case*WPВнаAвсякийNслучай
+for now*Dпока
+for free*Dбесплатно
+this morning*WDсегодняDутром
+at night*Dночью
+in the morning*Dутром
+in the evening*Dвечером
+in the afternoon*Dднём
+wait a minute*WVподождатьPВNминутка
+never again*WDбольшеDникогда
+once upon a time*Dоднажды
+as usual*WDкакDобычно
+for sure*Dнаверняка
+in `the``end`[j;,*]*$DDWPПвNконецPРnконец\  \

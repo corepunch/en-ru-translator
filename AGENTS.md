@@ -8,6 +8,13 @@ It records the LTGOLD manual's grammatical tags, the active dictionary sources,
 and native T4 grammatical phrase subrules. Prefer one typed grammatical
 rule for a phrase family when its variable words can be retained and inflected.
 
+## Commits
+
+Commit and push every completed step of work to the current branch without
+waiting to be asked. Each commit should cover one coherent step with passing
+tests (`sh test/run_all.sh`) and, for dictionary changes, a verified rebuild
+(`sh tools/rebuild_openrussian.sh --verify`).
+
 ## Icon generation
 
 Never draw icons separately. Generate every icon in a set together as a single

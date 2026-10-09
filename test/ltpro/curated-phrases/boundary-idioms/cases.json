@@ -1,0 +1,52 @@
+[
+  {
+    "id": "not-at-all",
+    "group": "verification",
+    "input": "Not at all."
+  },
+  {
+    "id": "not-at-all-thanks",
+    "group": "verification",
+    "input": "Not at all, thanks."
+  },
+  {
+    "id": "it-is-not-at-all-easy",
+    "group": "verification",
+    "input": "It is not at all easy."
+  },
+  {
+    "id": "she-does-not-read-at-all",
+    "group": "verification",
+    "input": "She does not read at all."
+  },
+  {
+    "id": "after-all",
+    "group": "verification",
+    "input": "After all."
+  },
+  {
+    "id": "after-all-he-knows",
+    "group": "verification",
+    "input": "After all, he knows."
+  },
+  {
+    "id": "after-all-the-guests-left",
+    "group": "verification",
+    "input": "After all the guests left."
+  },
+  {
+    "id": "he-knows-after-all",
+    "group": "verification",
+    "input": "He knows after all."
+  },
+  {
+    "id": "my-pleasure",
+    "group": "verification",
+    "input": "My pleasure."
+  },
+  {
+    "id": "my-pleasure-is-great",
+    "group": "verification",
+    "input": "My pleasure is great."
+  }
+]

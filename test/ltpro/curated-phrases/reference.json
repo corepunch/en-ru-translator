@@ -1,0 +1,500 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-09T13:36:36.665196+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "33475dfb1b3c3838291a788129c12d8a64e1cb64831039b82258664f161f4c7d",
+    "BASE.RUS": "764fea3b4377dbe78560bc00974776a2507f59dc756a6cb7c195bec7c2e5db02",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "6f85013c61f6918845cd2b98a0b70a47509a0e4937fbdaf549fe9887a3f7824e",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "phrase-00",
+      "group": "curated-entry",
+      "input": "Good morning.",
+      "raw_cp866_hex": "84aea1e0eba92093e2e0ae2e0d0a",
+      "raw_sha256": "8e21dfebd192dc2a42b37754aca117f6e3a218532d31786c9a83c3e25c044704",
+      "translation": "Добрый Утро."
+    },
+    {
+      "id": "phrase-01",
+      "group": "curated-entry",
+      "input": "Good afternoon.",
+      "raw_cp866_hex": "84aea1e0eba92084a5adec2e0d0a",
+      "raw_sha256": "e4b4b6f667bbde29babe517e4eb4aa73157fa83e2c1dbae792c6cedc1a790372",
+      "translation": "Добрый День."
+    },
+    {
+      "id": "phrase-02",
+      "group": "curated-entry",
+      "input": "Good evening.",
+      "raw_cp866_hex": "84aea1e0eba92082a5e7a5e02e0d0a",
+      "raw_sha256": "5574956ea7b67c579c3579e54452fe7f78d54e0b1fefd76044de28b68edd3e29",
+      "translation": "Добрый Вечер."
+    },
+    {
+      "id": "phrase-03",
+      "group": "curated-entry",
+      "input": "Good night.",
+      "raw_cp866_hex": "e1afaeaaaea9adaea920adaee7a82e0d0a",
+      "raw_sha256": "6c60ff460ee74d0f6648fed78985dc59b7141adea0817751d1b2505b4a66c4b0",
+      "translation": "спокойной ночи."
+    },
+    {
+      "id": "phrase-04",
+      "group": "curated-entry",
+      "input": "Good luck.",
+      "raw_cp866_hex": "e3a4a0e7a02e0d0a",
+      "raw_sha256": "6bf9102f44d04b6cfa6f63b382bd93836540c0ab2645feb8c2f140a0e8c014a1",
+      "translation": "удача."
+    },
+    {
+      "id": "phrase-05",
+      "group": "curated-entry",
+      "input": "Thank you.",
+      "raw_cp866_hex": "91afa0e1a8a1ae2e0d0a",
+      "raw_sha256": "9d33f88de0e271fbee753f6a35f30452e83deed2287eb203fada93e299d6f803",
+      "translation": "Спасибо."
+    },
+    {
+      "id": "phrase-06",
+      "group": "curated-entry",
+      "input": "Thank you very much.",
+      "raw_cp866_hex": "81aeabece8aea52091afa0e1a8a1ae2e0d0a",
+      "raw_sha256": "e89e7c8b5adbfacc9b4a60c51a8ca82d56832cb21c80180bbf95bbe448ca0b19",
+      "translation": "Большое Спасибо."
+    },
+    {
+      "id": "phrase-07",
+      "group": "curated-entry",
+      "input": "Thanks a lot.",
+      "raw_cp866_hex": "81aeabece8aea52091afa0e1a8a1ae2e0d0a",
+      "raw_sha256": "e89e7c8b5adbfacc9b4a60c51a8ca82d56832cb21c80180bbf95bbe448ca0b19",
+      "translation": "Большое Спасибо."
+    },
+    {
+      "id": "phrase-08",
+      "group": "curated-entry",
+      "input": "You are welcome.",
+      "raw_cp866_hex": "8faea6a0abe3a9e1e2a02e0d0a",
+      "raw_sha256": "5b171be597ce22e6b15c20e9cefc26c65c9f75ae41e2d626c09edbe18b13829d",
+      "translation": "Пожалуйста."
+    },
+    {
+      "id": "phrase-09",
+      "group": "curated-entry",
+      "input": "Excuse me.",
+      "raw_cp866_hex": "88a7a2a8ada8e2a5208cada52e0d0a",
+      "raw_sha256": "573209e991737f7a7ac444b5635307f604d9dd11d19c51fd3c7c7354b6fa68d3",
+      "translation": "Извините Мне."
+    },
+    {
+      "id": "phrase-10",
+      "group": "curated-entry",
+      "input": "Long time no see.",
+      "raw_cp866_hex": "8ceb2084a0a2adae208da52082a8a465aba8e1ec2e0d0a",
+      "raw_sha256": "c5fb66ebaa7077cb07218f0b6fac2fca112ef7645b4d639fcb9d5c13e7a0ee17",
+      "translation": "Мы Давно Не Видeлись."
+    },
+    {
+      "id": "phrase-11",
+      "group": "curated-entry",
+      "input": "So far so good.",
+      "raw_cp866_hex": "8faeaaa02082e1f12095aee0aee8ae2e0d0a",
+      "raw_sha256": "892971a4890ce2f91fe511b609edde64ad8887137c2a5ec74795e4b95de89e69",
+      "translation": "Пока Всё Хорошо."
+    },
+    {
+      "id": "phrase-12",
+      "group": "curated-entry",
+      "input": "Just a moment.",
+      "raw_cp866_hex": "aca8ade3e2aaa02e0d0a",
+      "raw_sha256": "4bce84535ed51ad5866b618654c3f06f1c6d86444a66cde41ae49f8d0add334d",
+      "translation": "минутка."
+    },
+    {
+      "id": "phrase-13",
+      "group": "curated-entry",
+      "input": "My pleasure.",
+      "raw_cp866_hex": "912093a4aea2aeabece1e2a2a8a5ac2e0d0a",
+      "raw_sha256": "674494e9a7d0e8586bc98ca94fdee54b23ed3354a390ae08b37c7d55a66cdb3c",
+      "translation": "С Удовольствием."
+    },
+    {
+      "id": "phrase-14",
+      "group": "curated-entry",
+      "input": "Best wishes.",
+      "raw_cp866_hex": "8da0a8abe3e7e8a8a5208faea6a5aba0ada8ef2e0d0a",
+      "raw_sha256": "49a904eac8dc1790458ea4945dd7828ae2365a3e3b599f29f023b8879c357bcc",
+      "translation": "Наилучшие Пожелания."
+    },
+    {
+      "id": "phrase-15",
+      "group": "curated-entry",
+      "input": "Happy birthday.",
+      "raw_cp866_hex": "912084ada5ac20e0aea6a4a5ada8ef2e0d0a",
+      "raw_sha256": "0057ae3def9ace0fc4258fcf142dfa28a756e3444313137e40a98b3999a6bc9f",
+      "translation": "С Днем рождения."
+    },
+    {
+      "id": "phrase-16",
+      "group": "curated-entry",
+      "input": "Merry christmas.",
+      "raw_cp866_hex": "912090aea6a4a5e1e2a2ae2e0d0a",
+      "raw_sha256": "402667bd0d6a6f2231294e5ff798b92106ae5a93955785e66965379cb9d9c49f",
+      "translation": "С Рождество."
+    },
+    {
+      "id": "phrase-17",
+      "group": "curated-entry",
+      "input": "Happy new year.",
+      "raw_cp866_hex": "91208daea22a412083aea4aeac2e0d0a",
+      "raw_sha256": "6dbc5c4929558cdd6df0c57cc7cac26fb9741f00499391c1cd80327bcd70a2df",
+      "translation": "С Нов*A Годом."
+    },
+    {
+      "id": "phrase-18",
+      "group": "curated-entry",
+      "input": "Bless you.",
+      "raw_cp866_hex": "81e3a4ece2a52087a4aee0aea2ebac2e0d0a",
+      "raw_sha256": "8c9edfa92de975ae8be025d9a03b76495e92a6f56e810224dd357c26adaf762c",
+      "translation": "Будьте Здоровым."
+    },
+    {
+      "id": "phrase-19",
+      "group": "curated-entry",
+      "input": "Get well soon.",
+      "raw_cp866_hex": "8faeafe0a0a2abefe2ece1ef2091aaaee0a5a52e0d0a",
+      "raw_sha256": "fcb342695d63a82c066ddcbe7cf5874ed5a4aea313d85022a12137293d7a9c9b",
+      "translation": "Поправляться Скорее."
+    },
+    {
+      "id": "phrase-20",
+      "group": "curated-entry",
+      "input": "Welcome back.",
+      "raw_cp866_hex": "912082aea7a2e0a0e9a5ada8a5ac2e0d0a",
+      "raw_sha256": "b1dce2f98d4b596b247709f35262fc6ac76bac93318f8e564cb453b4fe1d6a78",
+      "translation": "С Возвращением."
+    },
+    {
+      "id": "phrase-21",
+      "group": "curated-entry",
+      "input": "Enjoy your meal.",
+      "raw_cp866_hex": "afe0a8efe2adaea3ae20a0afafa5e2a8e2a02e0d0a",
+      "raw_sha256": "78f8ec7d40ce921cb46e06e3e35d59f2af6e6adbac7e37f1ed0c0b37157bca2f",
+      "translation": "приятного аппетита."
+    },
+    {
+      "id": "phrase-22",
+      "group": "curated-entry",
+      "input": "Never mind.",
+      "raw_cp866_hex": "8da5a2a0a6adae2e0d0a",
+      "raw_sha256": "3f857913d168dc0106cc470f467a0c54fe46d8345eaabd4ff450a486b8d95b03",
+      "translation": "Неважно."
+    },
+    {
+      "id": "phrase-23",
+      "group": "curated-entry",
+      "input": "Not at all.",
+      "raw_cp866_hex": "8da8e1aaaeabecaaae2e0d0a",
+      "raw_sha256": "f54d4da18a0d08ba2be2275be26d7c6e26bab72129bc579c51d13ba17cf83e39",
+      "translation": "Нисколько."
+    },
+    {
+      "id": "phrase-24",
+      "group": "curated-entry",
+      "input": "Of course.",
+      "raw_cp866_hex": "8aaeada5e7adae2e0d0a",
+      "raw_sha256": "52dda2fbd16e269f4bd87accbb34ec558ce1e8d07ab2f389771d97add665f02d",
+      "translation": "Конечно."
+    },
+    {
+      "id": "phrase-25",
+      "group": "curated-entry",
+      "input": "By the way.",
+      "raw_cp866_hex": "8ca5a6a4e3208fe0aee7a8ac2e0d0a",
+      "raw_sha256": "1ae5602205a1731f96188259fd7f0c912d4f51b7cc1850f853001cb7747d4b38",
+      "translation": "Между Прочим."
+    },
+    {
+      "id": "phrase-26",
+      "group": "curated-entry",
+      "input": "As soon as possible.",
+      "raw_cp866_hex": "8aa0aa208caea6adae2091aaaee0a5a52e0d0a",
+      "raw_sha256": "7fdc2c7f476e8bc0a0156d9eb22a5ae79f9ba0fcfe8631235ae7fba0d7bdd5f6",
+      "translation": "Как Можно Скорее."
+    },
+    {
+      "id": "phrase-27",
+      "group": "curated-entry",
+      "input": "On the other hand.",
+      "raw_cp866_hex": "912084e0e3a3aea92091e2aee0aeadeb2e0d0a",
+      "raw_sha256": "3e49a6c333336e8834434351c3c8adee9ef39455b84c512082b00e01f5ea1539",
+      "translation": "С Другой Стороны."
+    },
+    {
+      "id": "phrase-28",
+      "group": "curated-entry",
+      "input": "After all.",
+      "raw_cp866_hex": "82208aaeade6a520aaaeade6aea22e0d0a",
+      "raw_sha256": "13be2c3eee339912e61c4d2c041adbc2522e00b9067447f1052aa0146fe39975",
+      "translation": "В Конце концов."
+    },
+    {
+      "id": "phrase-29",
+      "group": "curated-entry",
+      "input": "At least.",
+      "raw_cp866_hex": "8fae208ae0a0a9ada5a9208ca5e0a52e0d0a",
+      "raw_sha256": "6a2361c848abecaad3e8c4e5c113c68737100e0402d11ee63f6b393c80e27204",
+      "translation": "По Крайней Мере."
+    },
+    {
+      "id": "phrase-30",
+      "group": "curated-entry",
+      "input": "In fact.",
+      "raw_cp866_hex": "94a0aae2a8e7a5e1aaa82e0d0a",
+      "raw_sha256": "b557ddc7ec2b0b155486e08bedd80ecd05ef13879fd58d663a95047dbd8d639c",
+      "translation": "Фактически."
+    },
+    {
+      "id": "phrase-31",
+      "group": "curated-entry",
+      "input": "In any case.",
+      "raw_cp866_hex": "82208beea1aeac2091abe3e7a0a52e0d0a",
+      "raw_sha256": "7250ac942e67e5996a6a89ed7b65535af414cd59f3272747da9f641e42a3ca10",
+      "translation": "В Любом Случае."
+    },
+    {
+      "id": "phrase-32",
+      "group": "curated-entry",
+      "input": "For example.",
+      "raw_cp866_hex": "8da0afe0a8aca5e02e0d0a",
+      "raw_sha256": "45010f528bc8275a6fd2f43d7d0da5e88aee1f50a2773af9faa52aeb70fb58ff",
+      "translation": "Например."
+    },
+    {
+      "id": "phrase-33",
+      "group": "curated-entry",
+      "input": "As a matter of fact.",
+      "raw_cp866_hex": "94a0aae2a8e7a5e1aaa82e0d0a",
+      "raw_sha256": "b557ddc7ec2b0b155486e08bedd80ecd05ef13879fd58d663a95047dbd8d639c",
+      "translation": "Фактически."
+    },
+    {
+      "id": "phrase-34",
+      "group": "curated-entry",
+      "input": "All right.",
+      "raw_cp866_hex": "95aee0aee8ae2e0d0a",
+      "raw_sha256": "cb67fe15a42c904a4ef62ee7991113b5512b065f2393c804d5698bb8b894fe42",
+      "translation": "Хорошо."
+    },
+    {
+      "id": "phrase-35",
+      "group": "curated-entry",
+      "input": "Once again.",
+      "raw_cp866_hex": "91adaea2a02e0d0a",
+      "raw_sha256": "522c68bf5dc5b219e7000b9a24067ace52cd439a54722b37265aa28bb4d6c140",
+      "translation": "Снова."
+    },
+    {
+      "id": "phrase-36",
+      "group": "curated-entry",
+      "input": "In advance.",
+      "raw_cp866_hex": "87a0e0a0ada5a52e0d0a",
+      "raw_sha256": "b493afe487eb842c81517afe369e16793b0e8a12236ebf3f9aa65fceb0e2853a",
+      "translation": "Заранее."
+    },
+    {
+      "id": "phrase-37",
+      "group": "curated-entry",
+      "input": "In other words.",
+      "raw_cp866_hex": "a4e0e3a3a8aca820e1abaea2a0aca82e0d0a",
+      "raw_sha256": "d5dc98e501ebdc4390c60168dfa434dd521c7df55f74d97d3b841f8d0a5a9834",
+      "translation": "другими словами."
+    },
+    {
+      "id": "phrase-38",
+      "group": "curated-entry",
+      "input": "For a while.",
+      "raw_cp866_hex": "8da02082e0a5acef2e0d0a",
+      "raw_sha256": "d1589fb765ab2855c2e17f80b659839cdb7dc064cf595533b5f10145c43fa869",
+      "translation": "На Время."
+    },
+    {
+      "id": "phrase-39",
+      "group": "curated-entry",
+      "input": "Right away.",
+      "raw_cp866_hex": "8da5aca5a4aba5adadae2e0d0a",
+      "raw_sha256": "5b001deffb4f401d97ee74292d5568938709a806db1eee667d70ed398318560a",
+      "translation": "Немедленно."
+    },
+    {
+      "id": "phrase-40",
+      "group": "curated-entry",
+      "input": "Sooner or later.",
+      "raw_cp866_hex": "90a0adae2088aba8208faea7a4adae2e0d0a",
+      "raw_sha256": "7a8a21bd1602d843fb82f56d284aa4fcb6615595fe616962acc1cf63981942ce",
+      "translation": "Рано Или Поздно."
+    },
+    {
+      "id": "phrase-41",
+      "group": "curated-entry",
+      "input": "How are you?",
+      "raw_cp866_hex": "8aa0aa20e32082a0e120a4a5aba03f0d0a",
+      "raw_sha256": "3ca55168129d3f99b11c317a2da18fef11d4b8e6b1bde60a84f019ddc9f5cf69",
+      "translation": "Как у Вас дела?"
+    },
+    {
+      "id": "phrase-42",
+      "group": "curated-entry",
+      "input": "What's up?",
+      "raw_cp866_hex": "8aa0aa2084a5aba03f0d0a",
+      "raw_sha256": "f587f2d4ee8312f45019730cb86dd2b8d381ff9e200e8f66fb73c4a4237258bb",
+      "translation": "Как Дела?"
+    },
+    {
+      "id": "context-00",
+      "group": "context",
+      "input": "With best wishes.",
+      "raw_cp866_hex": "9120ada0a8abe3e7e8a8aca820afaea6a5aba0ada8efaca82e0d0a",
+      "raw_sha256": "2abb4beec3e6aa3a0aefd5e2b6df203f1df88d398e3f940492a5c18ff3f47de7",
+      "translation": "С наилучшими пожеланиями."
+    },
+    {
+      "id": "context-01",
+      "group": "context",
+      "input": "THANK YOU VERY MUCH!",
+      "raw_cp866_hex": "818e8b9c988e8520918f809188818e210d0a",
+      "raw_sha256": "e965f1dbd3453ff4ecf40bd456d87d9e2cfc67002c04c9330f0136ac12eb9518",
+      "translation": "БОЛЬШОЕ СПАСИБО!"
+    },
+    {
+      "id": "context-02",
+      "group": "context",
+      "input": "You're welcome.",
+      "raw_cp866_hex": "8faea6a0abe3a9e1e2a02e0d0a",
+      "raw_sha256": "5b171be597ce22e6b15c20e9cefc26c65c9f75ae41e2d626c09edbe18b13829d",
+      "translation": "Пожалуйста."
+    },
+    {
+      "id": "context-03",
+      "group": "context",
+      "input": "You are welcome to stay.",
+      "raw_cp866_hex": "82eb202d20a4aea1e0ae20afaea6a0abaea2a0e2ec20a220afe0a5a1eba2a0ada8a52e0d0a",
+      "raw_sha256": "8de2a3bef70bd52fd449474b3156420ffa4d9e6e9085a60ef4d797bbd686537e",
+      "translation": "Вы - добро пожаловать в пребывание."
+    },
+    {
+      "id": "context-04",
+      "group": "context",
+      "input": "You were welcome.",
+      "raw_cp866_hex": "82eb20a1ebaba820a4aea1e0ae20afaea6a0abaea2a0e2ec2e0d0a",
+      "raw_sha256": "a5c7c811686e22704043a12b1159e405b4b3805af134cb09cd375c4c4fbf4e46",
+      "translation": "Вы были добро пожаловать."
+    },
+    {
+      "id": "context-05",
+      "group": "context",
+      "input": "How is he?",
+      "raw_cp866_hex": "8aa0aa20e320a5a3ae20a4a5aba03f0d0a",
+      "raw_sha256": "1c1ecbe8fb8696dbf36e0ccf1c0143e16f2f5c978c9ccaaefd5bde7f0a3a1825",
+      "translation": "Как у его дела?"
+    },
+    {
+      "id": "context-06",
+      "group": "context",
+      "input": "What is up there?",
+      "raw_cp866_hex": "8aa0aaaea520afae20e2a0ac3f0d0a",
+      "raw_sha256": "ba24cf5cc76120b247e4907cb0a27f1eeb0c40ab8ad580a66e08938564bad5dc",
+      "translation": "Какое по там?"
+    },
+    {
+      "id": "context-07",
+      "group": "context",
+      "input": "happy birthday!",
+      "raw_cp866_hex": "e120a4ada5ac20e0aea6a4a5ada8ef210d0a",
+      "raw_sha256": "0508c711a8de183fa29c5151a4a5185416d6ab4f9ddbb3f393d23fa43af019c4",
+      "translation": "с днем рождения!"
+    },
+    {
+      "id": "context-08",
+      "group": "context",
+      "input": "Merry Christmas!",
+      "raw_cp866_hex": "912090aea6a4a5e1e2a2ae210d0a",
+      "raw_sha256": "793ce9738711a3701da87c43da29a5b9240b1c3b5851f3f1fd9a00a3d26891aa",
+      "translation": "С Рождество!"
+    },
+    {
+      "id": "context-09",
+      "group": "context",
+      "input": "Happy New Year!",
+      "raw_cp866_hex": "91208daea22a412083aea4aeac210d0a",
+      "raw_sha256": "c2f56df66a0c155e403800b8222bf19da9b4dff838cf914534974a06b2a9be2b",
+      "translation": "С Нов*A Годом!"
+    },
+    {
+      "id": "context-10",
+      "group": "context",
+      "input": "GOOD NIGHT!",
+      "raw_cp866_hex": "918f8e8a8e898d8e89208d8e9788210d0a",
+      "raw_sha256": "f351688934f764038636e007a250b6ec9ce3d68fdff75b0a86aa782a33ba6baa",
+      "translation": "СПОКОЙНОЙ НОЧИ!"
+    },
+    {
+      "id": "context-11",
+      "group": "context",
+      "input": "JUST A MOMENT!",
+      "raw_cp866_hex": "8c888d93928a80210d0a",
+      "raw_sha256": "91ce1c3bac7f305de29319f403a9498271573d3fc1b94cec4cf910329c16fb71",
+      "translation": "МИНУТКА!"
+    },
+    {
+      "id": "context-12",
+      "group": "context",
+      "input": "Good morningish.",
+      "raw_cp866_hex": "95aee0aee8a8a9206d6f726e696e676973682e0d0a",
+      "raw_sha256": "771880e211e8526d780874b1263b3c09a509933b69acfeee72fb914d25b46834",
+      "translation": "Хороший morningish."
+    },
+    {
+      "id": "context-13",
+      "group": "context",
+      "input": "For a while longer.",
+      "raw_cp866_hex": "8da02082e0a5acef2081aeaba5a52084aba8adadeba92e0d0a",
+      "raw_sha256": "d7d58c9b243460ceddfca21fa39a7c4eea2627fced9969230a1961d0422cc5cd",
+      "translation": "На Время Более Длинный."
+    },
+    {
+      "id": "context-14",
+      "group": "context",
+      "input": "How is it?",
+      "raw_cp866_hex": "8aa0aa2093209de2ae3f0d0a",
+      "raw_sha256": "9a04529bd00c190eb817f86509efe2f1b685eab3a798524495880f861556becc",
+      "translation": "Как У Это?"
+    }
+  ]
+}

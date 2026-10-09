@@ -1,0 +1,27 @@
+[
+  {
+    "id": "he-is-inside",
+    "group": "adverb",
+    "input": "He is inside."
+  },
+  {
+    "id": "the-garden-is-behind",
+    "group": "adverb",
+    "input": "The garden is behind."
+  },
+  {
+    "id": "he-looked-around",
+    "group": "adverb",
+    "input": "He looked around."
+  },
+  {
+    "id": "he-came-after",
+    "group": "adverb",
+    "input": "He came after."
+  },
+  {
+    "id": "come-inside",
+    "group": "adverb",
+    "input": "Come inside."
+  }
+]

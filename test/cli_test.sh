@@ -3,11 +3,13 @@
 set -eu
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
-expected_openrussian='Он - в дом.'
-expected_ltech='Он - в доме.'
-[ "$(lua init.lua 'He is in the house.')" = "$expected_openrussian" ]
-[ "$(printf '%s' 'He is in the house.' | lua init.lua --data=LTGOLD)" = "$expected_openrussian" ]
-[ "$(lua init.lua --exe LTGOLD/LTPRO.EXE --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'He is in the house.')" = "$expected_ltech" ]
+# The dictionaries encode toward differently; the LTGOLD text is the original
+# capture in test/ltpro/prepositions/reference.json.
+expected_openrussian='Шаг к дому.'
+expected_ltech='Шаг по отношению к дому.'
+[ "$(lua init.lua 'A step toward the house.')" = "$expected_openrussian" ]
+[ "$(printf '%s' 'A step toward the house.' | lua init.lua --data=LTGOLD)" = "$expected_openrussian" ]
+[ "$(lua init.lua --exe LTGOLD/LTPRO.EXE --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'A step toward the house.')" = "$expected_ltech" ]
 lua init.lua --help > "$scratch/help"
 lua init.lua --dic LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS --meanings 'I agree.' > "$scratch/meanings"
 case "$(cat "$scratch/meanings")" in *agree*) ;; *) exit 1 ;; esac

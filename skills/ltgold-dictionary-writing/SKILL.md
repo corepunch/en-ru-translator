@@ -21,6 +21,11 @@ in `reference/openrussian/function-words.txt`; import them with
 not an automatically merged source. English phrase rules belong in `.DIC`;
 `.RUS` and `.MORPH` supply Russian morphology.
 
+Honor the requested scope. For a whole-file or batch review, inventory every
+entry and complete an entry-by-entry review; fixing the user's example does not
+complete the rest. Historical presence and native syntactic validity are
+evidence, not proof of a suitable grammatical encoding or correct translation.
+
 Take no shortcuts. Use verified dictionary syntax, grammatical tags, reusable
 patterns, and normal agreement and morphology. Do not hardcode surface forms,
 enumerate grammatical variants, or use `#` literals or uninflected tails to hide
@@ -28,6 +33,15 @@ missing matcher, agreement, morphology, or casing support. Fix and verify the
 underlying defect instead. Fixed text must reflect a genuinely fixed expression
 and follow the documented format; it is not a workaround for one failing example.
 Do not declare success from the target sentence alone.
+
+For multiword Russian equivalents, use tagged lemma components with agreement
+and case government, including conventional greetings such as “happy birthday”.
+Do not label an entire sentence `D` merely because it is a familiar expression,
+or mechanically wrap frozen text in `W`. A single-word `D` equivalent or truly
+fixed text can be appropriate; record the grammatical reason. Preserve intended
+meaning and register, and explain deliberate changes. See the authoring
+reference's [whole-file review lessons](references/authoring.md#whole-file-phrase-review-lessons)
+for verified examples and diagnostic pitfalls.
 
 Recover the native LTGOLD mechanism before changing the translator. Search
 `BASE.DIC` for comparable entries, trace the relevant pipeline stage, and test
@@ -50,8 +64,20 @@ when necessary; preserve lexical metadata through captures and let normal
 agreement/generation decline the word. Document verified native behavior and
 remaining port defects separately; do not assume absent native support.
 
-Import reviewed sources, check the rebuilt index, and test the default dictionary
-through the actual engine. Cover representative grammatical variants,
+Test every entry you add or change, including structural function-word readings;
+do not sample a batch or infer coverage from another entry's passing result.
+Keep an explicit entry-to-case mapping and persistent regression cases. Verify
+the rebuilt default dictionary through the actual engine, and verify authored
+syntax in the original executable with the capture workflow below. Capture
+experimental dictionaries separately from untouched historical assets. Inspect
+each result; executing successfully or reproducing a frozen expected string
+does not establish correct grammar. For each inflecting or variable entry, test
+agreement/case or person/number variants and a nearby context that must not be
+consumed. Record the reason for retaining any genuinely fixed expression.
+An entry with failing or missing verification is unfinished; report it explicitly
+instead of declaring the whole file complete.
+
+Import reviewed sources and check the rebuilt index. Cover grammatical variants,
 contractions, capitalization, and nearby contexts the rule must not consume.
 For variable words, also exercise an additional lexical reading to establish
 that matching depends on tags rather than an English spelling list. Run the
@@ -62,3 +88,7 @@ capture instructions: the original executable is the oracle. Use explicit
 temporary cases/output paths, preserve captured text, and report original and
 Lua outputs separately. A better Lua translation can intentionally differ;
 never alter a capture to make it agree.
+Report entry coverage, grammatical regression results, and exact native parity
+separately. A reviewed native difference is not an exact match; a negative
+matching test does not certify the surrounding translation. Never turn a known
+grammatical defect into an accepted expectation just to make tests pass.

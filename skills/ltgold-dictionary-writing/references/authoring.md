@@ -123,9 +123,11 @@ verified engine difference, not evidence that native grammatical phrase matching
 is absent. No custom pre-T1 retained-slot syntax or execution pass is needed.
 
 The separate sentence-final `it` rule in native T4 overrides this construction
-for `How is it?`: captured original output is `Как У Это?`, and current Lua output
-is `Как у это?`. Treat this as an unresolved rule-order interaction; the six
-personal-pronoun examples above must not be presented as covering every pronoun.
+for `How is it?`: captured original output is `Как У Это?`. Lua now protects an
+authored W equivalent from later English lexical rewrites within its span,
+giving `Как у него дела?` with the neuter pronoun's grammatical fields retained.
+The regression includes both this input and `How's it?`; the repeated native
+capture is in `test/ltpro/curated-phrases/`.
 
 For `what`, `<X>` permits the auxiliary to remain or have been removed by native
 question cleanup, lexical `up` identifies the idiom, and `[*]` requires sentence
@@ -154,22 +156,181 @@ composition: `after-sale services*WAпослепродажныйNсервис`,
 `money matters*WAденежныйnдело`, and
 `be in charge of*WXбытьAответственныйPВза`.
 
+The `#` decoder reads a leading Cyrillic с/м/ж as gender, so `#` text must not
+start with Russian prose: the OpenRussian builder's former `W#согласно#`
+printed `огласно`. Its unclassified `others.tsv` words are now `WDсогласно`.
+
 Do not put final `.`, `!`, or `?` in a literal phrase key to restrict sentence
 end. The former Lua-only matching behavior has been removed. Use a native
 grammatical context rule ending in `[*]`; punctuation is emitted separately.
 `How's` expands to `how is`; smart apostrophes normalize at the encoding boundary.
+
+## Whole-file phrase review lessons
+
+Review every requested source row, including greetings and apparently simple
+adverbial expressions. For each, record the intended sense/register, encoding
+choice, positive case, relevant inflection/context cases, and reviewed result.
+Do not use a handful of historical matches to exempt the rest of a file from
+review. Native `D` phrases are legal and occur in `LTGOLD/BASE.DIC`, but their
+presence does not justify freezing words that should participate in grammar.
+Conversely, do not replace a suitable single-word `D` reading merely to make
+every row look complex.
+
+### Encode the grammatical structure
+
+These tested entries illustrate distinct choices; copy their mechanism only
+when the new expression has the same grammatical requirements:
+
+```text
+happy birthday*WPТсNденьPРNрождение
+good morning*WAдобрыйNутро
+good night*WPРAспокойныйNночь
+best wishes*WAнаилучшийnпожелание
+with*PТсJс помощью
+thank you*Dспасибо
+```
+
+Birthday uses instrumental `с` governing `день`, then a silent genitive governor
+for `рождение`; it is not `Dс днём рождения`. The silent `PР` in good night
+produces genitive agreement without emitting a preposition. Best wishes stays
+nominative alone, but structural `with` governs instrumental in “With best
+wishes.” Freezing “с наилучшими пожеланиями” into best wishes duplicates `с`;
+encoding with as literal `W` text prevents case government. Thank you retains
+the appropriate single-word interjection reading. More tags are not inherently
+better: the goal is a correct grammatical representation.
+
+Check every lemma's active Russian morphology. For “Большое спасибо”, the
+interjection reading alone did not provide noun agreement; nominal `спасибо`
+needed an indeclinable neuter entry in `.RUS`, using the verified native paradigm
+of `шоссе`. Update the generating source as well as the built dictionary, then
+verify a rebuild reproduces the data. Do not substitute a frozen surface phrase
+for missing lexical morphology.
+
+Choose person, number and register deliberately. The curated imperative entries
+currently produce informal singular “Извини меня”, “Будь здоров”, and
+“Поправляйся скорее”; do not silently switch to formal/plural forms or modify
+expected output to conceal a mistake. Generated OpenRussian forms currently
+normalize `ё` to `е`; distinguish that data convention from failed inflection.
+
+### Preserve native actions and constrain idioms
+
+The spaces in `\ $ \` are executable action characters, not formatting. In the
+what's up rule they delete context nodes around `$` anchor alignment; the final
+backslash opens an empty selector. The exact concatenation was not found in
+historical BASE.DIC, but its native components and execution were verified.
+Use the [symbol-by-symbol breakdown](codes.md#native-boundary-rule-for-whats-up)
+and original capture before changing unfamiliar punctuation. Do not claim an
+entire authored rule is copied from the original just because its parts are native.
+
+Generalize a grammatical family only as far as its meaning permits. A literal
+“you are welcome” entry consumed the start of “You are welcome to stay.” A
+boundary rule with `<X>` also matched “You were welcome.” The verified idiom is:
+
+```text
+you `are``welcome`[*]*$Dпожалуйста\  \
+```
+
+Its lexical anchors are intentional: they exclude past tense and longer
+constructions while contraction normalization supports “You're welcome.” Typed
+`XR` remains appropriate for the how greeting family. Test both positive
+variants and nearby constructions that must remain outside the idiom.
+
+Apply the same reasoning to clause-final idioms. Literal `after all` consumed
+“After all the guests left”, and literal `not at all*Dнисколько` dropped the
+negation in “It is not at all easy” (native LTPRO does the same). The verified
+replacements are boundary subrules:
+
+```text
+after `all`[j,*]*$DDWPПвNконецPРnконец\ \
+not `at``all`[,*]*$Dнисколько\  \
+not `at``all`~[,*]*$DDWDсовсемKне\  .\
+at `all`[PJj,C*]*$Dсовсем\ \
+my `pleasure`[*]*$Dпожалуйста\ \
+```
+
+`[,*]` is the native comma-or-end class (historical ``besides [,*]``). After
+a clause-initial `p` preposition the grammar retags the comma `j`, so `after`
+needs `[j,*]` (historical ``as `it``is`[j,*)]``). A
+generated literal with the same first words still wins lexically and hides
+the subrule, so list it in `reference/openrussian/removed-headwords.txt`;
+`--replace` only replaces identical keys. “My pleasure” answers thanks, so
+`Пожалуйста` replaces the former “С удовольствием” (accepting an offer).
+
+### Diagnose the layer before changing the entry
+
+The full-file tests exposed these reusable failure modes. They have engine fixes;
+use them as diagnostic leads, not reasons to add spelling-specific exceptions.
+
+| Symptom | Verified cause and repair |
+| --- | --- |
+| A phrase starting with a silent case governor loses sentence capitalization | `core/output.lua` must capitalize the first visible component. |
+| Рождество does not decline or Новый produces a malformed ending | `core/senses.lua` normalizes the Russian lemma for morphology while retaining its capitalization flag; grammatical code prefixes must keep their case. |
+| Authored `в` changes to `на` in “in any case” | `core/agreement.lua` preserves explicit W prepositions instead of reselecting them from English locative heuristics. |
+| A later English lexical rule deletes некоторое or changes retained it to это | `core/phrasing.lua` prevents lexical backtick rules from rewriting wholly inside an authored W equivalent; tag-based grammar still runs. |
+| A comma after a `[,*]` subrule glues the next word (`Кроме того,он`) | Native marks the matched comma; `core/phrasing.lua` leaves a comma tail unmarked. |
+| Two subrules both fire (`Нисколько Совсем`) | Native lets a later head rewrite a node an earlier subrule deleted; `core/phrasing.lua` skips heads retagged for deletion. |
+| Москва stops declining after a capitalized-lemma fix | Keep exact capitalized `.RUS` headwords; lowercase only when the capitalized form is absent (`core/senses.lua`). |
+| “Bless you” fails to generate an imperative or short adjective | `core/russian.lua` uses the available source aspect for imperative forms when the requested aspect is absent; `core/syntax.lua` gives the imperative copula a short predicate adjective (regular truncation then yields здоров). |
+
+“How is it?” previously had a test accepting broken “Как у это?”; that did not
+establish correctness. Its corrected Lua result is “Как у него дела?”, while
+the preserved original capture still records “Как У Это?”. Review expected
+strings linguistically and inspect grammatical metadata, rather than blessing
+whatever the engine currently prints.
+
+### Evidence and completion
+
+Use `test/common_phrases_test.lua` as the coverage model: every nonblank source
+entry maps explicitly to a regression case, and an uncovered entry fails the
+test. Add relevant agreement/case, contraction/capitalization, partial-word,
+protected-span, longest-match, and boundary cases; use `test/greetings_test.lua`
+for retained variable metadata and alternative lexical readings. Inspect every
+result, including supporting function-word entries. Source-only tests do not
+prove that the rebuilt default dictionary contains or executes the new reading.
+
+The [curated capture fixture](../../../test/ltpro/curated-phrases/README.md)
+records the 43 entries reviewed at that time and 58 native cases, each captured twice. It
+distinguishes experimental native assets from untouched LTGOLD assets and binds
+reviewed Lua differences to dictionary hashes. Its 17 exact matches and 41
+reviewed differences are not an exact-parity pass. Preserve previous captures
+as historical evidence rather than overwriting them to fit new expectations.
+The fixture's size-preserving omissions/padding are an isolated capture
+workaround, not a dictionary-authoring rule or a change to shipped assets.
+
+For negative controls, distinguish “the idiom did not fire” from “the whole
+sentence translated well”. Longer welcome constructions and “For a while longer”
+still expose unrelated translation limitations. Record such limitations without
+claiming that nonmatching tests prove natural Russian. Report missing or failing
+entry verification explicitly; do not call a file complete while its entries
+remain unreviewed.
+
+### Closed-class batches
+
+A `function-words.txt` row replaces every record for its key, so leave out
+words whose other readings matter (*like*, *down*, *near*) or pack those
+readings into the one record as LTGOLD does (`like*PДподобноV11любить`).
+Check what agreement reads besides the entry: в/на and из/с/от depend on the
+noun's `.RUS` flags (bit 1 animate, bit 6 на-noun), so a correct preposition
+can still print “на доме” when that data is wrong. A sentence-initial `p`
+preposition turns its comma into `j`, and no subrule attaches to a
+sentence-final head. Both are native behaviors confirmed by captures in
+`test/ltpro/prepositions/`.
 
 ## Build and verify
 
 Keep UTF-8 source rows, then rebuild the active index through the editor:
 
 ```sh
+python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
+  --keys-file reference/openrussian/removed-headwords.txt --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/function-words.txt --replace --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/phrases.txt --replace --in-place
 python3 tools/ltech_dict.py check reference/openrussian/BASE.DIC
+lua test/common_phrases_test.lua
 lua test/greetings_test.lua
+lua test/prepositions_test.lua
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 sh test/run_all.sh
 ```

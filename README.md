@@ -30,7 +30,7 @@ The API also exposes it as `state.meanings_text` (UTF-8) and `state.meanings`
 ```lua
 local engine = require 'core.engine'
 local text, state = engine.translate('He is in the house.')
-assert(text == 'Он - в дом.')
+assert(text == 'Он - в доме.')
 ```
 
 `translate` returns UTF-8 plus diagnostic state. `run` returns CP866 plus the same

@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-09T14:42:42.625264+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "fb36dd022c6740f067184711dc06a58c3111d3381cccbdfba0cb910f397fad8a",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "e21cbc04df646ac8c0193c015f4b9784a5b223009c3d6982e22f0044cc2e0153",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "not-at-all",
+      "group": "verification",
+      "input": "Not at all.",
+      "raw_cp866_hex": "8da8e1aaaeabecaaae2091aea2e1a5ac2e0d0a",
+      "raw_sha256": "ab293960deb6b520325dff762f9cdaf0ed33ce75b98361fe9a3d63fe04735400",
+      "translation": "Нисколько Совсем."
+    },
+    {
+      "id": "not-at-all-thanks",
+      "group": "verification",
+      "input": "Not at all, thanks.",
+      "raw_cp866_hex": "8da8e1aaaeabecaaae2091aea2e1a5ac2ca1aba0a3aea4a0e0adaee1e2a82e0d0a",
+      "raw_sha256": "b394d3fa8c6b7f8ccbc3f201d5eddcdd96fab87df7791b4756734f729cc5cbf9",
+      "translation": "Нисколько Совсем,благодарности."
+    },
+    {
+      "id": "it-is-not-at-all-easy",
+      "group": "verification",
+      "input": "It is not at all easy.",
+      "raw_cp866_hex": "9de2ae202d20e1aea2e1a5ac20ada520aba5a3aaae2e0d0a",
+      "raw_sha256": "1e91a18abab7a02171580e8575eecdd8ea5ae6788b4559a1ddffc4fb72d08b4d",
+      "translation": "Это - совсем не легко."
+    },
+    {
+      "id": "she-does-not-read-at-all",
+      "group": "verification",
+      "input": "She does not read at all.",
+      "raw_cp866_hex": "8eada020ada520e7a8e2a0a5e220e1aea2e1a5ac2e0d0a",
+      "raw_sha256": "a5ad577732f8b543e6d4c76a8699229ae77de42277fa563ce65473f83f5f4e21",
+      "translation": "Она не читает совсем."
+    },
+    {
+      "id": "after-all",
+      "group": "verification",
+      "input": "After all.",
+      "raw_cp866_hex": "82208aaeade6a520aaaeade6aea22e0d0a",
+      "raw_sha256": "13be2c3eee339912e61c4d2c041adbc2522e00b9067447f1052aa0146fe39975",
+      "translation": "В Конце концов."
+    },
+    {
+      "id": "after-all-he-knows",
+      "group": "verification",
+      "input": "After all, he knows.",
+      "raw_cp866_hex": "8faee1aba520a2e1a52c20aead20a7ada0a5e22e0d0a",
+      "raw_sha256": "1820556e4baa8d41290c3126b408aa9565944be349b02f3a84ad3d4891c784dd",
+      "translation": "После все, он знает."
+    },
+    {
+      "id": "after-all-the-guests-left",
+      "group": "verification",
+      "input": "After all the guests left.",
+      "raw_cp866_hex": "8faee1aba520a2e1a5e520a3aee1e2a5a920aee1e2a0a2e8a8e5e1ef2e0d0a",
+      "raw_sha256": "ec192c1606316546e0f8443a6d8e7871c93a53e708a38a358a4c2c7ed31ee9e1",
+      "translation": "После всех гостей оставшихся."
+    },
+    {
+      "id": "he-knows-after-all",
+      "group": "verification",
+      "input": "He knows after all.",
+      "raw_cp866_hex": "8ead20a7ada0a5e220a220aaaeade6a520aaaeade6aea22e0d0a",
+      "raw_sha256": "cd072fd7dc0e17d2588d4019b51b4def8f9006879a72322a254b42ed03c19b0c",
+      "translation": "Он знает в конце концов."
+    },
+    {
+      "id": "my-pleasure",
+      "group": "verification",
+      "input": "My pleasure.",
+      "raw_cp866_hex": "8faea6a0abe3a9e1e2a02e0d0a",
+      "raw_sha256": "5b171be597ce22e6b15c20e9cefc26c65c9f75ae41e2d626c09edbe18b13829d",
+      "translation": "Пожалуйста."
+    },
+    {
+      "id": "my-pleasure-is-great",
+      "group": "verification",
+      "input": "My pleasure is great.",
+      "raw_cp866_hex": "8caea520e3a4aea2aeabece1e2a2a8a520a1aeabece8aea52e0d0a",
+      "raw_sha256": "31eef8d1ffba1794bf81589bf60cee310c167c7085fcb0d46b7d3077106512ed",
+      "translation": "Мое удовольствие большое."
+    }
+  ]
+}

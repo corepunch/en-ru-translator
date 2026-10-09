@@ -116,12 +116,15 @@ static void lower_ascii(char *text) { for(;*text;text++)if(*text>='A'&&*text<='Z
 static int is_empty(const char *s) { return !s||!*s; }
 
 static void add_english_alias(Records *dic,const char *alias,const char *pos,const char *lemma,const char *aspect,int plural) {
-  /* OpenRussian's `others` table includes fixed expressions. Emit those as
-   * literal phrase readings; they do not have an inflectional POS adapter. */
+  /* OpenRussian's `others` table has uninflected words and fixed expressions
+   * without a part of speech. Native LTGOLD codes most such words as D
+   * (`at all*Dсовсем`, `today*Dсегодня`). Keep them in a W composite so
+   * reordering leaves these unclassified words in place. Do not use the `#`
+   * class: it is for nontranslated names and reads a leading с/м/ж as gender. */
   if(!strcmp(pos,"other")) {
     size_t alias_len,lemma_len;unsigned char *key=to_cp866(alias,&alias_len),*lemma_bytes=to_cp866(lemma,&lemma_len);
-    unsigned char *value=allocate(lemma_len+4);value[0]='W';value[1]='#';memcpy(value+2,lemma_bytes,lemma_len);value[lemma_len+2]='#';
-    add_record(dic,key,alias_len,value,lemma_len+3);free(key);free(lemma_bytes);free(value);return;
+    unsigned char *value=allocate(lemma_len+2);value[0]='W';value[1]='D';memcpy(value+2,lemma_bytes,lemma_len);
+    add_record(dic,key,alias_len,value,lemma_len+2);free(key);free(lemma_bytes);free(value);return;
   }
   const char *russian_lemma=plural&&!strcmp(pos,"noun")&&!strcmp(alias,"people")&&!strcmp(lemma,"человек")?"люди":lemma;
   size_t lemma_len; unsigned char *encoded=to_cp866(russian_lemma,&lemma_len);
@@ -151,10 +154,26 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
   free(copy);
 }
 
-static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *sg_only,const char *pl_only) {
+/* Curated lemmas taking на/с for location/source (на столе, со станции).
+ * OpenRussian has no such data; native noun flag bit 6 (0x40) marks them. */
+static char **na_nouns;static size_t na_noun_count;
+static void load_na_nouns(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    na_nouns=realloc(na_nouns,(na_noun_count+1)*sizeof *na_nouns);if(!na_nouns)fail("out of memory");
+    if(!(na_nouns[na_noun_count++]=strdup(line)))fail("out of memory");
+  }
+  free(line);fclose(file);
+}
+static int is_na_noun(const char *lemma) { for(size_t i=0;i<na_noun_count;i++)if(!strcmp(na_nouns[i],lemma))return 1; return 0; }
+
+static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5]; size_t used=0;
   if(!strcmp(pos,"noun")) {
-    value[used++]='N';value[used++]=0xc0;
+    /* Native noun flags: 0x80 base, 0x02 animate (from/от, animate
+     * accusative), 0x40 на-location noun. */
+    value[used++]='N';value[used++]=(unsigned char)(0x80|(!strcmp(animate,"1")?0x02:0)|(is_na_noun(lemma)?0x40:0));
     /* Keep the legacy RUS number bits beside the 2-bit gender code. */
     int g=!strcmp(gender,"m")?1:!strcmp(gender,"f")?2:0;
     value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
@@ -232,13 +251,13 @@ static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,
 
 static void import_file(Records *source_dic,Records *source_rus,Records *morph,const char *path,const char *pos) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;ssize_t n=getline(&line,&cap,file);if(n<0)fail("empty source TSV");
-  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), sg_only=column(&header,"sg_only"), pl_only=column(&header,"pl_only"), source_row=column(&header,"source_row");
+  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), sg_only=column(&header,"sg_only"), animate=column(&header,"animate"), pl_only=column(&header,"pl_only"), source_row=column(&header,"source_row");
   if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
   while((n=getline(&line,&cap,file))>=0) {
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
     if(is_empty(lemma))continue;
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
-    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,sg_only),cell(&row,pl_only));
+    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,animate),cell(&row,sg_only),cell(&row,pl_only));
     if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a);
     add_forms(morph,&header,&row,pos,lemma,a);
   }
@@ -250,6 +269,15 @@ static void add_people_plural(Records *rus) {
   static const unsigned char key[]={0xab,0xee,0xa4,0xa8}; /* люди */
   static const unsigned char code[]={'N',0xd2,0x88,0x9e};
   add_record(rus,key,sizeof key,code,sizeof code);
+}
+
+static void add_curated_nouns(Records *rus) {
+  /* The source's others.tsv has only the interjection спасибо. Its nominal
+   * use (большое спасибо) is neuter and indeclinable, like native шоссе.
+   * 0xff is the native no-declension paradigm, not a frozen phrase reading. */
+  size_t length; unsigned char *key=to_cp866("спасибо",&length);
+  static const unsigned char code[]={'N',0xc0,0x80,0xff};
+  add_record(rus,key,length,code,sizeof code);free(key);
 }
 
 static void emit_morphology_patterns(Records *rus) {
@@ -300,11 +328,12 @@ static void command_build(int argc,char **argv) {
   add_utf8_record(&source_dic,"i","R011я");
   add_utf8_record(&source_dic,"want","e00хотеть");add_utf8_record(&source_dic,"wants","e00хотеть");
   add_utf8_record(&source_dic,"can","e00мочь");
+  snprintf(path,need,"%s/../na-nouns.txt",dir);load_na_nouns(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
-  add_people_plural(&source_rus);emit_morphology_patterns(&morph);
+  add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
   printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);
 }

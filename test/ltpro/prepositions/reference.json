@@ -1,0 +1,540 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-09T16:03:26.474719+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "8101e69ce2485b1d28d334078a8d8eeeffc95b8bf86bf863c137e12dd901390f",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "a-book-about-the-war",
+      "group": "about",
+      "input": "A book about the war.",
+      "raw_cp866_hex": "8aada8a3a020ae20a2aea9ada52e0d0a",
+      "raw_sha256": "e2e651f6dd9a3a96b287cfe148df5561ddc0655e0f80a63b316e6c233e812e6a",
+      "translation": "Книга о войне."
+    },
+    {
+      "id": "a-bridge-across-the-river",
+      "group": "across",
+      "input": "A bridge across the river.",
+      "raw_cp866_hex": "8caee1e27b312ea1e0a8a4a67d20e7a5e0a5a720e0a5aae32e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206272696467653a20616e7920627269646765202d208caee1e23b2067616d65202d20a1e0a8a4a60d0a0d0a",
+      "raw_sha256": "f946c0a08595aad7dab9aa40d1344da4b9ec5f5922cc0d09ac5890306d73c7bf",
+      "translation": "Мост{1.бридж} через реку."
+    },
+    {
+      "id": "after-the-war",
+      "group": "after",
+      "input": "After the war.",
+      "raw_cp866_hex": "8faee1aba520a2aea9adeb2e0d0a",
+      "raw_sha256": "60063cbc82b2fc372ccc35c971209c9d9fa54b8769c1513d38d27f01b900b71c",
+      "translation": "После войны."
+    },
+    {
+      "id": "he-left-after-the-war",
+      "group": "after",
+      "input": "He left after the war.",
+      "raw_cp866_hex": "8ead20aee1e2a0abe1ef20afaee1aba520a2aea9adeb2e0d0a",
+      "raw_sha256": "c3ce937b6b40fc466a51ddeddd262dc3effc42a2d8606d3bb8b898ff541a88b8",
+      "translation": "Он остался после войны."
+    },
+    {
+      "id": "a-law-against-the-war",
+      "group": "against",
+      "input": "A law against the war.",
+      "raw_cp866_hex": "87a0aaaead20afe0aee2a8a220a2aea9adeb2e0d0a",
+      "raw_sha256": "cca1310b496510a1705b07c02fe4779f829aa02eda8f1166bd7e6989f7259cbd",
+      "translation": "Закон против войны."
+    },
+    {
+      "id": "a-road-along-the-river",
+      "group": "along",
+      "input": "A road along the river.",
+      "raw_cp866_hex": "84aee0aea3a020a2a4aeabec20e0a5aaa82e0d0a",
+      "raw_sha256": "6b713564977d0ccfe793787345b9a8a59d77dc1b8ed1dd6303a385c5e31e64ba",
+      "translation": "Дорога вдоль реки."
+    },
+    {
+      "id": "a-house-amid-the-trees",
+      "group": "amid",
+      "input": "A house amid the trees.",
+      "raw_cp866_hex": "84aeac20e1e0a5a4a820a4a5e0a5a2eca5a22e0d0a",
+      "raw_sha256": "97fad3f7c7b6177d1d94f92d6895e32420d7341ad09ea3fdf39bf021fe67a1b0",
+      "translation": "Дом среди деревьев."
+    },
+    {
+      "id": "a-house-amidst-the-trees",
+      "group": "amidst",
+      "input": "A house amidst the trees.",
+      "raw_cp866_hex": "84aeac20e1e0a5a4a820a4a5e0a5a2eca5a22e0d0a",
+      "raw_sha256": "97fad3f7c7b6177d1d94f92d6895e32420d7341ad09ea3fdf39bf021fe67a1b0",
+      "translation": "Дом среди деревьев."
+    },
+    {
+      "id": "a-house-among-the-trees",
+      "group": "among",
+      "input": "A house among the trees.",
+      "raw_cp866_hex": "84aeac20e1e0a5a4a820a4a5e0a5a2eca5a22e0d0a",
+      "raw_sha256": "97fad3f7c7b6177d1d94f92d6895e32420d7341ad09ea3fdf39bf021fe67a1b0",
+      "translation": "Дом среди деревьев."
+    },
+    {
+      "id": "a-house-amongst-the-trees",
+      "group": "amongst",
+      "input": "A house amongst the trees.",
+      "raw_cp866_hex": "84aeac20e1e0a5a4a820a4a5e0a5a2eca5a22e0d0a",
+      "raw_sha256": "97fad3f7c7b6177d1d94f92d6895e32420d7341ad09ea3fdf39bf021fe67a1b0",
+      "translation": "Дом среди деревьев."
+    },
+    {
+      "id": "a-wall-around-the-city",
+      "group": "around",
+      "input": "A wall around the city.",
+      "raw_cp866_hex": "91e2a5ada020a2aeaae0e3a320a3aee0aea4a02e0d0a",
+      "raw_sha256": "27b0f2b58218357a232c1ec3f3184a9ca6e3b3f68f9e08067c5979dfab505556",
+      "translation": "Стена вокруг города."
+    },
+    {
+      "id": "he-is-at-the-station",
+      "group": "at",
+      "input": "He is at the station.",
+      "raw_cp866_hex": "8ead202d20ada020e1e2a0ade6a8a82e0d0a",
+      "raw_sha256": "2db966d6bd50ceffdac9ba8f2493ddcd225113fea726945448a3d64a247b51a3",
+      "translation": "Он - на станции."
+    },
+    {
+      "id": "before-the-war",
+      "group": "before",
+      "input": "Before the war.",
+      "raw_cp866_hex": "8fa5e0a5a420a2aea9adaea92e0d0a",
+      "raw_sha256": "b36904cf2921370a3efc8dc87b2e67008727e75f5eea182777d499954ae7a699",
+      "translation": "Перед войной."
+    },
+    {
+      "id": "a-garden-behind-the-house",
+      "group": "behind",
+      "input": "A garden behind the house.",
+      "raw_cp866_hex": "91a0a420a7a020a4aeacaeac2e0d0a",
+      "raw_sha256": "c99dd397f7b39c0fb223745399fe45107316eaa4eb5643748f3e1b296b9c1cc9",
+      "translation": "Сад за домом."
+    },
+    {
+      "id": "a-cellar-beneath-the-house",
+      "group": "beneath",
+      "input": "A cellar beneath the house.",
+      "raw_cp866_hex": "8faea4a2a0ab20afaea420a4aeacaeac2e0d0a",
+      "raw_sha256": "d6ffeeff6e8c45fbe711b45152bbd5ba55893c18ac4a7a32619d0e675fda5e94",
+      "translation": "Подвал под домом."
+    },
+    {
+      "id": "a-tree-beside-the-house",
+      "group": "beside",
+      "input": "A tree beside the house.",
+      "raw_cp866_hex": "84a5e0a5a2ae20e0efa4aeac20e120a4aeacaeac2e0d0a",
+      "raw_sha256": "3bb901d11bd88daff6c5571ead50f9a89281e7af48731bd08636a909ff38bc15",
+      "translation": "Дерево рядом с домом."
+    },
+    {
+      "id": "besides-the-house",
+      "group": "besides",
+      "input": "Besides the house.",
+      "raw_cp866_hex": "8ae0aeaca520a4aeaca02e0d0a",
+      "raw_sha256": "6a5138e0cae63ca8d4f335801e9e048f6aacc6b544729df67f3590108f4ea64a",
+      "translation": "Кроме дома."
+    },
+    {
+      "id": "a-road-between-the-cities",
+      "group": "between",
+      "input": "A road between the cities.",
+      "raw_cp866_hex": "84aee0aea3a020aca5a6a4e320a3aee0aea4a0aca82e0d0a",
+      "raw_sha256": "2a55f19c295ef195485ad95cc32a4baee8852f8321aaa16c10cd03eba100c7dd",
+      "translation": "Дорога между городами."
+    },
+    {
+      "id": "a-village-beyond-the-river",
+      "group": "beyond",
+      "input": "A village beyond the river.",
+      "raw_cp866_hex": "84a5e0a5a2adef20a7a020e0a5aaaea92e0d0a",
+      "raw_sha256": "dd9325fa718baaea4cdc5cd56a03dec10247f41686d6c38c4c85f1e360f86246",
+      "translation": "Деревня за рекой."
+    },
+    {
+      "id": "a-book-by-the-author",
+      "group": "by",
+      "input": "A book by the author.",
+      "raw_cp866_hex": "8aada8a3a020a0a2e2aee0aeac2e0d0a",
+      "raw_sha256": "287f334b7216708edee584f38c3aeab3fc6b588cf8dd72bd4788caa630641550",
+      "translation": "Книга автором."
+    },
+    {
+      "id": "a-letter-concerning-the-house",
+      "group": "concerning",
+      "input": "A letter concerning the house.",
+      "raw_cp866_hex": "8fa8e1ecacae7b312ea1e3aaa2a07d20aee2adaee1a8e2a5abecadae20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206c65747465723a20646f63756d656e74202d208fa8e1ecacae3b20636861726163746572202d20a1e3aaa2a00d0a0d0a",
+      "raw_sha256": "6cb99fe643c96108a3ff12497096378d19821a3a9e92ad0d3fa3c12731ea449f",
+      "translation": "Письмо{1.буква} относительно дома."
+    },
+    {
+      "id": "despite-the-rain",
+      "group": "despite",
+      "input": "Despite the rain.",
+      "raw_cp866_hex": "8da5e1acaee2e0ef20ada020a4aea6a4ec2e0d0a",
+      "raw_sha256": "d1639fb8bc753ffe4f27dde1b31f2cb17ac4b46622725db14d73c593ce4b64e7",
+      "translation": "Несмотря на дождь."
+    },
+    {
+      "id": "during-the-war",
+      "group": "during",
+      "input": "During the war.",
+      "raw_cp866_hex": "8220e2a5e7a5ada8a520a2aea9adeb2e0d0a",
+      "raw_sha256": "d735504b44b085b05e566ee39745112227fee1d0bdc8558ab98ccd597209224d",
+      "translation": "В течение войны."
+    },
+    {
+      "id": "all-except-the-house",
+      "group": "except",
+      "input": "All except the house.",
+      "raw_cp866_hex": "82e1a520aae0aeaca520a4aeaca02e0d0a",
+      "raw_sha256": "eb33aa708fd4ef2c63a69dbb6bdd9c6bfb8cd0a3702182bbbe2463dabd65e54b",
+      "translation": "Все кроме дома."
+    },
+    {
+      "id": "a-gift-for-the-mother",
+      "group": "for",
+      "input": "A gift for the mother.",
+      "raw_cp866_hex": "8faea4a0e0aeaa20a4abef20aca0e2a5e0a82e0d0a",
+      "raw_sha256": "37694f28acabe144192058225962e8cbca2cac4bd6195b1db07c728c7c5e3ade",
+      "translation": "Подарок для матери."
+    },
+    {
+      "id": "a-letter-from-the-mother",
+      "group": "from",
+      "input": "A letter from the mother.",
+      "raw_cp866_hex": "8fa8e1ecacae208ee220aca0e2a5e0a82e0d0a",
+      "raw_sha256": "fb76844871f2d97222c92e8c9c0da71dad680657d26629e908970ceb518f8745",
+      "translation": "Письмо От матери."
+    },
+    {
+      "id": "i-live-in-moscow",
+      "group": "in",
+      "input": "I live in Moscow.",
+      "raw_cp866_hex": "9f20a6a8a2e320a2208caee1aaa2a52e0d0a",
+      "raw_sha256": "d7501b215278c0cd17e2cbe56bbb7d6751d9c092fd115e74f254040d3b219263",
+      "translation": "Я живу в Москве."
+    },
+    {
+      "id": "a-house-in-the-city",
+      "group": "in",
+      "input": "A house in the city.",
+      "raw_cp866_hex": "84aeac20a220a3aee0aea4a52e0d0a",
+      "raw_sha256": "46917720e2f10a045033e778a5991ee12487141e4caf2a6da44308bec7bbe587",
+      "translation": "Дом в городе."
+    },
+    {
+      "id": "a-room-inside-the-house",
+      "group": "inside",
+      "input": "A room inside the house.",
+      "raw_cp866_hex": "8aaeacada0e2a020a220a4aeaca52e0d0a",
+      "raw_sha256": "ff0fada86e3fdd31577c0b99c8c732df2600affb6c88cc9559bff103575b3048",
+      "translation": "Комната в доме."
+    },
+    {
+      "id": "he-looked-into-the-room",
+      "group": "into",
+      "input": "He looked into the room.",
+      "raw_cp866_hex": "8ead20e1acaee2e0a5ab20a220aaaeacada0e2e32e0d0a",
+      "raw_sha256": "57a8ca82c959a3cd431218cd9b7df96b063b432988bdb1721277c36773223c70",
+      "translation": "Он смотрел в комнату."
+    },
+    {
+      "id": "a-cup-of-tea",
+      "group": "of",
+      "input": "A cup of tea.",
+      "raw_cp866_hex": "97a0e8aaa07b312eaae3a1aeaa7d20e7a0a92e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206375703a206472696e6b696e67202d2097a0e8aaa03b2074726f706879202d20aae3a1aeaa0d0a0d0a",
+      "raw_sha256": "c0d7a03a9a6284ad1b50032c28306c67ecb661a4ac77dae77479b285e0803319",
+      "translation": "Чашка{1.кубок} чай."
+    },
+    {
+      "id": "the-door-of-the-house",
+      "group": "of",
+      "input": "The door of the house.",
+      "raw_cp866_hex": "84a2a5e0ec7b312ea2e5aea47d20a4aeaca02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020646f6f723a20706879736963616c20646f6f72202d2084a2a5e0ec3b20656e7472616e6365202d20a2e5aea40d0a0d0a",
+      "raw_sha256": "293030b3560837866e0f3ccbb07622100854e70679f4423264e6a61db20d00c4",
+      "translation": "Дверь{1.вход} дома."
+    },
+    {
+      "id": "a-cup-off-the-table",
+      "group": "off",
+      "input": "A cup off the table.",
+      "raw_cp866_hex": "97a0e8aaa07b312eaae3a1aeaa7d20e120e1e2aeaba07b322ee2a0a1aba8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206375703a206472696e6b696e67202d2097a0e8aaa03b2074726f706879202d20aae3a1aeaa0d0a3220207461626c653a207069656365206f66206675726e6974757265202d20e1e2aeaba03b206368617274202d20e2a0a1aba8e6a00d0a0d0a",
+      "raw_sha256": "73d4187f199cde85342fdff27a32711f93be4d1edec4d99f47e0e9cc82637262",
+      "translation": "Чашка{1.кубок} с стола{2.таблица}."
+    },
+    {
+      "id": "a-book-on-the-table",
+      "group": "on",
+      "input": "A book on the table.",
+      "raw_cp866_hex": "8aada8a3a020ada020e1e2aeaba57b312ee2a0a1aba8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120207461626c653a207069656365206f66206675726e6974757265202d20e1e2aeaba53b206368617274202d20e2a0a1aba8e6a00d0a0d0a",
+      "raw_sha256": "710e888a245e2ef665e7d5e6bcd66e00f8d9571c4f822e8abd8a526dc3667ccf",
+      "translation": "Книга на столе{1.таблица}."
+    },
+    {
+      "id": "he-jumped-onto-the-table",
+      "group": "onto",
+      "input": "He jumped onto the table.",
+      "raw_cp866_hex": "8ead20afe0eba3ade3ab20ada020e1e2aeaba57b312ee2a0a1aba8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120207461626c653a207069656365206f66206675726e6974757265202d20e1e2aeaba53b206368617274202d20e2a0a1aba8e6a00d0a0d0a",
+      "raw_sha256": "638743784a09f29a81f98fd1d3237d5114b517ae7a6b0dfb3375eb2422f02b28",
+      "translation": "Он прыгнул на столе{1.таблица}."
+    },
+    {
+      "id": "two-books-per-student",
+      "group": "per",
+      "input": "Two books per student.",
+      "raw_cp866_hex": "84a2a520aaada8a3a820ada020e1e2e3a4a5ade2a02e0d0a",
+      "raw_sha256": "df540c0bad4a9d3e15e34022dd946c6ceadda8245e21bb58abb1896a758b7bf7",
+      "translation": "Две книги на студента."
+    },
+    {
+      "id": "since-the-war",
+      "group": "since",
+      "input": "Since the war.",
+      "raw_cp866_hex": "8faee1aaaeabecaae320a2aea9ada02e0d0a",
+      "raw_sha256": "3516ca33a48b3c0d65b326e5819b4c1a8b46101e82571832034778985e4c14ac",
+      "translation": "Поскольку война."
+    },
+    {
+      "id": "a-road-through-the-forest",
+      "group": "through",
+      "input": "A road through the forest.",
+      "raw_cp866_hex": "84aee0aea3a020e7a5e0a5a720aba5e12e0d0a",
+      "raw_sha256": "8b8ee6792315426023aba9f93aa9de33d68c79dd016433b611f79fabbd165f35",
+      "translation": "Дорога через лес."
+    },
+    {
+      "id": "a-step-toward-the-house",
+      "group": "toward",
+      "input": "A step toward the house.",
+      "raw_cp866_hex": "98a0a320afae20aee2adaee8a5ada8ee20aa20a4aeace32e0d0a",
+      "raw_sha256": "27104775f313172fb07e67d37c96ec1889590b53939ae7da60a4eab0d140ee7c",
+      "translation": "Шаг по отношению к дому."
+    },
+    {
+      "id": "a-step-towards-the-house",
+      "group": "towards",
+      "input": "A step towards the house.",
+      "raw_cp866_hex": "98a0a320aa20a4aeace32e0d0a",
+      "raw_sha256": "afc9a980312060cda2b6df3e9c7df201d0ab4e3c53ec52a7a948754ec09657ba",
+      "translation": "Шаг к дому."
+    },
+    {
+      "id": "a-cat-under-the-table",
+      "group": "under",
+      "input": "A cat under the table.",
+      "raw_cp866_hex": "8aaee8aaa020afaea420e1e2aeabaeac7b312ee2a0a1aba8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120207461626c653a207069656365206f66206675726e6974757265202d20e1e2aeabaeac3b206368617274202d20e2a0a1aba8e6a00d0a0d0a",
+      "raw_sha256": "1129a68dfcd11a307cb739af6ee52c3ae9a3b2a2169a1a94074a3dfc3ed48f48",
+      "translation": "Кошка под столом{1.таблица}."
+    },
+    {
+      "id": "a-cat-underneath-the-table",
+      "group": "underneath",
+      "input": "A cat underneath the table.",
+      "raw_cp866_hex": "8aaee8aaa020afaea420e1e2aeabaeac7b312ee2a0a1aba8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120207461626c653a207069656365206f66206675726e6974757265202d20e1e2aeabaeac3b206368617274202d20e2a0a1aba8e6a00d0a0d0a",
+      "raw_sha256": "1129a68dfcd11a307cb739af6ee52c3ae9a3b2a2169a1a94074a3dfc3ed48f48",
+      "translation": "Кошка под столом{1.таблица}."
+    },
+    {
+      "id": "a-book-upon-the-table",
+      "group": "upon",
+      "input": "A book upon the table.",
+      "raw_cp866_hex": "8aada8a3a020ada020e1e2aeaba57b312ee2a0a1aba8e6a07d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120207461626c653a207069656365206f66206675726e6974757265202d20e1e2aeaba53b206368617274202d20e2a0a1aba8e6a00d0a0d0a",
+      "raw_sha256": "710e888a245e2ef665e7d5e6bcd66e00f8d9571c4f822e8abd8a526dc3667ccf",
+      "translation": "Книга на столе{1.таблица}."
+    },
+    {
+      "id": "the-city-versus-the-village",
+      "group": "versus",
+      "input": "The city versus the village.",
+      "raw_cp866_hex": "83aee0aea420afe0aee2a8a220a4a5e0a5a2ada82e0d0a",
+      "raw_sha256": "e51eabd43fc4192c15c201eb19b5eefdc146d74053bf041b88374b8b12a2109a",
+      "translation": "Город против деревни."
+    },
+    {
+      "id": "a-letter-via-the-mother",
+      "group": "via",
+      "input": "A letter via the mother.",
+      "raw_cp866_hex": "8fa8e1ecacae7b312ea1e3aaa2a07d20e7a5e0a5a720aca0e2a5e0a82e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206c65747465723a20646f63756d656e74202d208fa8e1ecacae3b20636861726163746572202d20a1e3aaa2a00d0a0d0a",
+      "raw_sha256": "f7952845f896045d41d525c6a20b9246109aeb9e63cbdb9770ba87c4784ad691",
+      "translation": "Письмо{1.буква} через матери."
+    },
+    {
+      "id": "within-the-city",
+      "group": "within",
+      "input": "Within the city.",
+      "raw_cp866_hex": "8220afe0a5a4a5aba0e57b312ea220e2a5e7a5ada8a57d20a3aee0aea4a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202077697468696e3a20696e73696465202d208220afe0a5a4a5aba0e53b20647572696e67202d20a220e2a5e7a5ada8a50d0a0d0a",
+      "raw_sha256": "c68a4c71cb8905c7be2a1bf949255100bb195cebdf5c3f17c83626c606e89473",
+      "translation": "В пределах{1.в течение} города."
+    },
+    {
+      "id": "a-house-without-a-roof",
+      "group": "without",
+      "input": "A house without a roof.",
+      "raw_cp866_hex": "84aeac20a1a5a720aae0ebe8a02e0d0a",
+      "raw_sha256": "c1f60389b9e5def50639d5cf2a170daa184fa11653f47447f6871e0dc5e9fd82",
+      "translation": "Дом без крыша."
+    },
+    {
+      "id": "he-is-in-the-house",
+      "group": "in",
+      "input": "He is in the house.",
+      "raw_cp866_hex": "8ead202d20a220a4aeaca52e0d0a",
+      "raw_sha256": "f10a86d74e1dcc8b1e8a1059872e6ccef5e1500b8e83f117b2df2ec78029a926",
+      "translation": "Он - в доме."
+    },
+    {
+      "id": "he-is-at-the-house",
+      "group": "at",
+      "input": "He is at the house.",
+      "raw_cp866_hex": "8ead202d20a220a4aeaca52e0d0a",
+      "raw_sha256": "f10a86d74e1dcc8b1e8a1059872e6ccef5e1500b8e83f117b2df2ec78029a926",
+      "translation": "Он - в доме."
+    },
+    {
+      "id": "he-is-in-the-street",
+      "group": "in",
+      "input": "He is in the street.",
+      "raw_cp866_hex": "8ead202d20ada020e3aba8e6a52e0d0a",
+      "raw_sha256": "ceb408bbd8c13e54d83ad6ca8ceb061a005fd7f8ba6c34c6d35ba6dac9956218",
+      "translation": "Он - на улице."
+    },
+    {
+      "id": "a-gift-from-the-brother",
+      "group": "from",
+      "input": "A gift from the brother.",
+      "raw_cp866_hex": "8faea4a0e0aeaa20aee220a1e0a0e2a02e0d0a",
+      "raw_sha256": "ed402c8fbe50d9d86c6fcebf58770afc00a1f990da4389d71c20b8be5d0dff7d",
+      "translation": "Подарок от брата."
+    },
+    {
+      "id": "a-letter-from-the-factory",
+      "group": "from",
+      "input": "A letter from the factory.",
+      "raw_cp866_hex": "8fa8e1ecacae208ee220a7a0a2aea4a02e0d0a",
+      "raw_sha256": "d22ac7c57bccd4572eb802861d7ac5782846efdeb503ad06eeb3840f2c11ef73",
+      "translation": "Письмо От завода."
+    },
+    {
+      "id": "he-came-out-from-the-house",
+      "group": "from",
+      "input": "He came out from the house.",
+      "raw_cp866_hex": "8ead20afaeefa2abefabe1ef20a8a720a4aeaca02e0d0a",
+      "raw_sha256": "d77ad05e18f4648198e921b62182682f9c34f6035423b87986f070b50057e245",
+      "translation": "Он появлялся из дома."
+    },
+    {
+      "id": "he-went-into-the-house",
+      "group": "into",
+      "input": "He went into the house.",
+      "raw_cp866_hex": "8ead20a2e1e2e3afa0ab20a220a4aeac2e0d0a",
+      "raw_sha256": "c451574a4a1a2fd04b8f409c8d873a4e3a200034fc0e964eba9db3afa9eb66d4",
+      "translation": "Он вступал в дом."
+    },
+    {
+      "id": "he-fell-onto-the-floor",
+      "group": "onto",
+      "input": "He fell onto the floor.",
+      "raw_cp866_hex": "8ead20afa0a4a0ab20ada020afaeaba57b312eede2a0a67d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020666c6f6f723a20696e206120726f6f6d202d20afaeaba53b206275696c64696e67206c6576656c202d20ede2a0a60d0a0d0a",
+      "raw_sha256": "a75ec1f67102e1f6153f0fc255a147c2d50dbdb05b482f0b124c75039bedbf51",
+      "translation": "Он падал на поле{1.этаж}."
+    },
+    {
+      "id": "i-see-the-mother",
+      "group": "animate",
+      "input": "I see the mother.",
+      "raw_cp866_hex": "9f20a2a8a6e320aca0e2ec2e0d0a",
+      "raw_sha256": "54470792f6c3f6c742e3981d1eb60937ad8655565dc26fbe90a91c8bd6603677",
+      "translation": "Я вижу мать."
+    },
+    {
+      "id": "i-see-the-brother",
+      "group": "animate",
+      "input": "I see the brother.",
+      "raw_cp866_hex": "9f20a2a8a6e320a1e0a0e2a02e0d0a",
+      "raw_sha256": "1908777de62093e453af2b929e8d799fa6e70713189a03cbb5df78ea284396c6",
+      "translation": "Я вижу брата."
+    },
+    {
+      "id": "i-see-the-dog",
+      "group": "animate",
+      "input": "I see the dog.",
+      "raw_cp866_hex": "9f20a2a8a6e320e1aea1a0aae32e0d0a",
+      "raw_sha256": "e52488fd003e520d44422f723d0e263da8476448a217284a046528478b51cb64",
+      "translation": "Я вижу собаку."
+    },
+    {
+      "id": "i-see-the-house",
+      "group": "animate",
+      "input": "I see the house.",
+      "raw_cp866_hex": "9f20a2a8a6e320a4aeac2e0d0a",
+      "raw_sha256": "a5661ae011781ccff52355bfd16d6092d003ae5cfe0caa1139da185e11156289",
+      "translation": "Я вижу дом."
+    },
+    {
+      "id": "i-see-the-brothers",
+      "group": "animate",
+      "input": "I see the brothers.",
+      "raw_cp866_hex": "9f20a2a8a6e320a1e0a0e2eca5a22e0d0a",
+      "raw_sha256": "29f2a735088e1fca8e4efa63ae4cb4e17d3cbe974aafbe059ff0f7e2ae61f490",
+      "translation": "Я вижу братьев."
+    },
+    {
+      "id": "a-letter-via-the-brother",
+      "group": "animate",
+      "input": "A letter via the brother.",
+      "raw_cp866_hex": "8fa8e1ecacae7b312ea1e3aaa2a07d20e7a5e0a5a720a1e0a0e2a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206c65747465723a20646f63756d656e74202d208fa8e1ecacae3b20636861726163746572202d20a1e3aaa2a00d0a0d0a",
+      "raw_sha256": "a9588aadb5e36ebe002773eccdb6863733dd376e9ad39fdf737be94b398182d0",
+      "translation": "Письмо{1.буква} через брата."
+    },
+    {
+      "id": "a-letter-for-the-brother",
+      "group": "animate",
+      "input": "A letter for the brother.",
+      "raw_cp866_hex": "8fa8e1ecacae7b312ea1e3aaa2a07d20a4abef20a1e0a0e2a02e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206c65747465723a20646f63756d656e74202d208fa8e1ecacae3b20636861726163746572202d20a1e3aaa2a00d0a0d0a",
+      "raw_sha256": "1dc66f7274f5365e98f805b6d2cd98cd4a1c05886ce9812b1d0afc10e39801a2",
+      "translation": "Письмо{1.буква} для брата."
+    },
+    {
+      "id": "he-looked-at-the-mother",
+      "group": "animate",
+      "input": "He looked at the mother.",
+      "raw_cp866_hex": "8ead20e1acaee2e0a5ab20ada020aca0e2ec2e0d0a",
+      "raw_sha256": "6b5cde34ab806b403fb370316b7cba2a42b7e8327f9212771acbde913802d302",
+      "translation": "Он смотрел на мать."
+    }
+  ]
+}

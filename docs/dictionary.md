@@ -299,8 +299,8 @@ those fields during normal generation. `J0` closes the prepositional group befor
 the independent nominative plural noun, generated from lemma `дело`.
 This rule has been executed in original LTPRO. Original third-person forms omit
 `н`; Lua's agreement/generation fixes produce `него/неё/них`. The custom pre-T1
-retained-slot execution path has been removed. The native sentence-final `it`
-rewrite still overrides the composite for `How is it?`; see the skill reference
+retained-slot execution path has been removed. Lua now protects the authored
+composite from the native sentence-final `it` rewrite for `How is it?`; see the skill reference
 for this captured limitation.
 
 Structural function words are maintained in

@@ -4,11 +4,12 @@ The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
 indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,552 DIC
-records, 53,491 native-format RUS records, and 58,772 compact morphology
+records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies twelve reviewed structural word readings from
-`function-words.txt`, replacing all records for those exact keys, and adds two
-phrase rules from `phrases.txt`. It contains 95,521 DIC records after replacement.
+The checked-in `BASE.DIC` applies 57 reviewed structural word readings from
+`function-words.txt` (pronouns, auxiliaries and 45 prepositions), replacing all
+records for those exact keys, and 47 phrase entries from `phrases.txt`. It
+contains 95,435 DIC records after replacement.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and
@@ -53,16 +54,47 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
 /tmp/openrussian_db build reference/openrussian/source \
   reference/openrussian/BASE.DIC reference/openrussian/BASE.RUS \
   reference/openrussian/BASE.MORPH
+python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
+  --keys-file reference/openrussian/removed-headwords.txt --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/function-words.txt --replace --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/phrases.txt --replace --in-place
 ```
 
+`removed-headwords.txt` lists generated OpenRussian literal phrases that would
+consume input before a curated T4 subrule can see it (for example the builder's
+`you are welcome*WDпожалуйста`). A curated subrule has a different key, so
+`--replace` cannot remove those literals. Always rebuild from the C builder
+output; this sequence reproduces the checked-in `BASE.DIC` byte for byte.
+
+Rows from `others.tsv` have no part of speech. The builder emits each as a
+one-component `W` composite with native adverb class `D` (`at all*WDсовсем`),
+following LTGOLD's usual `D` coding for such words; the `W` wrapper keeps
+reordering from moving these unclassified prepositions and conjunctions. It
+formerly emitted `W#…#`, but native `#` marks nontranslated names and reads a
+leading с/м/ж as gender, so 542 readings lost their first letter
+(`according to` → `огласно`).
+
 `info FILE` reports the binary image size and record count; `find FILE HEADWORD`
 shows matching dictionary records. The builder also adds a few high-priority
 English function-word and common-verb readings so source homonyms do not
 override the translator's basic grammar.
+
+## Prepositions and noun flags
+
+Each preposition in `function-words.txt` is one native record: class `P` or
+`p`, the governed case, and the Russian preposition, with packed alternatives
+where the original uses them (`for*PРдля`, `of*PР`,
+`after*pРпослеDвпоследствииJ2после того, как`). LTGOLD's entries are evidence;
+deliberate differences, omitted homographs, and original captures are in
+[preposition verification](../../test/ltpro/prepositions/README.md).
+
+Agreement chooses в/на and из/с/от from noun flags in `.RUS`: bit 1 (`0x02`)
+marks animates and bit 6 (`0x40`) nouns that take на. The builder sets the
+first from OpenRussian `animate` and the second from the curated
+[`na-nouns.txt`](na-nouns.txt), read from the source directory's parent. It
+previously wrote `0xc0` for every noun.
 
 ## Curated phrases
 
@@ -90,9 +122,10 @@ singular. The custom pre-T1 retained-slot execution path has been removed.
 Original LTPRO executes this construction but produces `у его/ее/их` in the third
 person. Lua's agreement/generation fixes give `у него/неё/них`. The translations
 intentionally improve those forms and phrase casing while using native syntax.
-A remaining native rule-order interaction affects `How is it?`: a later
-sentence-final `it` rule overrides the composite, producing original `Как У Это?`
-and Lua `Как у это?`.
+Native rule order still affects `How is it?`: a later sentence-final `it` rule
+overrides the composite, producing original `Как У Это?`. Lua preserves the
+authored equivalent and generates `Как у него дела?`; the regression also checks
+`How's it?`.
 
 The imported default readings previously classified `are` as a noun, `is` as a
 lexical verb, and `you` as fixed `W` text. Those readings could not satisfy the
@@ -116,6 +149,48 @@ nearby inputs. These phrases intentionally improve on the original translator;
 original captures remain separate. The
 [dictionary-writing skill](../../skills/ltgold-dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
+
+The complete source has 27 `W` composites, eight native T4 subrules, and ten
+single-word `D` equivalents. There are no frozen multiword Russian payloads.
+For example, `happy birthday*WPТсNденьPРNрождение` gives instrumental `день`
+and genitive `рождение`; `best wishes*WAнаилучшийnпожелание` agrees and declines
+after `with`. The structural `with*PТсJс помощью` reading supplies instrumental
+government. The builder also adds nominal `спасибо` as a neuter indeclinable
+noun, using native no-declension metadata, so `AбольшойNспасибо` agrees normally.
+
+The `you` subrule requires lexical `are`, `welcome`, and a final boundary. It
+accepts `You're welcome.` without consuming `You are welcome to stay.` or
+`You were welcome.`. Imperatives use normal morphology and the default informal
+register: `Извини меня.`, `Будь здоров.`, and `Поправляйся скорее.`. The composed
+past greeting spells out its subject: `Мы давно не виделись.`. OpenRussian
+normalizes ё to е in generated forms, including `С днем рождения.`.
+
+`test/common_phrases_test.lua` checks every source entry, capitalization,
+contractions, punctuation, longest-phrase selection, and protected/partial-word
+nonmatches. Original-program evidence, the per-entry review, known differences,
+and isolated fixture construction are in
+[curated-phrase verification](../../test/ltpro/curated-phrases/README.md).
+Some entries deliberately choose historical senses: `by the way` becomes
+`между прочим` and `after all` becomes `в конце концов`.
+
+Clause-final idioms are boundary subrules rather than literal keys, so they do
+not consume a following construction. `after `all`[j,*]` matches before a comma
+or sentence end but leaves “After all the guests left” alone. `not at all` has
+two native subrules: standalone `Нисколько.` before `[,*]`, and `совсем не`
+otherwise, so “It is not at all easy” keeps its negation. The native
+``at `all`[PJj,C*]`` rule covers clause-final “at all”. `my `pleasure`[*]`
+answers thanks with `Пожалуйста.` without consuming “My pleasure is great.”
+The builder's literal `not at all`, `at all`, and `after all` readings are removed
+before import.
+
+Original LTPRO differs from Lua for these subrules in two engine respects. It
+marks a matched comma so the next word is glued to it (`Нисколько,благодарности`),
+and a later subrule can resurrect a node an earlier subrule deleted in the same
+pass (`Нисколько Совсем.`). Lua keeps normal comma spacing and skips deleted
+heads. A sentence-initial `p` preposition such as `after` makes the grammar
+retag its comma as clause junction `j`, so the rule uses native `[j,*]`
+(compare historical ``as `it``is`[j,*)]``); with `[,*]` the original printed
+“После все, он знает.”
 
 ## Parity examples
 

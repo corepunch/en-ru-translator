@@ -120,7 +120,13 @@ end
 function russian.source_forms(state, word, pos, slot, aspect)
   local direct=state.russian.openrussian_forms and state.russian.openrussian_forms[pos]
   local row=direct and direct[word]
-  if row and pos=='v' then row=row[aspect==1 and 'pf' or 'ipf'] end
+  if row and pos=='v' then
+    local selected=row[aspect==1 and 'pf' or 'ipf']
+    -- Clause-initial imperative analysis can request perfective aspect even
+    -- when the unchanged lemma has only imperfective forms (e.g. быть).
+    if not selected and slot:match('^imperative_') then selected=row.ipf or row.pf end
+    row=selected
+  end
   if row then
     local forms=row.forms[slot]
     if forms and #forms>0 then return forms end

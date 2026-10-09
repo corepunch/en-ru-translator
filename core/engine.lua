@@ -47,7 +47,7 @@ local function memoized_asset(source,name,decoder,secondary,secondary_name,terti
   local bytes=engine.read_asset(source,name)
   local secondary_bytes=secondary and engine.read_asset(secondary,secondary_name or name) or nil
   local tertiary_bytes=tertiary and engine.read_asset(tertiary,tertiary_name or name) or nil
-  local key=#bytes>=1024*1024 and type(source)=='string' and not source:find('\0',1,true) and name..'\0'..source..
+  local key=type(source)=='string' and not source:find('\0',1,true) and name..'\0'..source..
     (secondary and '\0'..secondary or '')..(tertiary and '\0'..tertiary or '')
   local cached=key and static_cache[key]
   if cached and cached.bytes==bytes and cached.secondary_bytes==secondary_bytes and cached.tertiary_bytes==tertiary_bytes then return cached.value end

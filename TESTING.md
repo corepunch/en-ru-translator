@@ -9,6 +9,17 @@ supplied unpacked `LTGOLD/LTPRO.EXE`, `BASE.DIC`, and `BASE.RUS`.
 sh test/run_all.sh
 ```
 
+`test/run_all.lua` runs every `test/*_test.lua` in one Lua process, so the
+dictionaries are parsed once, and prints one line per test. A single test still
+runs alone with `lua test/NAME_test.lua`.
+
+Translation checks live in `test/translations.txt`, one per line:
+`group[:entry] | input => expected` (exact), `~>` (contains) or `!>` (does
+not contain). Quote an input with edge whitespace; `\t` inside quotes is a tab.
+Entry tags let `common_phrases_test.lua` and `prepositions_test.lua` require a
+line for every curated entry, and `greetings_test.lua` adds structural checks
+to the `greeting` lines.
+
 This is the required feature regression suite; it does not require DOSBox or
 memory-operation parity. New feature expectations describe the documented Lua
 behavior. Existing captured expectations remain useful regressions, not a demand
@@ -31,6 +42,20 @@ structural `R/X` tags outside greetings. The `what` idiom uses the native T4
 subrule ``what <X>`up`[*]``; tests check its application with contractions,
 different terminators, and longer inputs that must not match. Literal phrase
 keys containing final punctuation do not match the separately stored terminator.
+`common_phrases_test.lua` maps all 45 curated entries to explicit translation
+cases and fails if any source entry lacks a case. Every literal key also gets
+partial-word and protected-span nonmatch checks. Context tests cover declension,
+contractions, capitalization, longest-match behavior, and polite-response
+boundaries. The 58 repeated native captures, per-entry review, and reproduction
+instructions are in `test/ltpro/curated-phrases/` (captured for the
+earlier 43-entry source). Boundary-subrule cases may check only the span the
+entry owns; the test also fails if a `removed-headwords.txt` literal remains. Raw native differences remain
+visible; the default expectations are not assertions of exact LTPRO parity.
+`prepositions_test.lua` maps every `P`/`p` row in `function-words.txt` to a
+case checking the preposition and governed noun form, plus в/на, из/с/от and
+animate selection from `.RUS` noun flags; captures are in
+`test/ltpro/prepositions/`. `openrussian_others_test.lua` checks that generated
+`others.tsv` readings use `WD`, not the `#` class that drops a leading с/м/ж.
 `encoding_test.lua` verifies standard CP866 bytes for both `Ё` and `ё`.
 
 `W` capitalization applies to the complete phrase, including inserted words.

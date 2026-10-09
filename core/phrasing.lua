@@ -132,6 +132,15 @@ end
 local function replace_and_stop()
   return 'replace_and_stop'
 end
+local function inside_equivalent(match)
+  local casing=match.head.phrase_case
+  if casing then
+    for i=match.first,match.last do
+      if match.node(i).phrase_case~=casing then return false end
+    end
+    return true
+  end
+end
 handlers[11] = replace_and_stop
 
 local function stop_unmarked_participle(match)
@@ -635,8 +644,11 @@ function phrasing.run(root, options)
   di = 1
   while count - 1 > di do
     local head = V(di)
+    -- A node retagged ' ' was deleted by an earlier subrule in this pass;
+    -- its own subrules must not resurrect it (not at all / at all).
     local skip = number(head, 'kind') ~= 0x57 or not head.rules or #head.rules == 0
       or number(head, 'marker') == 0x77 or number(head, 'marker') == 0x57 or tag(head) == 'g'
+      or tag(head) == ' '
     if not skip then
       local best, chosen = 0x200, nil
       for index, rule in ipairs(head.rules) do
@@ -694,7 +706,12 @@ function phrasing.run(root, options)
           end
           if tag(head) == 'N' and number(head, 'previous_tag') == 0x47 then mark(head, 'g')
           elseif number(head, 'marker') ~= 0x6E then mark(head, 'w') end
-          if number(tail, 'marker') ~= 0x67 then mark(tail, 'w') end
+          -- Native also marks a matched comma boundary, which makes output
+          -- glue the next word to it (original "Кроме того,он"). Keep the
+          -- comma (tag , or clause junction j) unmarked so boundary rules keep spacing.
+          if number(tail, 'marker') ~= 0x67 and not (number(tail, 'kind') == 0x44 and number(tail, 'source') == 0x2C) then
+            mark(tail, 'w')
+          end
           if action ~= '' then head.reading = action end
           -- A native subrule can put a W equivalent in the head or a context
           -- word. Share the phrase's casing through that later expansion, so
@@ -753,7 +770,11 @@ function phrasing.run(root, options)
         end
         local apply = handlers[handler]
         local exit, at = 'replace', nil
-        if apply then exit, at = apply(match) end
+        -- English lexical idioms cannot reinterpret nodes already assigned to
+        -- one W equivalent, including equivalents authored by an earlier T4
+        -- subrule. Tag-based agreement rules still run normally.
+        if pattern:find('`',1,true) and inside_equivalent(match) then exit='advance_past_match'
+        elseif apply then exit, at = apply(match) end
         last, count = match.last, match.count
         if exit == 'replace' or exit == 'replace_and_stop' then
           if action then removed = matching.replace(vector, di, last, pattern, action, state) end

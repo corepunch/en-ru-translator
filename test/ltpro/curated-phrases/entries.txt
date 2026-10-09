@@ -14,7 +14,7 @@ excuse me*WVизвинитьM011я
 long time no see*WR11мыDдавноKнеhвидеться
 so far so good*WDпокаSвсёDхорошо
 just a moment*WPВNминутка
-my `pleasure`[*]*$Dпожалуйста\ \
+my pleasure*WPТсNудовольствие
 best wishes*WAнаилучшийnпожелание
 happy birthday*WPТсNденьPРNрождение
 merry christmas*WPТсNРождество
@@ -24,14 +24,12 @@ get well soon*WVпоправлятьсяDскорее
 welcome back*WPТсNвозвращение
 enjoy your meal*WPРAприятныйNаппетит
 never mind*Dневажно
-not `at``all`[,*]*$Dнисколько\  \
-not `at``all`~[,*]*$DDWDсовсемKне\  .\
-at `all`[PJj,C*]*$Dсовсем\ \
+not at all*Dнисколько
 of course*Dконечно
 by the way*WPТмеждуAпрочий
 as soon as possible*WDкакDможноDскорее
 on the other hand*WPРсAдругойNсторона
-after `all`[j,*]*$DDWPПвNконецPРnконец\ \
+after all*WPПвNконецPРnконец
 at least*WPДпоAкрайнийNмера
 in fact*Dфактически
 in any case*WPПвAлюбойNслучай
@@ -44,5 +42,3 @@ in other words*WPТAдругойnслово
 for a while*WPВнаOнекоторыйNвремя
 right away*Dнемедленно
 sooner or later*WDраноCилиDпоздно
-behind [,*]*$Dпозади
-inside [,*]*$Dвнутри

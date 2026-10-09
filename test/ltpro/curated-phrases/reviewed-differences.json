@@ -1,0 +1,299 @@
+{
+  "default_assets_sha256": {
+    "BASE.DIC": "e1df970c59972bcb9aa67465ea56f581e8e626714ac3f4fae31f407ec356da7d",
+    "BASE.RUS": "cce33067c49a5d9e66d172fa986713fdb9e665beccef0094eeda82269a8ffb95",
+    "BASE.MORPH": "b6d742e5e16dbae1eacbb255c8858c9806f7f484c1e776da22b4332fd6d151dd"
+  },
+  "positive_entries": 43,
+  "native_cases": 58,
+  "exact_native_matches": 17,
+  "reviewed_differences": [
+    {
+      "id": "phrase-00",
+      "input": "Good morning.",
+      "original": "Добрый Утро.",
+      "lua": "Доброе утро.",
+      "reason": "Neuter adjective agreement differs from native output."
+    },
+    {
+      "id": "phrase-01",
+      "input": "Good afternoon.",
+      "original": "Добрый День.",
+      "lua": "Добрый день.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-02",
+      "input": "Good evening.",
+      "original": "Добрый Вечер.",
+      "lua": "Добрый вечер.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-03",
+      "input": "Good night.",
+      "original": "спокойной ночи.",
+      "lua": "Спокойной ночи.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-04",
+      "input": "Good luck.",
+      "original": "удача.",
+      "lua": "Удачи.",
+      "reason": "The silent genitive governor yields удачи with the default noun morphology."
+    },
+    {
+      "id": "phrase-06",
+      "input": "Thank you very much.",
+      "original": "Большое Спасибо.",
+      "lua": "Большое спасибо.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-07",
+      "input": "Thanks a lot.",
+      "original": "Большое Спасибо.",
+      "lua": "Большое спасибо.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-09",
+      "input": "Excuse me.",
+      "original": "Извините Мне.",
+      "lua": "Извини меня.",
+      "reason": "Default informal singular imperative and accusative object pronoun."
+    },
+    {
+      "id": "phrase-10",
+      "input": "Long time no see.",
+      "original": "Мы Давно Не Видeлись.",
+      "lua": "Мы давно не виделись.",
+      "reason": "Default past/reflexive morphology avoids the native mixed-script Видeлись."
+    },
+    {
+      "id": "phrase-11",
+      "input": "So far so good.",
+      "original": "Пока Всё Хорошо.",
+      "lua": "Пока всё хорошо.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-12",
+      "input": "Just a moment.",
+      "original": "минутка.",
+      "lua": "Минутку.",
+      "reason": "The silent accusative governor yields минутку with default morphology."
+    },
+    {
+      "id": "phrase-13",
+      "input": "My pleasure.",
+      "original": "С Удовольствием.",
+      "lua": "С удовольствием.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-14",
+      "input": "Best wishes.",
+      "original": "Наилучшие Пожелания.",
+      "lua": "Наилучшие пожелания.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-15",
+      "input": "Happy birthday.",
+      "original": "С Днем рождения.",
+      "lua": "С днем рождения.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-16",
+      "input": "Merry christmas.",
+      "original": "С Рождество.",
+      "lua": "С Рождеством.",
+      "reason": "Capitalized noun lemma is looked up and declined before case is restored."
+    },
+    {
+      "id": "phrase-17",
+      "input": "Happy new year.",
+      "original": "С Нов*A Годом.",
+      "lua": "С Новым годом.",
+      "reason": "Capitalized adjective lemma is looked up and inflected before case is restored."
+    },
+    {
+      "id": "phrase-18",
+      "input": "Bless you.",
+      "original": "Будьте Здоровым.",
+      "lua": "Будь здоров.",
+      "reason": "Default singular imperative and short predicate adjective are generated from lemmas."
+    },
+    {
+      "id": "phrase-19",
+      "input": "Get well soon.",
+      "original": "Поправляться Скорее.",
+      "lua": "Поправляйся скорее.",
+      "reason": "Default singular imperative comes from OpenRussian source forms."
+    },
+    {
+      "id": "phrase-20",
+      "input": "Welcome back.",
+      "original": "С Возвращением.",
+      "lua": "С возвращением.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-21",
+      "input": "Enjoy your meal.",
+      "original": "приятного аппетита.",
+      "lua": "Приятного аппетита.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-25",
+      "input": "By the way.",
+      "original": "Между Прочим.",
+      "lua": "Между прочим.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-26",
+      "input": "As soon as possible.",
+      "original": "Как Можно Скорее.",
+      "lua": "Как можно скорее.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-27",
+      "input": "On the other hand.",
+      "original": "С Другой Стороны.",
+      "lua": "С другой стороны.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-28",
+      "input": "After all.",
+      "original": "В Конце концов.",
+      "lua": "В конце концов.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-29",
+      "input": "At least.",
+      "original": "По Крайней Мере.",
+      "lua": "По крайней мере.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-31",
+      "input": "In any case.",
+      "original": "В Любом Случае.",
+      "lua": "В любом случае.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-37",
+      "input": "In other words.",
+      "original": "другими словами.",
+      "lua": "Другими словами.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-38",
+      "input": "For a while.",
+      "original": "На Время.",
+      "lua": "На некоторое время.",
+      "reason": "Authored W components survive the later English a-while rewrite."
+    },
+    {
+      "id": "phrase-40",
+      "input": "Sooner or later.",
+      "original": "Рано Или Поздно.",
+      "lua": "Рано или поздно.",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "phrase-41",
+      "input": "How are you?",
+      "original": "Как у Вас дела?",
+      "lua": "Как у тебя дела?",
+      "reason": "Default you is informal singular, unlike historical formal/plural Вы."
+    },
+    {
+      "id": "phrase-42",
+      "input": "What's up?",
+      "original": "Как Дела?",
+      "lua": "Как дела?",
+      "reason": "Phrase-wide sentence casing, including the first visible word after a silent governor."
+    },
+    {
+      "id": "context-03",
+      "input": "You are welcome to stay.",
+      "original": "Вы - добро пожаловать в пребывание.",
+      "lua": "Ты - добро пожаловать в пребывание.",
+      "reason": "Negative scope control; outside phrase coverage. Dictionaries use different pronoun registers."
+    },
+    {
+      "id": "context-04",
+      "input": "You were welcome.",
+      "original": "Вы были добро пожаловать.",
+      "lua": "Ты were добро пожаловать.",
+      "reason": "Negative scope control; outside phrase coverage. Default were is a remaining lexical gap."
+    },
+    {
+      "id": "context-05",
+      "input": "How is he?",
+      "original": "Как у его дела?",
+      "lua": "Как у него дела?",
+      "reason": "Lua supplies the prepositional н- prefix in него."
+    },
+    {
+      "id": "context-06",
+      "input": "What is up there?",
+      "original": "Какое по там?",
+      "lua": "Что вверх вот?",
+      "reason": "Negative scope control; outside phrase coverage. Existing lexical choices differ."
+    },
+    {
+      "id": "context-08",
+      "input": "Merry Christmas!",
+      "original": "С Рождество!",
+      "lua": "С Рождеством!",
+      "reason": "Capitalized noun lemma is inflected normally."
+    },
+    {
+      "id": "context-09",
+      "input": "Happy New Year!",
+      "original": "С Нов*A Годом!",
+      "lua": "С Новым годом!",
+      "reason": "Capitalized adjective lemma is inflected normally."
+    },
+    {
+      "id": "context-11",
+      "input": "JUST A MOMENT!",
+      "original": "МИНУТКА!",
+      "lua": "МИНУТКУ!",
+      "reason": "Default noun morphology supplies accusative минутку."
+    },
+    {
+      "id": "context-12",
+      "input": "Good morningish.",
+      "original": "Хороший morningish.",
+      "lua": "Хорошо morningish.",
+      "reason": "Partial-word negative control; source dictionary senses differ."
+    },
+    {
+      "id": "context-13",
+      "input": "For a while longer.",
+      "original": "На Время Более Длинный.",
+      "lua": "На некоторое долее время.",
+      "reason": "Phrase components survive; the trailing comparative remains an existing word-order limitation."
+    },
+    {
+      "id": "context-14",
+      "input": "How is it?",
+      "original": "Как У Это?",
+      "lua": "Как у него дела?",
+      "reason": "The authored W pronoun composite survives the later English sentence-final it rewrite."
+    }
+  ]
+}

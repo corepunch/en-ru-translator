@@ -50,6 +50,7 @@ function output.sentence(state,root)
   local r=assert(root.next,'output requires the leading boundary')
   local initial_caps=get(r,9)
   local chunks={}
+  local phrase_started={}
   local function emit(value) chunks[#chunks+1]=value end
   while r do
     local function b(f) return get(r,f) end
@@ -75,10 +76,12 @@ function output.sentence(state,root)
           emit(partner.text)
         end
         local marker=b('marker')
+        if r.dictionary_capital then cap_translation(false) end
         if r.phrase_case then
           local casing=r.phrase_case
           if casing.caps>1 then cap_translation(true)
-          elseif r==casing.first and casing.caps>0 then cap_translation(false) end
+          elseif not phrase_started[casing] and casing.caps>0 then cap_translation(false) end
+          if (r.text or '')~='' then phrase_started[casing]=true end
           first=false
         elseif (marker==0x77 or marker==0x57) and previous and (get(previous,'marker')==0x77 or get(previous,'marker')==0x57) then
           if text.is_upper_cyrillic((previous.text or ''):byte() or 0) or leading_upper('source') then

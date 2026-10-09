@@ -1,12 +1,57 @@
+about*PПо
+across*PВчерез
+after*pРпослеDвпоследствииJ2после того, как
+against*PРпротив
+along*PРвдоль
 am*X001
+amid*PРсреди
+amidst*PРсреди
+among*PРсреди
+amongst*PРсреди
 are*X013-
+around*PРвокругDвокруг
+at*PПв
 be*Xбыть
+before*pТпередDпреждеJ2прежде, чем
+behind*PТзаDпозади
+beneath*PТпод
+beside*PТрядом с
+besides*PРкромеDкроме того
+between*PТмежду
+beyond*PТза
+by*PТ
+concerning*PРотносительно
+despite*PВнесмотря на
+during*PРв течение
+except*PРкромеJза исключением того, что
+for*PРдля
+from*PРот
 he*R031он
 how*Qкак
 i*R011я
+in*PПв
+inside*PПвDвнутри
+into*PВв
 is*X003быть
 it*R030оно
+of*PР
+off*PРс
+on*PПна
+onto*PВна
+per*PВна
 she*R032она
+since*pРсJпосколькуDс тех пор
 they*R13они
+through*PВчерез
+toward*PДк
+towards*PДк
+under*PТпод
+underneath*PТпод
+upon*PПна
+versus*PРпротив
+via*PВчерез
 we*R11мы
+with*PТсJс помощью
+within*PРв пределах
+without*PРбезKне
 you*R021ты

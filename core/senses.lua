@@ -231,6 +231,19 @@ function senses.select(state, original, r, alt, wtag, wflag)
     if t & 0xFF == 0 then return 0 end
   end
   if not same_record() then return 1 end
+  -- Capitalized Russian lemmas still need morphology (Рождество, Новый год).
+  -- Case codes on prepositions/pronouns are deliberately excluded. Proper
+  -- nouns stored capitalized in .RUS (Москва) keep their own entry.
+  if ('NAEVGev'):find(string.char(T),1,true) and text.is_upper_cyrillic(reading_byte(0))
+    and not state.russian.entries[r.text] then
+    local first=reading_byte(0)
+    local lower=first==0xF0 and 0xF1 or first<0x90 and first+0x20 or first+0x50
+    local lowered=string.char(lower)..r.text:sub(2)
+    if state.russian.entries[lowered] then
+      r.dictionary_capital=true
+      r.text=lowered
+    end
+  end
   if T == 0x4E and get(r, 'previous_tag') == 0x41 and (get(r, 'marker') == 0x77 or get(r, 'marker') == 0x57) then
     T = 0x41; set(r, 'tag', 0x41); set(r, 'case_mask', 0)
   end

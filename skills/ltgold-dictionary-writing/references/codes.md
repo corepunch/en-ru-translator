@@ -318,10 +318,11 @@ The default curated dictionary selects informal singular `ты` for `you`.
 Contraction expansion lets `How's he?` use the same rule.
 
 A later native T4 rule rewrites sentence-final English `it` to `Rэто`, overriding
-the pronoun composite. `How is it?` is therefore a remaining native rule-order
-interaction: original `Как У Это?`, Lua `Как у это?`. This does not imply that
-placeholders or short questions are unsupported.
-Do not hide that limitation with a special spelling-based translation.
+the pronoun composite: original `Как У Это?`. Lua preserves authored W components
+against English lexical rewrites wholly inside the same equivalent, producing
+`Как у него дела?`. This is a general phrase-ownership correction, not a special
+translation of the spelling `it`; tag-based agreement still runs. The complete
+curated capture and regression include this pronoun and its contraction.
 
 ### Native boundary rule for “what’s up”
 

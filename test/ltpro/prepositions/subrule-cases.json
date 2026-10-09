@@ -1,0 +1,22 @@
+[
+  {
+    "id": "he-is-inside",
+    "group": "adverb",
+    "input": "He is inside."
+  },
+  {
+    "id": "the-garden-is-behind",
+    "group": "adverb",
+    "input": "The garden is behind."
+  },
+  {
+    "id": "he-stayed-behind-i-think",
+    "group": "adverb",
+    "input": "He stayed behind, I think."
+  },
+  {
+    "id": "come-inside-please",
+    "group": "adverb",
+    "input": "Come inside, please."
+  }
+]

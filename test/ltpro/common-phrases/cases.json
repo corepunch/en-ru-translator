@@ -1,0 +1,217 @@
+[
+  {
+    "id": "common-00",
+    "group": "common-phrases",
+    "input": "Good morning."
+  },
+  {
+    "id": "common-01",
+    "group": "common-phrases",
+    "input": "Good afternoon."
+  },
+  {
+    "id": "common-02",
+    "group": "common-phrases",
+    "input": "Good evening."
+  },
+  {
+    "id": "common-03",
+    "group": "common-phrases",
+    "input": "Good night."
+  },
+  {
+    "id": "common-04",
+    "group": "common-phrases",
+    "input": "Good luck."
+  },
+  {
+    "id": "common-05",
+    "group": "common-phrases",
+    "input": "Thank you."
+  },
+  {
+    "id": "common-06",
+    "group": "common-phrases",
+    "input": "Thank you very much."
+  },
+  {
+    "id": "common-07",
+    "group": "common-phrases",
+    "input": "Thanks a lot."
+  },
+  {
+    "id": "common-08",
+    "group": "common-phrases",
+    "input": "You are welcome."
+  },
+  {
+    "id": "common-09",
+    "group": "common-phrases",
+    "input": "Excuse me."
+  },
+  {
+    "id": "common-10",
+    "group": "common-phrases",
+    "input": "Long time no see."
+  },
+  {
+    "id": "common-11",
+    "group": "common-phrases",
+    "input": "So far so good."
+  },
+  {
+    "id": "common-12",
+    "group": "common-phrases",
+    "input": "Just a moment."
+  },
+  {
+    "id": "common-13",
+    "group": "common-phrases",
+    "input": "My pleasure."
+  },
+  {
+    "id": "common-14",
+    "group": "common-phrases",
+    "input": "Best wishes."
+  },
+  {
+    "id": "common-15",
+    "group": "common-phrases",
+    "input": "Happy birthday."
+  },
+  {
+    "id": "common-16",
+    "group": "common-phrases",
+    "input": "Merry christmas."
+  },
+  {
+    "id": "common-17",
+    "group": "common-phrases",
+    "input": "Happy new year."
+  },
+  {
+    "id": "common-18",
+    "group": "common-phrases",
+    "input": "Bless you."
+  },
+  {
+    "id": "common-19",
+    "group": "common-phrases",
+    "input": "Get well soon."
+  },
+  {
+    "id": "common-20",
+    "group": "common-phrases",
+    "input": "Welcome back."
+  },
+  {
+    "id": "common-21",
+    "group": "common-phrases",
+    "input": "Enjoy your meal."
+  },
+  {
+    "id": "common-22",
+    "group": "common-phrases",
+    "input": "Never mind."
+  },
+  {
+    "id": "common-23",
+    "group": "common-phrases",
+    "input": "Not at all."
+  },
+  {
+    "id": "common-24",
+    "group": "common-phrases",
+    "input": "Of course."
+  },
+  {
+    "id": "common-25",
+    "group": "common-phrases",
+    "input": "By the way."
+  },
+  {
+    "id": "common-26",
+    "group": "common-phrases",
+    "input": "As soon as possible."
+  },
+  {
+    "id": "common-27",
+    "group": "common-phrases",
+    "input": "On the other hand."
+  },
+  {
+    "id": "common-28",
+    "group": "common-phrases",
+    "input": "After all."
+  },
+  {
+    "id": "common-29",
+    "group": "common-phrases",
+    "input": "At least."
+  },
+  {
+    "id": "common-30",
+    "group": "common-phrases",
+    "input": "In fact."
+  },
+  {
+    "id": "common-31",
+    "group": "common-phrases",
+    "input": "In any case."
+  },
+  {
+    "id": "common-32",
+    "group": "common-phrases",
+    "input": "For example."
+  },
+  {
+    "id": "common-33",
+    "group": "common-phrases",
+    "input": "As a matter of fact."
+  },
+  {
+    "id": "common-34",
+    "group": "common-phrases",
+    "input": "All right."
+  },
+  {
+    "id": "common-35",
+    "group": "common-phrases",
+    "input": "Once again."
+  },
+  {
+    "id": "common-36",
+    "group": "common-phrases",
+    "input": "In advance."
+  },
+  {
+    "id": "common-37",
+    "group": "common-phrases",
+    "input": "In other words."
+  },
+  {
+    "id": "common-38",
+    "group": "common-phrases",
+    "input": "For a while."
+  },
+  {
+    "id": "common-39",
+    "group": "common-phrases",
+    "input": "Right away."
+  },
+  {
+    "id": "common-40",
+    "group": "common-phrases",
+    "input": "Sooner or later."
+  },
+  {
+    "id": "control-weather",
+    "group": "controls",
+    "input": "The weather is good today."
+  },
+  {
+    "id": "control-house",
+    "group": "controls",
+    "input": "He is in the house."
+  }
+]

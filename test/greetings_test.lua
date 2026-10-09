@@ -4,24 +4,14 @@ local encoding = require 'core.encoding'
 local file=assert(io.open('reference/openrussian/BASE.DIC','rb'))
 local dictionary=lexicon.from_bytes(file:read('*a'));file:close()
 
-local cases={
-  {"What's up?",'Как дела?'}, {'What is up?','Как дела?'}, {'What’s up?','Как дела?'},
-  {'How are you?','Как у тебя дела?'}, {"How're you?",'Как у тебя дела?'},
-  {'How’re you?','Как у тебя дела?'}, {'  How   are\tyou?  ','Как у тебя дела?'},
-  {'how are you?','как у тебя дела?'}, {'HOW ARE YOU?','КАК У ТЕБЯ ДЕЛА?'},
-  {"WHAT'S UP?",'КАК ДЕЛА?'}, {'What is up.','Как дела.'},
-  {'What is up!','Как дела!'}, {'What is up','Как дела'},
-  {'what is up ?','как дела?'}, {'How is he?','Как у него дела?'},
-  {'How is she?','Как у неё дела?'}, {"How's she?",'Как у неё дела?'},
-  {'HOW IS SHE?','КАК У НЕЁ ДЕЛА?'},
-  {"How's he?",'Как у него дела?'}, {'How’s she?','Как у неё дела?'},
-  {'How are they?','Как у них дела?'}, {'How are we?','Как у нас дела?'},
-  {'How am I?','Как у меня дела?'},
-}
+-- Cases are the `greeting` lines in test/translations.txt. Besides the
+-- translation, each must use the native rule and keep pronoun fields.
+local cases=require('test.cases').group(require('test.cases').load(),'greeting')
+assert(#cases>0,'no greeting cases')
 for _,case in ipairs(cases) do
-  local input,expected=table.unpack(case)
+  local input=case.input
   local actual,state=engine.translate(input)
-  assert(actual==expected, input..' -> '..actual)
+  assert(actual==case.expected, input..' -> '..actual)
   local noun
   local word=state.root.next
   while word do
@@ -48,10 +38,8 @@ for _,case in ipairs(cases) do
   end
 end
 
--- Native T4 subsequently rewrites sentence-final it to это, overriding its
--- composite reading. Keep this known interaction visible, without introducing
--- a spelling-specific bypass of the native pipeline.
-assert(engine.translate('How is it?')=='Как у это?')
+-- The native sentence-final it rewrite must not overwrite a W equivalent
+-- already authored by the XR subrule. The tests above retain its neuter fields.
 
 -- Compare nearby inputs with the same dictionary minus the new entries. This
 -- checks isolation without blessing the engine's existing awkward Russian.
@@ -69,11 +57,6 @@ for _,input in ipairs({'How are you feeling?',"What's up there?",
   local expected=engine.translate(input,{dictionary=baseline})
   assert(actual==expected, input..': phrase changed an unrelated translation')
 end
--- Original LTPRO's lexical context test also recognizes a one-word protected
--- source spelling. Preserve that captured native subrule behavior.
-assert(engine.translate("What's {~up~}?")=='Как дела?')
-assert(engine.translate('How are you.')=='Как у тебя дела.')
-assert(engine.translate('How are you')=='Как у тебя дела')
 -- The placeholder also accepts a newly added lexical pronoun reading. It must
 -- not depend on enumerating English spellings or fixed Russian object forms.
 local novel=engine.translate('How are thou?',{dictionary=dictionary.bytes..'thou*R021ты\n'})

@@ -1,0 +1,317 @@
+[
+  {
+    "id": "a-book-about-the-war",
+    "group": "about",
+    "input": "A book about the war."
+  },
+  {
+    "id": "a-bridge-across-the-river",
+    "group": "across",
+    "input": "A bridge across the river."
+  },
+  {
+    "id": "after-the-war",
+    "group": "after",
+    "input": "After the war."
+  },
+  {
+    "id": "he-left-after-the-war",
+    "group": "after",
+    "input": "He left after the war."
+  },
+  {
+    "id": "a-law-against-the-war",
+    "group": "against",
+    "input": "A law against the war."
+  },
+  {
+    "id": "a-road-along-the-river",
+    "group": "along",
+    "input": "A road along the river."
+  },
+  {
+    "id": "a-house-amid-the-trees",
+    "group": "amid",
+    "input": "A house amid the trees."
+  },
+  {
+    "id": "a-house-amidst-the-trees",
+    "group": "amidst",
+    "input": "A house amidst the trees."
+  },
+  {
+    "id": "a-house-among-the-trees",
+    "group": "among",
+    "input": "A house among the trees."
+  },
+  {
+    "id": "a-house-amongst-the-trees",
+    "group": "amongst",
+    "input": "A house amongst the trees."
+  },
+  {
+    "id": "a-wall-around-the-city",
+    "group": "around",
+    "input": "A wall around the city."
+  },
+  {
+    "id": "he-is-at-the-station",
+    "group": "at",
+    "input": "He is at the station."
+  },
+  {
+    "id": "before-the-war",
+    "group": "before",
+    "input": "Before the war."
+  },
+  {
+    "id": "a-garden-behind-the-house",
+    "group": "behind",
+    "input": "A garden behind the house."
+  },
+  {
+    "id": "a-cellar-beneath-the-house",
+    "group": "beneath",
+    "input": "A cellar beneath the house."
+  },
+  {
+    "id": "a-tree-beside-the-house",
+    "group": "beside",
+    "input": "A tree beside the house."
+  },
+  {
+    "id": "besides-the-house",
+    "group": "besides",
+    "input": "Besides the house."
+  },
+  {
+    "id": "a-road-between-the-cities",
+    "group": "between",
+    "input": "A road between the cities."
+  },
+  {
+    "id": "a-village-beyond-the-river",
+    "group": "beyond",
+    "input": "A village beyond the river."
+  },
+  {
+    "id": "a-book-by-the-author",
+    "group": "by",
+    "input": "A book by the author."
+  },
+  {
+    "id": "a-letter-concerning-the-house",
+    "group": "concerning",
+    "input": "A letter concerning the house."
+  },
+  {
+    "id": "despite-the-rain",
+    "group": "despite",
+    "input": "Despite the rain."
+  },
+  {
+    "id": "during-the-war",
+    "group": "during",
+    "input": "During the war."
+  },
+  {
+    "id": "all-except-the-house",
+    "group": "except",
+    "input": "All except the house."
+  },
+  {
+    "id": "a-gift-for-the-mother",
+    "group": "for",
+    "input": "A gift for the mother."
+  },
+  {
+    "id": "a-letter-from-the-mother",
+    "group": "from",
+    "input": "A letter from the mother."
+  },
+  {
+    "id": "i-live-in-moscow",
+    "group": "in",
+    "input": "I live in Moscow."
+  },
+  {
+    "id": "a-house-in-the-city",
+    "group": "in",
+    "input": "A house in the city."
+  },
+  {
+    "id": "a-room-inside-the-house",
+    "group": "inside",
+    "input": "A room inside the house."
+  },
+  {
+    "id": "he-looked-into-the-room",
+    "group": "into",
+    "input": "He looked into the room."
+  },
+  {
+    "id": "a-cup-of-tea",
+    "group": "of",
+    "input": "A cup of tea."
+  },
+  {
+    "id": "the-door-of-the-house",
+    "group": "of",
+    "input": "The door of the house."
+  },
+  {
+    "id": "a-cup-off-the-table",
+    "group": "off",
+    "input": "A cup off the table."
+  },
+  {
+    "id": "a-book-on-the-table",
+    "group": "on",
+    "input": "A book on the table."
+  },
+  {
+    "id": "he-jumped-onto-the-table",
+    "group": "onto",
+    "input": "He jumped onto the table."
+  },
+  {
+    "id": "two-books-per-student",
+    "group": "per",
+    "input": "Two books per student."
+  },
+  {
+    "id": "since-the-war",
+    "group": "since",
+    "input": "Since the war."
+  },
+  {
+    "id": "a-road-through-the-forest",
+    "group": "through",
+    "input": "A road through the forest."
+  },
+  {
+    "id": "a-step-toward-the-house",
+    "group": "toward",
+    "input": "A step toward the house."
+  },
+  {
+    "id": "a-step-towards-the-house",
+    "group": "towards",
+    "input": "A step towards the house."
+  },
+  {
+    "id": "a-cat-under-the-table",
+    "group": "under",
+    "input": "A cat under the table."
+  },
+  {
+    "id": "a-cat-underneath-the-table",
+    "group": "underneath",
+    "input": "A cat underneath the table."
+  },
+  {
+    "id": "a-book-upon-the-table",
+    "group": "upon",
+    "input": "A book upon the table."
+  },
+  {
+    "id": "the-city-versus-the-village",
+    "group": "versus",
+    "input": "The city versus the village."
+  },
+  {
+    "id": "a-letter-via-the-mother",
+    "group": "via",
+    "input": "A letter via the mother."
+  },
+  {
+    "id": "within-the-city",
+    "group": "within",
+    "input": "Within the city."
+  },
+  {
+    "id": "a-house-without-a-roof",
+    "group": "without",
+    "input": "A house without a roof."
+  },
+  {
+    "id": "he-is-in-the-house",
+    "group": "in",
+    "input": "He is in the house."
+  },
+  {
+    "id": "he-is-at-the-house",
+    "group": "at",
+    "input": "He is at the house."
+  },
+  {
+    "id": "he-is-in-the-street",
+    "group": "in",
+    "input": "He is in the street."
+  },
+  {
+    "id": "a-gift-from-the-brother",
+    "group": "from",
+    "input": "A gift from the brother."
+  },
+  {
+    "id": "a-letter-from-the-factory",
+    "group": "from",
+    "input": "A letter from the factory."
+  },
+  {
+    "id": "he-came-out-from-the-house",
+    "group": "from",
+    "input": "He came out from the house."
+  },
+  {
+    "id": "he-went-into-the-house",
+    "group": "into",
+    "input": "He went into the house."
+  },
+  {
+    "id": "he-fell-onto-the-floor",
+    "group": "onto",
+    "input": "He fell onto the floor."
+  },
+  {
+    "id": "i-see-the-mother",
+    "group": "animate",
+    "input": "I see the mother."
+  },
+  {
+    "id": "i-see-the-brother",
+    "group": "animate",
+    "input": "I see the brother."
+  },
+  {
+    "id": "i-see-the-dog",
+    "group": "animate",
+    "input": "I see the dog."
+  },
+  {
+    "id": "i-see-the-house",
+    "group": "animate",
+    "input": "I see the house."
+  },
+  {
+    "id": "i-see-the-brothers",
+    "group": "animate",
+    "input": "I see the brothers."
+  },
+  {
+    "id": "a-letter-via-the-brother",
+    "group": "animate",
+    "input": "A letter via the brother."
+  },
+  {
+    "id": "a-letter-for-the-brother",
+    "group": "animate",
+    "input": "A letter for the brother."
+  },
+  {
+    "id": "he-looked-at-the-mother",
+    "group": "animate",
+    "input": "He looked at the mother."
+  }
+]

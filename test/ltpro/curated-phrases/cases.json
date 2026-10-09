@@ -1,0 +1,292 @@
+[
+  {
+    "id": "phrase-00",
+    "group": "curated-entry",
+    "input": "Good morning."
+  },
+  {
+    "id": "phrase-01",
+    "group": "curated-entry",
+    "input": "Good afternoon."
+  },
+  {
+    "id": "phrase-02",
+    "group": "curated-entry",
+    "input": "Good evening."
+  },
+  {
+    "id": "phrase-03",
+    "group": "curated-entry",
+    "input": "Good night."
+  },
+  {
+    "id": "phrase-04",
+    "group": "curated-entry",
+    "input": "Good luck."
+  },
+  {
+    "id": "phrase-05",
+    "group": "curated-entry",
+    "input": "Thank you."
+  },
+  {
+    "id": "phrase-06",
+    "group": "curated-entry",
+    "input": "Thank you very much."
+  },
+  {
+    "id": "phrase-07",
+    "group": "curated-entry",
+    "input": "Thanks a lot."
+  },
+  {
+    "id": "phrase-08",
+    "group": "curated-entry",
+    "input": "You are welcome."
+  },
+  {
+    "id": "phrase-09",
+    "group": "curated-entry",
+    "input": "Excuse me."
+  },
+  {
+    "id": "phrase-10",
+    "group": "curated-entry",
+    "input": "Long time no see."
+  },
+  {
+    "id": "phrase-11",
+    "group": "curated-entry",
+    "input": "So far so good."
+  },
+  {
+    "id": "phrase-12",
+    "group": "curated-entry",
+    "input": "Just a moment."
+  },
+  {
+    "id": "phrase-13",
+    "group": "curated-entry",
+    "input": "My pleasure."
+  },
+  {
+    "id": "phrase-14",
+    "group": "curated-entry",
+    "input": "Best wishes."
+  },
+  {
+    "id": "phrase-15",
+    "group": "curated-entry",
+    "input": "Happy birthday."
+  },
+  {
+    "id": "phrase-16",
+    "group": "curated-entry",
+    "input": "Merry christmas."
+  },
+  {
+    "id": "phrase-17",
+    "group": "curated-entry",
+    "input": "Happy new year."
+  },
+  {
+    "id": "phrase-18",
+    "group": "curated-entry",
+    "input": "Bless you."
+  },
+  {
+    "id": "phrase-19",
+    "group": "curated-entry",
+    "input": "Get well soon."
+  },
+  {
+    "id": "phrase-20",
+    "group": "curated-entry",
+    "input": "Welcome back."
+  },
+  {
+    "id": "phrase-21",
+    "group": "curated-entry",
+    "input": "Enjoy your meal."
+  },
+  {
+    "id": "phrase-22",
+    "group": "curated-entry",
+    "input": "Never mind."
+  },
+  {
+    "id": "phrase-23",
+    "group": "curated-entry",
+    "input": "Not at all."
+  },
+  {
+    "id": "phrase-24",
+    "group": "curated-entry",
+    "input": "Of course."
+  },
+  {
+    "id": "phrase-25",
+    "group": "curated-entry",
+    "input": "By the way."
+  },
+  {
+    "id": "phrase-26",
+    "group": "curated-entry",
+    "input": "As soon as possible."
+  },
+  {
+    "id": "phrase-27",
+    "group": "curated-entry",
+    "input": "On the other hand."
+  },
+  {
+    "id": "phrase-28",
+    "group": "curated-entry",
+    "input": "After all."
+  },
+  {
+    "id": "phrase-29",
+    "group": "curated-entry",
+    "input": "At least."
+  },
+  {
+    "id": "phrase-30",
+    "group": "curated-entry",
+    "input": "In fact."
+  },
+  {
+    "id": "phrase-31",
+    "group": "curated-entry",
+    "input": "In any case."
+  },
+  {
+    "id": "phrase-32",
+    "group": "curated-entry",
+    "input": "For example."
+  },
+  {
+    "id": "phrase-33",
+    "group": "curated-entry",
+    "input": "As a matter of fact."
+  },
+  {
+    "id": "phrase-34",
+    "group": "curated-entry",
+    "input": "All right."
+  },
+  {
+    "id": "phrase-35",
+    "group": "curated-entry",
+    "input": "Once again."
+  },
+  {
+    "id": "phrase-36",
+    "group": "curated-entry",
+    "input": "In advance."
+  },
+  {
+    "id": "phrase-37",
+    "group": "curated-entry",
+    "input": "In other words."
+  },
+  {
+    "id": "phrase-38",
+    "group": "curated-entry",
+    "input": "For a while."
+  },
+  {
+    "id": "phrase-39",
+    "group": "curated-entry",
+    "input": "Right away."
+  },
+  {
+    "id": "phrase-40",
+    "group": "curated-entry",
+    "input": "Sooner or later."
+  },
+  {
+    "id": "phrase-41",
+    "group": "curated-entry",
+    "input": "How are you?"
+  },
+  {
+    "id": "phrase-42",
+    "group": "curated-entry",
+    "input": "What's up?"
+  },
+  {
+    "id": "context-00",
+    "group": "context",
+    "input": "With best wishes."
+  },
+  {
+    "id": "context-01",
+    "group": "context",
+    "input": "THANK YOU VERY MUCH!"
+  },
+  {
+    "id": "context-02",
+    "group": "context",
+    "input": "You're welcome."
+  },
+  {
+    "id": "context-03",
+    "group": "context",
+    "input": "You are welcome to stay."
+  },
+  {
+    "id": "context-04",
+    "group": "context",
+    "input": "You were welcome."
+  },
+  {
+    "id": "context-05",
+    "group": "context",
+    "input": "How is he?"
+  },
+  {
+    "id": "context-06",
+    "group": "context",
+    "input": "What is up there?"
+  },
+  {
+    "id": "context-07",
+    "group": "context",
+    "input": "happy birthday!"
+  },
+  {
+    "id": "context-08",
+    "group": "context",
+    "input": "Merry Christmas!"
+  },
+  {
+    "id": "context-09",
+    "group": "context",
+    "input": "Happy New Year!"
+  },
+  {
+    "id": "context-10",
+    "group": "context",
+    "input": "GOOD NIGHT!"
+  },
+  {
+    "id": "context-11",
+    "group": "context",
+    "input": "JUST A MOMENT!"
+  },
+  {
+    "id": "context-12",
+    "group": "context",
+    "input": "Good morningish."
+  },
+  {
+    "id": "context-13",
+    "group": "context",
+    "input": "For a while longer."
+  },
+  {
+    "id": "context-14",
+    "group": "context",
+    "input": "How is it?"
+  }
+]

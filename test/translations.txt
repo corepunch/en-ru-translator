@@ -1,0 +1,166 @@
+# Greeting subrules: how XR[*] and what <X>`up`[*]. greetings_test.lua also
+# checks each greeting case for the native rule and retained pronoun fields.
+greeting | What's up? => Как дела?
+greeting | What is up? => Как дела?
+greeting | What’s up? => Как дела?
+greeting | How are you? => Как у тебя дела?
+greeting | How're you? => Как у тебя дела?
+greeting | How’re you? => Как у тебя дела?
+greeting | "  How   are\tyou?  " => Как у тебя дела?
+greeting | how are you? => как у тебя дела?
+greeting | HOW ARE YOU? => КАК У ТЕБЯ ДЕЛА?
+greeting | WHAT'S UP? => КАК ДЕЛА?
+greeting | What is up. => Как дела.
+greeting | What is up! => Как дела!
+greeting | What is up => Как дела
+greeting | what is up ? => как дела?
+greeting | How is he? => Как у него дела?
+greeting | How is she? => Как у неё дела?
+greeting | How's she? => Как у неё дела?
+greeting | HOW IS SHE? => КАК У НЕЁ ДЕЛА?
+greeting | How's he? => Как у него дела?
+greeting | How’s she? => Как у неё дела?
+greeting | How are they? => Как у них дела?
+greeting | How are we? => Как у нас дела?
+greeting | How am I? => Как у меня дела?
+greeting | How is it? => Как у него дела?
+greeting | How's it? => Как у него дела?
+greeting-context | What's {~up~}? => Как дела?
+greeting-context | How are you. => Как у тебя дела.
+greeting-context | How are you => Как у тебя дела
+
+# Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
+phrase:good morning | Good morning. => Доброе утро.
+phrase:good afternoon | Good afternoon. => Добрый день.
+phrase:good evening | Good evening. => Добрый вечер.
+phrase:good night | Good night. => Спокойной ночи.
+phrase:good luck | Good luck. => Удачи.
+phrase:thank you | Thank you. => Спасибо.
+phrase:thank you very much | Thank you very much. => Большое спасибо.
+phrase:thanks a lot | Thanks a lot. => Большое спасибо.
+phrase:you `are``welcome`[*] | You are welcome. => Пожалуйста.
+phrase:excuse me | Excuse me. => Извини меня.
+phrase:long time no see | Long time no see. => Мы давно не виделись.
+phrase:so far so good | So far so good. => Пока всё хорошо.
+phrase:just a moment | Just a moment. => Минутку.
+phrase:my `pleasure`[*] | My pleasure. => Пожалуйста.
+phrase:best wishes | Best wishes. => Наилучшие пожелания.
+phrase:happy birthday | Happy birthday. => С днем рождения.
+phrase:merry christmas | Merry christmas. => С Рождеством.
+phrase:happy new year | Happy new year. => С Новым годом.
+phrase:bless you | Bless you. => Будь здоров.
+phrase:get well soon | Get well soon. => Поправляйся скорее.
+phrase:welcome back | Welcome back. => С возвращением.
+phrase:enjoy your meal | Enjoy your meal. => Приятного аппетита.
+phrase:never mind | Never mind. => Неважно.
+phrase:not `at``all`[,*] | Not at all. => Нисколько.
+phrase:not `at``all`~[,*] | It is not at all easy. ~> совсем не легко
+phrase:at `all`[PJj,C*] | She does not read at all. ~>  совсем.
+phrase:of course | Of course. => Конечно.
+phrase:by the way | By the way. => Между прочим.
+phrase:as soon as possible | As soon as possible. => Как можно скорее.
+phrase:on the other hand | On the other hand. => С другой стороны.
+phrase:after `all`[j,*] | After all. => В конце концов.
+phrase:at least | At least. => По крайней мере.
+phrase:in fact | In fact. => Фактически.
+phrase:in any case | In any case. => В любом случае.
+phrase:for example | For example. => Например.
+phrase:as a matter of fact | As a matter of fact. => Фактически.
+phrase:all right | All right. => Хорошо.
+phrase:once again | Once again. => Снова.
+phrase:in advance | In advance. => Заранее.
+phrase:in other words | In other words. => Другими словами.
+phrase:for a while | For a while. => На некоторое время.
+phrase:right away | Right away. => Немедленно.
+phrase:sooner or later | Sooner or later. => Рано или поздно.
+phrase:behind [,*] | He stayed behind, I think. ~> позади,
+phrase:inside [,*] | Come inside, please. ~> внутри,
+phrase:how XR[*] | How are you? => Как у тебя дела?
+phrase:what <X>`up`[*] | What's up? => Как дела?
+phrase-context | good afternoon => добрый день
+phrase-context | GOOD AFTERNOON! => ДОБРЫЙ ДЕНЬ!
+phrase-context | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБО!
+phrase-context | Happy Birthday! => С днем рождения!
+phrase-context | Happy New Year! => С Новым годом!
+phrase-context | With best wishes. => С наилучшими пожеланиями.
+phrase-context | You're welcome. => Пожалуйста.
+phrase-context | Not at all, thanks. => Нисколько, спасибо.
+phrase-context | After all, he knows. => В конце концов, он знает.
+phrase-context | He knows after all. => Он знает в конце концов.
+phrase-context | AFTER ALL! => В КОНЦЕ КОНЦОВ!
+phrase-context | My pleasure! => Пожалуйста!
+phrase-context | You’re welcome. => Пожалуйста.
+phrase-context | "  As   soon as\tpossible.  " => Как можно скорее.
+phrase-context | You are welcome to stay. !> Пожалуйста
+phrase-context | You were welcome. !> Пожалуйста
+phrase-context | My pleasure is great. !> Пожалуйста
+phrase-context | After all the guests left. !> В конце концов
+phrase-context | It is not at all easy. !> нисколько
+phrase-context | Not at all. !> Совсем
+
+# Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
+# The checked span is the preposition and its governed noun form.
+preposition:about | A book about the war. ~> о войне
+preposition:across | A bridge across the river. ~> через реку
+preposition:after | After the war. ~> После войны
+preposition:against | A law against the war. ~> против войны
+preposition:along | A road along the river. ~> вдоль реки
+preposition:amid | A house amid the trees. ~> среди деревьев
+preposition:amidst | A house amidst the trees. ~> среди деревьев
+preposition:among | A house among the trees. ~> среди деревьев
+preposition:amongst | A house amongst the trees. ~> среди деревьев
+preposition:around | A wall around the house. ~> вокруг дома
+preposition:at | He is at the station. ~> на станции
+preposition:before | Before the war. ~> Перед войной
+preposition:behind | A garden behind the house. ~> за домом
+preposition:beneath | A cellar beneath the house. ~> под домом
+preposition:beside | A tree beside the house. ~> рядом с домом
+preposition:besides | Besides the house. ~> Кроме дома
+preposition:between | A road between the houses. ~> между домами
+preposition:beyond | A village beyond the river. ~> за рекой
+preposition:by | A book by the author. ~> писателем
+preposition:concerning | A letter concerning the house. ~> относительно дома
+preposition:despite | Despite the rain. ~> Несмотря на дождь
+preposition:during | During the war. ~> В течение войны
+preposition:except | All except the house. ~> кроме дома
+preposition:for | A gift for the mother. ~> для матери
+preposition:from | A letter from the mother. ~> от матери
+preposition:in | I live in Moscow. ~> в Москве
+preposition:inside | A room inside the house. ~> в доме
+preposition:into | He went into the house. ~> в дом
+preposition:of | A cup of tea. ~> Чашка чая
+preposition:off | A cup off the table. ~> с стола
+preposition:on | A book on the table. ~> на столе
+preposition:onto | He fell onto the floor. ~> на пол
+preposition:per | Two books per student. ~> на студента
+preposition:since | Since he knows, he speaks. ~> Поскольку он знает
+preposition:through | A road through the forest. ~> через лес
+preposition:toward | A step toward the house. ~> к дому
+preposition:towards | A step towards the house. ~> к дому
+preposition:under | A cat under the table. ~> под столом
+preposition:underneath | A cat underneath the table. ~> под столом
+preposition:upon | A book upon the table. ~> на столе
+preposition:versus | The house versus the village. ~> против деревни
+preposition:via | A letter via the brother. ~> через брата
+preposition:within | Within the house. ~> В пределах дома
+preposition:with | With best wishes. ~> С наилучшими пожеланиями
+preposition:without | A house without a roof. ~> без крыши
+# в/на and из/с/от follow .RUS noun flags; p entries pack conjunctions.
+preposition-context | He is in the house. ~> в доме
+preposition-context | He is at the house. ~> в доме
+preposition-context | He is in the street. ~> на улице
+preposition-context | A letter from the factory. ~> с завода
+preposition-context | He came out from the house. ~> из дома
+preposition-context | A gift from the brother. ~> от брата
+preposition-context | I see the brother. ~> вижу брата
+preposition-context | I see the mother. ~> вижу мать
+preposition-context | After he knows, he speaks. ~> После того, как он знает
+preposition-context | Before he knows, he speaks. ~> Прежде, чем он знает
+preposition-context | He stayed behind, I think. ~> позади,
+preposition-context | Come inside, please. ~> внутри,
+
+# Generated others.tsv readings keep a leading с/м/ж (formerly dropped by #).
+others | According to him. ~> Согласно
+others | It is a bit scary. ~> страшновато
+others | This is a nice book. ~> мило
+others | He and she. => Он и она.

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-09T16:05:47.604674+00:00",
+  "profile": "supplied-unpacked-LTPRO-original-BASE",
+  "dosbox_version": "DOSBox-X version 2026.10.01 SDL2, copyright 2011-2026 The DOSBox-X Team.",
+  "dosbox_binary_sha256": "ce67eb513fbd7a87022624b47a36cf5ae073bb65bc99df1a67d9ca163d1e10bd",
+  "assets_sha256": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+  },
+  "input_cases_sha256": "6cd243ed7b236c8a1f2e8cabd0fee2f781725f3349efe0b2a0105d188f305cab",
+  "command": [
+    "LTPRO.EXE",
+    "/I",
+    "{input}",
+    "/O",
+    "{output}",
+    "/F-",
+    "/B-",
+    "/N"
+  ],
+  "dosbox_config_template": "[sdl]\noutput=surface\n[cpu]\ncore=normal\ncycles=fixed 30000\n[midi]\nmididevice=none\n[sblaster]\nsbtype=none\n[gus]\ngus=false\n[speaker]\npcspeaker=false\n[joystick]\njoysticktype=none\n[autoexec]\nmount c \"{mount}\"\nc:\nRUN.BAT\n",
+  "environment": {
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "batch_size": 16,
+  "identical_runs": 2,
+  "comparison": "Exact CP866-decoded translation paragraph; only CRLF/newline framing and the separate meanings appendix excluded. Raw output is retained.",
+  "cases": [
+    {
+      "id": "he-is-inside",
+      "group": "adverb",
+      "input": "He is inside.",
+      "raw_cp866_hex": "8ead202d20a22e0d0a",
+      "raw_sha256": "b44fd27a21dc316dd7c078e7590689563b052176a6c78896c4b6e1093bca6f72",
+      "translation": "Он - в."
+    },
+    {
+      "id": "the-garden-is-behind",
+      "group": "adverb",
+      "input": "The garden is behind.",
+      "raw_cp866_hex": "91a0a4202d20a7a02e0d0a",
+      "raw_sha256": "385a12536cbcfd893614886e88bb86197831144e220ab5f6ac9d2ee342c680db",
+      "translation": "Сад - за."
+    },
+    {
+      "id": "he-looked-around",
+      "group": "adverb",
+      "input": "He looked around.",
+      "raw_cp866_hex": "8ead20e1acaee2e0a5ab20a2aeaae0e3a32e0d0a",
+      "raw_sha256": "34c0b2c3b0c92379909d575dd19668b817c76d9b4c18572c47a2d85eeaa638e6",
+      "translation": "Он смотрел вокруг."
+    },
+    {
+      "id": "he-came-after",
+      "group": "adverb",
+      "input": "He came after.",
+      "raw_cp866_hex": "8ead20e1aba5a4aea2a0ab2e0d0a",
+      "raw_sha256": "e6031e328b9a96a1b40f2bee1102e27912f95690b4a9883e0af4db11e438dd3a",
+      "translation": "Он следовал."
+    },
+    {
+      "id": "come-inside",
+      "group": "adverb",
+      "input": "Come inside.",
+      "raw_cp866_hex": "8fe0a8a4e2a820a22e0d0a",
+      "raw_sha256": "712d75c57f3194b783a9cab789545fc14c32c020f26c326c93f5f7f290251ae4",
+      "translation": "Придти в."
+    }
+  ]
+}

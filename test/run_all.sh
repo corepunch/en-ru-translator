@@ -5,11 +5,8 @@ set -eu
 ROOT_DIR="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "== Lua module tests =="
-for f in test/*_test.lua; do
-  echo "-> $f"
-  lua "$f"
-done
+# One Lua process: dictionaries are parsed once and shared by every test.
+lua test/run_all.lua
 
 echo
 sh test/cli_test.sh

@@ -85,3 +85,19 @@ for sure*Dнаверняка
 in `the``end`[j;,*]*$DDWPПвNконецPРnконец\  \
 against <AO>`will`*$PРпротив\$`Nволя`
 against ~ will*WPРпротив~Nволя
+go home*WVидтиDдомой
+come home*WVприходитьDдомой
+walk home*WVидтиDдомой
+run home*WVбежатьDдомой
+return home*WVвозвращатьсяDдомой
+get home*WVдобиратьсяDдомой
+hurry home*WVспешитьDдомой
+fly home*WVлететьDдомой
+welcome home*WPТсNвозвращениеDдомой
+am home*WX001Dдома
+is home*WX003Dдома
+are home*WX013Dдома
+was home*WX103бытьDдома
+were home*WX113бытьDдома
+be home*WXбытьDдома
+stay home*WVоставатьсяDдома

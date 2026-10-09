@@ -116,6 +116,28 @@ phrase:for sure | For sure. => Наверняка.
 phrase:in `the``end`[j;,*] | In the end. => В конце концов.
 phrase:against <AO>`will` | He did it against his will. ~> воли.
 phrase:against ~ will | against cat will. => против воли кота.
+phrase:go home | He went home. => Он шел домой.
+phrase:come home | She came home late. ~> домой
+phrase:walk home | We walked home. => Мы пошли домой.
+phrase:run home | He ran home. => Он побежал домой.
+phrase:return home | They returned home. => Они возвратились домой.
+phrase:get home | I got home late. ~> добрался домой
+phrase:hurry home | We hurry home. => Мы спешим домой.
+phrase:fly home | They will fly home. ~> домой
+phrase:welcome home | Welcome home. => С возвращением домой.
+phrase:am home | I am home. => Я дома.
+phrase:is home | He is home now. ~> дома
+phrase:are home | We are home. => Мы дома.
+phrase:was home | She was home. => Она была дома.
+phrase:were home | They were home yesterday. ~> были дома
+phrase:be home | I will be home soon. ~> буду дома
+phrase:stay home | Stay home. => Останься дома.
+phrase-context | He will go home. => Он пойдет домой.
+phrase-context | Let's go home. => Давайте пойдем домой.
+phrase-context | I want to go home. => Я хочу идти домой.
+phrase-context | At last, we are home. ~> мы дома.
+phrase-context | My home is big. => Мой дом большой.
+phrase-context | The house door. => Дверь дома.
 phrase-context | good afternoon => добрый день
 phrase-context | GOOD AFTERNOON! => ДОБРЫЙ ДЕНЬ!
 phrase-context | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБО!
@@ -316,3 +338,13 @@ homograph:photograph | She takes her photographs. ~> фотографии
 homograph:total | The total price. => Общая цена.
 homograph:stay | He stayed behind, I think. ~> остался
 function:need | I need help. => Мне нужна помощь.
+hortative | Let's go. => Давайте пойдем.
+hortative | Let us go. => Давайте пойдем.
+hortative | Let's eat. => Давайте съедим.
+hortative | Let's read the book. => Давайте прочитаем книгу.
+hortative | Let's not go. => Давайте не пойдем.
+hortative | Let's work. => Давайте работать.
+hortative | Let him go. !> Давайте
+homograph:blind | Love is blind. => Любовь слепая.
+homograph:blind | He is blind. => Он слепой.
+homograph:blind | The sun blinds me. => Солнце ослепляет меня.

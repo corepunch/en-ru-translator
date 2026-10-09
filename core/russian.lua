@@ -117,6 +117,13 @@ function russian.from_bytes(bytes, overlay, morphology)
   return {entries=entries, source_forms=source_forms,openrussian_forms=openrussian_forms}
 end
 
+-- Whether OpenRussian has a verb row of this aspect for the lemma.
+function russian.has_verb_aspect(state, word, aspect)
+  local verbs=state.russian.openrussian_forms and state.russian.openrussian_forms.v
+  local row=verbs and verbs[word]
+  return row ~= nil and row[aspect==1 and 'pf' or 'ipf'] ~= nil
+end
+
 function russian.source_forms(state, word, pos, slot, aspect)
   local direct=state.russian.openrussian_forms and state.russian.openrussian_forms[pos]
   local row=direct and direct[word]

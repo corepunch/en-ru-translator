@@ -250,6 +250,24 @@ handlers[23] = function(match)
   local tail = match.tail
   local exit = 'replace'
   tail.reading = ''; exit = 'replace_and_stop'
+  -- Native *`let``us` (rule 83) makes the next verb an infinitive after
+  -- давайте (original "Давайте идти"). Lua improvement: the hortative is the
+  -- first person plural of the perfective, "Давайте пойдем"; a verb without
+  -- a perfective keeps the infinitive (Давайте работать, in generation).
+  if (tail.source or ''):lower() == 'us' then
+    local k = match.last + 1
+    while match.vector[k] and ('DdK'):find(tag(match.vector[k]), 1, true) do k = k + 1 end
+    local verb = match.vector[k]
+    -- Grammar may already have read an ambiguous verb as its noun (Z reading
+    -- V.работатьN.работа) or participle (read); the hortative needs the verb.
+    if verb and (('VZeE'):find(tag(verb), 1, true)
+        or tag(verb) == 'N' and (verb.reading or ''):sub(1, 2) == 'V.') then
+      set(verb, 'V'); verb.previous_tag = 0x56
+      verb.person, verb.number, verb.aspect, verb.tense = 1, 1, 1, 0
+      verb.passive, verb.short_form, verb.marker = 0, 0, 0
+      verb.hortative = true
+    end
+  end
   return exit
 end
 

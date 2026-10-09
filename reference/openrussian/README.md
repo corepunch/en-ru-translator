@@ -3,15 +3,15 @@
 The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
-indexed binary `.DIC` and `.RUS` databases. This snapshot produces 98,590 DIC
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 98,628 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies 176 reviewed structural readings from
+The checked-in `BASE.DIC` applies 177 reviewed structural readings from
 `function-words.txt` (pronouns, determiners, conjunctions, question words,
 auxiliaries, modals, quantifiers, prepositions, and a few grammatical phrases),
-replacing all records for those exact keys, and 86 phrase entries from
+replacing all records for those exact keys, 102 phrase entries from
 `phrases.txt`, and 215 irregular verb forms from `irregular-verbs.txt`. It contains
-98,187 DIC records after replacement.
+98,232 DIC records after replacement.
 
 OpenRussian is a Russian dictionary and has no English grammar: it coded `this`
 as the adverb `сего`, `us` as `Америка`, `and` as `W`-text, and lacked `me`, `him`,
@@ -145,6 +145,26 @@ is dropped beside a primary verb, as in LTGOLD's `go*Vидти` (`Let's go` no l
 gives `изюминка`). `need` uses LTGOLD's impersonal `need*xнужноNнеобходимость`
 (`Мне нужна помощь`).
 
+A verb-headed key also becomes `Z` when it has a noun or adjective whose primary
+sense it is; an adjective joins only when no noun has that primary sense, or noun
+adjuncts turn adjectival (`the house door` → `домашняя дверь`). So
+`blind*ZV.ослеплятьA.слепой` (LTGOLD `blind*ZслепитьNштораAслепой`) gives
+`Любовь слепая`. The builder's curated readings (`want*V21хотеть`) stay as they
+are.
+
+`home` uses LTGOLD's packed `home*NдомAдомашнийDдомой`. As in LTGOLD, direction
+comes from verb phrases, here with tagged components rather than its frozen tail:
+`go home*WVидтиDдомой`, `come`, `walk`, `run`, `return`, `get`, `hurry`, `fly home`,
+reached from irregular forms through the stem backreference (`He went home` →
+`Он шел домой`). `am/is/are/was/were/be home` and `stay home` give `дома`
+(`Она была дома`). The original prints the same for the captured cases.
+
+`let us` (and `let's`) is native T4 rule 83, which gives `давайте` plus an
+infinitive (original `Давайте идти`). The Lua port makes the next verb first
+person plural perfective, the Russian hortative (`Давайте пойдем`, `Давайте
+прочитаем книгу`), and keeps the infinitive for a verb with no perfective
+(`Давайте работать`). The generated `let us*WDдавай` literal is removed.
+
 Verbs are coded `V`, as in LTGOLD. Native `e` marks a verb whose base form is
 also its past or participle (`come`, `read`, `put`), and the builder keeps it only
 for those 13 words; coding every verb `e` made a clause-initial imperative a
@@ -257,7 +277,7 @@ original captures remain separate. The
 [dictionary-writing skill](../../skills/ltgold-dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
 
-The complete source has 51 `W` composites, 15 native T4 subrules, and 20
+The complete source has 67 `W` composites, 15 native T4 subrules, and 20
 single-word `D` equivalents. The only uninflected tail is the invariant
 infinitive in `nice to meet you*WDприятно познакомиться`: a `V` component would
 become imperative sentence-initially (`Приятно познакомься`).

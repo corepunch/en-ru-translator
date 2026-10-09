@@ -62,6 +62,7 @@ herself*Mсебя
 him*M031он
 himself*Dсебя
 his*Oего
+home*NдомAдомашнийDдомой
 how many*QРсколько
 how much*QРсколько
 how*Qкак

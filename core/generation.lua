@@ -190,6 +190,9 @@ local function record(state,node)
     return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask')),r.animate()))
   end
   function r.verb(id,aspect)
+    -- A let's hortative without perfective forms stays infinitive (Давайте
+    -- работать); see phrasing handler 23.
+    if node.hortative and not russian.has_verb_aspect(state,r.text(),1) then return true end
     return r.save(generation.verb_form(state,id or r.w('paradigm'),r.text(),aspect or r.b('aspect'),r.b('verb_flags'),r.b('person'),
       r.b('number'),r.b('tense'),r.b('gender')))
   end

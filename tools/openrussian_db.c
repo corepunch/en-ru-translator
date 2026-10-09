@@ -532,10 +532,18 @@ static void add_verb_noun_homographs(Records *db) {
       /* A listed noun-headed adjective (ready*Nчистоган): adjective first. */
       if(listed&&!verb&&adj&&(head->value[0]=='N'||head->value[0]=='n'))other=1;
       unsigned char *value=allocate(2048);size_t len=0;
-      if(verb&&(other||strchr("NnA",head->value[0]))) {
+      /* The builder's curated readings (want*V21хотеть) have no source rank
+       * and stay as they are. */
+      if(head->rank==0){free(value);i=end;continue;}
+      int verb_head=is_verb_record(head),pn=has_primary(db,k,n,"Nn"),pa=has_primary(db,k,n,"A");
+      if(verb&&(other||strchr("NnA",head->value[0])||(verb_head&&(pn||pa)))) {
         /* Verb plus the head reading; a listed adverb-headed word takes its
          * noun and adjective readings (close*ZV.закрыватьN.закрытиеA.близкий). */
-        const Record *n1=other?noun:head->value[0]=='A'?NULL:noun,*a1=other?adj:head->value[0]=='A'?adj:NULL;
+        const Record *n1=other?noun:head->value[0]=='A'?NULL:noun,*a1=other||head->value[0]=='A'||(pa&&!pn)?adj:NULL;
+        /* Keep only readings whose primary sense the key is; an adjective
+         * only without such a noun, or noun adjuncts turn adjectival (the
+         * house door: домашняя). blind*ZV.ослеплятьA.слепой (LTGOLD Z). */
+        if(verb_head){n1=pn?noun:NULL;a1=pa&&!pn?adj:NULL;}
         /* A noun that is only a secondary sense of a primary verb drops out
          * (go: изюминка), as LTGOLD codes go*Vидти. */
         if(n1&&verb->primary&&!other&&!has_primary(db,k,n,"Nn"))n1=NULL;

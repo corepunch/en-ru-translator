@@ -97,7 +97,7 @@ phrase:thank god | Thank God. => Слава богу.
 phrase:what a pity | What a pity. => Как жаль.
 phrase:what a shame | What a shame. => Как жаль.
 phrase:what time is it | What time is it? => Который час?
-phrase:at `the``moment`[j;,*] | At the moment. => В настоящий момент.
+phrase:at `the``moment`[j;,*] | At the moment. => В данный момент.
 phrase:at `last`[j;,*] | At last. => Наконец.
 phrase:right now | Right now. => Прямо сейчас.
 phrase:just in case | Just in case. => На всякий случай.
@@ -114,6 +114,8 @@ phrase:once upon a time | Once upon a time. => Однажды.
 phrase:as usual | As usual. => Как обычно.
 phrase:for sure | For sure. => Наверняка.
 phrase:in `the``end`[j;,*] | In the end. => В конце концов.
+phrase:against <AO>`will` | He did it against his will. ~> против своей воли.
+phrase:against ~ will | against cat will. => против воли кота.
 phrase-context | good afternoon => добрый день
 phrase-context | GOOD AFTERNOON! => ДОБРЫЙ ДЕНЬ!
 phrase-context | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБО!
@@ -144,9 +146,9 @@ phrase-context | No problems were found. !> Без проблем
 phrase-context | Have a nice day! => Хорошего дня!
 phrase-context | Thank God, you are here. ~> Слава богу,
 phrase-context | What time is it now? ~> час
-phrase-context | At the moment, he is busy. ~> В настоящий момент, он
-phrase-context | He is busy at the moment. ~> в настоящий момент.
-phrase-context | At the moment of impact. !> настоящий
+phrase-context | At the moment, he is busy. ~> В данный момент, он
+phrase-context | He is busy at the moment. ~> в данный момент.
+phrase-context | At the moment of impact. !> данный
 phrase-context | At last, we are home. ~> Наконец, мы
 phrase-context | He came at last. ~> наконец.
 phrase-context | At last year's meeting. !> Наконец
@@ -225,3 +227,23 @@ others | According to him. ~> Согласно
 others | It is a bit scary. ~> страшновато
 others | This is a nice book. ~> мило
 others | He and she. => Он и она.
+
+# Auxiliaries and negation (function-words.txt), perfective partners from the
+# OpenRussian partner column, -s homographs (z records), adjective accusative
+# animacy. Checked spans avoid unrelated defects elsewhere in the sentence.
+function:will | We will see. => Мы увидим.
+function:will | I will do it. => Я сделаю это.
+function:will | She will read the book. => Она прочитает книгу.
+function:will | We will deliver the goods tomorrow. => Мы передадим завтра товар.
+function:will | Will you come? => Ты придешь?
+function:will | They will not come. => Они не придут.
+function:will | He did it against his will. ~> против своей воли
+function:shall | The Letter of Credit shall allow for partial shipments. ~> Аккредитив позволит
+function:not | He will not see it. ~> Он не увидит
+function:not | It is not at all easy. ~> совсем не легко
+homograph:works | He works. => Он работает.
+homograph:works | He works at night. => Он работает ночью.
+homograph:works | I know that he works. ~> он работает.
+homograph:works | The works of Tolstoy. ~> Производства
+homograph:leaves | He leaves at night. => Он выходит ночью.
+homograph:conditions | Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT. !> обусловливать

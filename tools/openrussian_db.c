@@ -181,8 +181,61 @@ static int lexeme_seen(const unsigned char *key,size_t n,unsigned char cls) {
   }
 }
 
+/* Native verb records name the perfective partner after the code
+ * (LTGOLD видеть*V\xc1\x88\xbc\x80увидеть); senses.lua follows it when the
+ * grammar requests perfective aspect, e.g. for the future after will. */
+typedef struct { char *lemma, *aspect, *partner; } Verb;
+static Verb *verbs;static size_t verb_count;
+static int verb_compare(const void *a,const void *b) { return strcmp(((const Verb *)a)->lemma,((const Verb *)b)->lemma); }
+static void load_verbs(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  if(getline(&line,&cap,file)<0)fail("empty source TSV");
+  Fields header=parse_tsv(line);size_t bare=column(&header,"bare"),aspect=column(&header,"aspect"),partner=column(&header,"partner");
+  if(bare==(size_t)-1||aspect==(size_t)-1||partner==(size_t)-1)fail("verbs.tsv is missing aspect/partner columns");
+  char *row_line=NULL;size_t row_cap=0;
+  while(getline(&row_line,&row_cap,file)>=0) {
+    if(row_line[0]=='#'||row_line[0]=='\n')continue;Fields row=parse_tsv(row_line);
+    if(is_empty(cell(&row,bare)))continue;
+    verbs=realloc(verbs,(verb_count+1)*sizeof *verbs);if(!verbs)fail("out of memory");
+    Verb *v=&verbs[verb_count++];v->lemma=strdup(cell(&row,bare));v->aspect=strdup(cell(&row,aspect));v->partner=strdup(cell(&row,partner));
+    if(!v->lemma||!v->aspect||!v->partner)fail("out of memory");
+  }
+  /* Stable for duplicate lemmas: the first source row stays first. */
+  for(size_t i=1;i<verb_count;i++){Verb v=verbs[i];size_t j=i;while(j&&strcmp(verbs[j-1].lemma,v.lemma)>0){verbs[j]=verbs[j-1];j--;}verbs[j]=v;}
+  free(line);free(row_line);fclose(file);
+}
+static int lists(const char *list,const char *word) {
+  size_t n=strlen(word);
+  for(const char *p=list;*p;){const char *end=strchr(p,';');size_t len=end?(size_t)(end-p):strlen(p);
+    if(len==n&&!strncmp(p,word,n))return 1;if(!end)break;p=end+1;}
+  return 0;
+}
+static const Verb *find_perfective(const char *lemma) {
+  Verb key={(char *)lemma,NULL,NULL};const Verb *v=bsearch(&key,verbs,verb_count,sizeof *verbs,verb_compare);
+  if(!v)return NULL;while(v>verbs&&!strcmp(v[-1].lemma,lemma))v--;
+  for(;v<verbs+verb_count&&!strcmp(v->lemma,lemma);v++)if(!strcmp(v->aspect,"perfective"))return v;
+  return NULL;
+}
+/* The first perfective partner that names this verb back, else the first
+ * perfective partner: видеть -> увидеть (not завидеть), говорить -> сказать. */
+static const char *perfective_partner(const char *lemma) {
+  Verb key={(char *)lemma,NULL,NULL};const Verb *v=bsearch(&key,verbs,verb_count,sizeof *verbs,verb_compare);
+  if(!v)return NULL;while(v>verbs&&!strcmp(v[-1].lemma,lemma))v--;
+  if(strcmp(v->aspect,"imperfective"))return NULL;
+  const char *fallback=NULL;char *copy=strdup(v->partner),*save=NULL;if(!copy)fail("out of memory");
+  static char chosen[256];const char *result=NULL;
+  for(char *p=strtok_r(copy,";",&save);p;p=strtok_r(NULL,";",&save)) {
+    while(*p==' ')p++;const Verb *pf=find_perfective(p);if(!pf)continue;
+    if(lists(pf->partner,lemma)){result=pf->lemma;break;}
+    if(!fallback)fallback=pf->lemma;
+  }
+  if(!result)result=fallback;
+  if(result){snprintf(chosen,sizeof chosen,"%s",result);result=chosen;}
+  free(copy);return result;
+}
+
 static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
-  size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5]; size_t used=0;
+  size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5+256]; size_t used=0;
   if(!strcmp(pos,"noun")) {
     /* Native noun flags: 0x80 base, 0x02 animate (from/от, animate
      * accusative), 0x40 на-location noun. */
@@ -191,7 +244,11 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
     int g=!strcmp(gender,"m")?1:!strcmp(gender,"f")?2:0;
     value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
     value[used++]=0;
-  } else if(!strcmp(pos,"verb")) { value[used++]='V';value[used++]=0xc0;value[used++]=0x88;value[used++]=0;value[used++]=0; }
+  } else if(!strcmp(pos,"verb")) {
+    value[used++]='V';value[used++]=0xc0;value[used++]=0x88;value[used++]=0;value[used++]=0;
+    const char *partner=perfective_partner(lemma);
+    if(partner){size_t m;unsigned char *p=to_cp866(partner,&m);if(m>255)fail("verb partner too long");memcpy(value+used,p,m);used+=m;free(p);}
+  }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
   /* One lexeme per (headword, class); a hash set replaces a linear scan. */
   if(!lexeme_seen(encoded,n,value[0])){free(encoded);return;}
@@ -278,6 +335,70 @@ static void import_file(Records *source_dic,Records *source_rus,Records *morph,c
   free(line);fclose(file);
 }
 
+/* OpenRussian lists some plural nouns as their own glosses (works ->
+ * производство). Such a literal shadows suffix analysis of the verb's -s form,
+ * so "He works" printed "Он производство". Native LTGOLD codes these
+ * homographs as one ambiguous v/n record, `accesses*zуправлятьnдоступ\access`,
+ * and lets grammar choose. Put the same record first for every one-word noun
+ * gloss ending in -s whose stem is a verb gloss, that is not a verb gloss, and
+ * whose noun the stem lacks. */
+static int key_compare(const Record *a,const unsigned char *key,size_t len) {
+  size_t n=a->key_len<len?a->key_len:len;
+  for(size_t i=0;i<n;i++){unsigned char x=fold(a->key[i]),y=fold(key[i]);if(x!=y)return x<y?-1:1;}
+  return a->key_len==len?0:(a->key_len<len?-1:1);
+}
+static size_t group_start(Records *db,const unsigned char *key,size_t len) {
+  size_t lo=0,hi=db->count;
+  while(lo<hi){size_t mid=(lo+hi)/2;if(key_compare(&db->items[mid],key,len)<0)lo=mid+1;else hi=mid;}
+  return lo;
+}
+static const Record *first_with(Records *db,const unsigned char *key,size_t len,unsigned char tag) {
+  for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++)
+    if(db->items[i].value_len&&db->items[i].value[0]==tag)return &db->items[i];
+  return NULL;
+}
+/* Prefer an imperfective reading: a perfective lemma's present form is future
+ * (He leaves -> выйдет). */
+static const Record *stem_verb(Records *db,const unsigned char *key,size_t len) {
+  const Record *any=NULL;
+  for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++) {
+    const Record *r=&db->items[i];if(!r->value_len||r->value[0]!='e')continue;
+    if(r->value_len>3&&r->value[2]=='0')return r;if(!any)any=r;
+  }
+  return any;
+}
+/* Whether the stem already has this noun: then suffix analysis of the -s form
+ * reaches it and the plural literal adds nothing (conditions -> условие). */
+static int stem_has_noun(Records *db,const unsigned char *key,size_t len,const Record *noun) {
+  for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++) {
+    const Record *r=&db->items[i];
+    if(r->value_len==noun->value_len&&(r->value[0]=='N'||r->value[0]=='n')&&!memcmp(r->value+1,noun->value+1,r->value_len-1))return 1;
+  }
+  return 0;
+}
+static void add_s_form_homographs(Records *db) {
+  for(size_t i=0;i<db->count;i++)db->items[i].sequence=db->items[i].sequence*2+2;
+  qsort(db->items,db->count,sizeof(Record),record_compare);
+  size_t original=db->count;
+  for(size_t i=0;i<original;) {
+    size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
+    const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
+    int word=n>2&&k[n-1]=='s';for(size_t j=0;j<n&&word;j++)if(!(k[j]>='a'&&k[j]<='z'))word=0;
+    if(word&&(head->value[0]=='N'||head->value[0]=='n')&&!first_with(db,k,n,'e')) {
+      const Record *verb=NULL;size_t stem=0;
+      if(first_with(db,k,n-1,'e')){verb=stem_verb(db,k,n-1);stem=n-1;}
+      else if(n>3&&k[n-2]=='e'&&(strchr("sxz",k[n-3])||(k[n-3]=='h'&&(k[n-4]=='c'||k[n-4]=='s')))&&first_with(db,k,n-2,'e')){verb=stem_verb(db,k,n-2);stem=n-2;}
+      if(verb&&verb->value_len>3&&!stem_has_noun(db,k,stem,head)) {
+        size_t vlen=verb->value_len-3,nlen=head->value_len-1,len=1+vlen+1+nlen+1+stem;
+        unsigned char *value=allocate(len),*key=allocate(n),*q=value;memcpy(key,k,n);
+        *q++='z';memcpy(q,verb->value+3,vlen);q+=vlen;*q++='n';memcpy(q,head->value+1,nlen);q+=nlen;*q++='\\';memcpy(q,k,stem);
+        size_t first=head->sequence;add_record(db,key,n,value,len);db->items[db->count-1].sequence=first-1;free(key);free(value);
+      }
+    }
+    i=end;
+  }
+}
+
 static void add_people_plural(Records *rus) {
   /* LTPRO stores this suppletive plural as its own noun, paradigm 30. */
   static const unsigned char key[]={0xab,0xee,0xa4,0xa8}; /* люди */
@@ -343,10 +464,12 @@ static void command_build(int argc,char **argv) {
   add_utf8_record(&source_dic,"want","e00хотеть");add_utf8_record(&source_dic,"wants","e00хотеть");
   add_utf8_record(&source_dic,"can","e00мочь");
   snprintf(path,need,"%s/../na-nouns.txt",dir);load_na_nouns(path);
+  snprintf(path,need,"%s/verbs.tsv",dir);load_verbs(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
+  add_s_form_homographs(&source_dic);
   add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
   printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);

@@ -3,13 +3,13 @@
 The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
-indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,552 DIC
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 95,704 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies 57 reviewed structural word readings from
-`function-words.txt` (pronouns, auxiliaries and 45 prepositions), replacing all
-records for those exact keys, and 84 phrase entries from `phrases.txt`. It
-contains 95,459 DIC records after replacement.
+The checked-in `BASE.DIC` applies 60 reviewed structural word readings from
+`function-words.txt` (pronouns, auxiliaries, `not` and 45 prepositions),
+replacing all records for those exact keys, and 86 phrase entries from
+`phrases.txt`. It contains 95,611 DIC records after replacement.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and
@@ -82,6 +82,34 @@ shows matching dictionary records. The builder also adds a few high-priority
 English function-word and common-verb readings so source homonyms do not
 override the translator's basic grammar.
 
+Each imperfective `.RUS` verb record names its perfective partner after the
+code, as LTGOLD does (`видеть*V\xc1\x88\xbc\x80увидеть`). The builder takes it from
+the source `partner` column: the first perfective partner that names the verb
+back, else the first perfective partner (`видеть` → `увидеть`, not `завидеть`;
+`говорить` → `сказать`). `senses.lua` follows it when grammar requests perfective
+aspect, so the future after `will` is `Мы увидим`, not the malformed `видеем`, and
+clause-initial imperatives are perfective (`Сделай`), as in the original. An
+entry that must stay imperfective names it on both sides of the native `|`
+alternative (`get well soon*WVпоправляться|поправлятьсяDскорее`).
+
+Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
+Such a literal shadowed suffix analysis of the verb's -s form (“He works” →
+`Он производство`). For a one-word -s gloss whose stem is a verb gloss, which is
+not itself a verb gloss and whose noun the stem lacks, the builder puts a native
+ambiguous v/n record first (`works*zработатьnпроизводство\work`, after LTGOLD's
+`accesses*zуправлятьnдоступ\access`); grammar chooses `Он работает` or
+`Производства`. The verb is the stem's first imperfective reading, since a
+perfective present reads as future (`leaves` → `выходит`, not `выйдет`). When the
+stem already has the noun (`conditions` → `условие`) the literal adds nothing and
+is left alone; coding it `z` read “terms and conditions” as a verb.
+
+`will` and `shall` use LTGOLD's auxiliary `X203быть`, and `not` its particle
+`KнеDнет`; the imported `will*Nволя` and `not*WDне` printed `Мы воля` and broke
+negated futures. The noun sense comes from LTGOLD's ``against <AO>`will` ``
+subrule and `against ~ will` literal in `phrases.txt`. As in the original, “His
+will is strong” does not get it. LTGOLD's matching `of <AO>`will`` rule is
+omitted: it turned “a test of his will” into `по своей воле`.
+
 ## Prepositions and noun flags
 
 Each preposition in `function-words.txt` is one native record: class `P` or
@@ -151,7 +179,7 @@ original captures remain separate. The
 [dictionary-writing skill](../../skills/ltgold-dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
 
-The complete source has 50 `W` composites, 14 native T4 subrules, and 20
+The complete source has 51 `W` composites, 15 native T4 subrules, and 20
 single-word `D` equivalents. The only uninflected tail is the invariant
 infinitive in `nice to meet you*WDприятно познакомиться`: a `V` component would
 become imperative sentence-initially (`Приятно познакомься`).

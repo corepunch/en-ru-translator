@@ -34,11 +34,13 @@ inside*PПвDвнутри
 into*PВв
 is*X003быть
 it*R030оно
+not*KнеDнет
 of*PР
 off*PРс
 on*PПна
 onto*PВна
 per*PВна
+shall*X203быть
 she*R032она
 since*pРсJпосколькуDс тех пор
 they*R13они
@@ -51,6 +53,7 @@ upon*PПна
 versus*PРпротив
 via*PВчерез
 we*R11мы
+will*X203быть
 with*PТсJс помощью
 within*PРв пределах
 without*PРбезKне

@@ -69,6 +69,8 @@ Each step takes seconds; do all of them.
 | Subrule fails before a comma after a sentence-initial `P` (`at`, `in`) | Comma retagged `;` | `[j;,*]` |
 | Single-word key prints a stray case letter (`Рдо`) | `W` reading without an input class | Prefix the class: `goodbye*DDWPРдоNсвидание` |
 | Sentence-initial `see …` subrule undone (`Смотри`) | Native T4 rule rewrites initial `see` to `Vсмотри` | Do not author it; the original behaves the same |
+| Imperfective verb needed where grammar asks for perfective (future, imperative) | Builder-written `.RUS` partner (`видеть`→`увидеть`) | Name the verb on both sides of `\|`: `Vпоправляться\|поправляться` |
+| -s verb form translated as a noun (`Он производство`) | Plural-noun gloss literal shadows suffix analysis | Builder emits native `z` (`works*zработатьnпроизводство\work`); check `find` |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |
 | Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find reference/openrussian/BASE.RUS <lemma>` |

@@ -42,14 +42,28 @@ function generation.noun_form(state,id,word,gender,plural,case)
   return build(state.assets,id,word,#word,gender==0 and 0x55A6 or gender==2 and 0x5450 or 0x5238,
     signed(case+(plural~=0 and 6 or 0))-1)
 end
-function generation.adjective_form(state,id,word,gender,plural,case)
+-- OpenRussian lists both accusative variants without a fixed order (данный:
+-- данного,данный; новый: новый,нового). Pick the one matching the noun's
+-- animacy: like the genitive for animates, like the nominative otherwise.
+local function accusative(state,word,numbers,forms,animate)
+  if #forms < 2 or animate == nil then return forms[1] end
+  local like = russian.source_forms(state,word,'a','decl_' .. numbers .. (animate and '_gen' or '_nom'))
+  for _,form in ipairs(forms) do
+    if like and form == like[1] then return form end
+  end
+  return forms[1]
+end
+function generation.adjective_form(state,id,word,gender,plural,case,animate)
   local a=state.assets
   local numbers = plural ~= 0 and 'pl' or 'm'
   local genders = {[0]='n',[1]='m',[2]='f'}
   if plural == 0 then numbers = genders[gender] or 'm' end
   local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
   local forms = russian.source_forms(state,word,'a','decl_' .. numbers .. '_' .. (cases[case] or 'nom'))
-  if forms and forms[1] then return forms[1] end
+  if forms and forms[1] then
+    if case == 3 then return accusative(state,word,numbers,forms,animate) end
+    return forms[1]
+  end
   local refl=id~=14 and reflexive(a,word,#word)
   local result=build(a,id,word,#word-(refl and 2 or 0),gender==0 and 0x580C or gender==2 and 0x5770 or 0x56D4,
     signed(case+(plural~=0 and 6 or 0)))
@@ -156,8 +170,14 @@ local function record(state,node)
   function r.copy(at) node.text=state.assets:string(at) end
   function r.save(value) if value==nil then return false end; node.text=value; return true end
   function r.valid() return r.w('paradigm')>=0 and r.w('paradigm')<0x7F end
+  -- Animacy of the noun this modifier agrees with (.RUS noun flag bit 1).
+  function r.animate()
+    local n=node.next
+    while n and (n.tag==0x41 or n.tag==0x4F or n.tag==0x44 or n.tag==0x53) do n=n.next end
+    if n and n.tag==0x4E then return (nodes.number(n,'dictionary_flags') & 2) ~= 0 end
+  end
   function r.adjective()
-    return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask'))))
+    return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask')),r.animate()))
   end
   function r.verb(id,aspect)
     return r.save(generation.verb_form(state,id or r.w('paradigm'),r.text(),aspect or r.b('aspect'),r.b('verb_flags'),r.b('person'),

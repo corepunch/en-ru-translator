@@ -123,8 +123,11 @@ function russian.source_forms(state, word, pos, slot, aspect)
   if row and pos=='v' then
     local selected=row[aspect==1 and 'pf' or 'ipf']
     -- Clause-initial imperative analysis can request perfective aspect even
-    -- when the unchanged lemma has only imperfective forms (e.g. быть).
-    if not selected and slot:match('^imperative_') then selected=row.ipf or row.pf end
+    -- when the unchanged lemma has only imperfective forms (e.g. быть). A
+    -- perfective-only lemma's present/future slots are its future, the right
+    -- form when an inverted question leaves aspect 0 (Will you come? придёшь);
+    -- the native paradigm fallback would build прийешь from the lemma.
+    if not selected and (slot:match('^imperative_') or slot:match('^presfut_')) then selected=row.ipf or row.pf end
     row=selected
   end
   if row then

@@ -77,7 +77,12 @@ consumed. Record the reason for retaining any genuinely fixed expression.
 An entry with failing or missing verification is unfinished; report it explicitly
 instead of declaring the whole file complete.
 
-Import reviewed sources and check the rebuilt index. Cover grammatical variants,
+Rebuild from the C builder output (never by importing into an existing
+`BASE.DIC`) and confirm the documented sequence reproduces the checked-in files.
+Put each translation check on one line in `test/translations.txt`, tagged with
+its source entry, and run `sh test/run_all.sh`. Before accepting a builder
+change or a new class of entries, compare old and new translations of the whole
+captured corpus and review every changed line. Cover grammatical variants,
 contractions, capitalization, and nearby contexts the rule must not consume.
 For variable words, also exercise an additional lexical reading to establish
 that matching depends on tags rather than an English spelling list. Run the

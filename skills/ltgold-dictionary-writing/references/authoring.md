@@ -280,11 +280,19 @@ whatever the engine currently prints.
 
 ### Evidence and completion
 
-Use `test/common_phrases_test.lua` as the coverage model: every nonblank source
-entry maps explicitly to a regression case, and an uncovered entry fails the
-test. Add relevant agreement/case, contraction/capitalization, partial-word,
-protected-span, longest-match, and boundary cases; use `test/greetings_test.lua`
-for retained variable metadata and alternative lexical readings. Inspect every
+Add translation checks to `test/translations.txt`, one per line:
+`group[:entry] | input => expected` (exact), `~>` (contains), or `!>` (must not
+contain). Tag each curated entry's case with its exact source key
+(`phrase:you `are``welcome`[*]`, `preposition:for`). `common_phrases_test.lua`
+and `prepositions_test.lua` fail when a source entry has no tagged line. Use
+`~>` for the span an entry owns when surrounding words still expose unrelated
+defects, rather than freezing broken text with `=>`. Add relevant
+agreement/case, contraction/capitalization, partial-word, protected-span,
+longest-match, and boundary cases. Keep checks that inspect engine state
+(`greetings_test.lua`: retained pronoun fields, applied T4 rule) or need
+options in Lua, reading their cases from the same file.
+`sh test/run_all.sh` runs every test in one Lua process (dictionaries parsed
+once) and prints one line per test. Inspect every
 result, including supporting function-word entries. Source-only tests do not
 prove that the rebuilt default dictionary contains or executes the new reading.
 
@@ -304,6 +312,18 @@ claiming that nonmatching tests prove natural Russian. Report missing or failing
 entry verification explicitly; do not call a file complete while its entries
 remain unreviewed.
 
+### Measure the blast radius
+
+Before accepting a builder change or a new class of entries, translate the
+whole input corpus (every `input` in `test/ltpro/**/*cases*.json`) with the
+old and new dictionaries in one Lua process each, and review every changed
+line. Two defects in this project were invisible to targeted tests: coding
+`others.tsv` words as plain `D` let reordering move prepositions and
+conjunctions (“Дверь о дома”), so they stayed in a `W` wrapper; and the builder's
+`0xc0` flag on every noun only surfaced once real `P` entries made agreement
+choose “на доме”. Use `engine.translate` in a loop, never one process per
+sentence.
+
 ### Closed-class batches
 
 A `function-words.txt` row replaces every record for its key, so leave out
@@ -318,9 +338,15 @@ sentence-final head. Both are native behaviors confirmed by captures in
 
 ## Build and verify
 
-Keep UTF-8 source rows, then rebuild the active index through the editor:
+Keep UTF-8 source rows, then rebuild from the C builder output. Importing into
+the existing `BASE.DIC` never removes a row you deleted or rekeyed in a source
+file, so always start from a fresh build:
 
 ```sh
+cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
+/tmp/openrussian_db build reference/openrussian/source \
+  reference/openrussian/BASE.DIC reference/openrussian/BASE.RUS \
+  reference/openrussian/BASE.MORPH
 python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
   --keys-file reference/openrussian/removed-headwords.txt --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
@@ -328,12 +354,12 @@ python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/phrases.txt --replace --in-place
 python3 tools/ltech_dict.py check reference/openrussian/BASE.DIC
-lua test/common_phrases_test.lua
-lua test/greetings_test.lua
-lua test/prepositions_test.lua
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 sh test/run_all.sh
 ```
+
+The sequence must reproduce the checked-in `.DIC`, `.RUS`, and `.MORPH` byte
+for byte; a hand edit to a built file is lost on the next rebuild.
 
 Each nonblank source row must contain a nonempty key and code, be CP866
 encodable, and have a unique key within the batch. `--replace` replaces all

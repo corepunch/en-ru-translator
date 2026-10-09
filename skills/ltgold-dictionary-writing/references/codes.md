@@ -78,7 +78,7 @@ fragments. Empty translations can be intentional for structural words.
 | `y` | Auxiliary/existential have with reading “есть”; often existential/negative constructions. Defaults to genitive; optional digit sets `aspect`. | Historical `there is*yесть`; `do not have` includes `y1нет`. Not lowercase spelling of `Y`. |
 | `Z` | Ambiguous V/N/A word: verb reading first, followed by available noun/adjective readings. | Manual `work*ZработатьNработаAрабочий`. Not every `Z` must have all three. |
 | `z` | Ambiguous -s verb/plural noun (v/n). Decoder sets plural number and third person, then normalizes to `Z`. | Historical `accesses*zуправлятьnдоступ\access`. |
-| `#` | Nontranslated unit, proper name, or designation; optional number/gender allow agreement. | Manual `brown*#0м`; historical `abbott*#0м=` requests transliteration. Not the ordinary class for fixed Russian prose. |
+| `#` | Nontranslated unit, proper name, or designation; optional number/gender allow agreement. | Manual `brown*#0м`; historical `abbott*#0м=` requests transliteration. Not the ordinary class for fixed Russian prose: the decoder takes a leading с/м/ж as gender, so `W#согласно#` printed `огласно`. |
 | `\|` | Fictitious separator class; also has other meanings inside verb readings. | Historical `as many as*\|столько, сколько`. In a tag pattern, `\|` is a literal separator tag, not alternation. |
 
 ## Internal tags

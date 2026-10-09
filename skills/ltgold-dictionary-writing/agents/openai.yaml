@@ -1,0 +1,4 @@
+interface:
+  display_name: "LTGOLD Dictionary Writing"
+  short_description: "Write grammatical LTech dictionary entries"
+  default_prompt: "Use $ltgold-dictionary-writing to add reusable grammatical dictionary entries and verify their translations."

@@ -3,7 +3,7 @@
 set -eu
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
-expected_openrussian='Он являлись в дом.'
+expected_openrussian='Он - в дом.'
 expected_ltech='Он - в доме.'
 [ "$(lua init.lua 'He is in the house.')" = "$expected_openrussian" ]
 [ "$(printf '%s' 'He is in the house.' | lua init.lua --data=LTGOLD)" = "$expected_openrussian" ]

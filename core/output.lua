@@ -75,7 +75,12 @@ function output.sentence(state,root)
           emit(partner.text)
         end
         local marker=b('marker')
-        if (marker==0x77 or marker==0x57) and previous and (get(previous,'marker')==0x77 or get(previous,'marker')==0x57) then
+        if r.phrase_case then
+          local casing=r.phrase_case
+          if casing.caps>1 then cap_translation(true)
+          elseif r==casing.first and casing.caps>0 then cap_translation(false) end
+          first=false
+        elseif (marker==0x77 or marker==0x57) and previous and (get(previous,'marker')==0x77 or get(previous,'marker')==0x57) then
           if text.is_upper_cyrillic((previous.text or ''):byte() or 0) or leading_upper('source') then
             cap_translation(false)
             if si>1 then cap_translation(true,false,2) end

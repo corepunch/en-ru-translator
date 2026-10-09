@@ -21,6 +21,28 @@ and API/CLI integration. `phrase_inventory_test.lua` also analyzes 8,940 multiwo
 W entries (using `cat` for gaps) to catch unsupported branches. It checks safe
 analysis, not linguistic correctness of every generated sentence.
 
+`greetings_test.lua` exercises the single grammatical `how XR[*]` rule with
+pronoun and contraction variants, capitalization, whitespace, and longer
+questions that must remain unaffected. It verifies pronoun fields preserved by
+native T4 context replacement,
+genitive agreement, nominative plural `дела` generated from `дело`, an additional
+pronoun spelling, formal/plural `you`, and
+structural `R/X` tags outside greetings. The `what` idiom uses the native T4
+subrule ``what <X>`up`[*]``; tests check its application with contractions,
+different terminators, and longer inputs that must not match. Literal phrase
+keys containing final punctuation do not match the separately stored terminator.
+`encoding_test.lua` verifies standard CP866 bytes for both `Ё` and `ё`.
+
+`W` capitalization applies to the complete phrase, including inserted words.
+The reviewed differences record the intentional sentence-case corrections for
+`Do your best.` and `Do your level best.`; their original captures remain intact.
+
+The dictionary editor's bulk-import and index checks run separately:
+
+```sh
+python3 -m unittest discover -s tools -p test_ltech_dict.py
+```
+
 ## Expanded executable review
 
 ```sh

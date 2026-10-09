@@ -67,7 +67,9 @@ def decode_cp866(data):
 
 
 def line_parts(line):
-    star = line.find(b'*')
+    star = line.rfind(b'*$')
+    if star < 0:
+        star = line.find(b'*')
     if star < 0:
         return line, None
     return line[:star], line[star + 1:]
@@ -277,8 +279,8 @@ class Dictionary:
         return removed
 
     def add_line(self, key, value, replace=False):
-        if b'*' in key or b'\n' in key or b'\n' in value:
-            raise DictError('headword and code must be single lines without "*" in the headword')
+        if (b'*' in key and not value.startswith(b'$')) or b'\n' in key or b'\n' in value:
+            raise DictError('headword and code must be single lines; "*" in a pattern requires a $ action')
         folded = fold_key(key)
         if any(fold_key(existing) == folded for existing, _value in self.entries()):
             if not replace:
@@ -565,6 +567,29 @@ def command_add(dictionary, args):
     print(f'added {args.key} -> {destination} ({sum(1 for _k, _v in dictionary.entries())} entries)')
 
 
+def command_import(dictionary, args):
+    if dictionary.binary_codes or dictionary.buckets == 32:
+        raise DictError('UTF-8 entry import is for text .DIC dictionaries; use add --hex for .RUS codes')
+    seen = set()
+    count = 0
+    for number, line in enumerate(args.entries.read_text(encoding='utf-8').splitlines(), 1):
+        if not line.strip():
+            continue
+        key, value = line_parts(encode_cp866(line))
+        if not key or not value:
+            raise DictError(f'{args.entries}:{number}: expected nonempty headword*code')
+        folded = fold_key(key)
+        if folded in seen:
+            raise DictError(f'{args.entries}:{number}: duplicate headword {decode_cp866(key)!r}')
+        seen.add(folded)
+        dictionary.add_line(key, value, replace=args.replace)
+        count += 1
+    if not count:
+        raise DictError(f'{args.entries}: no entries to import')
+    destination = _write_result(dictionary, args.output, args.in_place)
+    print(f'imported {count} entries -> {destination}')
+
+
 def command_delete(dictionary, args):
     if not args.key and not args.keys_file and not args.contains:
         raise DictError('pass --key, --keys-file, or --contains')
@@ -670,6 +695,11 @@ def build_parser():
     add.add_argument('--hex', help='raw code bytes after "*", hex, including the tag byte')
     add.add_argument('--replace', action='store_true', help='replace an existing headword')
     add_write(add)
+    entry_import = sub.add_parser('import', help='import UTF-8 headword*code lines and rebuild the index')
+    add_dictionary(entry_import)
+    entry_import.add_argument('--entries', required=True, type=Path, help='UTF-8 entry file; blank lines are ignored')
+    entry_import.add_argument('--replace', action='store_true', help='replace existing headwords')
+    add_write(entry_import)
     delete = sub.add_parser('delete', help='remove entries and rebuild the index')
     add_dictionary(delete)
     delete.add_argument('--key', action='append', default=[], help='exact headword; repeat for several')
@@ -714,12 +744,13 @@ def main(argv=None):
             'check': command_check,
             'export': command_export,
             'add': command_add,
+            'import': command_import,
             'delete': command_delete,
             'rebuild': command_rebuild,
         }
         result = commands[args.command](dictionary, args)
         return 0 if result is None else result
-    except (DictError, OSError) as exc:
+    except (DictError, OSError, UnicodeError) as exc:
         print(f'ltech_dict: {exc}', file=sys.stderr)
         return 1
 

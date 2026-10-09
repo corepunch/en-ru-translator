@@ -30,7 +30,7 @@ The API also exposes it as `state.meanings_text` (UTF-8) and `state.meanings`
 ```lua
 local engine = require 'core.engine'
 local text, state = engine.translate('He is in the house.')
-assert(text == 'Он - в доме.')
+assert(text == 'Он - в дом.')
 ```
 
 `translate` returns UTF-8 plus diagnostic state. `run` returns CP866 plus the same
@@ -82,9 +82,32 @@ without a gap consumes those words as part of the idiom (for example, the
 possessive in `do your best`).
 
 `W` phrase readings distribute tagged words, metadata, and `#literal#` text.
+Capitalization applies to the complete phrase, including inserted components.
 Slash-separated phrase readings default to the first alternative; the Lua option
 `phrase_reading = function(key, readings) return index end` selects another.
 The raw CP866 choices remain available as `node.phrase_readings` for diagnostics.
+
+Curated phrases live in UTF-8 `reference/openrussian/phrases.txt`; structural
+word readings live in `function-words.txt` alongside it. Both are compiled into
+the default `.DIC` with `tools/ltech_dict.py import`. The greeting entries use
+native T4 dictionary-subrule matching and context replacement:
+
+```text
+how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\
+what <X>`up`[*]*$DDWDкакnдело\ $ \
+```
+
+The `how` pattern preserves the pronoun node's number/person/gender through
+native replacement and generates `Как у меня/тебя/него/неё/нас/них дела?`.
+`PР01у` supplies genitive government and pronoun-prefix control; `J0` closes that
+group before independent plural `nдело`. The `what` idiom allows question cleanup
+to remove `is` and requires the final `[*]` boundary. Both rule forms have been
+executed in original LTPRO. No custom retained-slot pass or final-punctuation
+phrase-key matcher is needed. Lua corrects the original third-person pronoun
+forms and applies casing to the whole phrase.
+
+See [adding phrases](reference/openrussian/README.md#curated-phrases) and the
+[dictionary-writing skill](skills/ltgold-dictionary-writing/SKILL.md).
 
 ## Structure
 

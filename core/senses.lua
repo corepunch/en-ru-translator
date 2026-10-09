@@ -134,6 +134,14 @@ end
 
 function senses.expand_phrase(state,r)
   local value=r.text
+  -- W readings expanded after native T4 subrules need the same phrase-wide
+  -- casing as equivalents distributed during lexical analysis.
+  local casing=r.phrase_case
+  if not casing then
+    local _,caps=(r.source or ''):gsub('[A-Z]','')
+    casing={caps=caps,first=r}
+    r.phrase_case=casing
+  end
   local i=1
   local function c() return value:byte(i) or 0 end
   local function step() i=i+1 end
@@ -183,6 +191,7 @@ function senses.expand_phrase(state,r)
     local n=nodes.word(state,current,value)
     if not n then last.reading_state=0xFF; return 0 end
     n.reading_state,n.marker=3,0x77
+    n.phrase_case=casing
     if current==0x56 then
       if tag==0x47 or tag==0x45 then n.tag=tag
       elseif get(last,'person')==3 then n.person=3 end

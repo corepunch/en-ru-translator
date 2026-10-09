@@ -24,7 +24,7 @@ function lexicon.from_bytes(bytes)
     local finish=bytes:find('\n',start,true) or (#bytes+1)
     local raw=bytes:sub(start,finish-1)
     local line=raw:gsub('\r$','')
-    local star=line:find('*',1,true)
+    local star=line:match('^.*()%*%$') or line:find('*',1,true)
     if star then
       local record={key=line:sub(1,star-1),value=line:sub(star+1),raw=raw,offset=start-1}
       result.records[#result.records+1]=record
@@ -533,6 +533,11 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   if value:sub(1,1)=='W' and value:sub(2,2)~='~' and not value:sub(2,2):match('[A-Za-z#]') then
     value='Ww'..value:sub(2)
   end
+  local casing=record.casing
+  if value:sub(1,1)=='W' and not casing then
+    local _,caps=node.source:gsub('[A-Z]','')
+    casing={caps=caps,first=node}
+  end
   if captures and #captures>0 then
     local held,literals,rendered={},{},{}
     for _,capture in ipairs(captures) do for _,n in ipairs(capture) do held[n]=true end end
@@ -556,7 +561,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
           fresh.source,fresh.source_length,fresh.rules='',0,nil
           pieces={fresh}
         end
-        lexicon.apply_phrase({value=part},pieces,1,#pieces,options)
+        lexicon.apply_phrase({value=part,casing=casing},pieces,1,#pieces,options)
         for _,n in ipairs(pieces) do rendered[#rendered+1]=n end
         used=used+1
       end
@@ -639,6 +644,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
       lexicon.decode_reading(n,text,options)
       n.reading_state=2
     end
+    n.phrase_case=casing
     if (n.marker or 0)==0 then n.marker=0x77 end
     tag,pos=nexttag,stop+1
     if tag=='' then
@@ -706,7 +712,7 @@ local contractions = {
 -- DS:09E4 pronouns and DS:0BD1..0BEE exceptions in 0A4F:047B.
 local contractedIs = { i = true, you = true, he = true, she = true,
 	it = true, we = true, they = true, there = true, here = true,
-	what = true, that = true, who = true }
+	what = true, that = true, who = true, how = true }
 local negativeStems = { ca = "can", wo = "will", sha = "shall" }
 
 local function contraction(source)

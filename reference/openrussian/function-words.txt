@@ -1,0 +1,12 @@
+am*X001
+are*X013-
+be*Xбыть
+he*R031он
+how*Qкак
+i*R011я
+is*X003быть
+it*R030оно
+she*R032она
+they*R13они
+we*R11мы
+you*R021ты

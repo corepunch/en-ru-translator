@@ -6,7 +6,7 @@ import struct
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -151,6 +151,55 @@ class EditTests(unittest.TestCase):
             self.assertTrue(loaded.index_valid())
             untouched = source.read_bytes()
             self.assertEqual(untouched, self.dictionary.to_bytes())
+
+    def test_import_phrases_and_repeat_replace(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, entries, output = root/'BASE.DIC', root/'phrases.txt', root/'out.dic'
+            source.write_bytes(self.dictionary.to_bytes())
+            original = source.read_bytes()
+            entries.write_text('how XR[*]*$Dкак\\`PР01у``MMWMJ0nдело`\\\n\nwhat <X>`up`[*]*$DDWDкакnдело\\ $ \\\n', encoding='utf-8')
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(ld.main(['import', str(source), '--entries', str(entries), '-o', str(output)]), 0)
+            loaded = ld.load_dictionary(output)
+            self.assertTrue(loaded.index_valid())
+            self.assertEqual(loaded.find('how XR[*]')[0][1].decode('cp866'), '$Dкак\\`PР01у``MMWMJ0nдело`\\')
+            for key, value in self.dictionary.entries():
+                self.assertEqual(loaded.find(ld.decode_cp866(key))[0][1], value)
+            self.assertEqual(source.read_bytes(), original)
+            imported = output.read_bytes()
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(ld.main(['import', str(output), '--entries', str(entries), '--replace', '--in-place']), 0)
+            self.assertEqual(output.read_bytes(), imported)
+
+    def test_failed_import_does_not_write_partial_dictionary(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, entries = root/'BASE.DIC', root/'phrases.txt'
+            original = self.dictionary.to_bytes()
+            source.write_bytes(original)
+            for bad in ['missing separator', 'hello*', '*W#привет#',
+                        'HELLO*W#дубликат#', 'emoji*W#🙂#', '']:
+                entries.write_text('hello*W#привет#\n'+bad+'\n' if bad else '\n', encoding='utf-8')
+                with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                    self.assertEqual(ld.main(['import', str(source), '--entries', str(entries), '--in-place']), 1)
+                self.assertEqual(source.read_bytes(), original)
+
+    def test_import_rejects_russian_binary_codes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, entries = root/'BASE.RUS', root/'phrases.txt'
+            header = bytearray(template_header())
+            header[21:24] = b'RS\x00'
+            header[28:30] = struct.pack('<H', 32)
+            dictionary = ld.Dictionary(bytes(header), [b'\xaa\xae\xe2*N\x00\x01\x02'],
+                1, 2, 'ltech', 32, ld.CYRILLIC, 'ltech', True, 0x1E, 0x22, b'')
+            original = dictionary.to_bytes()
+            source.write_bytes(original)
+            entries.write_text('hello*W#привет#\n', encoding='utf-8')
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                self.assertEqual(ld.main(['import', str(source), '--entries', str(entries), '--in-place']), 1)
+            self.assertEqual(source.read_bytes(), original)
 
 
 if __name__ == '__main__':

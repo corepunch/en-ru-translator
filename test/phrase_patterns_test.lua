@@ -22,6 +22,9 @@ swiss army knife*WармейскийNнож
 empathize with*WVвходитьPВв ~ положение
 literal mark*W#A~B/C#
 put ~ near ~ end*WVкласть~PРоколо~Nконец
+how are you ?*W#как дела#
+take home .*W#точка#
+take home !*W#восклицание#
 ]]))
 local function analyzed(input) return lexicon.analyze(dictionary,input) end
 local literal = analyzed('take home')
@@ -62,6 +65,21 @@ assert(analyzed('empathize with').count>2)
 assert(analyzed('literal mark').vector[1].reading=='A~B/C')
 local multiple=analyzed('put cat near dog end')
 assert(multiple.vector[2].source=='cat' and multiple.vector[4].source=='dog')
+-- Final punctuation is separate from literal phrase lookup. Boundary-sensitive
+-- entries belong in native grammatical subrules, not punctuation-bearing keys.
+assert(analyzed('How are you?').vector[1].reading~=encoding.encode('как дела'))
+assert(analyzed('take home.').vector[1].reading==encoding.encode('отнести'))
+assert(analyzed('take home!').vector[1].reading==encoding.encode('отнести'))
+assert(analyzed('take home?').vector[1].reading==encoding.encode('отнести'))
+assert(analyzed('take home again.').vector[1].reading==encoding.encode('отнести'))
+assert(analyzed('How are you feeling?').vector[1].reading~=encoding.encode('как дела'))
+assert(analyzed('How are {~you~}?').vector[1].reading~=encoding.encode('как дела'))
+local greeting=analyzed('How are you?')
+assert(greeting.count==5 and greeting.vector[greeting.count-1].source=='*', 'preserve the final boundary')
 local translated = engine.translate('take cat dog home', {dictionary=dictionary.bytes, prefixes=false})
 assert(translated:find('кот',1,true) and translated:find('собак',1,true) and translated:find('домой',1,true), translated)
+assert(engine.translate('Long wave.',{dictionary=dictionary.bytes})=='Длинная волна.')
+assert(engine.translate('LONG WAVE.',{dictionary=dictionary.bytes})=='ДЛИННАЯ ВОЛНА.')
+local capitals=engine.translate('TAKE CAT DOG HOME',{dictionary=dictionary.bytes,prefixes=false})
+assert(capitals:find('ДОМОЙ',1,true), 'capitalization reaches the inserted phrase tail')
 print('phrase_patterns_test: passed')

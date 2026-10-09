@@ -193,7 +193,7 @@ function agreement.run(state,list,tag,si)
             set(B, 'case_mask', 8)
           end
         elseif selector == 23 then
-          if get(A, 'case_mask') == 0x10 or get(A, 'case_mask') == 0x20 then set(B, 'aspect', 1) end
+          if get(A, 'aspect') ~= 0 or get(A, 'case_mask') == 0x10 or get(A, 'case_mask') == 0x20 then set(B, 'aspect', 1) end
           default = true
         else
           default = true

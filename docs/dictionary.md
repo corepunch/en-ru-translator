@@ -265,6 +265,67 @@ reading decoding into linked table nodes. Dictionary syntax described above is
 historical; it is not a promise that every macro or derivation is supported.
 Unsupported paths raise explicit errors. Custom overlay merging has been retired.
 
+### Adding reviewed phrase entries
+
+English phrase keys and their Russian readings belong in `.DIC`. `.RUS` holds
+Russian morphology codes. The active dictionary is
+`reference/openrussian/BASE.DIC`; historical `LTGOLD/BASE.DIC` is a separate
+asset and is not automatically combined with OpenRussian.
+
+Keep new entries in UTF-8 `reference/openrussian/phrases.txt`, then import them:
+
+```sh
+python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
+  --entries reference/openrussian/phrases.txt --replace --in-place
+python3 tools/ltech_dict.py check reference/openrussian/BASE.DIC
+```
+
+Each nonblank source line is `headword*code`. Grammatical subrules use
+`head pattern*$action`; stars inside a pattern belong to its key. The auxiliary
+`be` has class `X`, personal pronouns `R`, and prepositions `P`. `B/b` designate
+infinitival `to`. See the tag appendix in `LTGOLD/dic.txt`.
+
+The greeting family uses the native T4 dictionary-subrule mechanism:
+
+```text
+how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\
+```
+
+The pattern matches auxiliary `X`, personal pronoun `R`, then sentence boundary
+`[*]`. The head becomes `Dкак`; backticked context replacements supply `PР01у`
+and a composite `M` pronoun plus `J0nдело`. Replacement changes tag/reading while
+preserving the pronoun node's grammatical fields. The empty `M` component uses
+those fields during normal generation. `J0` closes the prepositional group before
+the independent nominative plural noun, generated from lemma `дело`.
+This rule has been executed in original LTPRO. Original third-person forms omit
+`н`; Lua's agreement/generation fixes produce `него/неё/них`. The custom pre-T1
+retained-slot execution path has been removed. The native sentence-final `it`
+rewrite still overrides the composite for `How is it?`; see the skill reference
+for this captured limitation.
+
+Structural function words are maintained in
+`reference/openrussian/function-words.txt` and imported before phrase entries.
+A literal `W#ты#` is not an `R` pronoun, and an auxiliary classified as a noun
+cannot match `X`. Use proper structural readings rather than enumerating the
+surface spellings of a grammatical family.
+
+Spaces in native `W` readings can introduce an uninflected tail, as in
+`interfere*VVWVсоздавать помехи`. Use `N/n` for a noun that should inflect.
+The manual's `#` denotes nontranslated units/proper names; it is not the normal
+class for Russian greeting text. Lua also accepts `#...#` literal spans, but
+the greeting now uses a native boundary-guarded T4 subrule:
+
+```text
+what <X>`up`[*]*$DDWDкакnдело\ $ \
+```
+
+This follows BASE.DIC entries such as ``thank `you`[*]*$Dблагодарю вас\ \``.
+The auxiliary span may be empty because the native question pass removes `is`.
+`[*]` requires sentence end; final punctuation stays separate from phrase keys.
+The prior Lua-specific final-punctuation matching has been removed. See the
+[curated phrases](../reference/openrussian/README.md#curated-phrases) and the
+[dictionary-writing skill](../skills/ltgold-dictionary-writing/SKILL.md).
+
 ## BASE.RUS (Russian) Code Format
 
 The Russian dictionary stores binary codes (not character strings). Each entry's
@@ -313,4 +374,4 @@ Key CP866 ranges:
 - `0x80-0x9F` — А-Я (uppercase)
 - `0xA0-0xAF` — а-п (lowercase first half)
 - `0xE0-0xEF` — р-я (lowercase second half)
-- `0xF0` — ё
+- `0xF0` — Ё; `0xF1` — ё

@@ -121,6 +121,8 @@ function generation.pronoun_form(state,word,person,gender,plural,case,prefix)
   local result=word:sub(1,#word-cut)
   if case~=5 and prefix~=0 and (index==2 or index==3 or index==4 or index==7) then result=a:string(0xBAB1) end
   local ending=slot(a:indirect(0x6314+index*4),signed(case)-1)
+  -- Prefer the explicit ё spelling for the feminine genitive/accusative form.
+  if index==4 and ending=='\xA5\xA5' then ending='\xA5\xF1' end
   return ending and result..ending
 end
 

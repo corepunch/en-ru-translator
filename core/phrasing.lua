@@ -696,6 +696,14 @@ function phrasing.run(root, options)
           elseif number(head, 'marker') ~= 0x6E then mark(head, 'w') end
           if number(tail, 'marker') ~= 0x67 then mark(tail, 'w') end
           if action ~= '' then head.reading = action end
+          -- A native subrule can put a W equivalent in the head or a context
+          -- word. Share the phrase's casing through that later expansion, so
+          -- English I does not capitalize an oblique pronoun mid-phrase.
+          if chosen.action:find('W',1,true) then
+            local _,caps=(head.source or ''):gsub('[A-Z]','')
+            local casing={caps=caps,first=head}
+            for at=di,best do V(at).phrase_case=casing end
+          end
           if tail_action and tail_action ~= '' then
             sub_result = matching.replace(vector, di + 1, best, chosen.pattern, tail_action, state)
           end

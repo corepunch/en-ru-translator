@@ -316,5 +316,17 @@
     "reason": "The recognized virus stem remains singular when prefixed with anti. The original antivirus capture unexpectedly becomes plural, while the unprefixed virus control is singular in both engines.",
     "oracle_raw_sha256": "5ce29d39c112997b8f1de5b80c8a392454dc2f7ac32c22b9c5b93295c2235131",
     "expected_lua": "Антивирус хороший."
+  },
+  "natural-001": {
+    "classification": "intentional_difference",
+    "expected_lua": "Сделайте все возможное.",
+    "oracle_raw_sha256": "f3d3a40c59f20d9f0c212f64a77a5cd9b2fdfa48dc22e2e72cc0502f6cbc8734",
+    "reason": "Apply capitalization to the W phrase as a whole; sentence case capitalizes its first word and keeps inserted common words lowercase. Original LTPRO capitalizes each component."
+  },
+  "natural-002": {
+    "classification": "intentional_difference",
+    "expected_lua": "Сделайте все возможное.",
+    "oracle_raw_sha256": "f3d3a40c59f20d9f0c212f64a77a5cd9b2fdfa48dc22e2e72cc0502f6cbc8734",
+    "reason": "Apply capitalization to the W phrase as a whole; sentence case capitalizes its first word and keeps inserted common words lowercase. Original LTPRO capitalizes each component."
   }
 }

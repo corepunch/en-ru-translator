@@ -10,7 +10,7 @@
 #define HEADER_SIZE 40u
 #define EMPTY_SLOT UINT32_MAX
 
-typedef struct { unsigned char *key, *value; size_t key_len, value_len, sequence; } Record;
+typedef struct { unsigned char *key, *value; size_t key_len, value_len, sequence; int primary, gloss; long rank; } Record;
 typedef struct { Record *items; size_t count, capacity; } Records;
 typedef struct { char **items; size_t count; } Fields;
 typedef struct { unsigned char pos, *data; size_t length; uint64_t hash; } Pattern;
@@ -89,7 +89,7 @@ static void add_record(Records *db,const unsigned char *key,size_t key_len,const
   if(memchr(key,'*',key_len)||memchr(key,'\n',key_len)||memchr(value,'\n',value_len)) fail("record contains a reserved delimiter");
   if(db->count==db->capacity){db->capacity=db->capacity?db->capacity*2:128;db->items=realloc(db->items,db->capacity*sizeof(Record));if(!db->items)fail("out of memory");}
   Record *r=&db->items[db->count++]; r->key=allocate(key_len);memcpy(r->key,key,key_len);r->key_len=key_len;
-  r->value=allocate(value_len);memcpy(r->value,value,value_len);r->value_len=value_len;r->sequence=next_sequence++;
+  r->value=allocate(value_len);memcpy(r->value,value,value_len);r->value_len=value_len;r->sequence=next_sequence++;r->primary=0;r->gloss=99;r->rank=0;
 }
 static void add_utf8_record(Records *db,const char *key,const char *value) {
   size_t key_len,value_len;unsigned char *encoded_key=to_cp866(key,&key_len),*encoded_value=to_cp866(value,&value_len);
@@ -145,9 +145,9 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
   size_t alias_len; unsigned char *key=to_cp866(alias,&alias_len);add_record(dic,key,alias_len,value,used);
   free(encoded);free(value);free(key);
 }
-static void parse_glosses(Records *dic,const char *gloss,const char *pos,const char *lemma,const char *aspect) {
+static void parse_glosses(Records *dic,const char *gloss,const char *pos,const char *lemma,const char *aspect,long rank) {
   char *copy=strdup(gloss); if(!copy)fail("out of memory");
-  char *group_save=NULL;
+  char *group_save=NULL;int first=1,index=0;
   for(char *group=strtok_r(copy,";",&group_save);group;group=strtok_r(NULL,";",&group_save)) {
     char *alias_save=NULL;
     for(char *alias=strtok_r(group,",",&alias_save);alias;alias=strtok_r(NULL,",",&alias_save)) {
@@ -159,6 +159,10 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
       if(!strcmp(pos,"verb")&&!strncmp(alias,"to ",3)){alias+=3;while(*alias==' ')alias++;if(!*alias)continue;}
       int plural=!strcmp(pos,"noun")&&(!strcmp(alias,"people")||!strcmp(alias,"children"));
       add_english_alias(dic,alias,pos,lemma,aspect,plural);
+      /* The first gloss is the row's primary sense (visit: посещать). */
+      dic->items[dic->count-1].rank=rank;dic->items[dic->count-1].gloss=index++;
+      if(first&&strcmp(pos,"other")){dic->items[dic->count-1].primary=1;}
+      first=0;
       if(!strcmp(pos,"noun")&&!strcmp(lemma,"ребёнок")&&!strcmp(alias,"child"))
         add_english_alias(dic,"children",pos,lemma,aspect,1);
     }
@@ -390,7 +394,7 @@ static void import_file(Records *source_dic,Records *source_rus,Records *morph,c
     if(is_empty(lemma))continue;
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
     if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,animate),cell(&row,sg_only),cell(&row,pl_only));
-    if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a);
+    if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a,strtol(cell(&row,source_row),NULL,10));
     add_forms(morph,&header,&row,pos,lemma,a);
   }
   free(line);fclose(file);
@@ -420,14 +424,36 @@ static int has_verb(Records *db,const unsigned char *key,size_t len) {
 }
 /* Prefer an imperfective reading: a perfective lemma's present form is future
  * (He leaves -> выйдет). */
-static const Record *stem_verb(Records *db,const unsigned char *key,size_t len) {
-  const Record *any=NULL;
+/* Choose a reading of one class for a key. The source tables are sorted by
+ * frequency (source_row); a row listing the key as its first gloss is that
+ * row's primary sense. Take the primary reading unless it is much rarer than
+ * the most frequent one (10x for verbs, 2x otherwise): call -> звать (not
+ * называть), visit -> посещать, but stay -> оставаться (not гостить),
+ * photograph -> фотография (not фотокарточка).
+ * Verbs prefer the imperfective. */
+static const Record *choose_reading(Records *db,const unsigned char *key,size_t len,const char *classes,int verbs) {
+  const Record *frequent=NULL,*primary=NULL,*any=NULL;int imperfective=0;
+  if(verbs)for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++)
+    if(is_verb_record(&db->items[i])&&db->items[i].value[2]=='0')imperfective=1;
   for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++) {
-    const Record *r=&db->items[i];if(!is_verb_record(r))continue;
-    if(r->value_len>3&&r->value[2]=='0')return r;if(!any)any=r;
+    const Record *r=&db->items[i];
+    if(verbs?!is_verb_record(r):(r->value_len<2||!strchr(classes,r->value[0])))continue;
+    if(verbs&&imperfective&&r->value[2]!='0')continue;
+    if(!any)any=r;
+    /* Frequency counts only where the key is among the row's first glosses
+     * (бывать is frequent as "be", and lists "visit" third). */
+    if(!frequent&&r->gloss<=(verbs?1:4))frequent=r;
+    if(r->primary&&!primary)primary=r;
   }
-  return any;
+  if(primary&&frequent&&frequent->rank>0&&primary->rank>(verbs?10:2)*frequent->rank)return frequent;
+  return primary?primary:frequent?frequent:any;
 }
+static int has_primary(Records *db,const unsigned char *key,size_t len,const char *classes) {
+  for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++)
+    if(db->items[i].primary&&db->items[i].value_len>1&&strchr(classes,db->items[i].value[0]))return 1;
+  return 0;
+}
+static const Record *stem_verb(Records *db,const unsigned char *key,size_t len) { return choose_reading(db,key,len,NULL,1); }
 /* Whether the stem already has this noun: then suffix analysis of the -s form
  * reaches it and the plural literal adds nothing (conditions -> условие). */
 static int stem_has_noun(Records *db,const unsigned char *key,size_t len,const Record *noun) {
@@ -481,11 +507,7 @@ static void add_s_form_homographs(Records *db) {
  * - an others.tsv adverb with an adjective and no verb: the adjective, with
  *   any noun as an alternative (new*AновыйDвновь in LTGOLD);
  * - verbs only, the first perfective: the imperfective (come*eприходить). */
-static const Record *first_class(Records *db,const unsigned char *key,size_t len,const char *classes) {
-  for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++)
-    if(db->items[i].value_len>1&&strchr(classes,db->items[i].value[0]))return &db->items[i];
-  return NULL;
-}
+static const Record *first_class(Records *db,const unsigned char *key,size_t len,const char *classes) { return choose_reading(db,key,len,classes,0); }
 /* The imperfective named in a perfective verb's partner column. */
 static const char *imperfective_partner(const Record *perfective) {
   char *lemma=from_cp866(perfective->value+3,perfective->value_len-3);
@@ -513,10 +535,16 @@ static void add_verb_noun_homographs(Records *db) {
       if(verb&&(other||strchr("NnA",head->value[0]))) {
         /* Verb plus the head reading; a listed adverb-headed word takes its
          * noun and adjective readings (close*ZV.закрыватьN.закрытиеA.близкий). */
-        const Record *n1=other?noun:head->value[0]=='A'?NULL:head,*a1=other?adj:head->value[0]=='A'?head:NULL;
+        const Record *n1=other?noun:head->value[0]=='A'?NULL:noun,*a1=other?adj:head->value[0]=='A'?adj:NULL;
+        /* A noun that is only a secondary sense of a primary verb drops out
+         * (go: изюминка), as LTGOLD codes go*Vидти. */
+        if(n1&&verb->primary&&!other&&!has_primary(db,k,n,"Nn"))n1=NULL;
+        if(!n1&&!a1){memcpy(value,verb->value,verb->value_len);len=verb->value_len;}
+        else {
         value[len++]='Z';value[len++]='V';value[len++]='.';memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
         if(n1){value[len++]=n1->value[0];value[len++]='.';memcpy(value+len,n1->value+1,n1->value_len-1);len+=n1->value_len-1;}
         if(a1){value[len++]='A';value[len++]='.';memcpy(value+len,a1->value+1,a1->value_len-1);len+=a1->value_len-1;}
+        }
       } else if(!verb&&other&&adj) {
         memcpy(value,adj->value,adj->value_len);len=adj->value_len;
         if(noun){memcpy(value+len,noun->value,noun->value_len);len+=noun->value_len;}

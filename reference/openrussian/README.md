@@ -6,12 +6,12 @@ entries (58,825 source rows total). The C builder compiles them into standalone
 indexed binary `.DIC` and `.RUS` databases. This snapshot produces 98,590 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies 175 reviewed structural readings from
+The checked-in `BASE.DIC` applies 176 reviewed structural readings from
 `function-words.txt` (pronouns, determiners, conjunctions, question words,
 auxiliaries, modals, quantifiers, prepositions, and a few grammatical phrases),
 replacing all records for those exact keys, and 86 phrase entries from
 `phrases.txt`, and 215 irregular verb forms from `irregular-verbs.txt`. It contains
-98,197 DIC records after replacement.
+98,187 DIC records after replacement.
 
 OpenRussian is a Russian dictionary and has no English grammar: it coded `this`
 as the adverb `сего`, `us` as `Америка`, `and` as `W`-text, and lacked `me`, `him`,
@@ -132,6 +132,18 @@ so grammar chooses: `Я работаю`, `Моя работа`. OpenRussian emit
 reading with nouns first, and only the first is used, so 1,580 verbs such as
 `work`, `go` and `call` were unreachable. The builder's high-priority readings
 use native classes: `want*V21хотеть`, `wants*vхотеть`.
+
+The reading a generated record uses is chosen by sense, not file order. The
+source tables are sorted by frequency (`source_row`), and a row that lists the
+key as its first gloss gives that key's primary sense. The builder takes the
+primary reading unless it is much rarer than the most frequent row listing the
+key among its first glosses (10× for verbs, 2× otherwise): `call` → `звать`
+(not `называть`), `supply` → `доставлять`, `visit` → `посещать` (`бывать` lists
+"visit" third), but `stay` → `оставаться` (not `гостить`) and `photograph` →
+`фотография` (not `фотокарточка`). A noun that is never a primary sense of the key
+is dropped beside a primary verb, as in LTGOLD's `go*Vидти` (`Let's go` no longer
+gives `изюминка`). `need` uses LTGOLD's impersonal `need*xнужноNнеобходимость`
+(`Мне нужна помощь`).
 
 Verbs are coded `V`, as in LTGOLD. Native `e` marks a verb whose base form is
 also its past or participle (`come`, `read`, `put`), and the builder keeps it only

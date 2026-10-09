@@ -249,7 +249,7 @@ homograph:works | He works. => Он работает.
 homograph:works | He works at night. => Он работает ночью.
 homograph:works | I know that he works. ~> он работает.
 homograph:works | The works of Tolstoy. ~> Производства
-homograph:leaves | He leaves at night. => Он выходит ночью.
+homograph:leaves | He leaves at night. => Он уходит ночью.
 homograph:conditions | Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT. !> обусловливать
 function:will | I'll work. => Я буду работать.
 function:will | they'll work. => они будут работать.
@@ -266,7 +266,7 @@ homograph:work | My work is hard. ~> Моя работа
 homograph:work | I like my work. ~> мою работу.
 function:this | This is my house. => Это мой дом.
 function:this | This is the girls' book. => Это книга девушек.
-function:me | Call me. => Назови меня.
+function:me | Call me. => Позови меня.
 function:was | He was here. => Он был здесь.
 function:did | Did you see it? => Ты видел это?
 function:do | I don't know. => Я не знаю.
@@ -304,3 +304,15 @@ homograph:new | A new house. => Новый дом.
 homograph:ready | I am ready. => Я готовый.
 homograph:house | The house door. => Дверь дома.
 function:will | Will he go? => Он пойдет?
+homograph:call | I will call you. => Я позову тебя.
+homograph:call | The call was short. => Вызов был коротким.
+homograph:supply | We supply food. => Мы доставляем еду.
+homograph:visit | I will visit you. => Я посещу тебя.
+homograph:walk | A short walk. => Короткая прогулка.
+homograph:go | Let's go. !> изюминка
+homograph:water | Water the flowers. => Полей цветы.
+homograph:water | I drink water. => Я пью воду.
+homograph:photograph | She takes her photographs. ~> фотографии
+homograph:total | The total price. => Общая цена.
+homograph:stay | He stayed behind, I think. ~> остался
+function:need | I need help. => Мне нужна помощь.

@@ -3,13 +3,32 @@
 The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
-indexed binary `.DIC` and `.RUS` databases. This snapshot produces 97,284 DIC
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 97,292 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies 61 reviewed structural word readings from
-`function-words.txt` (pronouns, auxiliaries, `not`, `to` and 45 prepositions),
+The checked-in `BASE.DIC` applies 175 reviewed structural readings from
+`function-words.txt` (pronouns, determiners, conjunctions, question words,
+auxiliaries, modals, quantifiers, prepositions, and a few grammatical phrases),
 replacing all records for those exact keys, and 86 phrase entries from
-`phrases.txt`. It contains 97,185 DIC records after replacement.
+`phrases.txt`. It contains 96,856 DIC records after replacement.
+
+OpenRussian is a Russian dictionary and has no English grammar: it coded `this`
+as the adverb `сего`, `us` as `Америка`, `and` as `W`-text, and lacked `me`, `him`,
+`was`, `does` and `could` altogether. The function-word batch takes LTGOLD's
+native readings for these closed classes (`this*SэтоOэтот`, `me*M011я`,
+`was*X103бытьx1быть`, `like*PДподобноV11любить`), without auxiliary stem
+backreferences, plus native rules such as ``would <dDK>`like` `` (`хотел бы`). Two
+additions cover native gaps: `do <TAO>[NRMS][,*]*$Vделать` reads `do` before an
+object at a clause end as the verb (`Do it` → `Сделай это`), and `will do` keeps the
+verb that grammar would otherwise delete after the auxiliary.
+
+`removed-headwords.txt` also drops generated literals made of grammar words that
+consume ordinary clauses, such as `this is`/`that is` → `это`, `to be` →
+`исполниться`, `not to` → `беречься`, `you know` → `ведь`, and `the first` →
+`первейший`. Fixed idioms (`each other`, `from now on`) and impersonal `it is …`
+readings (`It is cold` → `Холодно`) stay. Native T4 rereads the first English
+word of such a literal (original `It is cold.` → `Это.`). The Lua port keeps a
+multiword literal's reading, as it does for authored `W` equivalents.
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and

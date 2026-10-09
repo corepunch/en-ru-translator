@@ -572,7 +572,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     -- Only explicit output gaps reinsert captured words. Idioms such as
     -- "do your best" consume a possessive already expressed by their reading.
     for _=first,last do table.remove(records,first) end
-    for at=#rendered,1,-1 do table.insert(records,first,rendered[at]) end
+    for at=#rendered,1,-1 do rendered[at].phrase_literal=true;table.insert(records,first,rendered[at]) end
     return first
   end
   if value:find('~',1,true) then value=table.concat(phrase_patterns.segments(value)) end
@@ -582,6 +582,9 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     if not (t:match('[VZ]') and nodes.tag(node):match('[EeGFh]')) then node.tag=t:byte() end
     if nodes.tag(node)=='V' and node.source:sub(-1)~="'" then node.number=0 end
     node.marker=0x77
+    -- A multiword key's reading belongs to the whole phrase; English lexical
+    -- T4 rules must not reread its first word (it is cold -> Это).
+    if last>first then node.phrase_literal=true end
     local source = {}
     for index=first,last do table.insert(source, records[index].source) end
     local macroSource = table.concat(source, ' ')
@@ -645,6 +648,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
       n.reading_state=2
     end
     n.phrase_case=casing
+    if last>first then n.phrase_literal=true end
     if (n.marker or 0)==0 then n.marker=0x77 end
     tag,pos=nexttag,stop+1
     if tag=='' then

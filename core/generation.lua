@@ -84,7 +84,14 @@ function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gend
     if persons[person] then source_slot = 'presfut_' .. numbers .. persons[person] end
   end
   local forms = source_slot and russian.source_forms(state,word,'v',source_slot,aspect)
-  if forms and forms[1] then return forms[1] end
+  if forms and forms[1] then
+    -- Source forms still take the native particles: conditional бы and
+    -- interrogative ли (would like -> хотел бы).
+    local result=forms[1]
+    if past==1 and flags & 2 ~= 0 then result=result..a:string(0xB996) end
+    if flags & 16 ~= 0 then result=result..a:string(0xB99A) end
+    return result
+  end
   if flags & 4 ~= 0 then index,past=6,0
   elseif past==1 then index=7
   elseif person==0 then return word

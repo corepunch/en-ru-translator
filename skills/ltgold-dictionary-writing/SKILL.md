@@ -71,6 +71,8 @@ Each step takes seconds; do all of them.
 | Sentence-initial `see …` subrule undone (`Смотри`) | Native T4 rule rewrites initial `see` to `Vсмотри` | Do not author it; the original behaves the same |
 | Imperfective verb needed where grammar asks for perfective (future, imperative) | Builder-written `.RUS` partner (`видеть`→`увидеть`) | Name the verb on both sides of `\|`: `Vпоправляться\|поправляться` |
 | -s verb form translated as a noun (`Он производство`) | Plural-noun gloss literal shadows suffix analysis | Builder emits native `z` (`works*zработатьnпроизводство\work`); check `find` |
+| Basic English word translated as a content word (`this` → `сего`, `us` → `Америка`) | OpenRussian has no closed-class grammar | Add LTGOLD's native reading to `function-words.txt` |
+| Ordinary clause replaced by one word (`This is` → `Это`, `you know` → `ведь`) | Generated grammar-word literal | Add the key to `removed-headwords.txt` |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |
 | Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find reference/openrussian/BASE.RUS <lemma>` |

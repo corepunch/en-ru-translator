@@ -141,6 +141,14 @@ local function inside_equivalent(match)
     return true
   end
 end
+-- A node translated from a multiword dictionary key. Native T4 rereads its
+-- first English word (it is cold*WDхолодно -> `it` rule -> Это); like an
+-- authored W equivalent, it is not reinterpreted by lexical rules.
+local function touches_literal(match)
+  for i=match.first,match.last do
+    if match.node(i).phrase_literal then return true end
+  end
+end
 handlers[11] = replace_and_stop
 
 local function stop_unmarked_participle(match)
@@ -758,7 +766,9 @@ function phrasing.run(root, options)
         end
         function match.rebuild()
           local live_count = rebuild()
-          match.vector = vector
+          -- The loop takes count back from match.count; a stale value lets a
+          -- later rule read past the rebuilt vector (would like: *B[:*]).
+          match.vector, match.count = vector, live_count
           return live_count
         end
         function match.seek_up(from, limit, wanted)
@@ -773,7 +783,7 @@ function phrasing.run(root, options)
         -- English lexical idioms cannot reinterpret nodes already assigned to
         -- one W equivalent, including equivalents authored by an earlier T4
         -- subrule. Tag-based agreement rules still run normally.
-        if pattern:find('`',1,true) and inside_equivalent(match) then exit='advance_past_match'
+        if pattern:find('`',1,true) and (inside_equivalent(match) or touches_literal(match)) then exit='advance_past_match'
         elseif apply then exit, at = apply(match) end
         last, count = match.last, match.count
         if exit == 'replace' or exit == 'replace_and_stop' then

@@ -145,6 +145,9 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
       while(*alias==' '||*alias=='\t')alias++; size_t n=strlen(alias);while(n&&(alias[n-1]==' '||alias[n-1]=='\t'))alias[--n]=0;
       while(n&&strchr(".!?;:",alias[n-1]))alias[--n]=0;
       if(!n)continue; lower_ascii(alias);
+      /* Some verb glosses carry the infinitive marker (to go); as keys they
+       * shadowed every infinitive (I want to go -> пройнный). */
+      if(!strcmp(pos,"verb")&&!strncmp(alias,"to ",3)){alias+=3;while(*alias==' ')alias++;if(!*alias)continue;}
       int plural=!strcmp(pos,"noun")&&(!strcmp(alias,"people")||!strcmp(alias,"children"));
       add_english_alias(dic,alias,pos,lemma,aspect,plural);
       if(!strcmp(pos,"noun")&&!strcmp(lemma,"ребёнок")&&!strcmp(alias,"child"))

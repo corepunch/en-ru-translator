@@ -114,7 +114,7 @@ phrase:once upon a time | Once upon a time. => Однажды.
 phrase:as usual | As usual. => Как обычно.
 phrase:for sure | For sure. => Наверняка.
 phrase:in `the``end`[j;,*] | In the end. => В конце концов.
-phrase:against <AO>`will` | He did it against his will. ~> против своей воли.
+phrase:against <AO>`will` | He did it against his will. ~> воли.
 phrase:against ~ will | against cat will. => против воли кота.
 phrase-context | good afternoon => добрый день
 phrase-context | GOOD AFTERNOON! => ДОБРЫЙ ДЕНЬ!
@@ -167,6 +167,10 @@ preposition:about | A book about the war. ~> о войне
 preposition:across | A bridge across the river. ~> через реку
 preposition:after | After the war. ~> После войны
 preposition:against | A law against the war. ~> против войны
+preposition:because of | Because of the rain. => Из-за дождя.
+preposition:next to | Next to the house. => Около дома.
+preposition:like | He is like his father. ~> подобно его отцу
+preposition:than | It is better than nothing. ~> чем ничто
 preposition:along | A road along the river. ~> вдоль реки
 preposition:amid | A house amid the trees. ~> среди деревьев
 preposition:amidst | A house amidst the trees. ~> среди деревьев
@@ -237,7 +241,7 @@ function:will | She will read the book. => Она прочитает книгу.
 function:will | We will deliver the goods tomorrow. => Мы передадим завтра товар.
 function:will | Will you come? => Ты придешь?
 function:will | They will not come. => Они не придут.
-function:will | He did it against his will. ~> против своей воли
+function:will | He did it against his will. ~> воли.
 function:shall | The Letter of Credit shall allow for partial shipments. ~> Аккредитив позволит
 function:not | He will not see it. ~> Он не увидит
 function:not | It is not at all easy. ~> совсем не легко
@@ -260,3 +264,22 @@ function:want | The child wants books. => Ребенок хочет книги.
 homograph:work | I work. => Я работаю.
 homograph:work | My work is hard. ~> Моя работа
 homograph:work | I like my work. ~> мою работу.
+function:this | This is my house. => Это мой дом.
+function:this | This is the girls' book. => Это книга девушек.
+function:me | Call me. => Назови меня.
+function:was | He was here. => Он был здесь.
+function:did | Did you see it? => Ты видел это?
+function:do | I don't know. => Я не знаю.
+function:do | Do it. => Сделай это.
+function:will do | I will do it. => Я сделаю это.
+function:if | If you want, I will come. => Если ты хочешь, Я приду.
+function:that | I know that he works. => Я знаю, что он работает.
+function:there is | There is no time. => Некогда.
+function:have to | I have to go. => Я должен пойти.
+function:like | I like this book. => Я люблю эту книгу.
+function:would | I would like tea. => Я хотел бы чай.
+function:would | I'd like to go. => Я хотел бы пойти.
+function:to | I want to go. => Я хочу идти.
+function:nobody | Nobody knows. => Никто не знает.
+literal | It is cold. => Холодно.
+literal | You know the answer. !> ведь

@@ -361,6 +361,8 @@ python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/function-words.txt --replace --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
+  --entries reference/openrussian/irregular-verbs.txt --replace --in-place
+python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/phrases.txt --replace --in-place
 python3 tools/ltech_dict.py check reference/openrussian/BASE.DIC
 python3 -m unittest discover -s tools -p test_ltech_dict.py

@@ -3,14 +3,15 @@
 The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
-indexed binary `.DIC` and `.RUS` databases. This snapshot produces 97,292 DIC
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 98,590 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
 The checked-in `BASE.DIC` applies 175 reviewed structural readings from
 `function-words.txt` (pronouns, determiners, conjunctions, question words,
 auxiliaries, modals, quantifiers, prepositions, and a few grammatical phrases),
 replacing all records for those exact keys, and 86 phrase entries from
-`phrases.txt`. It contains 96,856 DIC records after replacement.
+`phrases.txt`, and 215 irregular verb forms from `irregular-verbs.txt`. It contains
+98,197 DIC records after replacement.
 
 OpenRussian is a Russian dictionary and has no English grammar: it coded `this`
 as the adverb `сего`, `us` as `Америка`, `and` as `W`-text, and lacked `me`, `him`,
@@ -79,6 +80,8 @@ python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/function-words.txt --replace --in-place
 python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
+  --entries reference/openrussian/irregular-verbs.txt --replace --in-place
+python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
   --entries reference/openrussian/phrases.txt --replace --in-place
 ```
 
@@ -128,8 +131,32 @@ gets LTGOLD's ambiguous record first, verb reading leading
 so grammar chooses: `Я работаю`, `Моя работа`. OpenRussian emits one record per
 reading with nouns first, and only the first is used, so 1,580 verbs such as
 `work`, `go` and `call` were unreachable. The builder's high-priority readings
-use native classes: `want*V21хотеть`, `wants*vхотеть` (`e` would allow a past
-reading).
+use native classes: `want*V21хотеть`, `wants*vхотеть`.
+
+Verbs are coded `V`, as in LTGOLD. Native `e` marks a verb whose base form is
+also its past or participle (`come`, `read`, `put`), and the builder keeps it only
+for those 13 words; coding every verb `e` made a clause-initial imperative a
+participle (`Give me the book` → `Данное мне книгой`, now `Дай мне книгу`). When a
+key's first verb is perfective, its imperfective partner goes first
+(`come*e00приходить`, as in LTGOLD), so `He comes` is present `приходит`.
+OpenRussian's unclassified `others.tsv` adverbs are imported first and hid the
+verb or adjective of 152 basic words (`open` → `открыто`, `new` → `внове`).
+[`content-first.txt`](content-first.txt) lists 307 words: those LTGOLD codes as verb,
+adjective or `Z`, plus noun-headed adjectives it codes `A`/`d` (`ready`); for
+those the builder puts the `Z` record (with noun and adjective readings) or the
+adjective first. Unlisted adverb-headed words keep the adverb, since LTGOLD does
+for `please`, `welcome` and `again`.
+
+[`irregular-verbs.txt`](irregular-verbs.txt) holds 215 irregular English verb
+forms from LTGOLD's native readings (`went*hидти\go`, `gave*hдавать\give`,
+`left*EоставатьсяAлевый\leave`), imported after the function words. Misspelled
+or regular LTGOLD keys are omitted, and `V.` readings keep only the sense that
+matches the base verb (`built*Eстроить\build`, not LTGOLD's first
+`разрабатывать`). Their stem backreferences reach generated stem phrases, so
+`come to` (`очнуться`), `go into` and `have seen` are removed. The personal
+pronouns carry LTGOLD's possessor and dative readings (`i*R011яrу меняmмне`), so
+`I have a book` → `У меня есть книга`. Unlike the original, a question's future
+verb is perfective (`Will you come?` → `Ты придешь?`).
 
 Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
 Such a literal shadowed suffix analysis of the verb's -s form (“He works” →

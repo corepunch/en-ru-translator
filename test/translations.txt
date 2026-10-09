@@ -229,7 +229,7 @@ preposition-context | Come inside, please. ~> внутри,
 # Generated others.tsv readings keep a leading с/м/ж (formerly dropped by #).
 others | According to him. ~> Согласно
 others | It is a bit scary. ~> страшновато
-others | This is a nice book. ~> мило
+others | He spoke mildly. ~> мягко
 others | He and she. => Он и она.
 
 # Auxiliaries and negation (function-words.txt), perfective partners from the
@@ -283,3 +283,24 @@ function:to | I want to go. => Я хочу идти.
 function:nobody | Nobody knows. => Никто не знает.
 literal | It is cold. => Холодно.
 literal | You know the answer. !> ведь
+irregular:went | He went home. ~> Он шел
+irregular:saw | I saw him. => Я видел его.
+irregular:gave | I gave it to him. => Я давал это ему.
+irregular:got | I got a letter. => Я получил письмо.
+irregular:bought | I bought a car. => Я купил машину.
+irregular:wrote | He wrote a letter. => Он писал письмо.
+irregular:built | They built a house. => Они построили дом.
+irregular:understood | I understood. => Я понял.
+imperative | Give me the book. => Дай мне книгу.
+imperative | Help me. => Помоги мне.
+imperative | Open the door. => Открой дверь.
+imperative | Take it. => Возьми это.
+possessor | I have a book. => У меня есть книга.
+possessor | She has a dog. => У нее есть собака.
+possessor | I had a dog. => У меня была собака.
+homograph:come | He comes home. ~> Он приходит
+homograph:speak | They speak Russian. ~> Они говорят
+homograph:new | A new house. => Новый дом.
+homograph:ready | I am ready. => Я готовый.
+homograph:house | The house door. => Дверь дома.
+function:will | Will he go? => Он пойдет?

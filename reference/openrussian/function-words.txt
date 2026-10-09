@@ -55,7 +55,7 @@ had*Y1иметьx1быть
 has*Y003иметьyесть
 have to*Uдолжен
 have*Yиметьyестьx1быть
-he*R031он
+he*R031онrу негоmему
 her*OееM032онаrу нееmей
 here*Dздесь
 herself*Mсебя
@@ -65,7 +65,7 @@ his*Oего
 how many*QРсколько
 how much*QРсколько
 how*Qкак
-i*R011я
+i*R011яrу меняmмне
 if*JеслиPПпри
 in*PПв
 inside*PПвDвнутри
@@ -111,7 +111,7 @@ own*ZобладатьNWAсобственный
 per*PВна
 same*SэтоOWOтотDже
 shall*X203быть
-she*R032она
+she*R032онаr032у нееmей
 should*UдолженT
 since*pРсJпосколькуDс тех пор
 some*S1некоторыеOнекоторыйPР
@@ -133,7 +133,7 @@ there is not*y1нет
 there is*yесть
 there*Dтам
 these*S1ониOэтот
-they*R13они
+they*R13ониr13у нихmим
 this*SэтоOэтот
 those*S1теOтот
 three*IтриAтрех
@@ -150,7 +150,7 @@ us*M11он
 versus*PРпротив
 via*PВчерез
 was*X103бытьx1быть
-we*R11мы
+we*R11мыr11у насmнам
 were*X113бытьx1быть
 what*QкакойJчто
 when*J, когдаPПпри
@@ -169,7 +169,7 @@ would <dDK>`like`*$?\$`Vхотеть`\5
 would*X203быть
 yet*Dвсе еще
 you should*WRвамUследует
-you*R021ты
+you*R021тыr021у тебяmтебе
 your*Oваш
 yours*Sваш
 yourself*Mсами

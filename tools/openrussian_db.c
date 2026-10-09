@@ -115,6 +115,15 @@ static const char *cell(Fields *row,size_t at) { return at<row->count?row->items
 static void lower_ascii(char *text) { for(;*text;text++)if(*text>='A'&&*text<='Z')*text=(char)(*text+32); }
 static int is_empty(const char *s) { return !s||!*s; }
 
+/* Native `e` marks an English verb whose base form is also its past or
+ * participle (come, read, put); LTGOLD codes only these words so. Coding every
+ * verb `e` made a clause-initial imperative a participle (Give me -> Данное). */
+static int coincident_form(const char *alias) {
+  static const char *words[]={"assured","become","come","cost","cut","fed","hit","let","misread","put","read","set","spit"};
+  for(size_t i=0;i<sizeof words/sizeof *words;i++)if(!strcmp(alias,words[i]))return 1;
+  return 0;
+}
+static int is_verb_record(const Record *r) { return r->value_len>3&&(r->value[0]=='e'||r->value[0]=='V'); }
 static void add_english_alias(Records *dic,const char *alias,const char *pos,const char *lemma,const char *aspect,int plural) {
   /* OpenRussian's `others` table has uninflected words and fixed expressions
    * without a part of speech. Native LTGOLD codes most such words as D
@@ -130,7 +139,7 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
   size_t lemma_len; unsigned char *encoded=to_cp866(russian_lemma,&lemma_len);
   unsigned char *value=allocate(lemma_len+8); size_t used=0;
   if(!strcmp(pos,"noun")){value[used++]=plural?'n':'N';}
-  else if(!strcmp(pos,"verb")){value[used++]='e';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
+  else if(!strcmp(pos,"verb")){value[used++]=coincident_form(alias)?'e':'V';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
   else value[used++]='A';
   memcpy(value+used,encoded,lemma_len);used+=lemma_len;
   size_t alias_len; unsigned char *key=to_cp866(alias,&alias_len);add_record(dic,key,alias_len,value,used);
@@ -181,6 +190,19 @@ static void load_imperfective_only(const char *path) {
   }
   free(line);fclose(file);
 }
+/* Curated words whose unclassified others.tsv adverb reading must not come
+ * first (open -> открыто); LTGOLD codes them as verb, adjective or Z. */
+static char **content_first;static size_t content_first_count;
+static void load_content_first(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    content_first=realloc(content_first,(content_first_count+1)*sizeof *content_first);if(!content_first)fail("out of memory");
+    if(!(content_first[content_first_count++]=strdup(line)))fail("out of memory");
+  }
+  free(line);fclose(file);
+}
+static int is_content_first(const char *word) { for(size_t i=0;i<content_first_count;i++)if(!strcmp(content_first[i],word))return 1; return 0; }
 /* Curated "imperfective perfective" pairs the partner column lacks. */
 static char **partner_pairs;static size_t partner_pair_count;
 static void load_verb_partners(const char *path) {
@@ -391,17 +413,17 @@ static size_t group_start(Records *db,const unsigned char *key,size_t len) {
   while(lo<hi){size_t mid=(lo+hi)/2;if(key_compare(&db->items[mid],key,len)<0)lo=mid+1;else hi=mid;}
   return lo;
 }
-static const Record *first_with(Records *db,const unsigned char *key,size_t len,unsigned char tag) {
+static int has_verb(Records *db,const unsigned char *key,size_t len) {
   for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++)
-    if(db->items[i].value_len&&db->items[i].value[0]==tag)return &db->items[i];
-  return NULL;
+    if(is_verb_record(&db->items[i]))return 1;
+  return 0;
 }
 /* Prefer an imperfective reading: a perfective lemma's present form is future
  * (He leaves -> выйдет). */
 static const Record *stem_verb(Records *db,const unsigned char *key,size_t len) {
   const Record *any=NULL;
   for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++) {
-    const Record *r=&db->items[i];if(!r->value_len||r->value[0]!='e')continue;
+    const Record *r=&db->items[i];if(!is_verb_record(r))continue;
     if(r->value_len>3&&r->value[2]=='0')return r;if(!any)any=r;
   }
   return any;
@@ -433,10 +455,10 @@ static void add_s_form_homographs(Records *db) {
     size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
     const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
     int word=n>2&&k[n-1]=='s';for(size_t j=0;j<n&&word;j++)if(!(k[j]>='a'&&k[j]<='z'))word=0;
-    if(word&&(head->value[0]=='N'||head->value[0]=='n')&&!first_with(db,k,n,'e')) {
+    if(word&&(head->value[0]=='N'||head->value[0]=='n')&&!has_verb(db,k,n)) {
       const Record *verb=NULL;size_t stem=0;
-      if(first_with(db,k,n-1,'e')){verb=stem_verb(db,k,n-1);stem=n-1;}
-      else if(n>3&&k[n-2]=='e'&&(strchr("sxz",k[n-3])||(k[n-3]=='h'&&(k[n-4]=='c'||k[n-4]=='s')))&&first_with(db,k,n-2,'e')){verb=stem_verb(db,k,n-2);stem=n-2;}
+      if(has_verb(db,k,n-1)){verb=stem_verb(db,k,n-1);stem=n-1;}
+      else if(n>3&&k[n-2]=='e'&&(strchr("sxz",k[n-3])||(k[n-3]=='h'&&(k[n-4]=='c'||k[n-4]=='s')))&&has_verb(db,k,n-2)){verb=stem_verb(db,k,n-2);stem=n-2;}
       if(verb&&verb->value_len>3&&!stem_has_noun(db,k,stem,head)) {
         size_t vlen=verb->value_len-3,nlen=head->value_len-1,len=1+vlen+1+nlen+1+stem;
         unsigned char *value=allocate(len),*key=allocate(n),*q=value;memcpy(key,k,n);
@@ -449,25 +471,64 @@ static void add_s_form_homographs(Records *db) {
   append_pending(db,&pending);
 }
 
-/* A word that is both noun and verb gets one record per reading, nouns first,
- * and only the first record is used: "I'll work" printed "Я есть работой".
- * Native LTGOLD codes such words as one ambiguous record with the verb reading
- * first, `work*ZV.работать{...}N.работа`, and grammar chooses. Put the same
- * record first for every one-word key whose first reading is a noun and that
- * also has a verb reading. */
+/* One-word keys get one record per OpenRussian reading, and only the first
+ * is used: unclassified others.tsv adverbs come first (open -> открыто, new ->
+ * внове), then nouns (I'll work -> Я есть работой), and a perfective verb can
+ * precede its imperfective (He comes -> придет). Following LTGOLD's codings,
+ * put one record first:
+ * - a verb with another class: the ambiguous Z record, verb reading first
+ *   (close*ZV.закрыватьN.закрытиеA.закрытый); grammar chooses;
+ * - an others.tsv adverb with an adjective and no verb: the adjective, with
+ *   any noun as an alternative (new*AновыйDвновь in LTGOLD);
+ * - verbs only, the first perfective: the imperfective (come*eприходить). */
+static const Record *first_class(Records *db,const unsigned char *key,size_t len,const char *classes) {
+  for(size_t i=group_start(db,key,len);i<db->count&&!key_compare(&db->items[i],key,len);i++)
+    if(db->items[i].value_len>1&&strchr(classes,db->items[i].value[0]))return &db->items[i];
+  return NULL;
+}
+/* The imperfective named in a perfective verb's partner column. */
+static const char *imperfective_partner(const Record *perfective) {
+  char *lemma=from_cp866(perfective->value+3,perfective->value_len-3);
+  const Verb *v=find_perfective(lemma);free(lemma);
+  if(!v)return NULL;
+  static char chosen[256];char *copy=strdup(v->partner),*save=NULL;const char *result=NULL;if(!copy)fail("out of memory");
+  for(char *p=strtok_r(copy,";",&save);p;p=strtok_r(NULL,";",&save))
+    if(!strcmp(verb_aspect(p),"imperfective")){snprintf(chosen,sizeof chosen,"%s",p);result=chosen;break;}
+  free(copy);return result;
+}
 static void add_verb_noun_homographs(Records *db) {
   qsort(db->items,db->count,sizeof(Record),record_compare);
   size_t original=db->count;Records pending={0};
   for(size_t i=0;i<original;) {
     size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
     const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
-    int word=n>1;for(size_t j=0;j<n&&word;j++)if(!((k[j]>='a'&&k[j]<='z')||k[j]=='-'))word=0;
-    const Record *verb=word&&(head->value[0]=='N'||head->value[0]=='n')?stem_verb(db,k,n):NULL;
-    if(verb&&verb->value_len>3) {
-      size_t vlen=verb->value_len-3,nlen=head->value_len-1,len=3+vlen+2+nlen;
-      unsigned char *value=allocate(len),*key=allocate(n),*q=value;memcpy(key,k,n);
-      *q++='Z';*q++='V';*q++='.';memcpy(q,verb->value+3,vlen);q+=vlen;*q++=head->value[0];*q++='.';memcpy(q,head->value+1,nlen);
-      add_record(&pending,key,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;free(key);free(value);
+    int word=n>1&&head->value[0]!='z';for(size_t j=0;j<n&&word;j++)if(!((k[j]>='a'&&k[j]<='z')||k[j]=='-'))word=0;
+    if(word) {
+      const Record *verb=stem_verb(db,k,n),*noun=first_class(db,k,n,"Nn"),*adj=first_class(db,k,n,"A");
+      char *english=from_cp866(k,n);int listed=is_content_first(english);free(english);
+      int other=listed&&head->value[0]=='W';
+      /* A listed noun-headed adjective (ready*Nчистоган): adjective first. */
+      if(listed&&!verb&&adj&&(head->value[0]=='N'||head->value[0]=='n'))other=1;
+      unsigned char *value=allocate(2048);size_t len=0;
+      if(verb&&(other||strchr("NnA",head->value[0]))) {
+        /* Verb plus the head reading; a listed adverb-headed word takes its
+         * noun and adjective readings (close*ZV.закрыватьN.закрытиеA.близкий). */
+        const Record *n1=other?noun:head->value[0]=='A'?NULL:head,*a1=other?adj:head->value[0]=='A'?head:NULL;
+        value[len++]='Z';value[len++]='V';value[len++]='.';memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
+        if(n1){value[len++]=n1->value[0];value[len++]='.';memcpy(value+len,n1->value+1,n1->value_len-1);len+=n1->value_len-1;}
+        if(a1){value[len++]='A';value[len++]='.';memcpy(value+len,a1->value+1,a1->value_len-1);len+=a1->value_len-1;}
+      } else if(!verb&&other&&adj) {
+        memcpy(value,adj->value,adj->value_len);len=adj->value_len;
+        if(noun){memcpy(value+len,noun->value,noun->value_len);len+=noun->value_len;}
+      } else if(verb&&verb!=head&&is_verb_record(head)&&head->value[1]=='0'&&head->value[2]=='1') {
+        /* Prefer the perfective's own partner (прийти -> приходить, not the
+         * first imperfective, происходить). */
+        const char *pair=imperfective_partner(head);
+        if(pair){size_t m;unsigned char *p=to_cp866(pair,&m);value[0]=head->value[0];value[1]='0';value[2]='0';memcpy(value+3,p,m);len=3+m;free(p);}
+        else{memcpy(value,verb->value,verb->value_len);len=verb->value_len;}
+      }
+      if(len){add_record(&pending,k,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;}
+      free(value);
     }
     i=end;
   }
@@ -542,6 +603,7 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/verbs.tsv",dir);load_verbs(path);
   snprintf(path,need,"%s/../imperfective-only.txt",dir);load_imperfective_only(path);
   snprintf(path,need,"%s/../verb-partners.txt",dir);load_verb_partners(path);
+  snprintf(path,need,"%s/../content-first.txt",dir);load_content_first(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");

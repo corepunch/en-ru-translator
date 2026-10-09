@@ -25,6 +25,10 @@ function grammar.cleanup(root)
         local head,tail=vector[first],vector[last]
         if handler==1 then
           for _,at in ipairs({'number','tense','person'}) do tail[at]=head[at] or 0 end
+          -- Lua improvement: a question's future verb takes the perfective, as
+          -- the declarative X V path does (Will you come? -> Ты придешь, not the
+          -- original's present приходите).
+          if (head.tense or 0)==2 then tail.aspect=1 end
           if tag(vector[first-1])=='Z' then vector[first-1].tag=0x4E end
           last=count
         elseif handler==8 then

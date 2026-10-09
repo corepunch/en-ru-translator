@@ -21,6 +21,7 @@ Publish a dictionary with the commercial headwords removed::
 """
 
 import argparse
+import bisect
 import struct
 import sys
 from pathlib import Path
@@ -51,8 +52,11 @@ def fold_byte(value):
     return value
 
 
+_FOLD_TABLE = bytes(fold_byte(value) for value in range(256))
+
+
 def fold_key(key):
-    return bytes(fold_byte(byte) for byte in key)
+    return key.translate(_FOLD_TABLE)
 
 
 def encode_cp866(text):
@@ -279,22 +283,38 @@ class Dictionary:
         return removed
 
     def add_line(self, key, value, replace=False):
-        if (b'*' in key and not value.startswith(b'$')) or b'\n' in key or b'\n' in value:
-            raise DictError('headword and code must be single lines; "*" in a pattern requires a $ action')
-        folded = fold_key(key)
-        if any(fold_key(existing) == folded for existing, _value in self.entries()):
-            if not replace:
-                raise DictError(f'headword already exists: {decode_cp866(key)}')
-            self.delete_folded({folded})
-        fresh = key + b'*' + value
-        position = len(self.lines)
-        for index, line in enumerate(self.lines):
-            current, _value = line_parts(line)
-            if fold_key(current) > folded:
-                position = index
-                break
-        self.lines.insert(position, fresh)
-        return fresh
+        return self.add_lines([(key, value)], replace)[0]
+
+    def add_lines(self, pairs, replace=False):
+        """Insert records before the first greater folded key, in one pass.
+
+        Keys within one batch must be distinct. Existing records for a key are
+        an error, or are removed first when ``replace`` is set.
+        """
+        folded = []
+        for key, value in pairs:
+            if (b'*' in key and not value.startswith(b'$')) or b'\n' in key or b'\n' in value:
+                raise DictError('headword and code must be single lines; "*" in a pattern requires a $ action')
+            folded.append(fold_key(key))
+        existing = {fold_key(key) for key, _value in self.entries()}
+        present = [(key, f) for (key, _value), f in zip(pairs, folded) if f in existing]
+        if present and not replace:
+            raise DictError(f'headword already exists: {decode_cp866(present[0][0])}')
+        if present:
+            self.delete_folded({f for _key, f in present})
+        keys = [fold_key(line_parts(line)[0]) for line in self.lines]
+        ordered = all(keys[i] <= keys[i + 1] for i in range(len(keys) - 1))
+        added = []
+        for (key, value), f in zip(pairs, folded):
+            fresh = key + b'*' + value
+            if ordered:
+                position = bisect.bisect_right(keys, f)
+            else:
+                position = next((i for i, current in enumerate(keys) if current > f), len(keys))
+            self.lines.insert(position, fresh)
+            keys.insert(position, f)
+            added.append(fresh)
+        return added
 
 
 def _frame(body):
@@ -571,7 +591,7 @@ def command_import(dictionary, args):
     if dictionary.binary_codes or dictionary.buckets == 32:
         raise DictError('UTF-8 entry import is for text .DIC dictionaries; use add --hex for .RUS codes')
     seen = set()
-    count = 0
+    pairs = []
     for number, line in enumerate(args.entries.read_text(encoding='utf-8').splitlines(), 1):
         if not line.strip():
             continue
@@ -582,10 +602,11 @@ def command_import(dictionary, args):
         if folded in seen:
             raise DictError(f'{args.entries}:{number}: duplicate headword {decode_cp866(key)!r}')
         seen.add(folded)
-        dictionary.add_line(key, value, replace=args.replace)
-        count += 1
+        pairs.append((key, value))
+    count = len(pairs)
     if not count:
         raise DictError(f'{args.entries}: no entries to import')
+    dictionary.add_lines(pairs, replace=args.replace)
     destination = _write_result(dictionary, args.output, args.in_place)
     print(f'imported {count} entries -> {destination}')
 

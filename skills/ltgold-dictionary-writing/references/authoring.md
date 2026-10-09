@@ -321,8 +321,16 @@ line. Two defects in this project were invisible to targeted tests: coding
 `others.tsv` words as plain `D` let reordering move prepositions and
 conjunctions (“Дверь о дома”), so they stayed in a `W` wrapper; and the builder's
 `0xc0` flag on every noun only surfaced once real `P` entries made agreement
-choose “на доме”. Use `engine.translate` in a loop, never one process per
-sentence.
+choose “на доме”. `lua tools/dict_compare.lua` does this against `HEAD`
+(`--base REV` for another revision, or pass sentences); it runs in one process
+and takes about 20 s for the whole corpus.
+
+To see the original program's output for candidate rows without building a
+fixture by hand, run `python3 tools/ltpro_try_entries.py --entry '<row>'
+[--delete '<historical key>'] 'Sentence.'`. It installs the rows in an
+isolated copy of `LTGOLD/BASE.DIC`, keeps the image size the DOS build needs,
+captures twice, and prints original and Lua output; `--keep DIR` saves the
+fixture for checking in.
 
 ### Closed-class batches
 
@@ -340,7 +348,8 @@ sentence-final head. Both are native behaviors confirmed by captures in
 
 Keep UTF-8 source rows, then rebuild from the C builder output. Importing into
 the existing `BASE.DIC` never removes a row you deleted or rekeyed in a source
-file, so always start from a fresh build:
+file, so always start from a fresh build. `sh tools/rebuild_openrussian.sh`
+runs this sequence (about 6 s); `--verify` checks the checked-in files instead:
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv

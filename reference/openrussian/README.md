@@ -47,7 +47,8 @@ gh repo clone Badestrand/russian-dictionary /tmp/openrussian-source
 python3 tools/export_openrussian_poc.py --full-snapshot /tmp/openrussian-source
 ```
 
-Build the binary databases:
+Build the binary databases with `sh tools/rebuild_openrussian.sh` (add
+`--verify` to check the checked-in files are reproducible). It runs:
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv

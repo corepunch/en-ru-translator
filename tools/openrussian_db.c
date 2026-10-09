@@ -168,6 +168,19 @@ static void load_na_nouns(const char *path) {
 }
 static int is_na_noun(const char *lemma) { for(size_t i=0;i<na_noun_count;i++)if(!strcmp(na_nouns[i],lemma))return 1; return 0; }
 
+#define LEXEME_SLOTS (1u<<18)
+static unsigned char **lexeme_slots;static size_t *lexeme_lengths;
+/* Returns 1 the first time (key, class) is seen, 0 afterwards. */
+static int lexeme_seen(const unsigned char *key,size_t n,unsigned char cls) {
+  if(!lexeme_slots){lexeme_slots=calloc(LEXEME_SLOTS,sizeof *lexeme_slots);lexeme_lengths=calloc(LEXEME_SLOTS,sizeof *lexeme_lengths);if(!lexeme_slots||!lexeme_lengths)fail("out of memory");}
+  uint64_t h=1469598103934665603ULL^cls;for(size_t i=0;i<n;i++)h=(h^key[i])*1099511628211ULL;
+  for(size_t at=h&(LEXEME_SLOTS-1);;at=(at+1)&(LEXEME_SLOTS-1)) {
+    unsigned char *slot=lexeme_slots[at];
+    if(!slot){slot=allocate(n+1);slot[0]=cls;memcpy(slot+1,key,n);lexeme_slots[at]=slot;lexeme_lengths[at]=n;return 1;}
+    if(lexeme_lengths[at]==n&&slot[0]==cls&&!memcmp(slot+1,key,n))return 0;
+  }
+}
+
 static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5]; size_t used=0;
   if(!strcmp(pos,"noun")) {
@@ -180,7 +193,8 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
     value[used++]=0;
   } else if(!strcmp(pos,"verb")) { value[used++]='V';value[used++]=0xc0;value[used++]=0x88;value[used++]=0;value[used++]=0; }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
-  for(size_t i=0;i<rus->count;i++)if(rus->items[i].key_len==n&&!memcmp(rus->items[i].key,encoded,n)&&rus->items[i].value_len&&rus->items[i].value[0]==value[0]){free(encoded);return;}
+  /* One lexeme per (headword, class); a hash set replaces a linear scan. */
+  if(!lexeme_seen(encoded,n,value[0])){free(encoded);return;}
   add_record(rus,encoded,n,value,used);free(encoded);
 }
 

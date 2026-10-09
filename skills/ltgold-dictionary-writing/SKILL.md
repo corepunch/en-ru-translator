@@ -21,6 +21,58 @@ in `reference/openrussian/function-words.txt`; import them with
 not an automatically merged source. English phrase rules belong in `.DIC`;
 `.RUS` and `.MORPH` supply Russian morphology.
 
+## Quick path: add a phrase to phrases.txt
+
+Each step takes seconds; do all of them.
+
+1. **Look up evidence.** `python3 tools/ltech_dict.py find LTGOLD/BASE.DIC 'good night'`
+   shows the original's coding; the same command on `reference/openrussian/BASE.DIC`
+   shows what is installed now, including generated OpenRussian literals.
+2. **Pick the shape** (tags: `N` noun, `n` plural noun, `A` adjective, `V` verb,
+   `D` adverb/interjection, `K` particle, `R` pronoun, `C` conjunction,
+   `P`+case+preposition; cases `И Р Д В Т П`; an empty `PР`/`PТ` only sets case):
+
+   | Expression | Shape | Verified example |
+   | --- | --- | --- |
+   | One fixed Russian word | `D` | `of course*Dконечно` |
+   | Russian words that agree or decline | `W` + tagged lemmas | `good night*WPРAспокойныйNночь`, `happy birthday*WPТсNденьPРNрождение` |
+   | Imperative | `WV…` | `get well soon*WVпоправлятьсяDскорее` |
+   | Valid only standalone or clause-final | boundary subrule | ``you `are``welcome`[*]*$Dпожалуйста\  \``; `[,*]` also allows a comma; use `[j,*]` after a sentence-initial `p` preposition |
+   | Variable pronoun/auxiliary | typed subrule | `how XR[*]*$…` (see codes reference) |
+
+   Never put Russian text after `#`, never freeze a multiword sentence in `D`,
+   and lowercase lemmas except proper names (`NРождество`).
+3. **Edit** `reference/openrussian/phrases.txt`. If step 1 showed a generated
+   literal starting with the same words, add its key to
+   `reference/openrussian/removed-headwords.txt`, or it will hide a subrule.
+4. **Rebuild:** `sh tools/rebuild_openrussian.sh` (always from source).
+5. **Check and record:** `lua init.lua 'Good night.'`, then add lines to
+   `test/translations.txt`: `phrase:<exact key> | Good night. => Спокойной ночи.`,
+   one variant (capitals, contraction, or another case form), and a `!>` line
+   for a nearby sentence the phrase must not consume.
+6. **Original program:** `python3 tools/ltpro_try_entries.py --entry '<row>'
+   [--delete '<historical key>'] 'Good night.' '<context>'` prints the original
+   next to Lua. New syntax must work there; note deliberate differences.
+7. **Regressions:** `sh test/run_all.sh`, then `lua tools/dict_compare.lua` and
+   review every changed corpus line.
+8. Before committing: `sh tools/rebuild_openrussian.sh --verify`.
+
+## Quick fixes
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Word printed uninflected or frozen | `D`/fixed text where words should agree | Tagged lemmas in a `W` composite |
+| First letter с/м/ж missing | Russian text in a `#` component | `D` or `WD` |
+| Idiom swallows a longer sentence (“You are welcome to stay”) | Literal key | Boundary subrule ending `[*]` or `[,*]` |
+| Subrule never fires | Literal with the same first words wins lexically | Add that key to `removed-headwords.txt` |
+| Subrule fails only before a comma after a sentence-initial preposition | Comma retagged `j` | `[j,*]` |
+| Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
+| Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |
+| Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find reference/openrussian/BASE.RUS <lemma>` |
+| Expected ё, got е | OpenRussian normalizes ё | Expect е |
+| A `function-words.txt` row deleted other meanings | `--replace` removes every record for the key | Pack alternatives into the one record, or leave the word out |
+| Test would need broken Russian to pass | Unrelated defect around the phrase | Check the owned span with `~>`; never bless the defect |
+
 Honor the requested scope. For a whole-file or batch review, inventory every
 entry and complete an entry-by-entry review; fixing the user's example does not
 complete the rest. Historical presence and native syntactic validity are

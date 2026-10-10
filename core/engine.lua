@@ -56,6 +56,8 @@ local function memoized_asset(source,name,decoder,secondary,secondary_name,terti
   return value
 end
 
+local paradigm_cache={}
+
 local function sibling_morphology(source)
   if type(source)~='string' or source:sub(1,20)=='LTech DIC File 2.00 ' then return nil end
   local directory,name=source:match('^(.*[/\\])([^/\\]+)$')
@@ -69,11 +71,19 @@ end
 function engine.new_state(exe_source,russian_source,russian_overlay,russian_morphology_source)
   russian_morphology_source=russian_morphology_source or sibling_morphology(russian_source)
   local exe_assets=memoized_asset(exe_source,'LTPRO.EXE',assets.new)
-  if not exe_assets.paradigm_tables then
-    local directory=type(russian_source)=='string' and russian_source:match('^(.*/)') or 'openrussian/'
-    local file=io.open(directory..'paradigms.txt','rb') or io.open('openrussian/paradigms.txt','rb')
-    if file then exe_assets:load_paradigms(file:read('*a'),encoding.encode);file:close() end
+  -- A dictionary directory with its own paradigms.txt inflects from it; the
+  -- original LTGOLD assets keep LTPRO's tables from the executable.
+  local directory=type(russian_source)=='string' and russian_source:match('^(.*/)') or 'openrussian/'
+  local tables=paradigm_cache[directory]
+  if tables==nil then
+    local file=io.open(directory..'paradigms.txt','rb')
+    if file then
+      local holder={};exe_assets.load_paradigms(holder,file:read('*a'),encoding.encode);file:close()
+      tables=holder.paradigm_tables
+    end
+    paradigm_cache[directory]=tables or false
   end
+  if tables then exe_assets=setmetatable({paradigm_tables=tables},{__index=exe_assets}) end
   return {assets=exe_assets,
     russian=memoized_asset(russian_source,'BASE.RUS',russian.from_bytes,russian_overlay,'BASE.RUS',russian_morphology_source,'BASE.MORPH'),
     elements={},tags={},count=0,word_count=0}

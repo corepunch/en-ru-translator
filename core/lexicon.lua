@@ -733,6 +733,77 @@ local function contraction(source)
 	end
 end
 
+local function punct(c) return c>=33 and c<=47 or c>=58 and c<=64 or c>=91 and c<=96 or c>=123 and c<=126 end
+
+-- 0687:1602: the records of one word. The tag counts letters, digits,
+-- Cyrillic and other characters (not ' . ,): letters only is ?, digits only
+-- H, anything mixed #. A hyphen, slash or parenthesis splits the word into
+-- records with the mark attached to the next part, unless the part before
+-- is purely alphabetic and the mark is a hyphen or slash (FORCE-MAJEURE,
+-- and/or, but 13-F and portion(s)). Each split counts as a word, as do ?
+-- parts; the first ? word gives the sentence its capitals.
+local function native_word(records,source,position,joined,words)
+  local created=false
+  local function add(tag,value)
+    local n=word(value,position)
+    if #value>=0x28 then tag='#' end
+    n.tag,n.counted_word=tag:byte(),tag=='?'
+    if tag=='#' then n.person,n.gender=3,1 else n.person,n.gender=0,0 end
+    if joined and not created then n.separator=1 end
+    created=true
+    records[#records+1]=n
+    return n
+  end
+  local function capitals(value)
+    if words==1 then local _,caps=value:gsub('[A-Z]','');records[1].capitals=caps end
+  end
+  local first=source:sub(1,1)
+  if first=='.' or first=='#' or first=='_' or first=='?' then
+    if #source==1 and not text.alpha(source:byte(1)) then
+      local n=boundary(first,0,position); n.tag=0x23
+      records[#records+1]=n
+    else add(first=='_' and '?' or '#',source) end
+    return words
+  end
+  local function tag_of(letters,digits,cyrillic,other)
+    if letters~=0 and digits~=0 or cyrillic~=0 or other~=0 then return '#' end
+    if letters==0 and digits~=0 then return 'H' end
+    return '?'
+  end
+  local letters,digits,cyrillic,other=0,0,0,0
+  local q,base,kept=1,1,false
+  if first=='/' then other,q=1,2 end
+  while q<=#source do
+    local c=source:byte(q)
+    if text.alpha(c) then letters=letters+1
+    elseif text.digit(c) then digits=digits+1
+    elseif text.is_cyrillic(c) then cyrillic=cyrillic+1
+    elseif c==0x2D or c==0x28 or c==0x2F then
+      if letters~=0 and digits==0 and cyrillic==0 and other==0 and c~=0x28 then kept=true end
+      local tag=tag_of(letters,digits,cyrillic,other)
+      if not (kept and tag=='?' and c~=0x28) then
+        local part=source:sub(base,q-1)
+        add(tag,part)
+        local n=boundary(string.char(c),0,position); n.marker=0x20
+        records[#records+1]=n
+        words=words+1
+        if tag=='?' then capitals(part) end
+        letters,digits,cyrillic,other,kept=0,0,0,0,false
+        base=q+1
+      end
+    elseif c~=0x27 and c~=0x2E and c~=0x2C then other=other+1 end
+    q=q+1
+  end
+  local tag,part=tag_of(letters,digits,cyrillic,other),source:sub(base)
+  if (part:byte(1) or 0)>0x7A and tag=='#' and #part==1 then
+    records[#records+1]=boundary(part,0,position)
+    return words
+  end
+  add(tag,part)
+  if tag=='?' then words=words+1; capitals(part) end
+  return words
+end
+
 -- Input splitting as LTPRO does it: whitespace separates chunks, leading and
 -- trailing punctuation becomes boundary records. Internal hyphens stay in
 -- the word until dictionary analysis has had a chance to recognize them.
@@ -762,35 +833,52 @@ function lexicon.tokenize(input,explicit)
       if item.joined then n.separator=1 end
       records[#records+1]=n
     else
+    -- 0687:1B93: leading marks become boundary records. The first may not
+    -- be . ? _ or a # or / that starts a word; later ones may be anything
+    -- but _. Pseudographics and the high CP866 letters count as marks.
+    local first=chunk:sub(1,1)
+    local function mark(c) return c and (punct(c) or c>0xEF or c>0xAF and c<0xE0) end
+    local c=chunk:byte(1)
     local leading=false
-    while chunk~='' and chunk:sub(1,1):match('[%p]') and not chunk:sub(1,1):match('[._?]') do
-      local c=chunk:sub(1,1)
-      if (c=='#' or c=='/') and chunk:sub(2,2):match('%a') then break end
-      if c=='`' then c="'" end
-      local n=boundary(c,(leading or item.joined) and 0 or 0x20,position-1)
+    if mark(c) and c~=0x2E and c~=0x3F and c~=0x5F and not ((c==0x23 or c==0x2F) and text.alpha(chunk:byte(2) or 0)) then
+      local n=boundary(c==0x60 and "'" or string.char(c),item.joined and 0 or 0x20,position-1)
       records[#records+1]=n;leading=n
       chunk=chunk:sub(2);position=position+1
+      while chunk~='' and mark(chunk:byte(1)) and chunk:byte(1)~=0x5F do
+        n=boundary(chunk:sub(1,1),0,position-1)
+        if n.tag==0x2E then n.tag=0x23 end
+        records[#records+1]=n;leading=n
+        chunk=chunk:sub(2);position=position+1
+      end
     end
-    -- 0687:1B93 attaches only the last leading mark, and only to a word that
+    -- Only the last leading mark is attached, and only to a word that
     -- follows in the same chunk: `(word` but `( word`.
     if leading and chunk~='' then leading.marker=0x20 end
     if chunk~='' then
-      local tail=''
-      while chunk~='' do
-        local c=chunk:sub(-1)
-        if c=='.' or c=='_' or (c=="'" and chunk:sub(-2,-2):match('[sS]')) or not c:match('%p') then break end
-        tail=c..tail;chunk=chunk:sub(1,-2)
+      local function ch(k) return k>=0 and chunk:byte(k+1) or 0 end
+      -- A closing quote matching an opening one is not part of the word.
+      local si=#chunk
+      if chunk:sub(-1)=="'" and first=="'" then si=si-1 end
+      -- Trailing marks are cut, except . _ and the 's apostrophe; a dot
+      -- after anything but a letter is cut too (1. but Mr.).
+      local di=si
+      while true do
+        local e=ch(di-1)
+        if not (e==0x2E or e==0x5F or e==0x27 and (ch(di-2)==0x73 or ch(di-2)==0x53)) and punct(e) then di=di-1
+        elseif e==0x2E and not text.alpha(ch(di-2)) then di=di-1
+        else break end
       end
-      if chunk~='' then
-        local n=word(chunk,position-1)
-        if item.joined then n.separator=1 end
-        records[#records+1]=n
-        if n.counted_word then
-          words=words+1
-          if words==1 then local _,caps=chunk:gsub('[A-Z]','');records[1].capitals=caps end
+      if not (di==0 and text.alpha(ch(0))) then
+        words=native_word(records,chunk:sub(1,di),position-1,item.joined,words)
+      end
+      if si<#chunk then si=si+1 end
+      if not (ch(si-1)==0x2E and not text.digit(ch(si-2))) then
+        for k=di,si-1 do
+          local n=boundary(string.char(ch(k)),0)
+          if n.tag==0x2E then n.tag=0x23 end
+          records[#records+1]=n
         end
       end
-      for c in tail:gmatch('.') do records[#records+1]=boundary(c,0) end
     end
     end
   end

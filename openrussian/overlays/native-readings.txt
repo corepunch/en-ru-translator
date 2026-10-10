@@ -12,7 +12,7 @@ hard*dтрудноAжесткий
 million*I1миллионAмиллионный
 release*ZV.выпускатьN.выпуск
 refinery*NNWAнефтеперегонныйNзавод
-deal*ZVWVиметь дело/Nсделка
+deal*ZVWVиметьNдело/Nсделка
 russian*NрусскийAрусский
 good will*NNWAдобраяNволя
 ablaze*Vпылать

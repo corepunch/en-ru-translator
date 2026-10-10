@@ -9,7 +9,9 @@ local usage = [[Usage: lua init.lua [--data DIR] [--dic FILE] [--rus FILE] [sent
 --data selects runtime assets; dictionary/ (LTGOLD's dictionaries with our
 changes) is used by default.
 Input and output are UTF-8. The translator accepts one sentence;
-it does not split multiple sentences. Asset options accept paths.
+--document translates a whole text (stdin, or the FILE given) as LTPRO
+translates a file: sentences, paragraphs and meanings appendices.
+Asset options accept paths.
 Inline {~text~} preserves text; {~=text~} transliterates it.
 {~\N starts a list with 1-10 words per row; {~\. returns to sentence mode.
 --meanings appends a glossary of alternative meanings and annotations.
@@ -25,7 +27,7 @@ LTGOLD's /C chain; the first listed wins.
 ]]
 
 local options, words = {}, {}
-local trace = false
+local trace, whole = false, false
 local asset_options = {
   ['--data'] = 'data_dir',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
@@ -45,6 +47,9 @@ while i <= #arg do
     i = i + 1
   elseif not end_options and key == '--meanings' then
     options.meanings = true
+    i = i + 1
+  elseif not end_options and key == '--document' then
+    whole = true
     i = i + 1
   elseif not end_options and key == '--trace' then
     trace = true
@@ -76,6 +81,25 @@ while i <= #arg do
     words[#words + 1] = key
     i = i + 1
   end
+end
+
+if whole then
+  local encoding = require 'core.encoding'
+  local input
+  if #words > 0 then
+    local file = io.open(table.concat(words, ' '), 'rb')
+    if not file then io.stderr:write('cannot read ', table.concat(words, ' '), '\n'); os.exit(2) end
+    input = file:read('a'); file:close()
+  else input = io.stdin:read('a') or '' end
+  local ok, result = pcall(function()
+    return require('core.document').translate(encoding.encode(input), options)
+  end)
+  if not ok then
+    io.stderr:write(tostring(result), '\n')
+    os.exit(1)
+  end
+  io.write((encoding.decode(result):gsub('\r\n', '\n')))
+  os.exit(0)
 end
 
 local input

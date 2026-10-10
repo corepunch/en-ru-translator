@@ -108,5 +108,7 @@ python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/cases.json \
 ```
 
 Before OpenRussian (commit `a38f955`) this gave 77/77 on the main corpus and
-355/386 on `review-2026-10-08`. A dictionary change is judged by what it does
+355/386 on `review-2026-10-08`.
+Whole files (`DEMO.TXT` and layout cases) are compared byte for byte by
+`test/document_test.lua` against `test/ltpro/documents/reference.json`. A dictionary change is judged by what it does
 to translations; an engine change must keep these numbers.

@@ -237,11 +237,13 @@ function engine.run(input, options)
   local result,alternatives=output.sentence(state,analyzed.root)
   result=result:gsub('^ ','')
   local terminator=analyzed.terminator
-  if terminator==0x2E or terminator==0x21 or terminator==0x3F then
+  -- A document writes its own separator after the sentence.
+  if options.terminator then
+  elseif terminator==0x2E or terminator==0x21 or terminator==0x3F then
     local mark=string.char(terminator)
     if result:sub(-1)~=mark then result=result..mark end
   end
-  local trailing_quotes=input:match("[.!?]([\"']+)%s*$") or ''
+  local trailing_quotes=not options.terminator and input:match("[.!?]([\"']+)%s*$") or ''
   if trailing_quotes~='' and result:sub(-#trailing_quotes)~=trailing_quotes then result=result..trailing_quotes end
   state.text,state.output=encoding.decode(result),result
   state.dictionary,state.lexical,state.root=dict,analyzed,analyzed.root

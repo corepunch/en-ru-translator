@@ -736,12 +736,17 @@ end
 -- Input splitting as LTPRO does it: whitespace separates chunks, leading and
 -- trailing punctuation becomes boundary records. Internal hyphens stay in
 -- the word until dictionary analysis has had a chance to recognize them.
-function lexicon.tokenize(input)
+-- A document (core/document.lua) cuts the terminator off itself, as LTPRO's
+-- sentence finder does, and passes its byte as `terminator`.
+function lexicon.tokenize(input,explicit)
   local records={boundary('*',0x2A)}
+  local terminator
+  if explicit then terminator=string.char(explicit) else
   local quoted=input:match("([.!?])['\"]%s*$")
   if quoted then input=input:gsub("['\"]%s*$",'') end
-  local terminator=input:match('([.!?])%s*$')
-  if terminator then
+  terminator=input:match('([.!?])%s*$')
+  end
+  if terminator and not explicit then
     -- A single-letter abbreviation retains its dot in the lexical token.
     if terminator~='.' or not input:match('^%a%.$') and not input:match('%s%a%.$') then
       input=input:gsub('[.!?]%s*$','')
@@ -921,7 +926,7 @@ end
 
 function lexicon.analyze(dictionary,input,options)
   options = options or {}
-  local records,terminator,word_count=lexicon.tokenize(input)
+  local records,terminator,word_count=lexicon.tokenize(input,options.terminator)
   local i=1
   while i<=#records do
     if records[i].kind==0x57 and not records[i].literal and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then

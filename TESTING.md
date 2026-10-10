@@ -66,6 +66,17 @@ The dictionary editor's bulk-import and index checks run separately:
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 ```
 
+## Documents
+
+`document_test.lua` translates whole files with `core/document.lua`, the port
+of LTPRO's file layer, and compares each complete output file byte for byte
+with the original's, including LTGOLD's `DEMO.TXT`. See
+[the document corpus](test/ltpro/documents/README.md). From the CLI:
+
+```sh
+lua init.lua --document LTGOLD/DEMO.TXT
+```
+
 ## Expanded executable review
 
 ```sh

@@ -13,6 +13,10 @@ expected='Шаг по отношению к дому.'
 [ "$(lua init.lua --names 'Xylophornium is here.')" = 'Ксилофорниум - здесь.' ]
 [ "$(lua init.lua --topic=BUSINESS 'Advising bank.')" = 'Авизующий Банк.' ]
 lua init.lua --help > "$scratch/help"
+# A document keeps the last sentence end's separator for an unterminated line.
+printf 'The cat.\n\nAGREEMENT\n' > "$scratch/document"
+[ "$(lua init.lua --document "$scratch/document")" = "$(printf 'Кошка.\n\nСОГЛАШЕНИЕ.')" ]
+[ "$(lua init.lua --document < "$scratch/document")" = "$(printf 'Кошка.\n\nСОГЛАШЕНИЕ.')" ]
 lua init.lua --dic LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS --meanings 'I agree.' > "$scratch/meanings"
 case "$(cat "$scratch/meanings")" in *agree*) ;; *) exit 1 ;; esac
 [ "$(lua init.lua '{~Keep  CASE~}.')" = 'Keep  CASE.' ]

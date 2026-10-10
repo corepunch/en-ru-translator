@@ -209,6 +209,7 @@
 залечь	government	80
 замерзать	government	80
 замерзнуть	government	80
+замерзнуть	government	80
 замолкать	government	80
 замолкнуть	government	80
 заниматься	government	80
@@ -305,6 +306,7 @@
 ложиться	government	80
 льстить	government	84
 манипулировать	government	90
+мародерствовать	government	80
 мародерствовать	government	80
 маршировать	government	80
 мастурбировать	government	80
@@ -443,6 +445,7 @@
 перебраться	government	80
 перевернуться	government	80
 перевертываться	government	80
+перевертываться	government	80
 переговорить	government	80
 перезванивать	government	84
 перезвонить	government	84
@@ -559,6 +562,7 @@
 пошевелить	government	90
 пошевелиться	government	80
 пошутить	government	80
+пощелкивать	government	80
 пощелкивать	government	80
 появиться	government	80
 появляться	government	80
@@ -839,6 +843,8 @@
 сходиться	government	80
 считаться	government	80
 съеживаться	government	80
+съеживаться	government	80
+съежиться	government	80
 съежиться	government	80
 съездить	government	80
 таиться	government	80
@@ -885,6 +891,7 @@
 уклоняться	government	80
 укорениться	government	80
 укореняться	government	80
+улепетывать	government	80
 улепетывать	government	80
 улетать	government	80
 улететь	government	80

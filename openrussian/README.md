@@ -23,14 +23,6 @@ additions cover native gaps: `do <TAO>[NRMS][,*]*$Vделать` reads `do` befo
 object at a clause end as the verb (`Do it` → `Сделай это`), and `will do` keeps the
 verb that grammar would otherwise delete after the auxiliary.
 
-`removed-headwords.txt` also drops generated literals made of grammar words that
-consume ordinary clauses, such as `this is`/`that is` → `это`, `to be` →
-`исполниться`, `not to` → `беречься`, `you know` → `ведь`, and `the first` →
-`первейший`. Fixed idioms (`each other`, `from now on`) and impersonal `it is …`
-readings (`It is cold` → `Холодно`) stay. Native T4 rereads the first English
-word of such a literal (original `It is cold.` → `Это.`). The Lua port keeps a
-multiword literal's reading, as it does for authored `W` equivalents.
-
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and
 native binary POS codes. The sibling `BASE.MORPH` carries OpenRussian morphology
@@ -75,8 +67,6 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
 /tmp/openrussian_db build openrussian/upstream \
   openrussian/BASE.DIC openrussian/BASE.RUS \
   openrussian/BASE.MORPH
-python3 tools/ltech_dict.py delete openrussian/BASE.DIC \
-  --keys-file openrussian/overlays/removed-headwords.txt --in-place
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
   --entries openrussian/overlays/function-words.txt --replace --in-place
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
@@ -84,12 +74,6 @@ python3 tools/ltech_dict.py import openrussian/BASE.DIC \
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
   --entries openrussian/overlays/phrases.txt --replace --in-place
 ```
-
-`removed-headwords.txt` lists generated OpenRussian literal phrases that would
-consume input before a curated T4 subrule can see it (for example the builder's
-`you are welcome*WDпожалуйста`). A curated subrule has a different key, so
-`--replace` cannot remove those literals. Always rebuild from the C builder
-output; this sequence reproduces the checked-in `BASE.DIC` byte for byte.
 
 Rows from `others.tsv` have no part of speech. The builder emits each as a
 one-component `W` composite with native adverb class `D` (`at all*WDсовсем`),

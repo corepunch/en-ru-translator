@@ -61,12 +61,9 @@ Each step takes seconds; do all of them.
    make <TAO>`deal`*$заключать\$`Nсделка`\
    ```
 
-   not `make a deal*WVзаключатьNсделка`, and not a `removed-headwords.txt`
-   deletion. LTGOLD has no such list. `Russia made a deal` and `They made the
-   deal` both give `заключила/заключили сделку`.
-3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
-   literal starting with the same words, add its key to
-   `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.
+   not `make a deal*WVзаключатьNсделка`. `Russia made a deal` and `They made
+   the deal` both give `заключила/заключили сделку`.
+3. **Edit** `openrussian/overlays/phrases.txt`.
 4. **Rebuild:** `sh tools/rebuild_openrussian.sh` (always from source).
 5. **Check and record:** `lua init.lua 'Good night.'`, then add lines to
    `test/translations.txt`: `phrase:<exact key> | Good night. => Спокойной ночи.`,
@@ -86,7 +83,6 @@ Each step takes seconds; do all of them.
 | Word printed uninflected or frozen | `D`/fixed text where words should agree | Tagged lemmas in a `W` composite |
 | First letter с/м/ж missing | Russian text in a `#` component | `D` or `WD` |
 | Idiom swallows a longer sentence (“You are welcome to stay”) | Literal key | Boundary subrule ending `[*]` or `[,*]` |
-| Subrule never fires | Literal with the same first words wins lexically | Add that key to `removed-headwords.txt` |
 | Subrule fails only before a comma after a sentence-initial preposition | Comma retagged `j` | `[j,*]` |
 | Subrule fails before a comma after a sentence-initial `P` (`at`, `in`) | Comma retagged `;` | `[j;,*]` |
 | Single-word key prints a stray case letter (`Рдо`) | `W` reading without an input class | Prefix the class: `goodbye*DDWPРдоNсвидание` |
@@ -94,7 +90,6 @@ Each step takes seconds; do all of them.
 | Imperfective verb needed where grammar asks for perfective (future, imperative) | Builder-written `.RUS` partner (`видеть`→`увидеть`) | Name the verb on both sides of `\|`: `Vпоправляться\|поправляться` |
 | -s verb form translated as a noun (`Он производство`) | Plural-noun gloss literal shadows suffix analysis | Builder emits native `z` (`works*zработатьnпроизводство\work`); check `find` |
 | Basic English word translated as a content word (`this` → `сего`, `us` → `Америка`) | OpenRussian has no closed-class grammar | Add LTGOLD's native reading to `function-words.txt` |
-| Ordinary clause replaced by one word (`This is` → `Это`, `you know` → `ведь`) | Generated grammar-word literal | Add the key to `removed-headwords.txt` |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |
 | Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find openrussian/BASE.RUS <lemma>` |

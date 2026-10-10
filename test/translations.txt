@@ -132,6 +132,18 @@ phrase:was home | She was home. => Она была дома.
 phrase:were home | They were home yesterday. ~> были дома
 phrase:be home | I will be home soon. ~> буду дома
 phrase:stay home | Stay home. => Останься дома.
+phrase:is [RN?#]`home`[D,*] | Is he home? => Он дома?
+phrase:is [TO]N`home`[D,*] | Is the dog home? => Собака дома?
+phrase:are [RN?#]`home`[D,*] | Are you home? => Ты дома?
+phrase:are [TO]N`home`[D,*] | Are your parents home? => Ваши родители дома?
+phrase:am [RN?#]`home`[D,*] | Am I home? => Я дома?
+phrase:was [RN?#]`home`[D,*] | Was she home? ~> дома?
+phrase:was [TO]N`home`[D,*] | Was the dog home? ~> дома?
+phrase:were [RN?#]`home`[D,*] | Were they home? ~> дома?
+phrase:were [TO]N`home`[D,*] | Were your parents home? ~> дома?
+phrase-context | Is he home now? => Он дома теперь?
+phrase-context | Is he a home? => Он дом?
+phrase-context | Is he the home? => Он дом?
 phrase-context | He will go home. => Он пойдет домой.
 phrase-context | Let's go home. => Давайте пойдем домой.
 phrase-context | I want to go home. => Я хочу идти домой.

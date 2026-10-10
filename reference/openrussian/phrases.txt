@@ -101,3 +101,12 @@ was home*WX103бытьDдома
 were home*WX113бытьDдома
 be home*WXбытьDдома
 stay home*WVоставатьсяDдома
+is [RN?#]`home`[D,*]*$@\.`Dдома`\
+is [TO]N`home`[D,*]*$@\..`Dдома`\
+are [RN?#]`home`[D,*]*$@\.`Dдома`\
+are [TO]N`home`[D,*]*$@\..`Dдома`\
+am [RN?#]`home`[D,*]*$@\.`Dдома`\
+was [RN?#]`home`[D,*]*$@\.`Dдома`\
+was [TO]N`home`[D,*]*$@\..`Dдома`\
+were [RN?#]`home`[D,*]*$@\.`Dдома`\
+were [TO]N`home`[D,*]*$@\..`Dдома`\

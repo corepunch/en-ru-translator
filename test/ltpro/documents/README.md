@@ -7,7 +7,8 @@ layer. `reference.json` is their original output, captured with
 BASE.RUS), two runs byte-identical. The capture appends CRLF to each input.
 
 `test/document_test.lua` translates every input with `core/document.lua` and
-compares the complete output file byte for byte, appendices included.
+compares the complete output file byte for byte, appendices included. All 21
+documents, `DEMO.TXT` among them, match the original exactly.
 
 Recapture after changing the inputs:
 

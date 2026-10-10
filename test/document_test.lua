@@ -33,25 +33,15 @@ local function first_difference(expected, actual)
   return 'same lines, different bytes'
 end
 
--- Documents whose sentences the engine does not yet translate as LTPRO does;
--- their layout already matches. Each must still differ, so the list shrinks.
-local pending = {
-  demo = true,
-}
-
 local failures = {}
 for index, case in ipairs(reference.cases) do
   assert(case.id == cases[index].id and case.input == cases[index].input, 'reference.json is stale for ' .. cases[index].id)
   -- The capture writes the input as CP866 followed by CRLF.
   local expected = unhex(case.raw_cp866_hex)
   local actual = document.translate(encoding.encode(case.input) .. '\r\n', options)
-  if pending[case.id] then
-    if actual == expected then failures[#failures + 1] = case.id .. ': now matches; remove it from pending' end
-  elseif actual ~= expected then
+  if actual ~= expected then
     failures[#failures + 1] = case.id .. ': ' .. first_difference(expected, actual)
   end
 end
 assert(#failures == 0, #failures .. ' of ' .. #reference.cases .. ' documents differ:\n' .. table.concat(failures, '\n'))
-local count = 0
-for _ in pairs(pending) do count = count + 1 end
-print((#reference.cases - count) .. ' of ' .. #reference.cases .. ' documents match LTPRO byte for byte')
+print(#reference.cases .. ' documents match LTPRO byte for byte')

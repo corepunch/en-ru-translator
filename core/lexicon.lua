@@ -515,7 +515,11 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   local value=record.value:match('^[^\\]*')
   local node=records[first]
   local readings=phrase_patterns.readings(value)
-  if #readings>1 then
+  -- A phrase led by a class letter keeps all its readings (0A4F:18F8 copies
+  -- the whole value); the reading choice picks one by the final tag, as for
+  -- a word: change to*ZWVизменяться ,Bчтобы/N.WNизменениеPПв read as N
+  -- gives изменения в.
+  if #readings>1 and (value:sub(1,1)=='W' or options.phrase_reading~=nil) then
     local selected=1
     if options.phrase_reading ~= nil then
       assert(type(options.phrase_reading)=='function', 'phrase_reading must be a function')

@@ -46,8 +46,11 @@ Each step takes seconds; do all of them.
    Every Russian word in a `W`/`V` composite needs its own tag. A space after a
    tag is a missing tag, not a multiword lemma: `Vиметь дело` is one untagged
    blob, `VиметьNдело` declines `дело`. Copying a LTGOLD record does not excuse
-   it. `deal*ZVWVиметь дело/Nсделка` is wrong; `deal*ZVWVиметьNдело/Nсделка` is
-   the entry.
+   it.
+
+   A phrasal verb is its own key. `иметь дело с` is `deal with`, not `deal`:
+   `deal with*ZVWVиметьNделоPТс/N.WNделоPТс`. Bare `deal` is the noun,
+   `deal*Nсделка`. Do not hang the preposition's object on the one-word key.
 3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
    literal starting with the same words, add its key to
    `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.

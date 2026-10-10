@@ -36,7 +36,7 @@ end
 -- Documents whose sentences the engine does not yet translate as LTPRO does;
 -- their layout already matches. Each must still differ, so the list shrinks.
 local pending = {
-  demo = true, ['marker-decimal'] = true, ['dash-joins-paragraph'] = true, abbreviations = true,
+  demo = true, ['marker-decimal'] = true, abbreviations = true,
 }
 
 local failures = {}

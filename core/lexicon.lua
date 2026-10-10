@@ -768,10 +768,12 @@ function lexicon.tokenize(input,explicit)
       if (c=='#' or c=='/') and chunk:sub(2,2):match('%a') then break end
       if c=='`' then c="'" end
       local n=boundary(c,(leading or item.joined) and 0 or 0x20,position-1)
-      n.marker=0x20
-      records[#records+1]=n;leading=true
+      records[#records+1]=n;leading=n
       chunk=chunk:sub(2);position=position+1
     end
+    -- 0687:1B93 attaches only the last leading mark, and only to a word that
+    -- follows in the same chunk: `(word` but `( word`.
+    if leading and chunk~='' then leading.marker=0x20 end
     if chunk~='' then
       local tail=''
       while chunk~='' do

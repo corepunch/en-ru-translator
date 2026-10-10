@@ -214,6 +214,7 @@ data or engine gap that fixed many sentences at once.
    | `know that X` → `знают этой X` | frame digit 0 (T3 rule 78) | `verb-frames.txt` |
    | `закрына`, `опреобранные` | native participle tables need a paradigm | `generation.lua` derives from forms |
    | wrong sense of a content word | OpenRussian ranks it | `native-readings.txt` (copy LTGOLD's record) |
+   | `made`/`opened`/`struck` stays a participle | no `N`/`R` subject in front of `E` | not an `-ed` defect. `R<dD?#>E` and `[NR]ET` promote `E` to finite `V` (`He opened` → `открыл`, `Russia made a deal` → `рядилась`). If the subject is tagged `V` (`Trump` → `козырь`) the rule never sees it |
 
 5. **Never add name entries.** Capitalized unknown words are transliterated
    by the engine (`lexicon.name_unknown`).

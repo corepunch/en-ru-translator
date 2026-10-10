@@ -11,7 +11,8 @@ package.path='./?.lua;'..package.path
 local engine=require 'core.engine'; local generation=require 'core.generation'; local enc=require 'core.encoding'
 local dir=arg[1] or 'openrussian/upstream'
 local state=engine.new_state('LTGOLD/LTPRO.EXE','LTGOLD/BASE.RUS')   -- no BASE.MORPH beside it: tables only
-assert(state.assets.paradigm_tables,'openrussian/paradigms.txt was not loaded')
+state.assets=setmetatable({},{__index=state.assets})
+do local f=assert(io.open('openrussian/paradigms.txt','rb')); state.assets:load_paradigms(f:read('a'),enc.encode); f:close() end
 local function norm(s) return (s:gsub('ё','е'):gsub("'",''):gsub('[;,].*','')) end
 local function rows(path) local f=assert(io.open(path)); local header,col; return function()
   while true do local line=f:read('l'); if not line then f:close() return nil end

@@ -159,3 +159,40 @@ Report entry coverage, grammatical regression results, and exact native parity
 separately. A reviewed native difference is not an exact match; a negative
 matching test does not certify the surrounding translation. Never turn a known
 grammatical defect into an accepted expectation just to make tests pass.
+
+## Fast path for a sentence that translates badly
+
+Diagnose by class of defect, not by sentence. Each failure below was a shared
+data or engine gap that fixed many sentences at once.
+
+1. **Probe in one call.** Run every sub-phrase together
+   (`while read s; do lua init.lua "$s"; done < list`) and capture the original
+   for the same list in one `tools/ltpro_capture.py` run. Do not probe one
+   sentence per command.
+2. **Look the word up in both dictionaries first**
+   (`tools/ltech_dict.py find LTGOLD/BASE.DIC w` and `openrussian/BASE.DIC w`).
+   A native record that the OpenRussian build lacks is a data fix, not a
+   rule. Search raw bytes (`d.find('свыше'.encode('cp866'))` across `LTGOLD/*`)
+   to find which native rule produces an unexplained original word.
+3. **Symptom to cause table** (all verified here):
+
+   | Symptom | Cause | Fix |
+   | --- | --- | --- |
+   | `He opened` → `открыто`, `is reading` → noun | `-ed`/`-ing` gloss hides the verb | builder `add_inflected_homographs` |
+   | `called/killed/lied` untranslated | native suffix rule undoes doubled letter / `-ied` | builder `add_native_suffix_gaps` |
+   | `will always supply` reads supply as noun | adverb in a `W` composite | `plain-adverbs.txt` |
+   | `Russia announced` → neuter verb | capitalized `.RUS` headword | builder lowers headwords |
+   | `main factor` → `Главное фактор` | empty gender column | builder infers from lemma ending |
+   | `Help me` → `Помоги меня` | no valency in OpenRussian | `verb-government.txt` |
+   | `know that X` → `знают этой X` | frame digit 0 (T3 rule 78) | `verb-frames.txt` |
+   | `закрына`, `опреобранные` | native participle tables need a paradigm | `generation.lua` derives from forms |
+   | wrong sense of a content word | OpenRussian ranks it | `native-readings.txt` (copy LTGOLD's record) |
+
+4. **Never add name entries.** Capitalized unknown words are transliterated
+   by the engine (`lexicon.name_unknown`).
+5. **Iterate cheaply.** `sh tools/rebuild_openrussian.sh` and `sh test/run_all.sh`
+   are fast; `lua tools/dict_compare.lua` takes about two minutes, so run it
+   once per batch in the background (`... > /tmp/dc.txt &`) and read it when it
+   finishes. Commit after each fix class, not at the end.
+6. **Before pushing a rebuilt branch**, check `git merge-base` with `main`; a
+   branch cut before a data move must be restarted from `main`.

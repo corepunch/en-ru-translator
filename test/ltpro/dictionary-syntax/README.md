@@ -12,7 +12,7 @@ runs the Lua engine on LTGOLD's own BASE.DIC/BASE.RUS: **112 exact matches and
 The test fails when a reviewed difference starts to match or changes.
 
 Findings are recorded in the
-[code reference](../../../skills/ltgold-dictionary-writing/references/codes.md).
+[code reference](../../../skills/dictionary-writing/references/codes.md).
 
 | Item | Probes | Result |
 | --- | --- | --- |

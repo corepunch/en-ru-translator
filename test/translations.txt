@@ -365,6 +365,10 @@ homograph:blind | The sun blinds me. => Солнце ослепляет меня
 # a leading underscore keeps an unknown word, an inner one makes it #.
 syntax | _Ohio is big. => _Ohio большое.
 syntax | Zork_x is big. => Zork_x большой.
+name:capitalized-unknown | Putin called Merkel. => Путин позвал Меркел.
+name:capitalized-unknown | Then Putin said that Merkel lied. => Затем Путин сказал, что Меркел врал.
+name:capitalized-unknown | I met Anderson in London. => Я встретился Андерсон в Лондоне.
+name:lowercase-stays-unknown | I saw putin. => Я видел putin.
 suffix-gap:doubled-ed | He called the doctor. => Он позвал врача.
 suffix-gap:doubled-ed | He killed the dog. => Он убил собаку.
 suffix-gap:doubled-ed | She pulled the door. => Она потянула дверь.

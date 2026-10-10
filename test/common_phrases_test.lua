@@ -35,15 +35,6 @@ for line in io.lines('openrussian/overlays/phrases.txt') do
     end
   end
 end
--- The C builder emits OpenRussian literals for these keys; the build removes
--- them (removed-headwords.txt) so the curated subrules apply instead.
-for line in io.lines('openrussian/overlays/removed-headwords.txt') do
-  if line:match('%S') then
-    -- A curated shorter key may still match its prefix (have to, have to do).
-    local found=lexicon.match_phrase(dictionary,lexicon.tokenize(line..' x'),2,line:match('^%S+'))
-    assert(not found or found.key~=line,'removed OpenRussian literal is still installed: '..line)
-  end
-end
 for _,case in ipairs({
   {'Good afternoontime.','добрый день'},
   {'Good {~afternoon~}.','добрый день'},

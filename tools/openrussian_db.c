@@ -573,6 +573,50 @@ static void add_verb_noun_homographs(Records *db) {
   append_pending(db,&pending);
 }
 
+/* The native suffix analysis (0A4F:07F2) picks one stem rule per ending. -ed
+ * undoes a doubled final consonant (stopped -> stop), so a verb that itself
+ * ends in a doubled letter (call, kill, pass) never finds its stem; -ied
+ * restores y (tried -> try), so a verb in -ie (lie, die) fails the same way.
+ * LTGOLD lists those forms explicitly (`pulled*Eтянуть\pull`,
+ * `calling*GвызыватьNвызов\call`); generate the same records. A reading the
+ * form already has (called -> имеемый, passing -> перевал) follows the verb. */
+static int ends_with(const unsigned char *key,size_t n,const char *tail) {
+  size_t m=strlen(tail);return n>=m&&!memcmp(key+n-m,tail,m);
+}
+static void add_inflected_form(Records *db,Records *pending,size_t original,const unsigned char *stem,size_t n,const char *suffix,char code,const Record *verb,size_t drop) {
+  size_t m=n-drop+strlen(suffix);unsigned char *key=allocate(m);memcpy(key,stem,n-drop);memcpy(key+n-drop,suffix,strlen(suffix));
+  const Record *existing=NULL;size_t at=group_start(db,key,m);
+  if(at<original&&!key_compare(&db->items[at],key,m))existing=&db->items[at];
+  unsigned char *value=allocate(verb->value_len+(existing?existing->value_len:0)+n+4);size_t len=0;
+  value[len++]=code;memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
+  if(existing&&!memchr(existing->value,'\\',existing->value_len)){memcpy(value+len,existing->value,existing->value_len);len+=existing->value_len;}
+  value[len++]='\\';memcpy(value+len,stem,n);len+=n;
+  add_record(pending,key,m,value,len);
+  pending->items[pending->count-1].sequence=existing?existing->sequence-1:next_sequence++;
+  free(value);free(key);
+}
+static void add_native_suffix_gaps(Records *db) {
+  qsort(db->items,db->count,sizeof(Record),record_compare);
+  size_t original=db->count;Records pending={0};
+  for(size_t i=0;i<original;) {
+    size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
+    const unsigned char *k=db->items[i].key;size_t n=db->items[i].key_len;
+    int word=1;for(size_t j=0;j<n&&word;j++)if(!(k[j]>='a'&&k[j]<='z'))word=0;
+    const Record *verb=word&&n>=3?stem_verb(db,k,n):NULL;
+    if(verb) {
+      if(n>=4&&k[n-1]==k[n-2]&&strchr("lsfz",k[n-1])) {
+        add_inflected_form(db,&pending,original,k,n,"ed",'E',verb,0);
+        add_inflected_form(db,&pending,original,k,n,"ing",'G',verb,0);
+      } else if(ends_with(k,n,"ie")) {
+        add_inflected_form(db,&pending,original,k,n,"d",'E',verb,0);
+        add_inflected_form(db,&pending,original,k,n,"ying",'G',verb,2);
+      }
+    }
+    i=end;
+  }
+  append_pending(db,&pending);
+}
+
 static void add_people_plural(Records *rus) {
   /* LTPRO stores this suppletive plural as its own noun, paradigm 30. */
   static const unsigned char key[]={0xab,0xee,0xa4,0xa8}; /* люди */
@@ -648,6 +692,7 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
   add_s_form_homographs(&source_dic);
   add_verb_noun_homographs(&source_dic);
+  add_native_suffix_gaps(&source_dic);
   add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
   printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);

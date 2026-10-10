@@ -79,6 +79,9 @@ Each step takes seconds; do all of them.
 | Expected ё, got е | OpenRussian normalizes ё | Expect е |
 | A `function-words.txt` row deleted other meanings | `--replace` removes every record for the key | Pack alternatives into the one record, or leave the word out |
 | Test would need broken Russian to pass | Unrelated defect around the phrase | Check the owned span with `~>`; never bless the defect |
+| Third `\`-section of a subrule does nothing | Only the selector's first character is read | Put the edit in the tail action: `` \$`Dв`$`Dвиду` `` |
+| Need a word that only begins phrases | No standalone meaning | Native placeholder `corned*:`; alone it prints the English word |
+| Unsure what a code does natively | Unverified syntax | Add a probe to `test/ltpro/dictionary-syntax/probes.json` and capture it |
 
 Honor the requested scope. For a whole-file or batch review, inventory every
 entry and complete an entry-by-entry review; fixing the user's example does not

@@ -336,7 +336,7 @@ code bytes encode grammatical properties used during compilation.
 | Byte | Mask | Meaning |
 |------|------|---------|
 | `byte(1)` | — | Part-of-speech tag (first char of grammatical code) |
-| `byte(2)` | — | Flags: `0x80` = adjective paradigm in byte(3), else in byte(4); `&2` = aspect flag |
+| `byte(2)` | — | Flags. Verbs: `0x08` future with буду, `0x02` native perfective, `0x04` forces perfective aspect. Adjectives: `0x20` short form always, `0x01` short predicate. See [verified bits](../skills/ltgold-dictionary-writing/references/codes.md#rus-code-bits) |
 | `byte(3)` | `&3` | Gender (0=neuter, 1=masculine, 2=feminine) OR adjective paradigm ID |
 | `byte(3)` | `&0x4` | Plural flag (noun) |
 | `byte(4)` | `&~0x80` | Paradigm ID (noun declension or verb conjugation pattern) |

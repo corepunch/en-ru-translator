@@ -307,8 +307,10 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
     value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
     value[used++]=0;
   } else if(!strcmp(pos,"verb")) {
-    /* LTGOLD's aspect flags: 0x04 perfective-only, 0x08 imperfective-only
-     * (no partner; analytic future буду работать). */
+    /* Byte-2 aspect flags. 0x08 (verified in original LTPRO): future is
+     * analytic буду работать, ignoring any partner. 0x04 forces perfective
+     * aspect in the decoder; native perfectives mostly carry 0x02 instead
+     * (увидеть e3), which also suppresses the partner lookup. */
     const char *partner=perfective_partner(lemma),*aspect=verb_aspect(lemma);
     value[used++]='V';value[used++]=(unsigned char)(0xc0|(!strcmp(aspect,"perfective")?0x04:partner?0:0x08));
     value[used++]=0x88;value[used++]=0;value[used++]=0;

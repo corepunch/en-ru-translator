@@ -16,7 +16,7 @@ Paths below are relative to the repository root. Sources of authority are
 `LTGOLD/BASE.DIC`, `BUSINESS.DIC`, and `COMPUTER.DIC`; and the implementation in
 `core/lexicon.lua`, `core/senses.lua`, `core/matching.lua`, `core/phrasing.lua`,
 `core/agreement.lua`, and `core/generation.lua`. The curated greetings are in
-`openrussian/overlays/phrases.txt` and exercised by `test/greetings_test.lua`.
+the `## phrases` section of `openrussian/dictionary.txt` and exercised by `test/greetings_test.lua`.
 
 Examples labeled **historical** are dictionary encodings, not claims about a
 captured translation. A tag's linguistic name does not prove every engine path

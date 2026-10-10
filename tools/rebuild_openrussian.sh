@@ -12,10 +12,7 @@ trap 'rm -rf "$work"' EXIT HUP INT TERM
 
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o "$work/openrussian_db" -liconv
 "$work/openrussian_db" build "$dir/upstream" "$work/BASE.DIC" "$work/BASE.RUS" "$work/BASE.MORPH" >/dev/null
-python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/overlays/function-words.txt" --replace --in-place >/dev/null
-python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/overlays/irregular-verbs.txt" --replace --in-place >/dev/null
-python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/overlays/native-readings.txt" --replace --in-place >/dev/null
-python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/overlays/phrases.txt" --replace --in-place >/dev/null
+python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/dictionary.txt" --replace --in-place >/dev/null
 python3 tools/ltech_dict.py check "$work/BASE.DIC" | grep -q 'index: valid'
 
 if [ "${1:-}" = "--verify" ]; then

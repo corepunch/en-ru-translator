@@ -6,12 +6,24 @@ entries (58,825 source rows total). The C builder compiles them into standalone
 indexed binary `.DIC` and `.RUS` databases. This snapshot produces 98,628 DIC
 records, 53,492 native-format RUS records, and 58,772 compact morphology
 records, including 4,978 shared templates.
-The checked-in `BASE.DIC` applies 177 reviewed structural readings from
-`function-words.txt` (pronouns, determiners, conjunctions, question words,
-auxiliaries, modals, quantifiers, prepositions, and a few grammatical phrases),
-replacing all records for those exact keys, 111 phrase entries from
-`phrases.txt`, and 215 irregular verb forms from `irregular-verbs.txt`. It contains
-98,241 DIC records after replacement.
+
+Three files of our own sit beside the upstream tables; they are the whole
+authored input, in the spirit of LTGOLD's single `.DIC` and `.RUS`:
+
+- [`dictionary.txt`](dictionary.txt): English `headword*code` rows imported into
+  `BASE.DIC` after the build with `--replace`. Sections: `function-words`
+  (pronouns, determiners, auxiliaries, prepositions with case),
+  `irregular-verbs`, `native-readings` (a full record for a word whose generated
+  first sense is wrong) and `phrases` (W composites, D equivalents, `*$`
+  subrules).
+- [`lexemes.tsv`](lexemes.tsv): Russian lemma attributes OpenRussian has no
+  column for (`government`, `imperfective-only`, `partner`, `na`), read by the
+  builder and written into `.RUS` records as LTGOLD stores them.
+- [`words.tsv`](words.tsv): English word attributes for the builder (`adverb`,
+  `content-first`, `frame`).
+
+The builder generates only one-word English keys; every multiword entry is a
+`dictionary.txt` row.
 
 OpenRussian is a Russian dictionary and has no English grammar: it coded `this`
 as the adverb `сего`, `us` as `Америка`, `and` as `W`-text, and lacked `me`, `him`,
@@ -26,8 +38,7 @@ verb that grammar would otherwise delete after the auxiliary.
 The builder emits only one-word English glosses. OpenRussian glosses are
 descriptions (`this is`, `make a deal`, `you know`), and as multiword literal keys
 they win over grammar and curated subrules, so every multiword entry comes from
-an overlay (`phrases.txt`, `native-readings.txt`, `function-words.txt`), as in
-LTGOLD. Text in parentheses (`growth (in quantity, prices, etc)`) is a note, not
+`dictionary.txt`, as in LTGOLD. Text in parentheses (`growth (in quantity, prices, etc)`) is a note, not
 glosses. Native T4 rereads the first English word of a multiword literal
 (original `It is cold.` → `Это.`); the Lua port keeps the literal's reading.
 
@@ -76,11 +87,7 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
   openrussian/BASE.DIC openrussian/BASE.RUS \
   openrussian/BASE.MORPH
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/function-words.txt --replace --in-place
-python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/irregular-verbs.txt --replace --in-place
-python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/phrases.txt --replace --in-place
+  --entries openrussian/dictionary.txt --replace --in-place
 ```
 
 Always rebuild from the C builder output; this sequence reproduces the checked-in
@@ -93,7 +100,7 @@ reordering from moving these unclassified prepositions and conjunctions.
 A one-word adverb is a plain `D` instead, as in LTGOLD (`always*Dвсегда`): native
 rules like `X D V` do not see through a `W` composite, so `Russia will always
 supply fuel` read `supply` as a noun. Every `-ly` word and the words in
-[`plain-adverbs.txt`](overlays/plain-adverbs.txt) get plain `D`; other unclassified words keep `W`. It
+the `adverb` rows of [`words.tsv`](words.tsv) get plain `D`; other unclassified words keep `W`. It
 formerly emitted `W#…#`, but native `#` marks nontranslated names and reads a
 leading с/м/ж as gender, so 542 readings lost their first letter
 (`according to` → `огласно`).
@@ -118,11 +125,11 @@ Verb records also carry LTGOLD's aspect flags: `0x04` on perfective verbs and
 An imperfective-only verb then takes the analytic future (`I'll work` →
 `Я буду работать`, as in the original). The future auxiliary comes from the
 native быть paradigm, since OpenRussian lists `есть` in every present/future
-slot. [`imperfective-only.txt`](overlays/imperfective-only.txt) lists the 152 imperfective
+slot. the `imperfective-only` rows of [`lexemes.tsv`](lexemes.tsv) list the 152 imperfective
 verbs that LTGOLD codes without a partner although the source names one
 (`работать` would otherwise pair with `поработать`). The partner column mixes
-`;`/`,` and stress marks; [`verb-partners.txt`](overlays/verb-partners.txt) adds pairs it
-lacks (`идти пойти`).
+`;`/`,` and stress marks; `partner` rows in `lexemes.tsv` add pairs it
+lacks (`идти	partner	пойти`).
 
 A one-word key whose first reading is a noun and that also has a verb reading
 gets LTGOLD's ambiguous record first, verb reading leading
@@ -179,13 +186,13 @@ key's first verb is perfective, its imperfective partner goes first
 (`come*e00приходить`, as in LTGOLD), so `He comes` is present `приходит`.
 OpenRussian's unclassified `others.tsv` adverbs are imported first and hid the
 verb or adjective of 152 basic words (`open` → `открыто`, `new` → `внове`).
-[`content-first.txt`](overlays/content-first.txt) lists 307 words: those LTGOLD codes as verb,
+the `content-first` rows of [`words.tsv`](words.tsv) list 307 words: those LTGOLD codes as verb,
 adjective or `Z`, plus noun-headed adjectives it codes `A`/`d` (`ready`); for
 those the builder puts the `Z` record (with noun and adjective readings) or the
 adjective first. Unlisted adverb-headed words keep the adverb, since LTGOLD does
 for `please`, `welcome` and `again`.
 
-[`irregular-verbs.txt`](overlays/irregular-verbs.txt) holds 215 irregular English verb
+The `irregular-verbs` section of [`dictionary.txt`](dictionary.txt) holds 215 irregular English verb
 forms from LTGOLD's native readings (`went*hидти\go`, `gave*hдавать\give`,
 `left*EоставатьсяAлевый\leave`), imported after the function words. Misspelled
 or regular LTGOLD keys are omitted, and `V.` readings keep only the sense that
@@ -218,19 +225,19 @@ agreed with a neuter verb.
 
 Four more repairs close gaps the source tables leave:
 
-- [`native-readings.txt`](overlays/native-readings.txt) takes LTGOLD's own record
+- The `native-readings` section of `dictionary.txt` gives a word its full record
   where OpenRussian has none or ranks the wrong sense first (`both*Iоба`,
   `rising*GподниматьсяAрастущий\rise`, `refinery`, `marketplace`, `export*…Aэкспортный`
-  so `export bans` is adjectival, `million*I1…`). It is imported after the
-  irregular verbs with `--replace`, like the function words.
+  so `export bans` is adjectival, `million*I1…`). `--replace` drops every
+  generated record for that key.
 - OpenRussian leaves the gender of 5,122 nouns empty, which became neuter
   (`Главное фактор`). The builder reads it off the lemma ending (`а/я/сть` feminine,
   `о/е/мя` neuter, otherwise masculine).
 - OpenRussian has no valency, so every verb was coded transitive (`0x88`), and
-  `Help me` printed `Помоги меня`. [`verb-government.txt`](overlays/verb-government.txt)
-  carries LTGOLD's government byte for the 946 shared verbs whose case differs from
-  the plain accusative (dative `0x84`, instrumental `0x90`, intransitive `0x80`);
-  regenerate it with `tools/export_verb_government.py`.
+  `Help me` printed `Помоги меня`. `government` rows in
+  [`lexemes.tsv`](lexemes.tsv) carry the government byte for the 946 verbs whose
+  case differs from the plain accusative (dative `84`, instrumental `90`,
+  intransitive `80`).
 - An English `-ed` or `-ing` gloss that is also a verb's inflected form
   (`opened*WDоткрыто`, `reading*Nчтение`) hides the verb. The builder emits
   LTGOLD's ambiguous record (`opened*EоткрыватьAоткрытый\open`), verb first.
@@ -244,8 +251,7 @@ and short-form code agree it (`Дверь закрыта`, `Условия оп�
 Native T3 rule 78 reads `that` after a verb as a demonstrative unless the verb
 has a nonzero frame digit (`know*V1знать`, `decide*V11решать`); OpenRussian verbs
 have frame 0, so `They know that Russia will help` printed `знают этой России`.
-[`verb-frames.txt`](overlays/verb-frames.txt) carries the 65 verbs LTGOLD codes with a
-frame (`tools/export_verb_frames.py`); the builder writes the digit into their
+`frame` rows in `words.tsv` carry the 65 verbs that take one; the builder writes the digit into their
 verb, `Z`, `-ed` and `-ing` records.
 
 Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
@@ -262,13 +268,13 @@ is left alone; coding it `z` read “terms and conditions” as a verb.
 `will` and `shall` use LTGOLD's auxiliary `X203быть`, and `not` its particle
 `KнеDнет`; the imported `will*Nволя` and `not*WDне` printed `Мы воля` and broke
 negated futures. The noun sense comes from LTGOLD's ``against <AO>`will` ``
-subrule and `against ~ will` literal in `phrases.txt`. As in the original, “His
+subrule and `against ~ will` literal in `dictionary.txt`. As in the original, “His
 will is strong” does not get it. LTGOLD's matching `of <AO>`will`` rule is
 omitted: it turned “a test of his will” into `по своей воле`.
 
 ## Prepositions and noun flags
 
-Each preposition in `function-words.txt` is one native record: class `P` or
+Each preposition in the `function-words` section of `dictionary.txt` is one native record: class `P` or
 `p`, the governed case, and the Russian preposition, with packed alternatives
 where the original uses them (`for*PРдля`, `of*PР`,
 `after*pРпослеDвпоследствииJ2после того, как`). LTGOLD's entries are evidence;
@@ -277,15 +283,15 @@ deliberate differences, omitted homographs, and original captures are in
 
 Agreement chooses в/на and из/с/от from noun flags in `.RUS`: bit 1 (`0x02`)
 marks animates and bit 6 (`0x40`) nouns that take на. The builder sets the
-first from OpenRussian `animate` and the second from the curated
-[`na-nouns.txt`](overlays/na-nouns.txt), read from `overlays/`. It
+first from OpenRussian `animate` and the second from the `na` rows of
+[`lexemes.tsv`](lexemes.tsv). It
 previously wrote `0xc0` for every noun.
 
 ## Curated phrases
 
-Keep reviewed UTF-8 `english key*reading` rows in `phrases.txt`; keep structural
-function-word readings in `function-words.txt`. Apply both batches after the C
-build. Import converts to CP866, replaces exact keys, and rebuilds the `.DIC`
+Keep reviewed UTF-8 `english key*reading` rows in [`dictionary.txt`](dictionary.txt):
+function words, irregular verb forms, sense readings and phrases, each under its
+`## section` header. One import applies them after the C build. Import converts to CP866, replaces exact keys, and rebuilds the `.DIC`
 index. Repeating an import is safe. `.RUS` and `.MORPH` contain Russian
 morphology; English-to-Russian phrases belong in `.DIC`.
 

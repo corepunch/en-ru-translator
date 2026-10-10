@@ -17,8 +17,10 @@ end
 local file=assert(io.open('openrussian/BASE.DIC','rb'))
 local dictionary=lexicon.from_bytes(file:read('*a'));file:close()
 local entries=0
-for line in io.lines('openrussian/overlays/phrases.txt') do
-  if line:match('%S') then
+local in_phrases=false
+for line in io.lines('openrussian/dictionary.txt') do
+  if line:match('^## ') then in_phrases=line=='## phrases' end
+  if in_phrases and line:match('%S') and not line:match('^#') then
     local key=line:match('^(.-)%*%$') or line:match('^(.-)%*')
     assert(covered[key],'curated entry has no translation test: '..key)
     entries=entries+1

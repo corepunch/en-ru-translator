@@ -593,7 +593,7 @@ def command_import(dictionary, args):
     seen = set()
     pairs = []
     for number, line in enumerate(args.entries.read_text(encoding='utf-8').splitlines(), 1):
-        if not line.strip():
+        if not line.strip() or line.lstrip().startswith('#'):
             continue
         key, value = line_parts(encode_cp866(line))
         if not key or not value:

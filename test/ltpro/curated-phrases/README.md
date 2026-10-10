@@ -1,6 +1,7 @@
 # Curated phrase verification
 
-This is the complete grammatical rewrite of `openrussian/overlays/phrases.txt`:
+This is the complete grammatical rewrite of `openrussian/overlays/phrases.txt` (now the `## phrases` section of
+`openrussian/dictionary.txt`):
 29 W composites, three native T4 subrules, and eleven single-word D equivalents.
 The review below covers every source entry. The single-word D readings retain
 conventional adverbial/interjection senses; none contains a frozen multiword

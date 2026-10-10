@@ -42,6 +42,12 @@ Each step takes seconds; do all of them.
 
    Never put Russian text after `#`, never freeze a multiword sentence in `D`,
    and lowercase lemmas except proper names (`NРождество`).
+
+   Every Russian word in a `W`/`V` composite needs its own tag. A space after a
+   tag is a missing tag, not a multiword lemma: `Vиметь дело` is one untagged
+   blob, `VиметьNдело` declines `дело`. Copying a LTGOLD record does not excuse
+   it. `deal*ZVWVиметь дело/Nсделка` is wrong; `deal*ZVWVиметьNдело/Nсделка` is
+   the entry.
 3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
    literal starting with the same words, add its key to
    `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.

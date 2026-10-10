@@ -107,8 +107,10 @@ python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/cases.json \
   --dictionary LTGOLD/BASE.DIC --russian LTGOLD/BASE.RUS
 ```
 
-Before OpenRussian (commit `a38f955`) this gave 77/77 on the main corpus and
-355/386 on `review-2026-10-08`.
+This gives 77/77 on the main corpus and 376/386 on `review-2026-10-08`; the
+ten differences there are reviewed intentional differences
+(`tools/ltpro_feature_review.py`: 603 exact, 22 intentional, 2 known
+limitations, 0 unexpected).
 Whole files (`DEMO.TXT` and layout cases) are compared byte for byte by
 `test/document_test.lua` against `test/ltpro/documents/reference.json`. A dictionary change is judged by what it does
 to translations; an engine change must keep these numbers.

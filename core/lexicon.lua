@@ -751,9 +751,12 @@ end
 -- as literals (there's, here's, what's, that's, who's).
 local contractedIs = { there = true, here = true, what = true, that = true, who = true }
 for i = 0, #ltpro_rules.lists.contracted_is do contractedIs[ltpro_rules.lists.contracted_is[i]] = true end
+-- By default 's after a question word is is too (How's he?); LTPRO reads it
+-- as a possessive there (--original).
+local questionIs = { how = true, where = true, when = true, why = true }
 local negativeStems = { ca = "can", wo = "will", sha = "shall" }
 
-local function contraction(source)
+local function contraction(source, original)
 	local lower = source:lower()
 	for _, row in ipairs(contractions) do
 		local ending, inserted, kind, selector = table.unpack(row)
@@ -763,7 +766,7 @@ local function contraction(source)
 		elseif #source > #ending and lower:sub(-#ending) == ending then
 			stem = source:sub(1, -#ending - 1)
 		end
-		if stem and (selector ~= 3 or contractedIs[stem:lower()]) then
+		if stem and (selector ~= 3 or contractedIs[stem:lower()] or not original and questionIs[stem:lower()]) then
 			-- Native negatives retain can's n and restore will/shall before
 			-- inserting not.
 			if ending == "n't" then
@@ -936,7 +939,7 @@ local function decode(dictionary,records,index,options)
   local node=records[index]
   local source=node.source
 	while true do
-		local stem, inserted, kind = contraction(source)
+		local stem, inserted, kind = contraction(source, options.original)
 		if not stem then break end
 		source = stem
 		node.source, node.source_length = source, #source

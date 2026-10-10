@@ -1,6 +1,9 @@
 #!/bin/sh
 # Build dictionary/BASE.DIC and dictionary/BASE.RUS: LTGOLD's dictionaries with
-# our changes applied (dictionary/changes.txt, dictionary/changes-rus.txt).
+# our changes applied (dictionary/changes.txt, dictionary/changes-rus.txt), and
+# the add-on dictionary/BASE2.DIC and BASE2.RUS: only the records of
+# dictionary/phrases.txt and phrases-rus.txt. The engine loads BASE.*, then
+# BASE2.*, BASE3.* ... (each overriding the earlier), as Quake 2 loads paks.
 #   sh tools/build_dictionary.sh           write dictionary/BASE.*
 #   sh tools/build_dictionary.sh --verify  require the checked-in files to match
 set -eu
@@ -42,12 +45,40 @@ if grep -qv '^\(#.*\)\?$' dictionary/changes-rus.txt; then
 fi
 python3 tools/ltech_dict.py check "$work/BASE.RUS" | grep -q 'index: valid'
 
+# An add-on: LTGOLD's file with the add-on imported, keeping only the add-on's
+# own keys, so it is a standalone file that can be taken out.
+overlay() { # base entries output
+  if ! grep -qv '^\(#.*\)\?$' "$2"; then return; fi
+  cp "$1" "$3"
+  python3 tools/ltech_dict.py import "$3" --entries "$2" --replace --in-place >/dev/null
+  python3 - "$2" "$3" <<'PY'
+import sys
+sys.path.insert(0, 'tools')
+import ltech_dict as L
+keys = set()
+for line in open(sys.argv[1], encoding='utf-8'):
+    line = line.rstrip('\n')
+    if line and not line.startswith('#'):
+        keys.add(L.fold_key(L.line_parts(L.encode_cp866(line))[0]))
+d = L.load_dictionary(sys.argv[2])
+d.delete_folded({L.fold_key(k) for k, _v in d.entries()} - keys)
+L._write_result(d, sys.argv[2], True)
+PY
+  python3 tools/ltech_dict.py check "$3" | grep -q 'index: valid'
+}
+overlay LTGOLD/BASE.DIC dictionary/phrases.txt "$work/BASE2.DIC"
+overlay LTGOLD/BASE.RUS dictionary/phrases-rus.txt "$work/BASE2.RUS"
+
 if [ "${1:-}" = "--verify" ]; then
   for x in BASE.DIC BASE.RUS; do cmp "$work/$x" "dictionary/$x"; done
-  if [ -f "$work/FORMAL.DIC" ]; then cmp "$work/FORMAL.DIC" dictionary/FORMAL.DIC; else [ ! -f dictionary/FORMAL.DIC ]; fi
-  echo "dictionary/BASE.DIC, BASE.RUS and FORMAL.DIC are reproducible"
+  for x in FORMAL.DIC BASE2.DIC BASE2.RUS; do
+    if [ -f "$work/$x" ]; then cmp "$work/$x" "dictionary/$x"; else [ ! -f "dictionary/$x" ]; fi
+  done
+  echo "dictionary/BASE.*, FORMAL.DIC and BASE2.* are reproducible"
 else
   for x in BASE.DIC BASE.RUS; do cp "$work/$x" "dictionary/$x"; done
-  if [ -f "$work/FORMAL.DIC" ]; then cp "$work/FORMAL.DIC" dictionary/FORMAL.DIC; else rm -f dictionary/FORMAL.DIC; fi
+  for x in FORMAL.DIC BASE2.DIC BASE2.RUS; do
+    if [ -f "$work/$x" ]; then cp "$work/$x" "dictionary/$x"; else rm -f "dictionary/$x"; fi
+  done
   python3 tools/ltech_dict.py check dictionary/BASE.DIC | grep entries
 fi

@@ -15,8 +15,8 @@ Paths below are relative to the repository root. Sources of authority are
 `LTGOLD/dic.txt`, chapter 3 and appendix 1; actual CP866 records in
 `LTGOLD/BASE.DIC`, `BUSINESS.DIC`, and `COMPUTER.DIC`; and the implementation in
 `core/lexicon.lua`, `core/senses.lua`, `core/matching.lua`, `core/phrasing.lua`,
-`core/agreement.lua`, and `core/generation.lua`. The curated greetings are in
-`dictionary/pending.txt` (waiting to return to `dictionary/changes.txt`).
+`core/agreement.lua`, and `core/generation.lua`. The greetings are in the
+phrase add-on `dictionary/phrases.txt` (built into `dictionary/BASE2.DIC`).
 
 Examples labeled **historical** are dictionary encodings, not claims about a
 captured translation. A tag's linguistic name does not prove every engine path
@@ -342,21 +342,24 @@ what <X>`up`[*]*$DDWDкакnдело\ $ \
 | `nдело` | Noun lemma `дело`, plural. Normal morphology produces nominative `дела`. |
 | Final backslash | Start an empty selector section. |
 
-This uses native T4 context replacement and later W expansion. It was executed
-in original LTPRO using isolated experimental dictionaries; it is a newly
-authored rule, not an entry claimed to exist in historical BASE.DIC. Original
-LTPRO generates `Как у Меня дела?`, `Как у Вас дела?`, `Как у его дела?`,
-`Как у ее дела?`, `Как у нас дела?`, and `Как у их дела?`. Lua applies phrase-wide
-casing and the corrected prepositional pronoun prefix, giving `меня/него/неё/них`.
-The default curated dictionary selects informal singular `ты` for `you`.
-Contraction expansion lets `How's he?` use the same rule.
+This uses native T4 context replacement and later W expansion. It is a newly
+authored rule, not an LTGOLD record. With LTGOLD's `you` (`Вы`) the default
+output is `Как у Вас дела?`, `Как у него дела?`, `Как у нее дела?`,
+`Как у них дела?`, `Как у меня дела?`. The original program prints the same
+except without н (`Как у его дела?`): `M` codes have no prefix flag, and
+LTPRO adds н after a preposition only in the instrumental and prepositional;
+the default engine adds it after every printing preposition (`--original`
+keeps LTPRO's rule). By default `How's he?` expands `'s` to `is` after a
+question word and reaches the same rule.
 
-A later native T4 rule rewrites sentence-final English `it` to `Rэто`, overriding
-the pronoun composite: original `Как У Это?`. Lua preserves authored W components
-against English lexical rewrites wholly inside the same equivalent, producing
-`Как у него дела?`. This is a general phrase-ownership correction, not a special
-translation of the spelling `it`; tag-based agreement still runs. The complete
-curated capture and regression include this pronoun and its contraction.
+A later native T4 rule rereads sentence-final `it` as `это` (original
+`Как У Это?`), so `How is it?` and `How is it going?` have their own boundary
+rules with fixed `Как дела`:
+
+```text
+how `is``it`[*]*$Dкак дела\  \
+how `is``it``going`[*]*$Dкак дела\   \
+```
 
 ### Native boundary rule for “what’s up”
 
@@ -387,12 +390,11 @@ in `full`[*]*$Dполностью\ \
 exclusive [*]*$VVWKнеVучитывать
 ```
 
-The idiom rule was tested in isolated copies with original LTPRO: it matches
-`What is up?`, `What's up?`, a spaced input question mark, a period, an exclamation
-mark, and no final punctuation. It excludes longer `What is up there?` and
-`What is up with him?`. The original output is `Как Дела?` for title-case input;
-Lua uses the same rule with phrase-wide sentence casing, producing `Как дела?`.
-Lowercase input produces `как дела?` in both. The original lexical test also
+Checked against original LTPRO: it matches `What is up?`, `What's up?` and a
+spaced input question mark, and excludes `What is up there?` and `What is up
+with him?`. With a period, an exclamation mark or no final punctuation LTGOLD's
+own `what [RSXU]` subrule wins (`Что - по.`) in both. The original prints
+`Как Дела?`, Lua `Как дела?`. The original lexical test also
 recognizes a one-word protected source spelling, as in `What's {~up~}?`.
 
 Do not replace `[*]` with a literal `?` or put a second bare `*` into a literal
@@ -436,8 +438,8 @@ change batch output: inline `{1.…}` alternatives are on in the supplied profil
 
 ### Reviewed deliberate differences
 
-Rechecked against the original with the current default dictionaries:
-`Let's go.` is `Давайте идти` there, `Давайте пойдем` here; `Will he come?`
-is present `Он приходит?` there, future `Он придет?` here; `How is it?` is
-`Как У Это?` there because a later English rule rereads `it`, while Lua
-protects authored phrase components (`Как у него дела?`).
+The engine's default fixes of LTPRO defects are listed with reasons in
+`test/ltpro/review-2026-10-08/reviewed-differences.json` and
+`test/ltpro/dictionary-syntax/reviewed-differences.json`; `--original` turns
+them off. `Let's go.` (`Давайте идти`) and `Will he come?` (`Он приходит?`) are
+LTPRO's own output in both modes.

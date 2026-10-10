@@ -164,8 +164,8 @@ preserving the pronoun node's grammatical fields. The empty `M` component uses
 those fields during normal generation. `J0` closes the prepositional group before
 the independent nominative plural noun, generated from lemma `дело`.
 This rule has been executed in original LTPRO; its third-person forms omit
-`н`. It waits in `dictionary/pending.txt` until it is checked against LTGOLD's
-own `how` and `what` records.
+`н` there (`Как у его дела?`), while the default engine prints `Как у него
+дела?`. It is in the phrase add-on `dictionary/phrases.txt` (`BASE2.DIC`).
 
 A literal `W#ты#` is not an `R` pronoun, and an auxiliary classified as a noun
 cannot match `X`. Use proper structural readings rather than enumerating the

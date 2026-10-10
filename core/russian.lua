@@ -17,9 +17,24 @@ function russian.from_bytes(bytes, overlay)
       end
     end
   end
-  ingest(bytes)
+  -- An overlay's records go ahead of the base's for the same lemma.
   if overlay then ingest(overlay) end
+  ingest(bytes)
   return {entries=entries}
+end
+
+-- A further overlay over already decoded records, ahead of them.
+function russian.with_overlay(base, bytes)
+  local overlay = russian.from_bytes(bytes)
+  local entries = {}
+  for key, lines in pairs(base.entries) do entries[key] = lines end
+  for key, lines in pairs(overlay.entries) do
+    local merged = {}
+    for _, line in ipairs(lines) do merged[#merged + 1] = line end
+    for _, line in ipairs(base.entries[key] or {}) do merged[#merged + 1] = line end
+    entries[key] = merged
+  end
+  return {entries = entries}
 end
 
 -- The .RUS verb record: V, flags, government, paradigm, 0, partner lemma.

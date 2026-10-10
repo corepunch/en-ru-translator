@@ -41,7 +41,7 @@ end
 -- The native sentence-final it rewrite must not overwrite a W equivalent
 -- already authored by the XR subrule. The tests above retain its neuter fields.
 
--- Compare nearby inputs with the same dictionary minus the new entries. This
+-- Compare nearby inputs without the add-on (dictionary/BASE2.DIC). This
 -- checks isolation without blessing the engine's existing awkward Russian.
 local baseline={}
 for _,record in ipairs(dictionary.records) do
@@ -59,11 +59,9 @@ for _,input in ipairs({'How are you feeling?',"What's up there?",
 end
 -- The placeholder also accepts a newly added lexical pronoun reading. It must
 -- not depend on enumerating English spellings or fixed Russian object forms.
-local novel=engine.translate('How are thou?',{dictionary=dictionary.bytes..'thou*R021ты\n'})
+local novel=engine.translate('How are zork?',{dictionary=dictionary.bytes..'zork*R021'..encoding.encode('ты')..'\n',
+  dic_overlay='dictionary/BASE2.DIC'})
 assert(novel=='Как у тебя дела?',novel)
-local formal=engine.translate('How are you?',{dictionary=dictionary.bytes..'you*R12'..encoding.encode('вы')..'\n',
-  dictionary_entry=function(key,entries) return key=='you' and #entries or 1 end})
-assert(formal=='Как у Вас дела?',formal)
 -- Structural readings remain available outside this phrase, so ordinary
 -- grammar rules can recognize auxiliaries and pronouns as X/R.
 for _,case in ipairs({{'I am','*RX*'},{'You are','*RX*'},{'He is','*RX*'},

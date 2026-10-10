@@ -2,7 +2,7 @@
 # checks each greeting case for the native rule and retained pronoun fields.
 
 # Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
-phrase:are [RN?#]`home`[D,*] | Are you home? => Вы дом?
+phrase:are [RN?#]`home`[D,*] | Are you home? => Вы дома?
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.
@@ -91,7 +91,7 @@ function:not | It is not at all easy. => Нисколько легко.
 homograph:works | He works. => Он работает.
 homograph:works | I know that he works. ~> он работает.
 homograph:works | The works of Tolstoy. => Работа Толстой.
-homograph:leaves | He leaves at night. => Он оставляет вечером.
+homograph:leaves | He leaves at night. => Он оставляет ночью.
 homograph:conditions | Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT. !> обусловливать
 function:will | I'll work. => Я буду работать.
 function:will | they'll work. => они будут работать.
@@ -229,7 +229,7 @@ verb-frame:that-clause | They agreed that Russia will help. => Они согла
 verb-frame:that-clause | He decided that Russia will help. => Он решил, что Россия поможет.
 verb-frame:that-clause | They hope that Russia will help. => Они надеются, что Россия поможет.
 rat-drones | Ukrainian drones struck a Russian oil export terminal in the Rostov region, setting the facility ablaze. => Украинские гул нажатые Русским нефтяным экспортным терминалом в Ростов области, устанавливая средство{1.предприятие;ресурсы;услуги} пылать.
-rat-goodwill | By continuing to hit refineries, he is eroding the good will that he has built with Trump over the last six months. => продолжая нажимать нефтеперегонные заводы, он разрушает добрую волю, которую он разработал{1.строить} с Козырь через последний раз шесть месяцев.
+rat-goodwill | By continuing to hit refineries, he is eroding the good will that he has built with Trump over the last six months. => продолжая нажимать нефтеперегонные заводы, он разрушает добрую волю, которую он разработал{1.строить} с Козырь через последние полгода.
 rat-barrels | Russia agreed to send us millions and millions of barrels of oil, and it is diesel. => Россия согласившаяся посылать нам миллион и миллион бочек{1.баррель} нефти, и это дизельный.
 idiom:make-a-deal | Russia made a deal. => Россия заключать сделку.
 native-reading:power | He has great power. => У него есть большая мощность{1.право}.
@@ -256,3 +256,106 @@ homograph | We store books. => Мы храним{1.загружать} книг�
 progressive | She is reading a book. => Она читает книгу.
 progressive | They are playing in the garden. => Они играют в сад.
 progressive | The children are sleeping. => Дети спят.
+
+# The phrase add-on dictionary/phrases.txt (dictionary/BASE2.DIC). Every entry
+# has a phrase:<key> line (common_phrases_test.lua); greeting lines also check
+# the native rule and pronoun fields (greetings_test.lua).
+greeting | What's up? => Как дела?
+greeting | What is up? => Как дела?
+greeting | What’s up? => Как дела?
+greeting | WHAT'S UP? => КАК ДЕЛА?
+greeting | what is up ? => как дела?
+greeting | How are you? => Как у Вас дела?
+greeting | How're you? => Как у Вас дела?
+greeting | How’re you? => Как у Вас дела?
+greeting | "  How   are\tyou?  " => Как у Вас дела?
+greeting | how are you? => как у Вас дела?
+greeting | HOW ARE YOU? => КАК У ВАС ДЕЛА?
+greeting | How is he? => Как у него дела?
+greeting | How is she? => Как у нее дела?
+greeting | How's she? => Как у нее дела?
+greeting | How’s she? => Как у нее дела?
+greeting | HOW IS SHE? => КАК У НЕЕ ДЕЛА?
+greeting | How's he? => Как у него дела?
+greeting | How are they? => Как у них дела?
+greeting | How are we? => Как у нас дела?
+greeting | How am I? => Как у меня дела?
+phrase:how XR[*] | How are you? => Как у Вас дела?
+phrase:how XR[*] | How are you feeling? !> дела
+phrase:what <X>`up`[*] | What's up? => Как дела?
+phrase:what <X>`up`[*] | What is up there? !> дела
+phrase:how `is``it`[*] | How is it? => Как дела?
+phrase:how `is``it`[*] | How's it? => Как дела?
+phrase:how `is``it`[*] | How is it made? !> Как дела
+phrase:how `is``it``going`[*] | How is it going? => Как дела?
+phrase:how `is``it``going`[*] | How's it going? => Как дела?
+phrase:thank you | Thank you. => Спасибо.
+phrase:thank you very much | Thank you very much. => Большое спасибо.
+phrase:thank you very much | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБО!
+phrase:thanks a lot | Thanks a lot. => Большое спасибо.
+phrase:many thanks | Many thanks. => Большое спасибо.
+phrase:you `are``welcome`[*] | You are welcome. => Пожалуйста.
+phrase:my `pleasure`[*] | My pleasure. => Пожалуйста.
+phrase:no `problem`[,*] | No problem. => Без проблем.
+phrase:excuse me | Excuse me. => Извините.
+phrase:goodbye | Goodbye. => До свидания.
+phrase:goodbye | GOODBYE! => ДО СВИДАНИЯ!
+phrase:nice to meet you | Nice to meet you. => Приятно познакомиться.
+phrase:pleased to meet you | Pleased to meet you. => Приятно познакомиться.
+phrase:long time no see | Long time no see. => Давно не виделись.
+phrase:so far so good | So far so good. => Пока всё хорошо.
+phrase:just a moment | Just a moment. => Минутку.
+phrase:wait a minute | Wait a minute. => Подождите минутку.
+phrase:best wishes | Best wishes. => Наилучшие пожелания.
+phrase:merry christmas | Merry christmas. => С Рождеством.
+phrase:happy new year | Happy new year. => С Новым годом.
+phrase:happy new year | Happy New Year! => С Новым годом!
+phrase:happy easter | Happy easter. => С Пасхой.
+phrase:happy holidays | Happy holidays. => С праздниками.
+phrase:bless you | Bless you. => Будьте здоровы.
+phrase:get well soon | Get well soon. => Поправляйтесь скорее.
+phrase:welcome back | Welcome back. => С возвращением.
+phrase:welcome home | Welcome home. => С возвращением домой.
+phrase:enjoy your meal | Enjoy your meal. => Приятного аппетита.
+phrase:bon appetit | Bon appetit. => Приятного аппетита.
+phrase:have a nice day | Have a nice day. => Хорошего дня.
+phrase:have a good day | Have a good day. => Хорошего дня.
+phrase:have a good trip | Have a good trip. => Счастливого пути.
+phrase:bon voyage | Bon voyage. => Счастливого пути.
+phrase:sweet dreams | Sweet dreams. => Сладких снов.
+phrase:what a pity | What a pity. => Как жаль.
+phrase:what a shame | What a shame. => Как жаль.
+phrase:what time is it | What time is it? => Который час?
+phrase:just in case | Just in case. => На всякий случай.
+phrase:never again | Never again. => Больше никогда.
+phrase:as usual | As usual. => Как обычно.
+phrase:for now | For now. => Пока.
+phrase:for free | For free. => Бесплатно.
+phrase:for sure | For sure. => Наверняка.
+phrase:at night | At night. => Ночью.
+phrase:at night | He works at night. => Он работает ночью.
+phrase:in the afternoon | In the afternoon. => Днём.
+phrase:this morning | This morning. => Сегодня утром.
+phrase:in `the``end`[j;,*] | In the end. => В конце концов.
+phrase:behind [,*] | He stayed behind, I think. ~> позади,
+phrase:inside [,*] | Come inside, please. ~> внутри,
+phrase:a bit scary | It is a bit scary. => Это - страшновато.
+phrase:there is no time | There is no time. => Некогда.
+phrase:six months | He stayed six months. => Он остался полгода.
+phrase:walk home | We walked home. => Мы пришли домой.
+phrase:run home | He ran home. => Он побежал домой.
+phrase:get home | I got home late. ~> добрался домой
+phrase:hurry home | We hurry home. => Мы спешим домой.
+phrase:fly home | They will fly home. ~> домой
+phrase:stay home | We stay home. => Мы остаемся дома.
+phrase:am home | I am home. => Я дома.
+phrase:is home | He is home now. ~> дома
+phrase:are home | We are home. => Мы дома.
+phrase:was home | She was home. => Она была дома.
+phrase:were home | They were home yesterday. ~> были дома
+phrase:be home | I will be home soon. ~> буду дома
+phrase:is [RN?#]`home`[D,*] | Is he home? => Он дома?
+phrase:am [RN?#]`home`[D,*] | Am I home? => Я дома?
+phrase:was [RN?#]`home`[D,*] | Was she home? ~> дома?
+phrase:were [RN?#]`home`[D,*] | Were they home? ~> дома?
+phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

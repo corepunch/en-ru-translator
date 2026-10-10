@@ -6,6 +6,13 @@ local agreement = {}
 local NOUN_TABLE, ADJECTIVE_TABLE = 8, 'adjective'
 local TAGS = '#BEFGHILNOPQUVWbfk'
 
+local encoding = require "core.encoding"
+-- Prepositions made from adverbs and participles keep ему, его (согласно ему).
+local no_n = {}
+for _, word in ipairs({'согласно', 'благодаря', 'вопреки', 'навстречу', 'подобно', 'вслед'}) do
+  no_n[encoding.encode(word)] = true
+end
+
 function agreement.run(state,list,tag,si)
   if not list.next then return 1 end
   local table_offset
@@ -194,7 +201,12 @@ function agreement.run(state,list,tag,si)
             set(B, 'case_mask', 8)
           end
         elseif selector == 23 then
-          if get(A, 'case_mask') == 0x10 or get(A, 'case_mask') == 0x20 then set(B, 'aspect', 1) end
+          -- LTPRO adds the н- of него/ней/них after a preposition only for
+          -- the instrumental and prepositional (с ними, but от его); by
+          -- default every oblique case takes it (от него, у него, к нему).
+          local c = get(A, 'case_mask')
+          if c == 0x10 or c == 0x20 or not state.original and (c == 2 or c == 4 or c == 8)
+              and (A.text or '') ~= '' and not no_n[A.text] then set(B, 'aspect', 1) end
           default = true
         else
           default = true

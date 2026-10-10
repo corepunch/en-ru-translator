@@ -1,0 +1,84 @@
+# Our phrase add-on to LTGOLD's dictionary: only phrases LTGOLD lacks or gets
+# wrong. tools/build_dictionary.sh builds it into dictionary/BASE2.DIC, which
+# the engine loads after BASE.DIC (--original or --base-only leave it out).
+# Fixed formulas are D text: a W composite at the start of a sentence is
+# printed with every component capitalized. Every entry has a phrase:<key>
+# case in test/translations.txt (common_phrases_test.lua checks).
+
+## greetings: native T4 grammatical subrules
+how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\
+what <X>`up`[*]*$DDWDкакnдело\ $ \
+# A later rule reads it as это, so How is it? is its own boundary rule.
+how `is``it`[*]*$Dкак дела\  \
+how `is``it``going`[*]*$Dкак дела\   \
+
+## fixed formulas
+thank you*Dспасибо
+thank you very much*Dбольшое спасибо
+thanks a lot*Dбольшое спасибо
+many thanks*Dбольшое спасибо
+you `are``welcome`[*]*$Dпожалуйста\  \
+my `pleasure`[*]*$Dпожалуйста\ \
+no `problem`[,*]*$DDWPРбезnпроблема\ \
+excuse me*Dизвините
+goodbye*Dдо свидания
+nice to meet you*Dприятно познакомиться
+pleased to meet you*Dприятно познакомиться
+long time no see*Dдавно не виделись
+so far so good*Dпока всё хорошо
+just a moment*Dминутку
+wait a minute*Dподождите минутку
+best wishes*Dнаилучшие пожелания
+merry christmas*Dс Рождеством
+happy new year*Dс Новым годом
+happy easter*Dс Пасхой
+happy holidays*Dс праздниками
+bless you*Dбудьте здоровы
+get well soon*Dпоправляйтесь скорее
+welcome back*Dс возвращением
+welcome home*Dс возвращением домой
+enjoy your meal*Dприятного аппетита
+bon appetit*Dприятного аппетита
+have a nice day*Dхорошего дня
+have a good day*Dхорошего дня
+have a good trip*Dсчастливого пути
+bon voyage*Dсчастливого пути
+sweet dreams*Dсладких снов
+what a pity*Dкак жаль
+what a shame*Dкак жаль
+what time is it*Dкоторый час
+just in case*Dна всякий случай
+never again*Dбольше никогда
+as usual*Dкак обычно
+for now*Dпока
+for free*Dбесплатно
+for sure*Dнаверняка
+at night*Dночью
+in the afternoon*Dднём
+this morning*Dсегодня утром
+in `the``end`[j;,*]*$DDWPПвNконецPРnконец\  \
+behind [,*]*$Dпозади
+inside [,*]*$Dвнутри
+a bit scary*WDстрашновато
+there is no time*WDнекогда
+six months*Nполгода
+
+## home
+walk home*WVидтиDдомой
+run home*WVбежатьDдомой
+get home*WVдобиратьсяDдомой
+hurry home*WVспешитьDдомой
+fly home*WVлететьDдомой
+stay home*WVоставатьсяDдома
+am home*WX001Dдома
+is home*WX003Dдома
+are home*WX013Dдома
+was home*WX103бытьDдома
+were home*WX113бытьDдома
+be home*WXбытьDдома
+is [RN?#]`home`[D,*]*$@\.`Dдома`\
+are [RN?#]`home`[D,*]*$@\.`Dдома`\
+am [RN?#]`home`[D,*]*$@\.`Dдома`\
+was [RN?#]`home`[D,*]*$@\.`Dдома`\
+were [RN?#]`home`[D,*]*$@\.`Dдома`\
+make <TAO>`deal`*$заключать\$`Nсделка`\

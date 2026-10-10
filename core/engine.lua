@@ -56,6 +56,29 @@ end
 
 local paradigm_cache={}
 
+-- An add-on merged over one particular base, cached per base object.
+local merged_cache=setmetatable({},{__mode='k'})
+local function merged(base, path, merge)
+  local per_base=merged_cache[base] or {}
+  merged_cache[base]=per_base
+  local bytes=engine.read_asset(path,'BASE.DIC')
+  local cached=per_base[path]
+  if cached and cached.bytes==bytes then return cached.value end
+  local value=merge(base, bytes)
+  per_base[path]={bytes=bytes,value=value}
+  return value
+end
+
+-- BASE.RUS and its overlays (a path, or a list in load order, later first).
+local function russian_with(source, overlays)
+  if type(overlays) ~= 'table' then overlays = {overlays} end
+  local russian_data = memoized_asset(source,'BASE.RUS',russian.from_bytes)
+  for _, overlay in ipairs(overlays) do
+    russian_data = merged(russian_data, overlay, russian.with_overlay)
+  end
+  return russian_data
+end
+
 -- Static binary assets are decoded separately from mutable sentence state.
 -- LTPRO's grammar tables come from core/rules.lua; the executable is not read.
 function engine.new_state(russian_source,russian_overlay)
@@ -74,7 +97,7 @@ function engine.new_state(russian_source,russian_overlay)
   end
   if tables then exe_assets=setmetatable({paradigm_tables=tables},{__index=exe_assets}) end
   return {assets=exe_assets,
-    russian=memoized_asset(russian_source,'BASE.RUS',russian.from_bytes,russian_overlay,'BASE.RUS'),
+    russian=russian_with(russian_source,russian_overlay),
     elements={},tags={},count=0,word_count=0}
 end
 
@@ -127,8 +150,25 @@ function engine.run(input, options)
   local dic_source = options.dictionary or options.dic or (default .. '/BASE.DIC')
   local rus_source = options.russian or options.rus or (default .. '/BASE.RUS')
 
-  local state = engine.new_state(rus_source, options.rus_overlay)
-  state.meaning_start=options.meaning_start
+  -- Add-ons next to the dictionary load after it, as Quake 2 loads paks:
+  -- BASE2.DIC/.RUS, BASE3 ... until a number is missing, each going ahead of
+  -- the ones before. --original or --base-only (addons = false) skip them.
+  local addon_dir = type(dic_source) == 'string' and (dic_source:match('^(.*[/\\])') or '')
+  local function addons(extension)
+    local found = {}
+    if options.original or options.addons == false or not addon_dir then return found end
+    for number = 2, 99 do
+      local path = addon_dir .. 'BASE' .. number .. '.' .. extension
+      local file = io.open(path, 'rb')
+      if not file then break end
+      file:close(); found[#found + 1] = path
+    end
+    return found
+  end
+  local rus_addons = addons('RUS')
+  if options.rus_overlay then rus_addons[#rus_addons + 1] = options.rus_overlay end
+  local state = engine.new_state(rus_source, rus_addons)
+  state.meaning_start,state.original=options.meaning_start,options.original
   if options.domain then
     assert(type(options.domain) == 'string' and options.domain ~= '', 'domain must be a nonempty string')
     state.domain=encoding.encode(options.domain)
@@ -146,6 +186,9 @@ function engine.run(input, options)
     end
   end
   local dict = memoized_asset(dic_source,'BASE.DIC',lexicon.from_bytes)
+  for _, path in ipairs(addons('DIC')) do
+    dict = merged(dict, path, lexicon.overlay)
+  end
   if options.dic_overlay then
     dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))
   end

@@ -12,6 +12,11 @@ expected='Шаг по отношению к дому.'
 [ "$(lua init.lua 'Xylophornium is here.')" = 'Xylophornium - здесь.' ]
 [ "$(lua init.lua --names 'Xylophornium is here.')" = 'Ксилофорниум - здесь.' ]
 [ "$(lua init.lua --topic=BUSINESS 'Advising bank.')" = 'Авизующий Банк.' ]
+# The phrase add-on dictionary/BASE2.DIC loads by default; --base-only and
+# --original leave it out.
+[ "$(lua init.lua "What's up?")" = 'Как дела?' ]
+[ "$(lua init.lua --base-only "What's up?")" = 'Какое по?' ]
+[ "$(lua init.lua --original "What's up?")" = 'Какое по?' ]
 # The improved reading by default; --original gives the executable's own.
 [ "$(lua init.lua 'The noncat is good.')" = 'Некошка хорошая.' ]
 [ "$(lua init.lua --original 'The noncat is good.')" = 'НеКошка хорошая.' ]

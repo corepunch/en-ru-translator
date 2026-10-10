@@ -3,6 +3,10 @@
   "This prevents him from working.": {
    "lua": "Это предохраняет его от работы.",
    "reason": "The original drops the object between prevent and from (also 'ошибки' in 'It prevents errors from occurring'); not yet explained. Lua keeps it, which is the correct Russian."
+  },
+  "It depends (mostly) on him.": {
+   "lua": "Он зависит (по большей части) от него.",
+   "reason": "LTPRO adds the н- of него/ней/них after a preposition only in the instrumental and prepositional (с ними, but от его). By default Lua adds it after every printing preposition except согласно, благодаря and similar (core/agreement.lua); --original keeps LTPRO's rule."
   }
  },
  "cyrillic-es-class": {

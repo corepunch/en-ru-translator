@@ -66,6 +66,13 @@ The dictionary editor's bulk-import and index checks run separately:
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 ```
 
+## Phrase add-on
+
+`dictionary/phrases.txt` builds `dictionary/BASE2.DIC`, which the engine loads
+after `BASE.DIC` (as further `BASE3.*` … would be). `common_phrases_test.lua`
+requires a `phrase:<key>` line in `test/translations.txt` for each entry;
+`greetings_test.lua` checks the `how XR[*]` and `what <X>`up`[*]` rules.
+
 ## Documents
 
 `document_test.lua` translates whole files with `core/document.lua`, the port

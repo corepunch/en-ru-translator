@@ -360,3 +360,8 @@ hortative | Let him go. !> Давайте
 homograph:blind | Love is blind. => Любовь слепая.
 homograph:blind | He is blind. => Он слепой.
 homograph:blind | The sun blinds me. => Солнце ослепляет меня.
+
+# Tokenizer classes recovered for issue 18 (test/ltpro/dictionary-syntax):
+# a leading underscore keeps an unknown word, an inner one makes it #.
+syntax | _Ohio is big. => _Ohio большое.
+syntax | Zork_x is big. => Zork_x большой.

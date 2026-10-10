@@ -1,0 +1,1010 @@
+{
+ "captured": "2026-10-10T06:30:04+00:00",
+ "emulator": "ltpro_capture via dosbox-x, two byte-identical runs per probe",
+ "probes_sha256": "4682afd6272f69dca9c8807e2f756f6803382eaf5cb92772073a56761e15648e",
+ "probes": [
+  {
+   "id": "stock",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Bear in mind the rules.",
+     "raw_cp866_hex": "93e7e2a8e2a520afe0a0a2a8aba02e0d0a",
+     "raw_sha256": "6a41c0e5f7cd5dd73b9ad7caeacbce220fc6ea1f55da13222872dd7996b0d667",
+     "translation": "Учтите правила."
+    },
+    {
+     "input": "Bear this in mind.",
+     "raw_cp866_hex": "88aca5a9e2a5209de2ae20822082a8a4e32e0d0a",
+     "raw_sha256": "ccef8590c55da5f7cf42ade90525018e3ff088607049da14d24d73eb9f97f05c",
+     "translation": "Имейте Это В Виду."
+    },
+    {
+     "input": "Bear it in your mind.",
+     "raw_cp866_hex": "88aca5a9e2a520ede2ae20a220a2a0e820e3ac7b312eacada5ada8a57d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206d696e643a20627261696e202d20e3ac3b206f7070696e696f6e202d20acada5ada8a50d0a0d0a",
+     "raw_sha256": "4abcb9a99dece1b4f9732dc1aec8263df314177ce9773b0c42084e8cb6cc10e7",
+     "translation": "Имейте это в ваш ум{1.мнение}."
+    },
+    {
+     "input": "Ask him to come.",
+     "raw_cp866_hex": "8faeafe0aee1a8e2a520a5a3ae20afe0a8e5aea4a8e2ec2e0d0a",
+     "raw_sha256": "a15d928817dbc3e31a54f70857d40fa086b36324bec4df3f669d449c65da65b3",
+     "translation": "Попросите его приходить."
+    },
+    {
+     "input": "It will cause him to leave.",
+     "raw_cp866_hex": "8ead20a2eba7aea2a5e220a5a3ae2c20e7e2aea1eb20aee1e2a0a2a8e2ec2e0d0a",
+     "raw_sha256": "f7a1552ac6ffe2eca0eae72d45cdab008bf8e707619ac0d22e578df68fe77e53",
+     "translation": "Он вызовет его, чтобы оставить."
+    },
+    {
+     "input": "I made up my mind.",
+     "raw_cp866_hex": "9f20e0a5e8a8ab2e0d0a",
+     "raw_sha256": "93c535735219138e4f3d9a0aa79d89539d251579fd6ba8cacf0d68b007d80ae7",
+     "translation": "Я решил."
+    },
+    {
+     "input": "This prevents him from working.",
+     "raw_cp866_hex": "9de2ae20afe0a5a4aee5e0a0adefa5e220aee220e0a0a1aee2eb2e0d0a",
+     "raw_sha256": "c7541f3281a093830c4bd2f8b90659f9b076232f9c35c14c2d63ae6d43809992",
+     "translation": "Это предохраняет от работы."
+    },
+    {
+     "input": "A few books are here.",
+     "raw_cp866_hex": "8da5e1aaaeabecaaae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "6fd95d5fa7ebacc39d4265dfa4630656968e6670cd52b424dffa5cc0ee429e02",
+     "translation": "Несколько книг - здесь."
+    },
+    {
+     "input": "A few book is here.",
+     "raw_cp866_hex": "8da5e1aaaeabecaaae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "6fd95d5fa7ebacc39d4265dfa4630656968e6670cd52b424dffa5cc0ee429e02",
+     "translation": "Несколько книг - здесь."
+    },
+    {
+     "input": "As far as possible.",
+     "raw_cp866_hex": "8fae20a2aea7acaea6adaee1e2a82e0d0a",
+     "raw_sha256": "3fe7a8717c3aae17460b93037f1f824b6306695197970757daedd1cda1618e8f",
+     "translation": "По возможности."
+    },
+    {
+     "input": "As far as I know, he is here.",
+     "raw_cp866_hex": "97e2ae20aaa0e1a0a5e2e1ef208ca5adef20a7ada0a9e2a52c20aead202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "288e6ba0eaf896b41c0c596c3f7d4cac0ddcd6b3700ff75ba1bc4f056dce5129",
+     "translation": "Что касается Меня знайте, он - здесь."
+    },
+    {
+     "input": "It rose from 5% to 10%.",
+     "raw_cp866_hex": "8ead20afaea4ada8aca0abe1ef20aee220352520a4ae203130252e0d0a",
+     "raw_sha256": "68605654da61292e5db8b895cce8f9f819a9b3b35844dea188fc796c18a7aacc",
+     "translation": "Он поднимался от 5% до 10%."
+    },
+    {
+     "input": "The state _Ohio is big.",
+     "raw_cp866_hex": "98e2a0e2205f4f68696f20a1aeabece8aea52e0d0a",
+     "raw_sha256": "899ffd593f7c68ea05f3a7f2476702c7648cb2f50da717f44ef6f46fcefdf484",
+     "translation": "Штат _Ohio большое."
+    },
+    {
+     "input": "_Ohio is big.",
+     "raw_cp866_hex": "5f4f68696f20a1aeabece8aea52e0d0a",
+     "raw_sha256": "7715a9dddbaaec0c0480421e6dda8d640fe78e3066d645b61131b55e065c4a33",
+     "translation": "_Ohio большое."
+    },
+    {
+     "input": "Zork_x is big.",
+     "raw_cp866_hex": "5a6f726b5f7820a1aeabece8aea92e0d0a",
+     "raw_sha256": "06bbebf3442ec6d1eff394a5111329a754c16982744de224f2ea0cca07e6f385",
+     "translation": "Zork_x большой."
+    },
+    {
+     "input": "Zorkx is big.",
+     "raw_cp866_hex": "5a6f726b7820a1aeabece8aea52e0d0a",
+     "raw_sha256": "c9e55e5803cf83cfa309900405fed4a4fc724e55d389961684ddb76e55e491a5",
+     "translation": "Zorkx большое."
+    },
+    {
+     "input": "It depends (mostly) on him.",
+     "raw_cp866_hex": "8ead20a7a0a2a8e1a8e22028afae20a1aeabece8a5a920e7a0e1e2a82920aee220a5a3ae2e0d0a",
+     "raw_sha256": "20da6f65702392547e6edda9489a6e9857417c774ea806be2e047b364b7547e6",
+     "translation": "Он зависит (по большей части) от его."
+    },
+    {
+     "input": "Follows: the list.",
+     "raw_cp866_hex": "8fe0a8a2aea4a8e2e1ef20ada8a6a53ae1afa8e1aeaa2e0d0a",
+     "raw_sha256": "03ac3f20a194ac5f0bea960b3bd48be5aa559d22a8204f0396ef853fdfd9593c",
+     "translation": "Приводится ниже:список."
+    },
+    {
+     "input": "If any) it works.",
+     "raw_cp866_hex": "85e1aba820a8aca5a5e2e1ef29aead20e0a0a1aee2a0a5e22e0d0a",
+     "raw_sha256": "3ce9dd85ff59921098282c30e1ffec8f5de4d5cf3a228cd5b5a33ac1e3efd67f",
+     "translation": "Если имеется)он работает."
+    },
+    {
+     "input": "Answer in writing and sign it.",
+     "raw_cp866_hex": "8ee2a2a5e2ece2a520a220afa8e1ecaca5adadaea920e4aee0aca520a820afaea4afa8e1eba2a0e2ec20ede2ae2e0d0a",
+     "raw_sha256": "fed40ed6018c3e966525331591f2327a2edee0ca6947c5a396bb8ccb2dab15b9",
+     "translation": "Ответьте в письменной форме и подписывать это."
+    },
+    {
+     "input": "The admission is free.",
+     "raw_cp866_hex": "84aeafe3e9a5ada8a57b312ea4aee1e2e3af7d20e1a2aea1aea4adeba92e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202061646d697373696f6e3a202d2084aeafe3e9a5ada8a53b20a4aee1e2e3af0d0a0d0a",
+     "raw_sha256": "8688bac83bf0850038f9e9c63dd34859cf33313ab0492479db94465eb9e308e7",
+     "translation": "Допущение{1.доступ} свободный."
+    },
+    {
+     "input": "The driver works.",
+     "raw_cp866_hex": "82aea4a8e2a5abec7b312ea4e0a0a9a2a5e07d20e0a0a1aee2a0a5e22e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206472697665723a206368617566666572202d2082aea4a8e2a5abec3b20636f6d707574657273202d20a4e0a0a9a2a5e00d0a0d0a",
+     "raw_sha256": "f0699c4c0eb07f2b67b2397ea5b04cd36af0e8634d5829142d4b3aff673905b0",
+     "translation": "Водитель{1.драйвер} работает."
+    },
+    {
+     "input": "Check the ground.",
+     "raw_cp866_hex": "8fe0aea2a5e0ece2a520a7a5acabee7b312ea7a0a7a5acaba5ada8a57d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202067726f756e643a206561727468202d20a7a5acabee3b2067726f756e6420636f6e6e656374696f6e202d20a7a0a7a5acaba5ada8a50d0a0d0a",
+     "raw_sha256": "b0801db6603f79e683a1de60e1108af5f48ddc2c7e3fe4ed89987247fd681fe9",
+     "translation": "Проверьте землю{1.заземление}."
+    },
+    {
+     "input": "The follower works.",
+     "raw_cp866_hex": "8faea2e2aee0a8e2a5abec7b312eafaee1aba5a4aea2a0e2a5abec7d20e0a0a1aee2a0a5e22e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020666f6c6c6f7765723a20696d697461746f72202d208faea2e2aee0a8e2a5abec3b206469736369706c65202d20afaee1aba5a4aea2a0e2a5abec0d0a0d0a",
+     "raw_sha256": "7f1d2aecee1d83488c2bfb32713225147360a37595a93da16ad19dd753b625b3",
+     "translation": "Повторитель{1.последователь} работает."
+    },
+    {
+     "input": "The collection is big.",
+     "raw_cp866_hex": "91a1aee07b312eaaaeababa5aae6a8ef3ba8adaaa0e1e1a8e0aea2a0ada8a57d20a1aeabece8aea92e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020636f6c6c656374696f6e3a20636f6c6c656374696e67202d2091a1aee03b207468696e677320636f6c6c6563746564202d20aaaeababa5aae6a8ef3b20636f6c6c656374696e67206d6f6e6579202d20a8adaaa0e1e1a8e0aea2a0ada8a50d0a0d0a",
+     "raw_sha256": "4ab3972f4382bb3b76b8af83418c346f6b7e6f903efbb74433892e57018fd8c9",
+     "translation": "Сбор{1.коллекция;инкассирование} большой."
+    },
+    {
+     "input": "He is abler.",
+     "raw_cp866_hex": "8ead20a1aeaba5a520a3aea4adeba92e0d0a",
+     "raw_sha256": "97530daf938a4d7f238d17ece20c4de4e92e23fdc204885bd5229146ff61b0e2",
+     "translation": "Он более годный."
+    },
+    {
+     "input": "The afterclap was bad.",
+     "raw_cp866_hex": "8da5afe0a8efe2adaea52091aea1ebe2a8a520a1ebabae20afabaee5a8ac2e0d0a",
+     "raw_sha256": "222669751d759a59c1f11da4e0e54564427296f5e0c6e05762112d2f870cef57",
+     "translation": "Неприятное Событие было плохим."
+    },
+    {
+     "input": "I saw the afterclap.",
+     "raw_cp866_hex": "9f20a2a8a465ab20ada5afe0a8efe2adaea520e1aea1ebe2a8a52e0d0a",
+     "raw_sha256": "936186a25bc3b4fc5eeb2be81493e256febbacbdda973173d29f4bb4d4ae9848",
+     "translation": "Я видeл неприятное событие."
+    },
+    {
+     "input": "He ambled home.",
+     "raw_cp866_hex": "8ead20afe0a8e8a5ab20a8adaee5aea4ecee20a4aeac2e0d0a",
+     "raw_sha256": "b4553c13861bea2848934a18bad6652877ca19a9826473ee1328dabaf024f385",
+     "translation": "Он пришел иноходью дом."
+    },
+    {
+     "input": "Bandar is here.",
+     "raw_cp866_hex": "42616e646172202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "edc9c9108a96f1a209e8f0d25d5eae96f0910c9f62f0cc7107a9ac29c4abb4e8",
+     "translation": "Bandar - здесь."
+    },
+    {
+     "input": "Corned is good.",
+     "raw_cp866_hex": "436f726e656420e5aee0aee8a5a52e0d0a",
+     "raw_sha256": "0caac88f378b889cc8fb2eb33b68650c2db2bfc699a3f903e4c4d46673c24cc5",
+     "translation": "Corned хорошее."
+    },
+    {
+     "input": "Corned beef is good.",
+     "raw_cp866_hex": "91aeabaeada8ada020e5aee0aee8a8a92e0d0a",
+     "raw_sha256": "2f81a811be5485ae2b804e86ef599815d5c940ebf5ae5226509cb7003162fcd9",
+     "translation": "Солонина хороший."
+    },
+    {
+     "input": "Buenos Aires is big.",
+     "raw_cp866_hex": "81e3edadaee12080a9e0a5e120a1aeabece8aea92e0d0a",
+     "raw_sha256": "4371e779e20d9ec4c1ea134de3e202e3b0e7b372d588d69c8f2c5468595c3ea8",
+     "translation": "Буэнос Айрес большой."
+    },
+    {
+     "input": "I like buenos aires.",
+     "raw_cp866_hex": "9f20abeea1abee20a1e3edadaee120a0a9e0a5e12e0d0a",
+     "raw_sha256": "530ab8847af4eec5a971eb8074fca66cd230e5a759d86df0d3b95b1e1e906ae6",
+     "translation": "Я люблю буэнос айрес."
+    },
+    {
+     "input": "I like BUENOS AIRES.",
+     "raw_cp866_hex": "9f20abeea1abee2081939d8d8e912080899085912e0d0a",
+     "raw_sha256": "3b6a17c18c37b2e83db237e05f03139f29c9955cf9951fbfec1aa70f3b0cbb4e",
+     "translation": "Я люблю БУЭНОС АЙРЕС."
+    },
+    {
+     "input": "Are there cats?",
+     "raw_cp866_hex": "85e1e2ec20aba820aaaee8aaa83f0d0a",
+     "raw_sha256": "32a7394aca0ce9cf7fdea9e80398abb548c477fa95072ee074f965a2a4af3257",
+     "translation": "Есть ли кошки?"
+    },
+    {
+     "input": "The aborticide works.",
+     "raw_cp866_hex": "91e0a5a4e1e2a2ae2c20a2eba7eba2a0eee9a5a520a0a1aee0e220e0a0a1aee2a0a5e22e0d0a",
+     "raw_sha256": "90be0cb3fbbde62161e2b6791bbe2c7544c29c319b7a9a726236f74868805320",
+     "translation": "Средство, вызывающее аборт работает."
+    },
+    {
+     "input": "As many as ten cats came.",
+     "raw_cp866_hex": "91e2aeabecaaae2c20e1aaaeabecaaae20a4a5e1efe2ec20aaaee8a5aa20afe0a8e5aea4a8aba82e0d0a",
+     "raw_sha256": "8eb5a9f383807ad696421be899d218e86397fb29dcfb1281589247662ae9fe1c",
+     "translation": "Столько, сколько десять кошек приходили."
+    },
+    {
+     "input": "It is faster than light.",
+     "raw_cp866_hex": "9de2ae202d20a1ebe1e2e0a5a520e7a5ac20e1a2a5e22e0d0a",
+     "raw_sha256": "d3ea9b71628c0ccdfff143f6ce149acfef536a241116b29b541752b63f55dc8e",
+     "translation": "Это - быстрее чем свет."
+    },
+    {
+     "input": "I want him to come.",
+     "raw_cp866_hex": "9f20e5aee7e32c20e7e2aea1eb20aead20afe0a8e8a5ab2e0d0a",
+     "raw_sha256": "e86ce046cc7d0f12def22ede306ffd9c76623805c852bf9c2e7712f4e5491f2a",
+     "translation": "Я хочу, чтобы он пришел."
+    },
+    {
+     "input": "They allow him to go.",
+     "raw_cp866_hex": "8eada820afaea7a2aeabefeee220a5ace320a8a4e2a82e0d0a",
+     "raw_sha256": "37c96e449f05cf4cb8b1ccea827d4b686cbb66e36c54584e2d8dbcb1fb44a96d",
+     "translation": "Они позволяют ему идти."
+    },
+    {
+     "input": "I advise him to go.",
+     "raw_cp866_hex": "9f20e1aea2a5e2e3ee2c20e7e2ae20aead20afe0a8a4a5e22e0d0a",
+     "raw_sha256": "afc338b5cc4e86e4a5425dea72db75026d1633e46db1c65ef41962cfc04cd7f5",
+     "translation": "Я советую, что он придет."
+    },
+    {
+     "input": "I hoped to come.",
+     "raw_cp866_hex": "9f20afaeada0a4a5efabe1ef20afe0a8e5aea4a8e2ec2e0d0a",
+     "raw_sha256": "84022176c15226c7df183220f7626ed1da36a013ec7b32d1d3a794e0e2ac4252",
+     "translation": "Я понадеялся приходить."
+    },
+    {
+     "input": "He could come.",
+     "raw_cp866_hex": "8ead20acaea320a1eb20afe0a8e5aea4a8e2ec2e0d0a",
+     "raw_sha256": "87ab888138544192773a0c9b52a8f95560cc9fc3221bc5d69402cf0fbcf51238",
+     "translation": "Он мог бы приходить."
+    },
+    {
+     "input": "He might come.",
+     "raw_cp866_hex": "8ead20acaea320a1eb20afe0a8e5aea4a8e2ec2e0d0a",
+     "raw_sha256": "87ab888138544192773a0c9b52a8f95560cc9fc3221bc5d69402cf0fbcf51238",
+     "translation": "Он мог бы приходить."
+    },
+    {
+     "input": "I will see him.",
+     "raw_cp866_hex": "9f20e3a2a8a6e320a5a3ae2e0d0a",
+     "raw_sha256": "d74aec8cf3237dbff3e59e48c799cf5391a44c784c0d594dae2c1108fc8ff4aa",
+     "translation": "Я увижу его."
+    },
+    {
+     "input": "I will work.",
+     "raw_cp866_hex": "9f20a1e3a4e320e0a0a1aee2a0e2ec2e0d0a",
+     "raw_sha256": "e968e7f713ce79f44d077bbf60cfa8e75548ea6697259faedc3fd4267f1cd27b",
+     "translation": "Я буду работать."
+    },
+    {
+     "input": "He is glad.",
+     "raw_cp866_hex": "8ead20e0a0a42e0d0a",
+     "raw_sha256": "5d95879478102f815868465c8b43b0c90073bdfea44cf34589395f649791c16b",
+     "translation": "Он рад."
+    },
+    {
+     "input": "She is glad.",
+     "raw_cp866_hex": "8eada020e0a0a4a02e0d0a",
+     "raw_sha256": "f7bae7c5e57c40526e29c3af7b7aa0569f1bebfb0257e166a5f2f0215a5121d3",
+     "translation": "Она рада."
+    },
+    {
+     "input": "The glad man came.",
+     "raw_cp866_hex": "90a0a420e7a5abaea2a5aa20afe0a8e5aea4a8ab2e0d0a",
+     "raw_sha256": "7e5e6f7fbc4d35759c5ff184175c5b69812dbb7342316c461931a29f4653c0cc",
+     "translation": "Рад человек приходил."
+    },
+    {
+     "input": "The river is deep.",
+     "raw_cp866_hex": "90a5aaa020a3abe3a1aeaaa02e0d0a",
+     "raw_sha256": "fe2ce401c304a348285fe93a3e5c7b78566214e509790e0553ffdc7424277e80",
+     "translation": "Река глубока."
+    },
+    {
+     "input": "I walk rather than run.",
+     "raw_cp866_hex": "9f20afe0aee5aea6e32c20a020ada520a1a5a6a0e2ec7b312ea2ebafaeabadefe2ec7d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202072756e3a206d6f76652073776966746c79202d20a1a5a6a0e2ec3b20706572666f726d202d20a2ebafaeabadefe2ec0d0a0d0a",
+     "raw_sha256": "29e3e5b7986499a86858b83c228da037a94c3b4de24255e741b36a744deb7bf6",
+     "translation": "Я прохожу, а не бежать{1.выполнять}."
+    },
+    {
+     "input": "Ten cats came, including him.",
+     "raw_cp866_hex": "84a5e1efe2ec20aaaee8a5aa20afe0a8e5aea4a8aba82c20a2aaabeee7a0ef20a5a3ae2e0d0a",
+     "raw_sha256": "31532377a731ae5ef006685bdc04e216aebeb73492805f83956a5a1fc02c85e7",
+     "translation": "Десять кошек приходили, включая его."
+    },
+    {
+     "input": "A great deal was done.",
+     "raw_cp866_hex": "8cadaea3ae20a1ebab20e1a4a5aba0ad2e0d0a",
+     "raw_sha256": "af80854776f57a2f0d0ed356d5598b117b343dbf8bf7cd46c98b0d8a0412caf9",
+     "translation": "Много был сделан."
+    },
+    {
+     "input": "After the war he came.",
+     "raw_cp866_hex": "8faee1aba520e2aea3ae2c20aaa0aa20a2aea9ada020aead20afe0a8a4a5e22e0d0a",
+     "raw_sha256": "572f03679cb0e49cb94228589ee596b3ef6ece47c2463e8ce6266cce3e8778cf",
+     "translation": "После того, как война он придет."
+    },
+    {
+     "input": "After he came, we left.",
+     "raw_cp866_hex": "8faee1aba520e2aea3ae2c20aaa0aa20aead20afe0a8e5aea4a8ab2c20aceb20aee1e2a0aba8e1ec2e0d0a",
+     "raw_sha256": "969172b9bbe420e2c62e89e412edaaa299e6f6639592e021554d41084f4e2a24",
+     "translation": "После того, как он приходил, мы остались."
+    },
+    {
+     "input": "Abe is here.",
+     "raw_cp866_hex": "416265202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "dabe57bb385278ddb65f68483b2f4c81f984bbe11e57ee6b57fd3dc07b7e3a68",
+     "translation": "Abe - здесь."
+    },
+    {
+     "input": "Ivanova is here.",
+     "raw_cp866_hex": "88a2a0adaea2a0202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "8eeab2b67394892e5652954c66ac38fc6d9573f827ebf1bacab7ec04aa22882e",
+     "translation": "Иванова - здесь."
+    },
+    {
+     "input": "Abbott is here.",
+     "raw_cp866_hex": "80a1a1aee2e2202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "91fb5ab1a094b821277514379d346bf5f9befa2bad25956af60db2048d722ac1",
+     "translation": "Абботт - здесь."
+    },
+    {
+     "input": "Smithers is here.",
+     "raw_cp866_hex": "536d697468657273202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "0207e280c39a887ae952a4c616cfb304a78ffc7add6f052d206fd23303aeb2f6",
+     "translation": "Smithers - здесь."
+    }
+   ]
+  },
+  {
+   "id": "third-section-ignored",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": true,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "8d11c72942fd36cd66b6c00710f75a68d9976f7f3761c24b90ef4cf11bee2412",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Bear it in your mind.",
+     "raw_cp866_hex": "88aca5a9e2a520ede2ae20a220a2a0e820e3ac7b312eacada5ada8a57d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206d696e643a20627261696e202d20e3ac3b206f7070696e696f6e202d20acada5ada8a50d0a0d0a",
+     "raw_sha256": "4abcb9a99dece1b4f9732dc1aec8263df314177ce9773b0c42084e8cb6cc10e7",
+     "translation": "Имейте это в ваш ум{1.мнение}."
+    }
+   ]
+  },
+  {
+   "id": "third-section-in-tail",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "0b0b4e370ed080dd4eeb9b57752d3fb1a3a21eaa83b33719a0c8625f5dc2c26f",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Bear it in your mind.",
+     "raw_cp866_hex": "88aca5a9e2a520ede2ae20a220a2a0e8a520a2a8a4e32e0d0a",
+     "raw_sha256": "0d522436dcbc675ba27eb9adc2163d3cca509db80b937bef6a5ec88ff01bcfda",
+     "translation": "Имейте это в ваше виду."
+    }
+   ]
+  },
+  {
+   "id": "selector-2-fourth-section",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "270426854b30b2a996152c99edf54132bd6ffcfcb6efdd1a55ad9c7f014f0b96",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "A few books are here.",
+     "raw_cp866_hex": "8cadaea3ae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "63c86cdb140bf1f2bcc6a10b5af0460762ffd194705638634a5ce58dff7242d0",
+     "translation": "Много книг - здесь."
+    },
+    {
+     "input": "A few book is here.",
+     "raw_cp866_hex": "8cadaea3ae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "63c86cdb140bf1f2bcc6a10b5af0460762ffd194705638634a5ce58dff7242d0",
+     "translation": "Много книг - здесь."
+    }
+   ]
+  },
+  {
+   "id": "selector-2",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "78f1f933111fb564eac0ee7017179735160af0e6ae882b03fcc759b0b017292d",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "A few books are here.",
+     "raw_cp866_hex": "8cadaea3ae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "63c86cdb140bf1f2bcc6a10b5af0460762ffd194705638634a5ce58dff7242d0",
+     "translation": "Много книг - здесь."
+    },
+    {
+     "input": "A few book is here.",
+     "raw_cp866_hex": "8da5e1aaaeabecaaae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "6fd95d5fa7ebacc39d4265dfa4630656968e6670cd52b424dffa5cc0ee429e02",
+     "translation": "Несколько книг - здесь."
+    }
+   ]
+  },
+  {
+   "id": "selector-n",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "1d08b75767dc13994710719f1fae621b1714cb40905d5056dbabfddc05e781c8",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "A few book is here.",
+     "raw_cp866_hex": "8cadaea3ae20aaada8a3202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "63c86cdb140bf1f2bcc6a10b5af0460762ffd194705638634a5ce58dff7242d0",
+     "translation": "Много книг - здесь."
+    }
+   ]
+  },
+  {
+   "id": "cyrillic-es-class",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "2b783de660911cc6c12a4414173bb0313932e3a399d12a3b16e75ed70b59f797",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Answer in writing and sign it.",
+     "raw_cp866_hex": "8ee2a2a5e220ada020a7a0afa8e1a87b312eada0afa8e1a0ada8a57d20a820afaea4afa8e1eba2a0a5e220ede2ae2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202077726974696e673a207265636f7264696e67202d20a7a0afa8e1a83b207370656c6c696e67202d20ada0afa8e1a0ada8a50d0a0d0a",
+     "raw_sha256": "b34d19ac888172693f6f1bf3c8b37c5ed0761d4360981c9296f06cff5502fcf9",
+     "translation": "Ответ на записи{1.написание} и подписывает это."
+    },
+    {
+     "input": "Answer in writing.",
+     "raw_cp866_hex": "8ee2a2a5e220afa8e1ecaca5adadae2e0d0a",
+     "raw_sha256": "681cef80a609e3be0cdbe3092d04b30f1a59b934c79a1b6bdda988571b03f7fd",
+     "translation": "Ответ письменно."
+    },
+    {
+     "input": "Answer in writing, please.",
+     "raw_cp866_hex": "8ee2a2a5e220afa8e1ecaca5adadae2cafaea6a0abe3a9e1e2a02e0d0a",
+     "raw_sha256": "c208b9a0d1a205ce1d5a7c41de85a151085581576eea5d94b3108e1408cc728e",
+     "translation": "Ответ письменно,пожалуйста."
+    }
+   ]
+  },
+  {
+   "id": "latin-c-class",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": true,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "b8056e975b774f89705470c0a164368b05f3fc11088a178bce67d589b72b7a6e",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Answer in writing and sign it.",
+     "raw_cp866_hex": "8ee2a2a5e220afa8e1ecaca5adadae20a820afaea4afa8e1eba2a0e2ec20ede2ae2e0d0a",
+     "raw_sha256": "1844fe2d717a8f08aa3d7796495c052e3f40cab4bcf194c9d934569990b68630",
+     "translation": "Ответ письменно и подписывать это."
+    },
+    {
+     "input": "Answer in writing.",
+     "raw_cp866_hex": "8ee2a2a5e220afa8e1ecaca5adadae2e0d0a",
+     "raw_sha256": "681cef80a609e3be0cdbe3092d04b30f1a59b934c79a1b6bdda988571b03f7fd",
+     "translation": "Ответ письменно."
+    },
+    {
+     "input": "Answer in writing, please.",
+     "raw_cp866_hex": "8ee2a2a5e220afa8e1ecaca5adadae2cafaea6a0abe3a9e1e2a02e0d0a",
+     "raw_sha256": "c208b9a0d1a205ce1d5a7c41de85a151085581576eea5d94b3108e1408cc728e",
+     "translation": "Ответ письменно,пожалуйста."
+    }
+   ]
+  },
+  {
+   "id": "automatic-meanings-computer",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N /C cu /AM",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3",
+    "COMPUTER.DIC": "d9e0645d417e59aff448afe7546ea8bb4c61727148d2a290d5df73c079506370",
+    "BUSINESS.DIC": "309ff47f8ad5b756629a73501db1f6762dbc4a4a15a6a971b87293566073daeb"
+   },
+   "cases": [
+    {
+     "input": "The admission is free.",
+     "raw_cp866_hex": "84aee1e2e3af7b312eaeafe3e9a5ada8a57d20e1a2aea1aea4adeba92e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202061646d697373696f6e3a202d2084aee1e2e3af3b20aeafe3e9a5ada8a50d0a0d0a",
+     "raw_sha256": "0807c1a7f09d20a278dd476faa94a4035539321bb527f1cd8649ae395ce63831",
+     "translation": "Доступ{1.опущение} свободный."
+    },
+    {
+     "input": "The driver works.",
+     "raw_cp866_hex": "84e0a0a9a2a5e07b312ea2aea4a8e2a5abec7d20e0a0a1aee2a0a5e22e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206472697665723a20636f6d707574657273202d2084e0a0a9a2a5e03b206368617566666572202d20a2aea4a8e2a5abec0d0a0d0a",
+     "raw_sha256": "6a71ecffceb21648689ae0b73cbf1e194e71b059d7f52fc633a49cf39ce31a57",
+     "translation": "Драйвер{1.водитель} работает."
+    },
+    {
+     "input": "Check the ground.",
+     "raw_cp866_hex": "8fe0aea2a5e0ece2a520a7a0a7a5acaba5ada8a57b312ea7a5acabef7d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202067726f756e643a2067726f756e6420636f6e6e656374696f6e202d20a7a0a7a5acaba5ada8a53b206561727468202d20a7a5acabef0d0a0d0a",
+     "raw_sha256": "0a25b528c382201ac381c706156e077dbb8dcb07913583000ff86e01eeba677a",
+     "translation": "Проверьте заземление{1.земля}."
+    },
+    {
+     "input": "The follower works.",
+     "raw_cp866_hex": "8faea2e2aee0a8e2a5abec7b312eafaee1aba5a4aea2a0e2a5abec7d20e0a0a1aee2a0a5e22e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020666f6c6c6f7765723a20696d697461746f72202d208faea2e2aee0a8e2a5abec3b206469736369706c65202d20afaee1aba5a4aea2a0e2a5abec0d0a0d0a",
+     "raw_sha256": "7f1d2aecee1d83488c2bfb32713225147360a37595a93da16ad19dd753b625b3",
+     "translation": "Повторитель{1.последователь} работает."
+    },
+    {
+     "input": "The collection is big.",
+     "raw_cp866_hex": "91a1aee07b312eaaaeababa5aae6a8ef3ba8adaaa0e1e1a8e0aea2a0ada8a57d20a1aeabece8aea92e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020636f6c6c656374696f6e3a20636f6c6c656374696e67202d2091a1aee03b207468696e677320636f6c6c6563746564202d20aaaeababa5aae6a8ef3b20636f6c6c656374696e67206d6f6e6579202d20a8adaaa0e1e1a8e0aea2a0ada8a50d0a0d0a",
+     "raw_sha256": "4ab3972f4382bb3b76b8af83418c346f6b7e6f903efbb74433892e57018fd8c9",
+     "translation": "Сбор{1.коллекция;инкассирование} большой."
+    }
+   ]
+  },
+  {
+   "id": "automatic-meanings-business",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N /C bu /AM",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3",
+    "COMPUTER.DIC": "d9e0645d417e59aff448afe7546ea8bb4c61727148d2a290d5df73c079506370",
+    "BUSINESS.DIC": "309ff47f8ad5b756629a73501db1f6762dbc4a4a15a6a971b87293566073daeb"
+   },
+   "cases": [
+    {
+     "input": "The admission is free.",
+     "raw_cp866_hex": "84aeafe3e9a5ada8a57b312ea4aee1e2e3af7d20e1a2aea1aea4adeba92e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202061646d697373696f6e3a202d2084aeafe3e9a5ada8a53b20a4aee1e2e3af0d0a0d0a",
+     "raw_sha256": "8688bac83bf0850038f9e9c63dd34859cf33313ab0492479db94465eb9e308e7",
+     "translation": "Допущение{1.доступ} свободный."
+    },
+    {
+     "input": "The driver works.",
+     "raw_cp866_hex": "82aea4a8e2a5abec7b312ea4e0a0a9a2a5e07d20e0a0a1aee2a0a5e22e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206472697665723a206368617566666572202d2082aea4a8e2a5abec3b20636f6d707574657273202d20a4e0a0a9a2a5e00d0a0d0a",
+     "raw_sha256": "f0699c4c0eb07f2b67b2397ea5b04cd36af0e8634d5829142d4b3aff673905b0",
+     "translation": "Водитель{1.драйвер} работает."
+    },
+    {
+     "input": "Check the ground.",
+     "raw_cp866_hex": "8fe0aea2a5e0ece2a520a7a5acabee7b312ea7a0a7a5acaba5ada8a57d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202067726f756e643a206561727468202d20a7a5acabee3b2067726f756e6420636f6e6e656374696f6e202d20a7a0a7a5acaba5ada8a50d0a0d0a",
+     "raw_sha256": "b0801db6603f79e683a1de60e1108af5f48ddc2c7e3fe4ed89987247fd681fe9",
+     "translation": "Проверьте землю{1.заземление}."
+    },
+    {
+     "input": "The follower works.",
+     "raw_cp866_hex": "8faee1aba5a4aea2a0e2a5abec7b312eafaea2e2aee0a8e2a5abec7d20e0a0a1aee2a0a5e22e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020666f6c6c6f7765723a206469736369706c65202d208faee1aba5a4aea2a0e2a5abec3b20696d697461746f72202d20afaea2e2aee0a8e2a5abec0d0a0d0a",
+     "raw_sha256": "9ac24facbed0eb70a5e6d8beef38f62f6a6f8bb7171a22e8692b1e57667ff853",
+     "translation": "Последователь{1.повторитель} работает."
+    },
+    {
+     "input": "The collection is big.",
+     "raw_cp866_hex": "88adaaa0e1e1a8e0aea2a0ada8a57b312ee1a1aee03baaaeababa5aae6a8ef7d20a1aeabece8aea52e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a312020636f6c6c656374696f6e3a20636f6c6c656374696e67206d6f6e6579202d2088adaaa0e1e1a8e0aea2a0ada8a53b20636f6c6c656374696e67202d20e1a1aee03b207468696e677320636f6c6c6563746564202d20aaaeababa5aae6a8ef0d0a0d0a",
+     "raw_sha256": "008544fd599f00043de5876ccf9f4dfdccdfd22bb729748918adef156bd677e8",
+     "translation": "Инкассирование{1.сбор;коллекция} большое."
+    }
+   ]
+  },
+  {
+   "id": "single-class-prefix",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "37e3a5ca0e8a027c61fb6a45ec1a5cf14145ebbe24aae096a4dd87af06372e49",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "He is abler.",
+     "raw_cp866_hex": "8ead20a3aea4adeba92e0d0a",
+     "raw_sha256": "167c7497849b833424517dba20bb0f6201b17ff5cbf1c908c038c76c4c359964",
+     "translation": "Он годный."
+    },
+    {
+     "input": "The afterclap was bad.",
+     "raw_cp866_hex": "91aea1ebe2a8a520a1ebabae20afabaee5a8ac2e0d0a",
+     "raw_sha256": "3bcfb110aecf79534319eb35862234151f45c62197a61f63979417fa8368a837",
+     "translation": "Событие было плохим."
+    },
+    {
+     "input": "He ambled home.",
+     "raw_cp866_hex": "8ead20afe0a8e8a5ab20a8adaee5aea4ecee20a4aeac2e0d0a",
+     "raw_sha256": "b4553c13861bea2848934a18bad6652877ca19a9826473ee1328dabaf024f385",
+     "translation": "Он пришел иноходью дом."
+    }
+   ]
+  },
+  {
+   "id": "no-class-prefix",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "446f5ee980d0d66600c65ad40df2c967a045e248350eb50778e23d742ab8fdd1",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "He is abler.",
+     "raw_cp866_hex": "8ead202d20a1aeaba5a52e0d0a",
+     "raw_sha256": "19485240ff98581f675933b6832f0c400476a4055f94391b0cd002451dce260b",
+     "translation": "Он - более."
+    },
+    {
+     "input": "The afterclap was bad.",
+     "raw_cp866_hex": "8da5afe0a8efe2adaea520a1ebaba820afabaee5ae2e0d0a",
+     "raw_sha256": "ca1f6696c59cd1a624cf8b7ad77b77918669ad242b3be785392c7f5da370ff5e",
+     "translation": "Неприятное были плохо."
+    },
+    {
+     "input": "He ambled home.",
+     "raw_cp866_hex": "8ead20a8a4e2a820a8adaee5aea4ecee20a4aeac2e0d0a",
+     "raw_sha256": "98961558cdffafac7064409a90fdc016688e1f0271f00fb6c373d9a263751010",
+     "translation": "Он идти иноходью дом."
+    }
+   ]
+  },
+  {
+   "id": "reading-punctuation",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "0d237163d70656986c8f05ead2bc91e4b514aafefa8acb4930334e72a7bad14c",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Bandar is here.",
+     "raw_cp866_hex": "42616e646172202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "edc9c9108a96f1a209e8f0d25d5eae96f0910c9f62f0cc7107a9ac29c4abb4e8",
+     "translation": "Bandar - здесь."
+    },
+    {
+     "input": "Corned is good.",
+     "raw_cp866_hex": "87a5e0adaea2aea920e5aee0aee8a5a52e0d0a",
+     "raw_sha256": "1df8f5bd0bdaa9100d57edda8c0056f939a398db364bc20826488bed9b9c0dde",
+     "translation": "Зерновой хорошее."
+    },
+    {
+     "input": "Corned beef is good.",
+     "raw_cp866_hex": "87a5e0adaea2aea920a3aea2efa4a8ada020e5aee0aee8a8a92e0d0a",
+     "raw_sha256": "a5727bd20605a93862897ffe53d2344cb87d5326503e3652563fcf11f542dbfd",
+     "translation": "Зерновой говядина хороший."
+    },
+    {
+     "input": "Are there cats?",
+     "raw_cp866_hex": "85e1e2ec20aba820aaaee8aaa83f0d0a",
+     "raw_sha256": "32a7394aca0ce9cf7fdea9e80398abb548c477fa95072ee074f965a2a4af3257",
+     "translation": "Есть ли кошки?"
+    },
+    {
+     "input": "The aborticide works.",
+     "raw_cp866_hex": "91e0a5a4e1e2a2ae20a2eba7eba2a0eee9a5a520a0a1aee0e220e0a0a1aee2a0a5e22e0d0a",
+     "raw_sha256": "0f1c885e1dd0afb375a59b8f6f093cab78ceda1d609d87f6971712eb6386c756",
+     "translation": "Средство вызывающее аборт работает."
+    },
+    {
+     "input": "As many as ten cats came.",
+     "raw_cp866_hex": "91e2aeabecaaae2c20e1aaaeabecaaae20a4a5e1efe2ec20aaaee8a5aa20afe0a8e5aea4a8aba82e0d0a",
+     "raw_sha256": "8eb5a9f383807ad696421be899d218e86397fb29dcfb1281589247662ae9fe1c",
+     "translation": "Столько, сколько десять кошек приходили."
+    },
+    {
+     "input": "It is faster than light.",
+     "raw_cp866_hex": "9de2ae20a1ebe1e2e0a5a520e7a5ac20e1a2a5e2abeba97b312eaba5a3aaa8a93be1a2a5e2aea2aea97d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a3120206c696768743a20636f6c6f72202d20e1a2a5e2abeba93b207765696768743b756e696d706f7274616e74202d20aba5a3aaa8a93b20656c656374726f6d61676e6574696320726164696174696f6e202d20e1a2a5e2aea2aea90d0a0d0a",
+     "raw_sha256": "98753b1cc0b4d4c11328397f27ff60cd9d0d55831415c9fcedaee14e36f3b0a8",
+     "translation": "Это быстрее чем светлый{1.легкий;световой}."
+    }
+   ]
+  },
+  {
+   "id": "verb-digits-removed",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "f3e85f8e4b6222908642b221327155e9d51c2f9ddd13825c95dc1a5cdceb1393",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "I want him to come.",
+     "raw_cp866_hex": "9f20e5aee7e320a5a3ae2c20e7e2aea1eb20afe0a8a4e2a82e0d0a",
+     "raw_sha256": "22bac634f2e568e3972364a5e158eefbc11fc2799c05246189dde2e5330059af",
+     "translation": "Я хочу его, чтобы придти."
+    },
+    {
+     "input": "They allow him to go.",
+     "raw_cp866_hex": "8eada820afaea7a2aeabefeee220a5ace32c20e7e2aea1eb20afe0a8a4e2a82e0d0a",
+     "raw_sha256": "a7e30ea61423c5ef9094d5f7ef70651d2d9c11e802a6a850b92d73241f5d3659",
+     "translation": "Они позволяют ему, чтобы придти."
+    },
+    {
+     "input": "I advise him to go.",
+     "raw_cp866_hex": "9f20e1aea2a5e2e3ee20a5ace32c20e7e2aea1eb20afe0a8a4e2a82e0d0a",
+     "raw_sha256": "5f83e5d845ae40e1a0b88ae3c1405dd155a97ae6f15e512f8ea835c020b3746f",
+     "translation": "Я советую ему, чтобы придти."
+    },
+    {
+     "input": "I hoped to come.",
+     "raw_cp866_hex": "9f20afaeada0a4a5efabe1ef2c20e7e2aea1eb20afe0a8a4e2a82e0d0a",
+     "raw_sha256": "b6ff758c44c47ae5e95b7305ac57abfc3d66e4866aadcae37999ef29e2f352e8",
+     "translation": "Я понадеялся, чтобы придти."
+    },
+    {
+     "input": "He could come.",
+     "raw_cp866_hex": "8ead20acaea6a5e220afe0a8e5aea4a8e2ec2e0d0a",
+     "raw_sha256": "fb3b294d30a05fe398290851bd5fab5462a7a74374a31e0d4313a35fbb724df4",
+     "translation": "Он может приходить."
+    },
+    {
+     "input": "He might come.",
+     "raw_cp866_hex": "8ead20acaea6a5e220afe0a8e5aea4a8e2ec2e0d0a",
+     "raw_sha256": "fb3b294d30a05fe398290851bd5fab5462a7a74374a31e0d4313a35fbb724df4",
+     "translation": "Он может приходить."
+    }
+   ]
+  },
+  {
+   "id": "rus-verb-future-bit",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "3dda66b1274f6b6f535dc8236f1158b5c38d4a41319f3684a5916653d15a7e3a",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "I will see him.",
+     "raw_cp866_hex": "9f20a1e3a4e320a2a8a4a5e2ec20a5a3ae2e0d0a",
+     "raw_sha256": "33e561974ece1b4354ce05ee2ae40030a1efa0df769cc8285cff66b276c87477",
+     "translation": "Я буду видеть его."
+    },
+    {
+     "input": "I will work.",
+     "raw_cp866_hex": "9f20e0a0a1aee2a0ee2e0d0a",
+     "raw_sha256": "b076450be9cafddd4a813d856e791b55ebf465b42ee6bd01a9fac5bc655d6f82",
+     "translation": "Я работаю."
+    },
+    {
+     "input": "I see him.",
+     "raw_cp866_hex": "9f20a2a8a6e320a5a3ae2e0d0a",
+     "raw_sha256": "ecada512847bc10dfd352c7ba7b3a9e73f85966152f5a2e75f292d50c88eb3e9",
+     "translation": "Я вижу его."
+    }
+   ]
+  },
+  {
+   "id": "rus-adjective-no-short",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "219dd38aa6f380e57401b726083778f96caec4f78a5a444f9eee91971ec7120f",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "He is glad.",
+     "raw_cp866_hex": "8ead20e0a0a4eba92e0d0a",
+     "raw_sha256": "5b9f8912d5afefb592ec39c1e433838535aabb3c71a505d43c3c6605c9272440",
+     "translation": "Он радый."
+    },
+    {
+     "input": "The glad man came.",
+     "raw_cp866_hex": "90a0a4eba920e7a5abaea2a5aa20afe0a8e5aea4a8ab2e0d0a",
+     "raw_sha256": "21720b2011ca99009ef1ac82db5762e70ba2bf6e261225df1323935725c9b52c",
+     "translation": "Радый человек приходил."
+    }
+   ]
+  },
+  {
+   "id": "rus-adjective-short-predicate",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "3af70f0ad8c953227ff0b62397121b71b65cf33295b904ed76f751915a5ae3ee",
+    "BASE.RUS": "4733686e5989c7991089117731f5b3247387831ff6c48eaa0b48cc5ca1c54948",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "He is glad.",
+     "raw_cp866_hex": "8ead20e0a0a42e0d0a",
+     "raw_sha256": "5d95879478102f815868465c8b43b0c90073bdfea44cf34589395f649791c16b",
+     "translation": "Он рад."
+    },
+    {
+     "input": "The man is glad.",
+     "raw_cp866_hex": "97a5abaea2a5aa20e0a0a42e0d0a",
+     "raw_sha256": "ec28ba0eb6f58e4edc7e7d1d94e033e8e86fd784b1c04fc94bf04ef3a8ef2e80",
+     "translation": "Человек рад."
+    },
+    {
+     "input": "He was glad.",
+     "raw_cp866_hex": "8ead20a1ebab20e0a0a4ebac2e0d0a",
+     "raw_sha256": "b27980521517182a3464b715ea4782fae9467d31ec5e4f6c1a2d46ac155b89fa",
+     "translation": "Он был радым."
+    },
+    {
+     "input": "The glad man came.",
+     "raw_cp866_hex": "90a0a4eba920e7a5abaea2a5aa20afe0a8e5aea4a8ab2e0d0a",
+     "raw_sha256": "21720b2011ca99009ef1ac82db5762e70ba2bf6e261225df1323935725c9b52c",
+     "translation": "Радый человек приходил."
+    }
+   ]
+  },
+  {
+   "id": "lowercase-tags-uppercased",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": false,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "75b4c0ff7c646ce5d9288de5ecd58fd715aab60504b7fd7ac8d941a62a0bf998",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "I walk rather than run.",
+     "raw_cp866_hex": "9f20afe0aee5aea6e32c20a020ada520a1a5a3e37b312ea2ebafaeabadefe2ec7d2e0d0a0d0a0d0a4d554c5449504c45204d45414e494e47533a0d0a0d0a31202072756e3a206d6f76652073776966746c79202d20a1a5a3e33b20706572666f726d202d20a2ebafaeabadefe2ec0d0a0d0a",
+     "raw_sha256": "cbdc46c94ab425b1315a4ab72ba364ab917e175b41fee025cce9556c647505a1",
+     "translation": "Я прохожу, а не бегу{1.выполнять}."
+    },
+    {
+     "input": "Ten cats came, including him.",
+     "raw_cp866_hex": "84a5e1efe2ec20aaaee8a5aa20afe0a8e5aea4a8aba82c20a2aaabeee7a0eee220a5a3ae2e0d0a",
+     "raw_sha256": "676b0129b179acdca3f5c62a8f8703a2c0c824d9ed1a86c17a6d2de948ea6bfc",
+     "translation": "Десять кошек приходили, включают его."
+    },
+    {
+     "input": "A great deal was done.",
+     "raw_cp866_hex": "8cadaea3ae20a1ebaba820e1a4a5aba0adeb2e0d0a",
+     "raw_sha256": "63cbb0e17e0e8aeeb86172e2a391cef2e4466032df68eae24e927dde4917e96d",
+     "translation": "Много были сделаны."
+    },
+    {
+     "input": "After the war he came.",
+     "raw_cp866_hex": "8faee1aba520a2aea9adeb20aead20afe0a8e5aea4a8ab2e0d0a",
+     "raw_sha256": "4c972ce723db0135d03c0dcf9759c2eb4d653fc2a65ad23ab60f57b3163482b8",
+     "translation": "После войны он приходил."
+    },
+    {
+     "input": "After he came, we left.",
+     "raw_cp866_hex": "8faee1aba520aead20afe0a8e5aea4a8ab2c20aceb20aee1e2a0aba8e1ec2e0d0a",
+     "raw_sha256": "076e98594e7b1533c8c07f72823a05f76a7cfbce7871bf6a9d5e33167807572f",
+     "translation": "После он приходил, мы остались."
+    }
+   ]
+  },
+  {
+   "id": "transliteration-override",
+   "command": "LTPRO.EXE /I C0000.IN /O C0000.OUT /F- /B- /N",
+   "dropped_z_headwords": true,
+   "assets": {
+    "LTPRO.EXE": "6a2036c2fbc629d0317bf02acbb1e6ebd82ceecb2d11f609c6460cc0c32dc4fe",
+    "BASE.DIC": "22bf3962e4d78e41d2cfb36f7ef24f4b3a8c3bd467046f8a5101ea6fb0468f99",
+    "BASE.RUS": "4e07b5b1725bf525406da59e6d24bf22e797906844e9a8d3eb4b838b40d1db9c",
+    "ERPREFIX.PRE": "0292be4b115e4579dc21d317d96a891cccce80946376dcf14c49307ce4832293",
+    "LTGOLD.CNF": "dfd21c14a6ff3f29521d205ab33889a314d15ffaf815c06071cb239d552dc728",
+    "LTPRO.CMD": "a7c2ed85077805aa59dedd26b679378d00c5935ca488f1733de26e8f532b06f3"
+   },
+   "cases": [
+    {
+     "input": "Abe is here.",
+     "raw_cp866_hex": "9da9a1202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "ca33bdf2007ed4c7464fbf1468fb061b7e9039a6877b7cb6ee855ce9aebad350",
+     "translation": "Эйб - здесь."
+    },
+    {
+     "input": "Ivanova is here.",
+     "raw_cp866_hex": "88a2a0adaea2a0202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "8eeab2b67394892e5652954c66ac38fc6d9573f827ebf1bacab7ec04aa22882e",
+     "translation": "Иванова - здесь."
+    },
+    {
+     "input": "Smithers is here.",
+     "raw_cp866_hex": "91aca8a7a5e0e1202d20a7a4a5e1ec2e0d0a",
+     "raw_sha256": "1df15c20c696187752bc809057e0803e0919b33538fa18f8c6479c81a9aaaa4e",
+     "translation": "Смизерс - здесь."
+    }
+   ]
+  }
+ ]
+}

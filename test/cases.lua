@@ -2,6 +2,8 @@
 --   group[:entry] | input => expected   exact translation
 --   group[:entry] | input ~> text       translation contains text
 --   group[:entry] | input !> text       translation does not contain text
+-- ~> and !> test the chosen words: inline alternatives ({1.кошка;кат}) are
+-- removed first; => compares the whole output.
 -- Quote an input with edge whitespace; inside quotes \t is a tab.
 local cases = {}
 
@@ -29,7 +31,8 @@ end
 
 function cases.check(engine, case)
   local actual = engine.translate(case.input)
-  local found = actual:find(case.expected, 1, true)
+  local chosen = actual:gsub('{%d+%.[^}]*}', '')
+  local found = chosen:find(case.expected, 1, true)
   local ok = (case.op == '=>' and actual == case.expected) or (case.op == '~>' and found)
     or (case.op == '!>' and not found)
   return ok and true or false, actual

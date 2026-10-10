@@ -189,6 +189,15 @@ than composing new values.
 
 ## Dictionary punctuation
 
+A record is one per key and packs every reading:
+`PREFIX SEGMENT {SEGMENT} [\stem]`. The prefix is the English word's class plus
+its verb digits (`V11`, `Z01`). Each segment is a class letter, optionally
+dotted, followed by meanings separated by `;` (`table*NN.стол{…};инф)таблица{…}A.табличный`).
+The first meaning is the translation, and the rest print inline as `{1.…}`. A
+segment of another class is a grammatical reading that grammar may choose, not
+a listed meaning. The full grammar and LTGOLD examples are in
+[docs/dictionary.md](../../../docs/dictionary.md#record-structure-one-record-per-key-one-segment-per-part-of-speech).
+
 | Syntax | Meaning | Example |
 | --- | --- | --- |
 | `key*reading` | Lookup key / encoded reading separator. | `economy*Nэкономика`. |

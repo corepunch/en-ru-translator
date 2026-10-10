@@ -82,6 +82,83 @@ english_word_or_phrase*CODES
 The entry separator is `*`. The CODES string encodes grammatical class, optional
 paradigm ID, Russian translation(s), and optional back-references.
 
+#### Record structure: one record per key, one segment per part of speech
+
+A `.DIC` holds **one record per English key**. Everything the key can mean is
+packed into that record: one *segment* per part of speech, and inside each
+segment the alternative meanings after `;`. Observed in LTGOLD's `BASE.DIC`
+(63,950 records, every key unique; 1,695 records carry `;` alternatives, 1,236
+carry dotted segments):
+
+```
+CODE     := PREFIX SEGMENT { SEGMENT } [ "\" stem ]
+PREFIX   := input-class letter of the English word, then its digits, if any
+SEGMENT  := [ class-letter [ "." ] ] MEANING { ";" MEANING }
+MEANING  := [ label ")" ] russian-lemma [ "{" note "}" ]
+```
+
+- **Prefix.** The English word's own class (`N`, `n`, `A`, `V`, `e`, `D`, `Z`,
+  `z`, `G`, `E`, …) and, for verbs, the frame and aspect digits (`V11`,
+  `Z01`, `V21`).
+- **Segments.** A class letter (`V`, `N`, `n`, `A`, `D`) starts each segment.
+  The first segment may have no letter of its own: after `N` it is a noun
+  (`Nстол`), and after a verb-like prefix (`Z`, `z`, `G`, `E`, `e`, `V`) it is the
+  verb (`Z01стремиться`, `Gвызывать`). A dot after the letter (`N.`, `A.`, `V.`)
+  marks the segment as an explicit input-side classification. LTGOLD writes the
+  dotted form for records with alternatives (`NN.экономика;экономия`,
+  `V11V.соглашаться;согласовывать`) and often the bare form otherwise
+  (`aim*Z01стремитьсяNцель`, `new*AновыйDвновь`). Both forms parse.
+- **Meanings.** The first meaning of a segment is the translation. The others
+  are alternatives, printed inline after the chosen word as `{1.экономия}`.
+  Numbers run through the whole text, so the second word with alternatives gets
+  `{2.…}`. `{note}` is a sense note shown in the `--meanings` glossary. A
+  `label)` (`инф)`, `дел)`, `мес)`, …) is a domain mark: see
+  [theme marks](#ltgold-theme-dictionaries) below.
+- **Backreference.** `\stem` ends the record (`calling*GвызыватьNвызов\call`).
+- **Phrase readings.** A `W…` composite is a segment too, and `/` ends it
+  before the plain segments (`bond*ZWVподписывать обязательство/Nобязательство;облигация`);
+  see [Phrase / compound entries](#phrase--compound-entries-w).
+
+Grammar picks the segment, and the segment's first meaning is printed:
+
+| LTGOLD record | Segments |
+| --- | --- |
+| `economy*NN.экономика{system};экономия{restrained use}` | noun: экономика, alternative экономия |
+| `door*NN.дверь{physical door};вход{entrance}` | noun: дверь, alternative вход |
+| `table*NN.стол{piece of furniture};инф)таблица{chart}A.табличный` | noun: стол, alternative таблица (domain `инф`); adjective: табличный |
+| `key*NN.ключ{to the lock};клавиша{of the keyboard}A.ключевой` | noun: ключ, клавиша; adjective: ключевой |
+| `agree*V11V.соглашаться{have the same opinion};согласовывать{negotiate}` | verb (frame 1, aspect 1): соглашаться, согласовывать |
+| `light*ZV.зажигатьN.светA.светлый{color};легкий{weight;unimportant};световой{…}` | verb, noun, adjective with three meanings |
+| `aim*Z01стремитьсяNцель` | bare form: verb стремиться, noun цель |
+
+`Экономика{1.экономия} хорошая.` is the original's output for *The economy is
+good.* with LTGOLD's dictionaries.
+
+A segment of another class is a grammatical reading, not just a listed
+meaning. An `A.` segment on a noun lets grammar read the noun as an adjective
+before another noun (LTGOLD gives `table` its `A.табличный` on purpose).
+
+**How `openrussian/BASE.DIC` follows this.** OpenRussian has one row per
+Russian word, so a key such as `economy` has nine source readings. The builder
+(`merge_readings` in `tools/openrussian_db.c`) writes one record per key: it
+keeps the record grammar was given (its classes chosen by the rules in
+[openrussian/README.md](../openrussian/README.md)) and folds *all* of the key's
+other readings of each of its classes into that segment, most frequent first:
+
+```
+economy*NN.хозяйство;экономика;экономия;сбережение;…;экономность
+table*NN.стол;таблица;табель;скрижаль
+break*ZV.рваться;перебить;ломать;нарушать;…N.разрыв;перерыв;перелом;…
+above*WDнад;вверху;сверх
+```
+
+A perfective whose imperfective partner is already a reading is not repeated,
+since grammar chooses the aspect. The builder adds no segment for a class the
+record lacks. Adding `A.` segments from OpenRussian's adjective glosses turned
+nouns into adjectives across the corpus: *Is the dog home?* became
+`Псиный дом?`, and *The house door.* became `Домашняя дверь`. Such a segment
+belongs in `dictionary.txt` as a native reading when LTGOLD has it.
+
 #### Simple unambiguous entries
 
 ```

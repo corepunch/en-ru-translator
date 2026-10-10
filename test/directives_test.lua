@@ -28,7 +28,8 @@ assert(engine.translate('{~Keep~}') == 'Keep', 'literal spans must not leak betw
 local list,state=engine.translate('{~\\2 {~one~} {~two words~} {~three~} {~\\. Two books.')
 assert(list=='one\ttwo words\nthree\n'..engine.translate('Two books.'),list)
 assert(#state.sections==4 and state.output==encoding.encode(list))
-assert(engine.translate('{~\\1 cat dog')==engine.translate('cat')..'\n'..engine.translate('dog'))
+-- Alternatives are numbered through the whole text, across list rows.
+assert(engine.translate('{~\\1 cat dog')==engine.translate('cat')..'\n'..engine.translate('dog'):gsub('{1%.','{2.'))
 assert(engine.translate('{~\\10 {~one~} {~two~}')=='one\ttwo')
 assert(engine.translate('{~\\2')=='')
 assert(not pcall(engine.translate,'{~\\0 cat'))

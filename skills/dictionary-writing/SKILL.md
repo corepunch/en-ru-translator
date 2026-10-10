@@ -23,7 +23,10 @@ a paradigm number in each `.RUS` record, not from stored forms; the original
 and this engine give the plural imperative (`Помогите мне`). Theme dictionaries are
 `openrussian/themes/<name>.txt` (same `key*code` rows), compiled to
 `openrussian/<NAME>.DIC` and loaded with `--dic-overlay`. There are no other
-sources. Historical `LTGOLD/BASE.DIC` is a separate reference,
+sources. Each `.DIC` key has exactly one record holding all its readings, one
+segment per part of speech with `;` alternatives, as in LTGOLD; the builder
+folds OpenRussian's readings into it ([record structure](../../docs/dictionary.md#record-structure-one-record-per-key-one-segment-per-part-of-speech)).
+Historical `LTGOLD/BASE.DIC` is a separate reference,
 not an automatically merged source. English phrase rules belong in `.DIC`;
 `.RUS` and `.MORPH` supply Russian morphology.
 

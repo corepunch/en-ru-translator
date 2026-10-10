@@ -3,9 +3,15 @@
 The checked-in source tables contain every row from the four public OpenRussian
 backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
-indexed binary `.DIC` and `.RUS` databases. This snapshot produces 98,628 DIC
-records, 53,492 native-format RUS records, and 58,772 compact morphology
-records, including 4,978 shared templates.
+indexed binary `.DIC` and `.RUS` databases. This snapshot produces 30,313 DIC
+records (one per English key, as in LTGOLD), 53,397 native-format RUS records,
+and 27,261 compact morphology records.
+
+Like LTGOLD's, every `.DIC` record holds all of its key's readings: one segment
+per part of speech, the alternative meanings after `;`
+(`table*NN.стол;таблица;табель;скрижаль`). The runtime prints the alternatives
+inline (`Стол{1.таблица;табель;скрижаль}`). See
+[record structure](../docs/dictionary.md#record-structure-one-record-per-key-one-segment-per-part-of-speech).
 
 Three files of our own sit beside the upstream tables; they are the whole
 authored input, in the spirit of LTGOLD's single `.DIC` and `.RUS`:
@@ -147,9 +153,10 @@ lacks (`идти	partner	пойти`).
 A one-word key whose first reading is a noun and that also has a verb reading
 gets LTGOLD's ambiguous record first, verb reading leading
 (`work*ZV.работатьN.работа`, like the original's `work*ZV.работать…N.работа…`),
-so grammar chooses: `Я работаю`, `Моя работа`. OpenRussian emits one record per
-reading with nouns first, and only the first is used, so 1,580 verbs such as
-`work`, `go` and `call` were unreachable. The builder's high-priority readings
+so grammar chooses: `Я работаю`, `Моя работа`. OpenRussian yields one reading
+per source row with nouns first, and the first record decides the key's
+classes, so 1,580 verbs such as `work`, `go` and `call` were unreachable. The
+other readings then become alternatives inside that record's segments. The builder's high-priority readings
 use native classes: `want*V21хотеть`, `wants*vхотеть`.
 
 The reading a generated record uses is chosen by sense, not file order. The

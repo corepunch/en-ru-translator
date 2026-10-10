@@ -5,7 +5,7 @@ scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
 # The dictionaries encode toward differently; the LTGOLD text is the original
 # capture in test/ltpro/prepositions/reference.json.
-expected_openrussian='Шаг к дому.'
+expected_openrussian='Шаг{1.мера;ступенька;ступень;походка;па;подножка;поступь;приступок} к дому{2.палата;династия;зрительница;курень}.'
 expected_ltech='Шаг по отношению к дому.'
 [ "$(lua init.lua 'A step toward the house.')" = "$expected_openrussian" ]
 [ "$(printf '%s' 'A step toward the house.' | lua init.lua --data=LTGOLD)" = "$expected_openrussian" ]

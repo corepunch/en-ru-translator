@@ -576,8 +576,8 @@ static void add_s_form_homographs(Records *db) {
   append_pending(db,&pending);
 }
 
-/* One-word keys get one record per OpenRussian reading, and only the first
- * is used: unclassified others.tsv adverbs come first (open -> открыто, new ->
+/* One-word keys get one record per OpenRussian reading until merge_readings
+ * folds them into the first, so the first decides the classes: unclassified others.tsv adverbs come first (open -> открыто, new ->
  * внове), then nouns (I'll work -> Я есть работой), and a perfective verb can
  * precede its imperfective (He comes -> придет). Following LTGOLD's codings,
  * put one record first:
@@ -735,6 +735,128 @@ static void add_native_suffix_gaps(Records *db) {
   append_pending(db,&pending);
 }
 
+/* LTGOLD keeps one record per key: one segment per part of speech, each with
+ * its alternative meanings after `;`
+ * (table*NN.стол{piece of furniture};инф)таблица{chart}A.табличный,
+ * agree*V11V.соглашаться;согласовывать). The runtime prints the alternatives
+ * as {1.…}. Fold every other reading of the key into its first record, most
+ * frequent first: each segment takes all the key's other lemmas of its class.
+ * No segment is added for a class the record lacks: an A. segment on a noun
+ * makes grammar read it as an adjective (Is the dog home? -> Псиный дом?).
+ * A perfective whose imperfective partner is a reading is the same meaning
+ * (grammar chooses the aspect) and is not repeated. */
+static int is_lemma_run(unsigned char c) { return !((c>='A'&&c<='Z')||(c>='a'&&c<='z')||c=='\\'); }
+static int lemma_ok(const unsigned char *s,size_t n) {
+  if(!n)return 0;
+  for(size_t i=0;i<n;i++)if(!is_lemma_run(s[i])||strchr(";{}/",s[i]))return 0;
+  return 1;
+}
+/* The lemma a record contributes to a class: V for any verb, else its letter. */
+static const unsigned char *reading_lemma(const Record *r,unsigned char cls,size_t *n) {
+  size_t skip;
+  if(cls=='V'){if(!is_verb_record(r))return NULL;skip=3;}
+  else if(cls=='w'){if(r->value_len<3||r->value[0]!='W'||r->value[1]!='D')return NULL;skip=2;}
+  else{if(r->value_len<2||r->value[0]!=cls)return NULL;skip=1;}
+  *n=r->value_len-skip;
+  return lemma_ok(r->value+skip,*n)?r->value+skip:NULL;
+}
+static int same_text(const unsigned char *a,size_t an,const unsigned char *b,size_t bn) { return an==bn&&!memcmp(a,b,an); }
+static int reading_before(const Record *a,const Record *b) {
+  if((a->rank>0)!=(b->rank>0))return a->rank>0;
+  return a->rank!=b->rank?a->rank<b->rank:a->sequence<b->sequence;
+}
+/* Whether a perfective's imperfective partner is a verb reading of the group. */
+static int partner_listed(Records *db,size_t from,size_t to,const Record *r) {
+  if(!is_verb_record(r)||r->value[2]!='1')return 0;
+  const char *pair=imperfective_partner(r);if(!pair)return 0;
+  size_t m;unsigned char *p=to_cp866(pair,&m);int found=0;
+  for(size_t j=from;j<to&&!found;j++){size_t n;const unsigned char *l=reading_lemma(&db->items[j],'V',&n);if(l&&same_text(l,n,p,m))found=1;}
+  free(p);return found;
+}
+/* Append to out every lemma of class cls not yet in seen, each after `;`
+ * (the first without it when lead is set). */
+static void append_readings(Records *db,size_t from,size_t to,unsigned char cls,unsigned char *out,size_t *len,
+                            const unsigned char **seen,size_t *seen_len,size_t *seen_count,int lead) {
+  for(;;) {
+    const Record *best=NULL;const unsigned char *best_lemma=NULL;size_t best_n=0;
+    for(size_t j=from;j<to;j++) {
+      const Record *r=&db->items[j];size_t n;const unsigned char *l=reading_lemma(r,cls,&n);
+      if(!l||partner_listed(db,from,to,r))continue;
+      int dup=0;for(size_t s=0;s<*seen_count&&!dup;s++)if(same_text(l,n,seen[s],seen_len[s]))dup=1;
+      if(dup)continue;
+      if(!best||reading_before(r,best)){best=r;best_lemma=l;best_n=n;}
+    }
+    if(!best)return;
+    if(!lead)out[(*len)++]=';';lead=0;
+    memcpy(out+*len,best_lemma,best_n);*len+=best_n;
+    seen[*seen_count]=best_lemma;seen_len[(*seen_count)++]=best_n;
+  }
+}
+static void merge_readings(Records *db) {
+  qsort(db->items,db->count,sizeof(Record),record_compare);
+  size_t kept=0,dropped=0;
+  for(size_t i=0;i<db->count;) {
+    size_t end=i+1;while(end<db->count&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
+    Record head=db->items[i];const unsigned char *v=head.value;size_t vn=head.value_len;
+    unsigned char first=vn?v[0]:0;
+    int mergeable=end-i>1&&vn>1&&strchr("VeZzGENnAD",first)&&!memchr(v,'/',vn)&&!memchr(v,'W',vn)&&!memchr(v,';',vn)&&!memchr(v,'{',vn);
+    /* An others.tsv word (WDнад) takes the key's other such words: WDнад;вверху. */
+    int composite=end-i>1&&vn>2&&v[0]=='W'&&v[1]=='D'&&lemma_ok(v+2,vn-2);
+    if(composite) {
+      size_t cap=vn;for(size_t j=i;j<end;j++)cap+=db->items[j].value_len+1;
+      unsigned char *out=allocate(cap);size_t len=vn;memcpy(out,v,vn);
+      const unsigned char **seen=allocate((end-i+1)*sizeof *seen);size_t *seen_len=allocate((end-i+1)*sizeof *seen_len),seen_count=1;
+      seen[0]=out+2;seen_len[0]=vn-2;
+      append_readings(db,i,end,'w',out,&len,seen,seen_len,&seen_count,0);
+      free(head.value);head.value=out;head.value_len=len;free(seen);free(seen_len);
+    } else if(mergeable) {
+      size_t cap=vn+16;for(size_t j=i;j<end;j++)cap+=db->items[j].value_len+3;
+      unsigned char *out=allocate(cap);size_t len=0,p=0;int ok=1;
+      const unsigned char **seen=allocate((end-i)*2*sizeof *seen);size_t *seen_len=allocate((end-i)*2*sizeof *seen_len),seen_count=0;
+      out[len++]=v[p++];while(p<vn&&v[p]>='0'&&v[p]<='9')out[len++]=v[p++];
+      size_t prefix=len;int plain=1;
+      unsigned char cls=strchr("VeZzGE",first)?'V':first;
+      if(p>=vn)ok=0;
+      /* After Z and its digits the verb is either bare (Z01стремиться) or
+       * marked (ZV.закрывать). */
+      else if(!is_lemma_run(v[p])) {
+        if(!strchr("VeNnAD",v[p]))ok=0;
+        else{cls=v[p]=='e'?'V':v[p];out[len++]=v[p++];if(p<vn&&v[p]=='.')out[len++]=v[p++];plain=0;}
+      }
+      while(ok) {
+        size_t start=p;while(p<vn&&is_lemma_run(v[p]))p++;
+        if(p==start){ok=0;break;}
+        size_t at=len;memcpy(out+len,v+start,p-start);len+=p-start;
+        seen[seen_count]=out+at;seen_len[seen_count++]=p-start;
+        append_readings(db,i,end,cls,out,&len,seen,seen_len,&seen_count,0);
+        if(p>=vn||v[p]=='\\')break;
+        plain=0;
+        unsigned char next=v[p];
+        if(!strchr("VeNnAD",next)){ok=0;break;}
+        out[len++]=v[p++];if(p<vn&&v[p]=='.')out[len++]=v[p++];
+        cls=next=='e'?'V':next;
+      }
+      if(ok) {
+        int single=plain;
+        /* A one-class record that gained readings takes LTGOLD's dotted form
+         * (Nстол -> NN.стол;таблица, V11соглашаться -> V11V.соглашаться;…). */
+        int dotted=single&&strchr("VeNnAD",first)&&len>p;
+        unsigned char *final=allocate(len+(vn-p)+2);size_t fl=prefix;memcpy(final,out,prefix);
+        if(dotted){final[fl++]=first=='e'?'V':first;final[fl++]='.';}
+        memcpy(final+fl,out+prefix,len-prefix);fl+=len-prefix;
+        memcpy(final+fl,v+p,vn-p);fl+=vn-p;
+        if(!dotted&&same_text(final,fl,v,vn))free(final);
+        else{free(head.value);head.value=final;head.value_len=fl;}
+      }
+      free(out);free(seen);free(seen_len);
+    } else if(!composite)dropped+=end-i-1;
+    for(size_t j=i+1;j<end;j++){free(db->items[j].key);free(db->items[j].value);}
+    db->items[kept++]=head;i=end;
+  }
+  db->count=kept;
+  fprintf(stderr,"merge_readings: %zu readings of unmergeable records dropped\n",dropped);
+}
+
 static void add_people_plural(Records *rus) {
   /* LTPRO stores this suppletive plural as its own noun, paradigm 30. */
   static const unsigned char key[]={0xab,0xee,0xa4,0xa8}; /* люди */
@@ -812,6 +934,7 @@ static void command_build(int argc,char **argv) {
   add_inflected_homographs(&source_dic,"ed",'E',"A");
   add_verb_noun_homographs(&source_dic);
   add_native_suffix_gaps(&source_dic);
+  merge_readings(&source_dic);
   add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);
   write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
   printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);

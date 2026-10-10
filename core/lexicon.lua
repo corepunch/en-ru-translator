@@ -245,7 +245,8 @@ local function adjective_candidates(word, ending)
   if ending:sub(1, 2) == "ie" then
     stem, extra = stem .. "y", nil
   elseif #stem >= 2 and stem:sub(-1) == stem:sub(-2, -2) then
-    extra, stem = stem:sub(-1), stem:sub(1, -2)
+    -- "taller" must still try "tall" after undoing the doubled "l" to "tal".
+    return { stem:sub(1, -2), stem }
   end
   return with_extra(stem, extra)
 end

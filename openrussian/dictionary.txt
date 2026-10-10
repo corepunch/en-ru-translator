@@ -86,7 +86,6 @@ just*dпростоAточный
 last*dпоследний разAпоследний
 like*PДподобноV11любить
 little*dнемногоAнебольшой
-many*dмногоAмногий
 may*Uмочьd, возможно,Nмес)май
 me*M011я
 might*U12мочь
@@ -97,7 +96,6 @@ much*aзначительноDочень
 must*Uдолженd, по-видимому,
 myself*Dсебя самого
 need*xнужноNнеобходимость
-never*kникогда
 next to*PРоколо
 next*Aследующий
 no*O01никакойy1нетKнет
@@ -129,7 +127,6 @@ someone*R031кто-то
 something*Sнечто
 still*dвсе ещеAнеподвижный
 such*Aтакой
-than*pИчем
 that*SэтоOэтотJ, чтоs, чтоL, который
 their*Oих
 them*M13они
@@ -189,6 +186,15 @@ tons*nтонна
 soon*Dскоро
 immediately*Dнемедленно
 
+never*Kникогда неDникогда
+than*pИ, чем
+many*I1многоAмногий
+slowly*Dмедленно
+store*ZV.хранитьN.магазин
+bank*Nбанк
+well*dхорошоAхороший
+beautiful*Aкрасивый
+outside*DснаружиPРвнеAпосторонний
 according to*PДсогласно
 
 ## irregular-verbs
@@ -502,7 +508,6 @@ bon appetit*WPРAприятныйNаппетит
 sweet dreams*WPРAсладкийnсон
 happy holidays*WPТсnпраздник
 happy easter*WPТсNПасха
-many thanks*WAбольшойNспасибо
 thank god*WNславаPДNбог
 what a pity*WDкакDжаль
 what a shame*WDкакDжаль
@@ -553,6 +558,48 @@ were [RN?#]`home`[D,*]*$@\.`Dдома`\
 were [TO]N`home`[D,*]*$@\..`Dдома`\
 over [HI]*$PРсвыше
 stop G*$Vпереставать\V
+many thanks*WDбольшоеNспасибо
+look at*WVсмотретьPВна
+is afraid of*WVбоятьсяPР
+am afraid of*WVбоятьсяPР
+are afraid of*WVбоятьсяPР
+was afraid of*WEбоятьсяPР
+were afraid of*WEбоятьсяPР
+go to*WVидтиPВв
+it rains*WNдождьVидти
+it is raining*WNдождьVидти
+it rained*WNдождьhидти
+it was raining*WNдождьhидти
+it will rain*WNдождьVпойти
+speak english*WVговоритьDпо-английски
+speak russian*WVговоритьDпо-русски
+speak french*WVговоритьDпо-французски
+speak german*WVговоритьDпо-немецки
+speak spanish*WVговоритьDпо-испански
+speak italian*WVговоритьDпо-итальянски
+speak chinese*WVговоритьDпо-китайски
+speak japanese*WVговоритьDпо-японски
+wait for*WVждатьPВ
+for <TAOIH>[`second``seconds``minute``minutes``hour``hours``day``days``week``weeks``month``months``year``years``decade``decades``century``centuries`]*$PВ\ \
+drive home*WVехатьDдомой
+ride home*WVехатьDдомой
+travel home*WVехатьDдомой
+head home*WVнаправлятьсяDдомой
+rush home*WVспешитьDдомой
+bring [RMO]`home`[D,*]*$@\.`Dдомой`\
+bring [TO]N`home`[D,*]*$@\..`Dдомой`\
+carry [RMO]`home`[D,*]*$@\.`Dдомой`\
+carry [TO]N`home`[D,*]*$@\..`Dдомой`\
+lead [RMO]`home`[D,*]*$@\.`Dдомой`\
+lead [TO]N`home`[D,*]*$@\..`Dдомой`\
+take [RMO]`home`[D,*]*$Vотводить|отвести\.`Dдомой`\
+take [TO]N`home`[D,*]*$Vотводить|отвести\..`Dдомой`\
+walk [RMO]`home`[D,*]*$Vпровожать|проводить\.`Dдомой`\
+walk [TO]N`home`[D,*]*$Vпровожать|проводить\..`Dдомой`\
+see [RMO]`home`[D,*]*$Vпровожать|проводить\.`Dдомой`\
+see [TO]N`home`[D,*]*$Vпровожать|проводить\..`Dдомой`\
+send [RMO]`home`[D,*]*$Vотправлять|отправить\.`Dдомой`\
+send [TO]N`home`[D,*]*$Vотправлять|отправить\..`Dдомой`\
 make <TAO>`deal`*$заключать\$`Nсделка`\
 a bit scary*WDстрашновато
 letter of credit*Nаккредитив

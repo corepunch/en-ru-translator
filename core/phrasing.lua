@@ -206,10 +206,31 @@ end
 handlers[17] = resolve_gerund_nouns
 handlers[45] = resolve_gerund_nouns
 
+-- Last node of the subject that follows a sentence-initial copula, or nil.
+local SUBJECT_MODIFIER = { T = true, O = true, A = true, I = true, H = true }
+local function question_subject(head)
+  local n = head.next
+  while n and SUBJECT_MODIFIER[tag(n)] do n = n.next end
+  local kind = n and tag(n)
+  if kind ~= 'R' and kind ~= 'N' and kind ~= '#' then return nil end
+  while n.next and tag(n.next) == 'N' do n = n.next end
+  return n
+end
+
 handlers[18] = function(match)
   local head = match.head
   local exit = 'replace'
-  if match.first == 1 then set(head, ' ')
+  local subject = match.first == 1 and number(head, 'tense') ~= values.tense.present and question_subject(head)
+  if subject then
+    -- Lua improvement: a past copula question keeps its verb after the subject
+    -- (Was he here? -> Он был здесь?), where the original drops it.
+    local before = match.vector[match.first - 1]
+    before.next = head.next
+    head.next = subject.next
+    subject.next = head
+    if (head.source or ''):match('^%u%l') then head.source = head.source:lower() end
+    match.rebuild()
+  elseif match.first == 1 then set(head, ' ')
   else
     local c = (head.source or ''):sub(1, 1)
     if (c == 'i' or c == 'I') and number(head, 'tense') == 0 then head.reading = '-'; head.reading_state = 3 end

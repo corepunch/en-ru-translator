@@ -8,6 +8,7 @@ local number, tag, set, mark = nodes.number, nodes.tag, nodes.set_tag, nodes.set
 local reading = nodes.has_reading
 
 -- LTPRO 12DC:0005, file 167C5..16AE3. Also called before T2 for questions.
+local BE_FORMS={am=true,is=true,are=true,was=true,were=true,be=true}
 function grammar.cleanup(root)
   local vector,count,state
   local removed=0
@@ -23,6 +24,11 @@ function grammar.cleanup(root)
       local last=matching.match(vector,first,pattern,state.tags)
       if last~=0 then
         local head,tail=vector[first],vector[last]
+        if handler==1 and BE_FORMS[(head.source or ''):lower()] and (tag(tail)=='Z' or tag(tail)=='V') then
+          -- Lua improvement: a copula question never has a bare verb as its
+          -- predicate (Were they at school? keeps school a noun).
+          goto advance
+        end
         if handler==1 then
           for _,at in ipairs({'number','tense','person'}) do tail[at]=head[at] or 0 end
           -- Lua improvement: a question's future verb takes the perfective, as

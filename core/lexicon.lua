@@ -1023,7 +1023,21 @@ function lexicon.analyze(dictionary,input,options)
       local at=i
       i=decode(dictionary,records,i,options)
       if options.proper_names then lexicon.name_unknown(records,at) end
-    else i=i+1 end
+    else
+      -- 0A4F:3B12: a # word with a digit before st, nd, th or rd is an
+      -- ordinal number: 10th -> 10, tagged H with marker h (no plural).
+      local r=records[i]
+      if r.kind==0x57 and nodes.tag(r)=='#' and not r.literal then
+        local source=r.source or ''
+        local length=r.source_length or #source
+        local suffix=source:sub(length-1,length):lower()
+        if length>=2 and text.digit(text.byte(source,length-3))
+            and (suffix=='st' or suffix=='nd' or suffix=='th' or suffix=='rd') then
+          r.tag,r.marker,r.source,r.reading_state=0x48,0x68,source:sub(1,length-2),1
+        end
+      end
+      i=i+1
+    end
   end
   assert(#records<=512,'native lexical vector limit exceeded')
   local root=nodes.link(records)

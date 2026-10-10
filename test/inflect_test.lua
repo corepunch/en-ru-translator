@@ -1,7 +1,7 @@
 -- Expected byte strings were checked against the original 8086 functions.
 local engine = require 'core.engine'
 local generation = require 'core.generation'
-local state = engine.new_state('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
+local state = engine.new_state('LTGOLD/BASE.RUS')
 local function form(kind, id, word, ...)
   return generation[kind .. '_form'](state, id, word, ...)
 end

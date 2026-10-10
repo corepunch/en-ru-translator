@@ -217,7 +217,7 @@ function constituents.pass(state,root,terminator,t7)
     while r and get(r,'tag')~=0x56 do r=r.next end
     return r
   end
-  for _,rule in ipairs(state.assets:rules(0x4FEC)) do
+  for _,rule in ipairs(state.assets:rules('constituent')) do
     local si,more=0,true
     while more and state.count-1>si do
       local hit=matching.constituents(state,si,rule.pattern)

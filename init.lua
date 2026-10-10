@@ -3,7 +3,7 @@
 package.path = './?.lua;./?/init.lua;' .. package.path
 
 local engine = require 'core.engine'
-local usage = [[Usage: lua init.lua [--data DIR] [--exe FILE] [--dic FILE] [--rus FILE] [sentence]
+local usage = [[Usage: lua init.lua [--data DIR] [--dic FILE] [--rus FILE] [sentence]
        printf '%s' 'English sentence.' | lua init.lua [asset options]
 
 --data selects runtime assets; OpenRussian dictionaries are used by default.
@@ -21,7 +21,7 @@ Inline {~text~} preserves text; {~=text~} transliterates it.
 local options, words = {}, {}
 local trace = false
 local asset_options = {
-  ['--data'] = 'data_dir', ['--exe'] = 'executable',
+  ['--data'] = 'data_dir',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
   ['--prefixes'] = 'prefixes', ['--dic-overlay'] = 'dic_overlay',
   ['--rus-overlay'] = 'rus_overlay',

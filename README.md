@@ -2,21 +2,22 @@
 
 A pure Lua port of the LTGOLD / SARMA 2.0 English→Russian rule-based translator
 (LinguaTech Systems, 1992). One engine handles lexical analysis, grammar,
-Russian morphology and output. The original EXE supplies static data; Lua runs
-the translation code without DOSBox or process snapshots.
+Russian morphology and output. LTPRO's grammar tables and strings are
+extracted from the original EXE into [`core/rules.lua`](core/rules.lua); Lua runs
+the translation code without the executable, DOSBox or process snapshots.
 
 ## Run
 
-Requires Lua 5.3+, the OpenRussian dictionaries in `openrussian/`,
-and the supplied unpacked `LTPRO.EXE` in `LTGOLD/` (the original executable is
-not tracked). OpenRussian `BASE.DIC`, `BASE.RUS`, and `BASE.MORPH` are used by
-default; the executable and prefix rules remain in `LTGOLD/`.
+Requires Lua 5.3+ and the OpenRussian dictionaries in `openrussian/`.
+OpenRussian `BASE.DIC`, `BASE.RUS`, and `BASE.MORPH` are used by default; the
+prefix rules come from `LTGOLD/`. The supplied unpacked `LTPRO.EXE` (not tracked)
+is needed only to regenerate `core/rules.lua` and as the translation oracle.
 
 ```sh
 lua init.lua "She can speak Russian."
 printf '%s' "Two books." | lua init.lua
 lua init.lua --data /path/to/runtime-assets "The door is open."
-lua init.lua --exe /path/to/LTPRO.EXE --dic /path/to/BASE.DIC --rus /path/to/BASE.RUS "Two books."
+lua init.lua --dic /path/to/BASE.DIC --rus /path/to/BASE.RUS "Two books."
 ```
 
 Input and output are UTF-8. Pass one sentence per invocation. `--help` lists
@@ -34,7 +35,7 @@ assert(text == 'Он - в доме.')
 ```
 
 `translate` returns UTF-8 plus diagnostic state. `run` returns CP866 plus the same
-state. Options `executable`, `dictionary`, and `russian` accept paths or raw bytes.
+state. Options `dictionary` and `russian` accept paths or raw bytes.
 Option `transliterate = false` corresponds to LTPRO’s `/L-`: bare `=`
 readings remain empty, while `%` still transliterates. Each call builds fresh mutable state. Diagnostic state exposes `root` (the Lua
 record list), `elements`, `tags`, `stages`, and `output` (CP866 text).

@@ -180,12 +180,12 @@ function generation.pronoun_form(state,word,person,gender,plural,case,prefix)
   local first=word:byte() or 0
   if person==0 or first==0xAD or first==0xAA or first==0xE7 or person>3 then
     index=8
-    while a:word(0x6344+index*4)~=0 do
+    while a:entry(0x6344+index*4) do
       local ending=a:indirect(0x6344+index*4)
       if text.ends(word,ending) then cut=#ending; break end
       index=index+1
     end
-    if a:word(0x6344+index*4)==0 then return nil end
+    if not a:entry(0x6344+index*4) then return nil end
   elseif person==1 then index=plural==1 and 5 or 0
   elseif person==2 then index=plural==1 and 6 or 1
   else index=plural==1 and 7 or gender==2 and 4 or 2 end

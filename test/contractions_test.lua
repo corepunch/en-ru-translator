@@ -1,4 +1,3 @@
-local assets = require "core.assets"
 local lexicon = require "core.lexicon"
 local encoding = require "core.encoding"
 
@@ -8,7 +7,14 @@ local function bytes(path)
 	file:close()
 	return body
 end
-local executable = assets.new(bytes("LTGOLD/LTPRO.EXE"))
+-- The original executable is the oracle: read its data segment directly.
+local segment = bytes("LTGOLD/LTPRO.EXE"):sub(0x26751)
+local executable = {}
+function executable:word(at) return string.unpack("<I2", segment, at + 1) end
+function executable:indirect(at)
+	local p = self:word(at)
+	return segment:sub(p + 1, segment:find("\0", p + 1, true) - 1)
+end
 local dictionary = lexicon.from_bytes(bytes("LTGOLD/BASE.DIC"))
 
 local function sources(text)

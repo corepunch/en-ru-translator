@@ -38,9 +38,8 @@ for _, case in ipairs(cases) do
 end
 
 -- The explicit asset arguments also accept the raw byte strings used by
--- embedding callers, including the executable image with embedded NULs.
+-- embedding callers.
 local raw_options = {
-  executable = bytes('LTGOLD/LTPRO.EXE'),
   dictionary = bytes('LTGOLD/BASE.DIC'),
   russian = bytes('LTGOLD/BASE.RUS'),
 }

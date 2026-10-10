@@ -9,7 +9,7 @@ expected_openrussian='Шаг{1.мера;ступенька;ступень;пох
 expected_ltech='Шаг по отношению к дому.'
 [ "$(lua init.lua 'A step toward the house.')" = "$expected_openrussian" ]
 [ "$(printf '%s' 'A step toward the house.' | lua init.lua --data=LTGOLD)" = "$expected_openrussian" ]
-[ "$(lua init.lua --exe LTGOLD/LTPRO.EXE --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'A step toward the house.')" = "$expected_ltech" ]
+[ "$(lua init.lua --dic=LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS -- 'A step toward the house.')" = "$expected_ltech" ]
 lua init.lua --help > "$scratch/help"
 lua init.lua --dic LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS --meanings 'I agree.' > "$scratch/meanings"
 case "$(cat "$scratch/meanings")" in *agree*) ;; *) exit 1 ;; esac

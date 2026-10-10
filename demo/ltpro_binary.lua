@@ -13,6 +13,8 @@ binary.layouts = {
   { name = "T7", offset = 0x2AC92, count = 35, size = 8, lua_index = 8 },
   { name = "T7-adjective", offset = 0x2ADB2, count = 1, size = 8, lua_key = "adjective" },
   { name = "T8", offset = 0x2B134, count = 83, size = 8, lua_index = 9 },
+  -- 1C3D:1B3F, the 21-selector constituent rule pass (DS:4FEC).
+  { name = "constituent", offset = 0x2B73C, count = 15, size = 8, lua_key = "constituent" },
 }
 binary.suffix_layout = { name = "suffix", offset = 0x26EC6, count = 43, size = 10, suffix = true }
 

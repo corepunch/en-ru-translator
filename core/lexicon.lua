@@ -6,6 +6,7 @@ local prefixes = require 'core.prefixes'
 local directives = require 'core.directives'
 local phrase_patterns = require 'core.phrase_patterns'
 local special_cases = require 'core.special_cases'
+local ltpro_rules = require 'core.rules'
 
 local lexicon = {}
 
@@ -81,51 +82,16 @@ end
 -- recorded as a noun. Phrase and annotation handling stays with the analyzer.
 -- Native row order matters. For example, `ies` precedes `es` and `s`, and
 -- `ed` follows `ied`. The ASCII strings and selectors were read from DS:0778.
-local rows = {
-  { "ies'", "N12", "class" },
-  { "es'", "N12", "class" },
-  { "s'", "N12", "class" },
-  { "'s", "N02", "class" },
-  { "ing", "G8", "ing" },
-  { "ied", "E", "ied" },
-  { "ed", "E", "ed" },
-  { "ness", "N00", "class" },
-  { "ous", "A", "class" },
-  { "less", "A", "class" },
-  { "ies", "Z13", "ies" },
-  { "es", "Z13", "es" },
-  { "s", "Z13", "s" },
-  { "fy", "V", "class" },
-  { "ment", "N00", "class" },
-  { "ion", "N00", "class" },
-  { "ence", "N00", "class" },
-  { "ance", "N00", "class" },
-  { "enc", "N00", "class" },
-  { "anc", "N00", "class" },
-  { "ity", "N00", "class" },
-  { "age", "N00", "class" },
-  { "ure", "N00", "class" },
-  { "ag", "N00", "class" },
-  { "nes", "N00", "class" },
-  { "or", "N00", "class" },
-  { "iest", "A", "class" },
-  { "ier", "A", "class" },
-  { "est", "A", "class" },
-  { "eur", "A", "class" },
-  { "er", "A", "class" },
-  { "ur", "N00", "class" },
-  { "ly", "D", "ly" },
-  { "ical", "A", "class" },
-  { "ic", "A", "class" },
-  { "ible", "A", "class" },
-  { "able", "A", "class" },
-  { "ibl", "A", "class" },
-  { "abl", "A", "class" },
-  { "ory", "A", "class" },
-  { "ary", "A", "class" },
-  { "ou", "A", "class" },
-  { "les", "A", "class" },
-}
+-- The rows themselves are rules.suffixes; the kind names the stem rewrite a
+-- row's branch performs, and the other rows only assign their class.
+local STEM_REWRITES = { ing = "ing", ied = "ied", ed = "ed", ies = "ies", es = "es", s = "s", ly = "ly" }
+local rows = {}
+for i, row in ipairs(ltpro_rules.suffixes) do
+  local ending, class = row[1], row[2]
+  -- Only the Z13/D rows rewrite: "ies'" (N12) is a plain class row.
+  local kind = (class == "Z13" or class == "G8" or class == "E" or class == "D") and STEM_REWRITES[ending] or "class"
+  rows[i] = { ending, class, kind }
+end
 for _, row in ipairs(rows) do
   row.ending, row.selector, row.transform = row[1], row[2], row[3]
 end
@@ -724,21 +690,15 @@ end
 
 -- LTPRO DS:0930..09C0, in original order: ending, inserted word, kind,
 -- selector. Selector 3 restricts 's to pronouns; 4 and 2 are whole words.
-local contractions = {
-	{ "let's", "us", "M", 4 },
-	{ "'s", "is", "X", 3 },
-	{ "n't", "not", "K", 0 },
-	{ "'ll", "will", "X", 0 },
-	{ "'d", "would", "X", 1 },
-	{ "'m", "am", "T", 0 },
-	{ "'re", "are", "T", 0 },
-	{ "'ve", "have", "X", 0 },
-	{ "cannot", "not", "K", 2 },
-}
--- DS:09E4 pronouns and DS:0BD1..0BEE exceptions in 0A4F:047B.
-local contractedIs = { i = true, you = true, he = true, she = true,
-	it = true, we = true, they = true, there = true, here = true,
-	what = true, that = true, who = true, how = true }
+local contractions = {}
+for i, row in ipairs(ltpro_rules.contractions) do
+	contractions[i] = { row[1], row[3], row[2], row[5] }
+end
+-- DS:09E4 pronouns (rules.lists), plus the exceptions 0A4F:047B tests as
+-- literals at DS:0BD1..0BEE (there's, here's, what's, that's, who's); how is
+-- a Lua addition (How's it going?).
+local contractedIs = { there = true, here = true, what = true, that = true, who = true, how = true }
+for i = 0, #ltpro_rules.lists[0x09E4] do contractedIs[ltpro_rules.lists[0x09E4][i]] = true end
 local negativeStems = { ca = "can", wo = "will", sha = "shall" }
 
 local function contraction(source)

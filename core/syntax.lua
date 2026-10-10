@@ -652,7 +652,7 @@ function syntax.run(state,root,terminator)
   local start=1
   while state.count-1>start do
     local skipped=false
-    for _,rule in ipairs(state.assets:rules(0x49E4)) do
+    for _,rule in ipairs(state.assets:rules(9)) do
       local finish=matching.constituents(state,start,rule.pattern)
       if finish~=0 then
         ctx.rule=rule

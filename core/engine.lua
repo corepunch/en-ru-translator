@@ -19,7 +19,6 @@ local engine = {}
 local static_cache = {}
 
 local signatures = {
-  ['LTPRO.EXE'] = 'MZ',
   ['BASE.RUS'] = 'LTech DIC File 2.00 ',
 }
 
@@ -68,11 +67,12 @@ local function sibling_morphology(source)
 end
 
 -- Static binary assets are decoded separately from mutable sentence state.
-function engine.new_state(exe_source,russian_source,russian_overlay,russian_morphology_source)
+-- LTPRO's grammar tables come from core/rules.lua; the executable is not read.
+function engine.new_state(russian_source,russian_overlay,russian_morphology_source)
   russian_morphology_source=russian_morphology_source or sibling_morphology(russian_source)
-  local exe_assets=memoized_asset(exe_source,'LTPRO.EXE',assets.new)
+  local exe_assets=assets.new()
   -- A dictionary directory with its own paradigms.txt inflects from it; the
-  -- original LTGOLD assets keep LTPRO's tables from the executable.
+  -- original LTGOLD assets keep LTPRO's tables (core/rules.lua).
   local directory=type(russian_source)=='string' and russian_source:match('^(.*/)') or 'openrussian/'
   local tables=paradigm_cache[directory]
   if tables==nil then
@@ -132,13 +132,12 @@ function engine.run(input, options)
   end
   local data = options.data_dir or 'LTGOLD'
   local openrussian = 'openrussian'
-  local executable = options.executable or (data .. '/LTPRO.EXE')
   -- OpenRussian is the standard dictionary set; --data selects runtime assets
   -- only. Alternate dictionary files require explicit --dic/--rus options.
   local dic_source = options.dictionary or options.dic or (openrussian .. '/BASE.DIC')
   local rus_source = options.russian or options.rus or (openrussian .. '/BASE.RUS')
 
-  local state = engine.new_state(executable, rus_source, options.rus_overlay,
+  local state = engine.new_state(rus_source, options.rus_overlay,
     options.russian_morphology or options.rus_morphology)
   state.meaning_start=options.meaning_start
   if options.domain then

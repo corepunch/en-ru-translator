@@ -2,10 +2,12 @@
 
 `core.generation` owns both low-level inflection and sentence word generation.
 `core.russian` supplies Russian dictionary metadata and ending operations.
-The morphology tables live in `openrussian/paradigms.txt` (one row per
-paradigm: cut count, endings per slot), extracted byte for byte from the data
-segment of the unpacked executable; the executable's copy is the fallback when
-the file is absent. Each `.RUS` record names its paradigm in the native byte
+LTPRO's morphology tables are in `core/rules.lua` (`rules.paradigms`, keyed by
+data-segment offset), extracted byte for byte from the unpacked executable,
+together with the pronoun table (`rules.lists[0x6344]` nominatives,
+`rules.lists[0x6314]` oblique cases). A dictionary directory may carry its own
+text copy: `openrussian/paradigms.txt` (one row per paradigm: cut count, endings
+per slot) takes precedence for the OpenRussian dictionaries. Each `.RUS` record names its paradigm in the native byte
 (`0x80|id`), assigned at build time by `tools/fit_paradigms.lua`.
 
 The form functions accept sentence state, table ID, a CP866 string and
@@ -15,7 +17,7 @@ grammatical arguments. They return a new string, or `nil` when no form exists:
 local engine = require 'core.engine'
 local generation = require 'core.generation'
 local encoding = require 'core.encoding'
-local state = engine.new_state('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
+local state = engine.new_state('LTGOLD/BASE.RUS')
 local result = generation.noun_form(state, 0, encoding.encode('дом'), 1, 0, 1)
 assert(encoding.decode(result) == 'дома')
 ```

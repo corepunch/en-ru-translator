@@ -1,40 +1,65 @@
--- Read-only decoding of the original executable's static tables. File offsets
--- are confined here; sentence state consists exclusively of Lua values.
+-- LTPRO's grammar data, read from core/rules.lua (extracted from the data
+-- segment by demo/extract_ltpro.lua). The engine still names each table and
+-- string by its DS offset; an offset the file lacks is an error, never a
+-- silent read. Sentence state consists exclusively of Lua values.
+local rules = require 'core.rules'
+local encoding = require 'core.encoding'
 local assets = {}
 assets.__index = assets
-function assets.new(exe)
-  assert(exe:sub(1,2) == 'MZ', 'LTPRO.EXE is not an MZ executable')
-  assert(string.unpack('<I2',exe,9)*16 == 0x3A00 and #exe == 0x26750+0xC412,
-    'LTPRO.EXE does not match the expected unpacked LTPRO image')
-  return setmetatable({data=exe:sub(0x26751), strings={}, rulesets={}}, assets)
+
+local function build()
+  local strings, entries, paradigms = {}, {}, {}
+  for at, value in pairs(rules.strings) do strings[at] = encoding.encode(value) end
+  for base, list in pairs(rules.lists) do
+    local count = 0
+    while list[count] do entries[base + count * 4] = encoding.encode(list[count]); count = count + 1 end
+    if list.terminated then entries[base + count * 4] = false end
+  end
+  for base, rows in pairs(rules.paradigms) do
+    local table_rows = {}
+    for id, row in pairs(rows) do table_rows[id] = {row[1], encoding.encode(row[2])} end
+    paradigms[base] = table_rows
+  end
+  return {strings = strings, entries = entries, paradigms = paradigms, rulesets = {}}
 end
-function assets:word(offset) return string.unpack('<I2',self.data,offset+1) end
+local shared
+
+function assets.new()
+  shared = shared or build()
+  return setmetatable({strings = shared.strings, entries = shared.entries, base_paradigms = shared.paradigms,
+    rulesets = shared.rulesets}, assets)
+end
+
+function assets:word(offset)
+  return rules.words[offset] or error(string.format('LTPRO word 0x%04X is not in core/rules.lua', offset))
+end
 function assets:string(offset)
-  local value = self.strings[offset]
-  if not value then
-    local stop = assert(self.data:find('\0',offset+1,true),'unterminated asset string')
-    value = self.data:sub(offset+1,stop-1); self.strings[offset] = value
-  end
-  return value
+  return self.strings[offset] or error(string.format('LTPRO string 0x%04X is not in core/rules.lua', offset))
 end
-function assets:indirect(offset) return self:string(self:word(offset)) end
-function assets:rules(offset)
-  if not self.rulesets[offset] then
-    local rules = {}
-    local at = offset
-    while self:word(at) ~= 0 do
-      local order = self:word(at+4)
-      rules[#rules+1] = {pattern=self:indirect(at), order=order >= 32768 and order-65536 or order,
-        selector=self:word(at+6)}
-      at = at + 8
+-- A pointer-list entry (DS base + 4*i); nil past a terminated list's end.
+function assets:entry(offset)
+  local value = self.entries[offset]
+  if value == nil then error(string.format('LTPRO list entry 0x%04X is not in core/rules.lua', offset)) end
+  return value or nil
+end
+function assets:indirect(offset)
+  return self:entry(offset) or error(string.format('LTPRO list entry 0x%04X is a terminator', offset))
+end
+-- A rule table by its core/rules.lua key: records of pattern, endpoint order and selector.
+function assets:rules(key)
+  if not self.rulesets[key] then
+    local list = {}
+    for i, record in ipairs(assert(rules[key], 'no rule table ' .. tostring(key))) do
+      list[i] = {pattern = encoding.encode(record[2]), order = record.endpoint_order, selector = record[1]}
     end
-    self.rulesets[offset] = rules
+    self.rulesets[key] = list
   end
-  return self.rulesets[offset]
+  return self.rulesets[key]
 end
--- Inflection tables. LTPRO keeps them in its data segment; this project keeps
--- the same rows in openrussian/paradigms.txt so they can be read and extended
--- without the executable. The file, when loaded, takes precedence.
+
+-- Inflection tables. A dictionary directory may carry its own copy as text
+-- (openrussian/paradigms.txt), which then takes precedence for the eight
+-- inflection tables.
 local sections = {[0x5A50]='verb-imperfective',[0x5E90]='verb-perfective',[0x5238]='noun-m',[0x5450]='noun-f',
   [0x55A6]='noun-n',[0x56D4]='adjective-m',[0x5770]='adjective-f',[0x580C]='adjective-n'}
 assets.paradigm_sections = sections
@@ -52,12 +77,9 @@ function assets:load_paradigms(text, encode)
 end
 function assets:paradigm(offset, id)
   local section = self.paradigm_tables and self.paradigm_tables[sections[offset]]
-  if section then
-    local row = section[id]
-    if row then return row[1], row[2] end
-    return 0, ''
-  end
-  local at = offset + id * 6
-  return self:word(at), self:indirect(at+2)
+  local rows = section or self.base_paradigms[offset] or error(string.format('no inflection table 0x%04X', offset))
+  local row = rows[id]
+  if row then return row[1], row[2] end
+  return 0, ''
 end
 return assets

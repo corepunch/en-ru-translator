@@ -2,7 +2,8 @@ local matching = require 'core.matching'
 local nodes = require 'core.nodes'
 local text = require 'core.text'
 local agreement = {}
-local NOUN_TABLE, ADJECTIVE_TABLE = 0x4542, 0x4662
+-- T7 and T7-adjective in core/rules.lua (DS 0x4542, 0x4662).
+local NOUN_TABLE, ADJECTIVE_TABLE = 8, 'adjective'
 local TAGS = '#BEFGHILNOPQUVWbfk'
 
 function agreement.run(state,list,tag,si)

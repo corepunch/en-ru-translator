@@ -4,7 +4,7 @@ local engine = require 'core.engine'
 local nodes = require 'core.nodes'
 local senses = require 'core.senses'
 local encode = require('core.encoding').encode
-local state = engine.new_state('LTGOLD/LTPRO.EXE', 'LTGOLD/BASE.RUS')
+local state = engine.new_state('LTGOLD/BASE.RUS')
 local function reading(source,value)
   local r = nodes.word(state,0x4E,encode(value))
   r.reading_state,r.previous_tag,r.source = 2,0x4E,source

@@ -400,7 +400,7 @@ phrase:stop G | I will stop eating. => Я перестану есть{1.куша
 phrase:stop G | Stop the car. !> перест
 progressive:ing-noun-gloss | He is reading the book. => Он читает книгу{1.книжка}.
 progressive:ing-noun-gloss | We are building a house. => Мы строим дом{1.палата;династия;зрительница;курень}.
-progressive:ing-noun-gloss | They are running. => Они бегут.
+progressive:ing-noun-gloss | They are running. => Они бегут{1.выполнять}.
 phrasal-verb:imperfective-first | He knocks out the lights. ~> выбивает
 past-form:ed-gloss-shadow | He opened the door. => Он открыл дверь{1.дверца}.
 past-form:ed-gloss-shadow | He closed the door. => Он закрыл дверь{1.дверца}.
@@ -417,6 +417,8 @@ verb-government:dative | Trust me. => Поверьте{1.доверять;пов
 native-reading:both | Both sides agreed. => Обе стороны{1.край;бок;стенка;борт;грань} согласились.
 native-reading:both | Attacks by both sides. => Нападения обеими сторонами{1.край;бок;стенка;борт;грань}.
 native-reading:rising | Rising prices. => Растущие цены{1.расценка}.
+native-reading:run | Run! => Побегите{1.выполнять}!
+native-reading:run | He ran home. => Он побежал домой.
 native-reading:refinery | The refineries burn. => Нефтеперегонные заводы горят{1.курить;пылать;жечь;жарить;палить;сжигать;загораться;обжигать;сгорать;топиться;куриться;погореть;прогореть;саднить;пламенеть;распаляться;растапливаться;возжигать;жечься;изжарить}.
 capitalization:dropped-article | The crude oil burns. => Сырая нефть горит{1.курить;пылать;жечь;жарить;палить;сжигать;загораться;обжигать;сгорать;топиться;куриться;погореть;прогореть;саднить;пламенеть;распаляться;растапливаться;возжигать;жечься;изжарить}.
 capitalization:dropped-article | the refineries burn. => нефтеперегонные заводы горят{1.курить;пылать;жечь;жарить;палить;сжигать;загораться;обжигать;сгорать;топиться;куриться;погореть;прогореть;саднить;пламенеть;распаляться;растапливаться;возжигать;жечься;изжарить}.

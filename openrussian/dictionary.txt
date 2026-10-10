@@ -302,7 +302,7 @@ overwritten*FпереписыватьNперезапись\overwrite
 overwrote*hпереписывать\overwrite
 paid*EплатитьAоплаченный\pay
 proven*EдоказыватьAдоказанный\prove
-ran*Eбежать\run
+ran*EV.бежать{moved swiftly};инф)выполнять{executed}\run
 rang*Eзвонить\ring
 remade*Eпеределывать\remake
 ridden*Fехать\ride
@@ -438,6 +438,8 @@ oil*NнефтьAнефтяной
 terminal*NтерминалAтерминальный
 region*Nобласть
 plant*ZV.устанавливатьN.завод{facility};растение{shrub}
+run*VV.бежать{move swiftly};инф)выполнять{perform}N.прогон
+running*GV.бежать{move swiftly};выполнять{perform}N.прогонA.бегущий\run
 power*NN.мощность{ability;electricity};право{the right}
 drone*Nбеспилотник
 struck*Eударить\strike

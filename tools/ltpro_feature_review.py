@@ -4,6 +4,8 @@
 Reviewed differences are exact, explained Lua expectations, never replacement
 oracle output. Unexpected results and execution failures always fail the run.
 Use --strict-oracle to fail on every difference from the executable.
+--original runs the engine with original=true, where every reviewed Lua
+improvement gives way to the executable's output; then nothing may differ.
 """
 import argparse
 import json
@@ -38,6 +40,7 @@ def main():
     parser.add_argument('--lua', default='lua')
     parser.add_argument('--report', type=Path)
     parser.add_argument('--strict-oracle', action='store_true')
+    parser.add_argument('--original', action='store_true')
     args = parser.parse_args()
     cases, provenance, seen = [], [], set()
     for inputs, reference in CORPORA:
@@ -54,6 +57,7 @@ def main():
                                cases=inputs, cases_sha256=input_hash))
     review_path = args.corpus / 'reviewed-differences.json'
     reviews = json.loads(review_path.read_text()) if review_path.exists() else {}
+    checked_reviews = reviews
     unknown = set(reviews) - seen
     if unknown:
         raise SystemExit('reviewed IDs absent from corpus: ' + ', '.join(sorted(unknown)))
@@ -69,10 +73,10 @@ def main():
                   known_limitation=0, unexpected=0, errors=0,
                   provenance=provenance, cases=[])
     for expected_index, (case, (index, status, actual)) in enumerate(
-            zip(cases, run_lua(cases, args.data.resolve(), args.lua)), 1):
+            zip(cases, run_lua(cases, args.data.resolve(), args.lua, original=args.original)), 1):
         if index != expected_index:
             raise SystemExit('Lua result order mismatch')
-        review = reviews.get(case['id'])
+        review = None if args.original else checked_reviews.get(case['id'])
         classification = classify(status, actual, case['translation'], review)
         report[classification] += 1
         row = dict(id=case['id'], group=case['group'], input=case['input'],

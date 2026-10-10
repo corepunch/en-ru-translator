@@ -53,11 +53,13 @@ def validate(reference_path, cases_path, data_dir):
     return reference, cases, errors, digest(reference_bytes), digest(cases_bytes)
 
 
-def lua_fixture(cases, data_dir, dictionary=None, russian=None):
+def lua_fixture(cases, data_dir, dictionary=None, russian=None, original=False):
     inputs = ','.join(lua_text(case['input']) for case in cases)
     options = ("dictionary=" + lua_text(str(dictionary.resolve())) + ",russian="
                + lua_text(str(russian.resolve()))) if dictionary and russian else (
                    "data_dir=" + lua_text(str(data_dir)))
+    if original:
+        options += ',original=true'
     return '''
 package.path = './?.lua;./?/init.lua;' .. package.path
 local engine = require 'core.engine'
@@ -76,10 +78,10 @@ end
 '''
 
 
-def run_lua(cases, data_dir, lua_executable, dictionary=None, russian=None):
+def run_lua(cases, data_dir, lua_executable, dictionary=None, russian=None, original=False):
     with tempfile.TemporaryDirectory(prefix='ltpro-pipeline-probe-') as directory:
         fixture = Path(directory) / 'audit.lua'
-        fixture.write_text(lua_fixture(cases, data_dir, dictionary, russian), encoding='utf-8')
+        fixture.write_text(lua_fixture(cases, data_dir, dictionary, russian, original), encoding='utf-8')
         result = subprocess.run([lua_executable, str(fixture)], capture_output=True,
                                 cwd=Path.cwd(), timeout=300)
     if result.returncode:
@@ -113,6 +115,8 @@ def main():
                         help='use this standalone RUS instead of DATA/BASE.RUS')
     parser.add_argument('--lua', default='lua')
     parser.add_argument('--report', type=Path, help='write a JSON provenance and result report')
+    parser.add_argument('--original', action='store_true',
+                        help="run the engine with original=true (LTPRO's output where Lua improves on it)")
     args = parser.parse_args()
     if bool(args.dictionary) != bool(args.russian):
         parser.error('--dictionary and --russian must be supplied together')
@@ -142,7 +146,7 @@ def main():
         print('LTPRO snapshot-free pipeline audit: INVALID PROVENANCE')
     else:
         try:
-            results = run_lua(cases, args.data.resolve(), args.lua, args.dictionary, args.russian)
+            results = run_lua(cases, args.data.resolve(), args.lua, args.dictionary, args.russian, args.original)
             for expected_index, (case, (index, status, actual)) in enumerate(zip(cases, results), 1):
                 if index != expected_index:
                     raise RuntimeError(f'Lua record order mismatch at {expected_index}: got {index}')

@@ -89,4 +89,33 @@ function directives.chunks(input, open)
   return chunks
 end
 
+-- 0687:1B93 in sentence mode: protection works token by token. A token
+-- starting {~ (or {~=, transliterated) opens it, one ending ~} closes it, and
+-- every token while it is open, or one ending ~}, is a literal record of its
+-- own; a token starting ~} only closes it. {~one~}, {~two~} -> one~}, two.
+function directives.native_chunks(input)
+  local chunks, open, transliterate = {}, false, false
+  for position, token in input:gmatch('()(%S+)') do
+    if token:sub(1, 2) == '{~' then
+      open = true
+      if token:sub(3, 3) == '=' then transliterate = true; token = token:sub(4)
+      else token = token:sub(3) end
+    end
+    if open or (#token > 1 and token:sub(-2) == '~}') then
+      if token:sub(-2) == '~}' then
+        open = false; token = token:sub(1, -3)
+      end
+      if token ~= '' then
+        local value = transliterate and transliteration.convert(token, true) or token
+        chunks[#chunks + 1] = {text = value, position = position, literal = true, joined = false}
+      end
+      if not open then transliterate = false end
+    else
+      if token:sub(1, 2) == '~}' then open, transliterate, token = false, false, token:sub(3) end
+      if token ~= '' then chunks[#chunks + 1] = {text = token, position = position, joined = false} end
+    end
+  end
+  return chunks
+end
+
 return directives

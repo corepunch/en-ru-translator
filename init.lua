@@ -24,6 +24,8 @@ LTGOLD's /C chain; the first listed wins.
 --formal addresses the reader as Вы (LTGOLD's own readings); the default is ты.
 --names transliterates an unknown capitalized word as a name (Xylophornium ->
 Ксилофорниум); LTPRO leaves it in Latin.
+--original gives LTPRO's own output where this translator improves on it
+(prefixed words, gap phrases, list controls, stacked contractions).
 ]]
 
 local options, words = {}, {}
@@ -59,6 +61,9 @@ while i <= #arg do
     i = i + 1
   elseif not end_options and key == '--names' then
     options.proper_names = true
+    i = i + 1
+  elseif not end_options and key == '--original' then
+    options.original = true
     i = i + 1
   elseif not end_options and key == '--no-prefixes' then
     options.prefixes = false

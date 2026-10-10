@@ -510,6 +510,27 @@ function lexicon.match_phrase(dictionary, records, index, key)
   end
   return best,finish,captures
 end
+
+-- 0A4F:10B52: after a key matches, LTPRO tries every key extending it, and
+-- each attempt first clears the shared gap pointer; a non-W reading keeps its
+-- ~ as text. The gap word survives only when the last attempt captured it.
+local function native_gaps(dictionary, key, phrase, captures)
+  if not captures or #captures==0 then return captures end
+  -- A reading led by a class letter is copied whole; the gap word goes.
+  if phrase.value:sub(1,1)~='W' then return nil end
+  local drop=false
+  local prefix=phrase.key..' '
+  local longest=''
+  for _,record in ipairs(dictionary.by_token[key] or {}) do
+    if record.key:sub(1,#prefix)==prefix then drop=true end
+    if #record.key>#longest and #record.key<#phrase.key and phrase.key:sub(1,#record.key+1)==record.key..' '
+        and not record.raw:find('*$',1,true) then longest=record.key end
+  end
+  -- The last call matched only the part after the longest shorter key.
+  if longest:find('~',1,true) then drop=true end
+  if drop then captures.dropped=true end
+  return captures
+end
 function lexicon.apply_phrase(record, records, first, last, options, captures)
   options = options or {}
   local value=record.value:match('^[^\\]*')
@@ -532,9 +553,17 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   end
   -- Two shipped entries omit/mistype a selector. Untagged text stays literal;
   -- the Cyrillic lookalike А in black board is an adjective selector.
-  value=value:gsub('^W\x80','WA')
-  if value:sub(1,1)=='W' and value:sub(2,2)~='~' and not value:sub(2,2):match('[A-Za-z#]') then
-    value='Ww'..value:sub(2)
+  if options.original then
+    -- 0A4F:18F8 takes any character after W as the selector; one that is not
+    -- a letter makes a w component and is lost (swiss army knife -> Рмейский).
+    if value:sub(1,1)=='W' and value:sub(2,2)~='~' and value:sub(2,2)~='' and not value:sub(2,2):match('[A-Za-z#]') then
+      value='Ww'..value:sub(3)
+    end
+  else
+    value=value:gsub('^W\x80','WA')
+    if value:sub(1,1)=='W' and value:sub(2,2)~='~' and not value:sub(2,2):match('[A-Za-z#]') then
+      value='Ww'..value:sub(2)
+    end
   end
   -- A subrule's W expansion carries its casing (phrasing.lua); a literal W
   -- phrase keeps LTPRO's casing of each component (Рыбная Мука).
@@ -574,7 +603,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
         for _,n in ipairs(pieces) do rendered[#rendered+1]=n end
       end
       if segment<#segments then
-        for _,n in ipairs(captures[segment] or {}) do
+        for _,n in ipairs(not captures.dropped and captures[segment] or {}) do
           -- The gap word is marked W (native trace: at BUYERS cost): output
           -- cases it as a phrase word, reorder still moves it.
           if (n.marker or 0)==0 then n.marker=0x57 end
@@ -588,7 +617,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     for at=#rendered,1,-1 do table.insert(records,first,rendered[at]) end
     return first
   end
-  if value:find('~',1,true) then value=table.concat(phrase_patterns.segments(value)) end
+  if value:find('~',1,true) and not options.original then value=table.concat(phrase_patterns.segments(value)) end
   if value:sub(1,1)~='W' then
     local t=value:sub(1,1)
     node.previous_tag=t:upper():byte()
@@ -825,7 +854,7 @@ end
 -- the word until dictionary analysis has had a chance to recognize them.
 -- A document (core/document.lua) cuts the terminator off itself, as LTPRO's
 -- sentence finder does, and passes its byte as `terminator`.
-function lexicon.tokenize(input,explicit)
+function lexicon.tokenize(input,explicit,original)
   local records={boundary('*',0x2A)}
   local terminator
   if explicit then terminator=string.char(explicit) else
@@ -840,7 +869,8 @@ function lexicon.tokenize(input,explicit)
     end
   end
   local words=0
-  for _, item in ipairs(directives.chunks(input,explicit~=nil)) do
+  local chunks=original and directives.native_chunks(input) or directives.chunks(input,explicit~=nil)
+  for _, item in ipairs(chunks) do
     local position,chunk=item.position,item.text
     if item.literal then
       local n=word(chunk,position-1)
@@ -914,6 +944,8 @@ local function decode(dictionary,records,index,options)
 		fresh.reading_state, fresh.tag, fresh.previous_tag = 1, kind:byte(), kind:byte()
 		if kind == "X" then fresh.marker = 0x27 end
 		table.insert(records, index + 1, fresh)
+		-- LTPRO removes one contraction; shouldn't've keeps shouldn't.
+		if options.original then break end
 	end
   local special_reading=special_cases.english_noun(source)
   local entry,resolved
@@ -940,15 +972,23 @@ local function decode(dictionary,records,index,options)
   if not value and not placeholder then
     derived, lookup_error=lexicon.lookup(dictionary,source,options)
     if not derived and options.prefixes then
-      derived, node.derivation_prefix=prefixes.lookup(options.prefixes,source,function(stem)
+      local hyphen
+      derived, node.derivation_prefix, hyphen=prefixes.lookup(options.prefixes,source,function(stem)
         return lexicon.lookup(dictionary,stem,options)
       end)
+      -- LTPRO keeps the hyphen (Не-Кошка) and reads a prefixed word ending
+      -- in s as plural (antivirus -> АнтиВирусы).
+      if derived and options.original then
+        if hyphen then node.derivation_prefix=node.derivation_prefix..'-' end
+        if source:sub(-1)=='s' then node.derivation_plural=true end
+      end
     end
     if derived and derived.record then
       value=derived.record.value
       node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()
       for at,v in pairs(derived.fields) do node[at]=v end
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
+      if node.derivation_plural then node.number=1 end
       node.lookup=derived.candidate
     else
       -- The word keeps its surface spelling with LTPRO's tag for an unknown
@@ -960,6 +1000,7 @@ local function decode(dictionary,records,index,options)
     end
   end
   local phrase,last,captures=lexicon.match_phrase(dictionary,records,index,source:lower())
+  if phrase and options.original then captures=native_gaps(dictionary,source:lower(),phrase,captures) end
   -- Subrules are collected while scanning possible following words, even
   -- when a literal phrase later wins. At a terminal boundary no scan occurs.
   if records[index+1] and records[index+1].separator~=0x2A then
@@ -973,7 +1014,10 @@ local function decode(dictionary,records,index,options)
     if #rules>0 then node.rules=rules end
   end
   local phrase_base=backref or (derived and derived.candidate)
-  if not phrase and phrase_base then phrase,last,captures=lexicon.match_phrase(dictionary,records,index,phrase_base:lower()) end
+  if not phrase and phrase_base then
+    phrase,last,captures=lexicon.match_phrase(dictionary,records,index,phrase_base:lower())
+    if phrase and options.original then captures=native_gaps(dictionary,phrase_base:lower(),phrase,captures) end
+  end
   if phrase then
     if value then
       -- A phrase can replace an auxiliary with a lexical verb. Decode its
@@ -985,7 +1029,8 @@ local function decode(dictionary,records,index,options)
       -- Case government belongs to the replacement reading, not the English
       -- head ("at" -> "к" must not inherit at's prepositional case).
       for _,field in ipairs({'tense','number','person','aspect'}) do
-        node[field]=context[field]
+        -- LTPRO keeps no number from the head's own reading (debris*n).
+        if not (options.original and field=='number') then node[field]=context[field] end
       end
     end
     return lexicon.apply_phrase(phrase,records,index,last,options,captures)
@@ -1032,7 +1077,7 @@ end
 
 function lexicon.analyze(dictionary,input,options)
   options = options or {}
-  local records,terminator,word_count=lexicon.tokenize(input,options.terminator)
+  local records,terminator,word_count=lexicon.tokenize(input,options.terminator,options.original)
   local i=1
   while i<=#records do
     if records[i].kind==0x57 and not records[i].literal and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then

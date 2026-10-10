@@ -85,7 +85,7 @@ function engine.run(input, options)
   for key, value in pairs(configured) do options[key] = value end
   assert(type(input) == 'string', 'input sentence must be a UTF-8 string')
   -- A document handles LTPRO's own whole-line list controls itself.
-  local sections=not options.terminator and directives.sections(input)
+  local sections=not options.terminator and not options.original and directives.sections(input)
   if sections then
     local chunks, states, glossary={},{},{}
     local cell_options={}
@@ -226,7 +226,11 @@ function engine.run(input, options)
   end
   local prefixed=analyzed.root.next
   while prefixed do
-    if prefixed.derivation_prefix and (prefixed.text or '') ~= '' then
+    if prefixed.derivation_prefix and (prefixed.text or '') ~= '' and options.original then
+      -- LTPRO prints the prefix as the record's own prefix, cased apart
+      -- from the stem (НеКошка).
+      prefixed.prefix=prefixed.derivation_prefix..(prefixed.prefix or '')
+    elseif prefixed.derivation_prefix and (prefixed.text or '') ~= '' then
       local reading=prefixed
       while reading do
         if (reading.text or '')~='' then reading.text=prefixed.derivation_prefix .. reading.text end

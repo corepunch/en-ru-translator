@@ -94,7 +94,13 @@ fails; a documented known limitation does not. Successful execution therefore
 means no unreviewed regressions, not universally correct Russian.
 
 The checked-in result is 603 exact matches, 22 intentional differences and 2
-known-limitation cases, with zero unexpected changes or errors. Use
+known-limitation cases, with zero unexpected changes or errors.
+The reviewed differences are improvements made by default; `--original`
+(engine option `original=true`) gives the executable's own output for each,
+and `python3 tools/ltpro_feature_review.py --original` reports 627 exact.
+`original_test.lua` requires that for every captured translation of the
+review, main, holdout, macro, capitalization and preposition corpora, both
+as a sentence and as a whole output file (834 captures). Use
 `--strict-oracle` to fail on any difference, including intentional Lua behavior.
 See the review for separate original/Lua outputs and remaining quality issues.
 

@@ -21,11 +21,12 @@ function prefixes.lookup(rows, source, resolve)
   local lower = source:lower()
   for _, row in ipairs(rows) do
     if lower:sub(1, #row.source) == row.source then
-      local stem = source:sub(#row.source + 1):gsub('^-', '')
+      local rest = source:sub(#row.source + 1)
+      local stem = rest:gsub('^-', '')
       if stem ~= '' and not stem:find('[-/]') then
         local result = resolve(stem)
         if result and result.record and result.tag:match('^[ANZVDGEF]$') then
-          return result, row.text
+          return result, row.text, rest:sub(1, 1) == '-'
         end
       end
     end

@@ -12,6 +12,9 @@ expected='Шаг по отношению к дому.'
 [ "$(lua init.lua 'Xylophornium is here.')" = 'Xylophornium - здесь.' ]
 [ "$(lua init.lua --names 'Xylophornium is here.')" = 'Ксилофорниум - здесь.' ]
 [ "$(lua init.lua --topic=BUSINESS 'Advising bank.')" = 'Авизующий Банк.' ]
+# The improved reading by default; --original gives the executable's own.
+[ "$(lua init.lua 'The noncat is good.')" = 'Некошка хорошая.' ]
+[ "$(lua init.lua --original 'The noncat is good.')" = 'НеКошка хорошая.' ]
 lua init.lua --help > "$scratch/help"
 # A document keeps the last sentence end's separator for an unterminated line.
 printf 'The cat.\n\nAGREEMENT\n' > "$scratch/document"

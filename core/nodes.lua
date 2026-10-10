@@ -1,7 +1,6 @@
-local layout = require 'core.record_layout'
 local nodes = {}
 
--- Native lexical-node operations recovered from LTPRO 1313:000E and 1313:12DF.
+-- Native lexical-node operations recovered from LTPRO.
 -- Grammar properties are named Lua fields; links preserve ordinary table identity.
 function nodes.new(tag, fields)
   local node = fields or {}
@@ -9,7 +8,7 @@ function nodes.new(tag, fields)
   return node
 end
 
--- 0687:0812 allocates a zeroed 15h-byte boundary record. This narrower
+-- LTPRO allocates a zeroed boundary record. This narrower
 -- constructor is used with a null parent by T1; it is not a lexical-node clone.
 function nodes.boundary(tag, marker, state)
   state = state or {}
@@ -25,7 +24,7 @@ function nodes.boundary(tag, marker, state)
 end
 
 function nodes.number(node, field)
-  local value = node and node[layout.key(field)]
+  local value = node and node[field]
   return type(value) == "string" and (value:byte() or 0) or value or 0
 end
 

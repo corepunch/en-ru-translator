@@ -33,8 +33,8 @@ authored input, in the spirit of LTGOLD's single `.DIC` and `.RUS`:
   tables, the same rows as `core/rules.lua` with four Latin `e` endings spelled
   Cyrillic. The engine reads this file for these dictionaries; the tables are
   not extended. The builder's `tools/fit_paradigms.lua` gives every lexeme a
-  row the way LTPRO does: the rows whose ending list (`core/rules.lua` lists
-  `0x5130`, `0x53C4`, `0x5522`, `0x566C`, `0x58A8`, `0x5CCC`) matches the
+  row the way LTPRO does: the rows whose ending list (`core/rules.lua`
+  `rules.lists.endings_*`) matches the
   lemma's end are the candidates, longest ending first. OpenRussian's listed
   forms pick among all rows (the one regenerating most of them, the earliest
   candidate on a tie); a lexeme without forms takes the first candidate. The

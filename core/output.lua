@@ -48,7 +48,7 @@ function output.sentence(state,root)
   local si,first,count,previous=0,true,0,nil
   local meaning_start=state.meaning_start
   local r=assert(root.next,'output requires the leading boundary')
-  local initial_caps=get(r,9)
+  local initial_caps=get(r,'capitals')
   local chunks={}
   local phrase_started={}
   local function emit(value) chunks[#chunks+1]=value end
@@ -73,7 +73,7 @@ function output.sentence(state,root)
           si=capitals(partner.source or '')
           if text.upper_ascii(get(partner,'source')) then partner.text=capital(partner.text,false) end
           if si>1 then partner.text=capital(partner.text,true,false,2) end
-          if b('separator')==0 then emit(a:string(0x5F5)) end
+          if b('separator')==0 then emit(a:string('space')) end
           emit(partner.text)
         end
         local marker=b('marker')
@@ -114,7 +114,7 @@ function output.sentence(state,root)
         local value=r.text or ''
         if value~='' then
           local c=value:byte()
-          if b('separator')==0 and c~=0x2C and c~=0x3A then emit(a:string(0x5F7)) end
+          if b('separator')==0 and c~=0x2C and c~=0x3A then emit(a:string('space')) end
           emit(str('prefix'))
           if c==0x2C then
             assert(previous,'output requires a previous record')
@@ -125,19 +125,19 @@ function output.sentence(state,root)
           emit(r.text)
           local alt=r.alternative
           if alt then
-            r.meaning_number=(meaning_start or a:word(0x042B))+count
-            emit(a:string(0x45C)..string.format(a:string(0x5F9),r.meaning_number))
+            r.meaning_number=(meaning_start or a:value('meaning_start'))+count
+            emit(a:string('alt_open')..string.format(a:string('alt_number'),r.meaning_number))
             count=count+1
             while alt do
               emit(output.reading(alt.text))
               alt=alt.alternative
-              if alt then emit(a:string(0x5FF)) end
+              if alt then emit(a:string('alt_separator')) end
             end
-            emit(a:string(0x601))
+            emit(a:string('alt_close'))
           end
         end
       else
-        if b('separator')==0 then emit(a:string(0x603)) end
+        if b('separator')==0 then emit(a:string('space')) end
         emit(b('tag')==0x23 and str('prefix'):find('-',1,true) and str('prefix') or str('suffix'))
         if b('previous_tag')==0x23 and b('source')~=0 then
           local apostrophe=str('source'):match(".*()'")
@@ -160,19 +160,19 @@ function output.meanings(state,root)
     if get(r,'kind')==0x57 and (r.alternative or r.annotation) then
       local source=(r.source or ''):lower()
       if r.alternative then
-        local number=r.meaning_number or (state.meaning_start or a:word(0x042B))+count
-        chunks[#chunks+1]=string.format(a:string(0x5CE),number,source)
+        local number=r.meaning_number or (state.meaning_start or a:value('meaning_start'))+count
+        chunks[#chunks+1]=string.format(a:string('glossary_head'),number,source)
         count=count+1
       else
         -- Annotation-only entries have no numbered inline reference.
         chunks[#chunks+1]='\n   '..source..': '
       end
       local reading=(r.text or ''):gsub('^,',''):gsub('^ ','')
-      chunks[#chunks+1]=r.annotation and string.format(a:string(0x5D9),r.annotation,reading) or string.format(a:string(0x5E1),reading)
+      chunks[#chunks+1]=r.annotation and string.format(a:string('glossary_note'),r.annotation,reading) or string.format(a:string('glossary_reading'),reading)
       local alt=r.alternative
       while alt do
         local value=output.reading(alt.text)
-        chunks[#chunks+1]=alt.annotation and string.format(a:string(0x5E6),alt.annotation,value) or string.format(a:string(0x5F0),value)
+        chunks[#chunks+1]=alt.annotation and string.format(a:string('glossary_alt_note'),alt.annotation,value) or string.format(a:string('glossary_alt'),value)
         alt=alt.alternative
       end
     end

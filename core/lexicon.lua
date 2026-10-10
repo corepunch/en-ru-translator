@@ -1,4 +1,3 @@
-local layout = require 'core.record_layout'
 local nodes = require 'core.nodes'
 local transliteration = require 'core.transliteration'
 local text = require 'core.text'
@@ -74,14 +73,14 @@ function lexicon.overlay(dictionary, bytes)
   return merged
 end
 
--- Narrow lexical fallback recovered from LTPRO 0A4F:07F2 (file 0x0E6E2).
--- The suffix rows are the native DS:0778 table: ending, class/metadata text.
+-- Narrow lexical fallback recovered from LTPRO's suffix analysis.
+-- The suffix rows are LTPRO's table (rules.suffixes): ending, class/metadata text.
 -- Productive rows (ing, ed, plurals, ly) search a rewritten stem. Adjective
 -- and possessive class rows do too. Derivational noun rows do not invent a
 -- stem: an unknown word such as "strongness" stays the surface word and is
 -- recorded as a noun. Phrase and annotation handling stays with the analyzer.
 -- Native row order matters. For example, `ies` precedes `es` and `s`, and
--- `ed` follows `ied`. The ASCII strings and selectors were read from DS:0778.
+-- `ed` follows `ied`.
 -- The rows themselves are rules.suffixes; the kind names the stem rewrite a
 -- row's branch performs, and the other rows only assign their class.
 local STEM_REWRITES = { ing = "ing", ied = "ied", ed = "ed", ies = "ies", es = "es", s = "s", ly = "ly" }
@@ -175,7 +174,7 @@ local function selector_digit(selector, index)
   return 0
 end
 
--- Grammar written by the 0A4F:07F2 class switch, independent of the dictionary hit.
+-- Grammar written by the suffix analysis' class switch, independent of the dictionary hit.
 function suffix_fields(row)
   local fields = {}
   if not row then return fields end
@@ -249,7 +248,7 @@ local function candidates(word, row)
       return { stem:sub(1, -2) }
     end
     -- The native G branch writes auxiliary `e` when the truncated stem is
-    -- not doubled (0A4F:0E793), just as the E branch inherits it from the
+    -- not doubled, just as the E branch inherits it from the
     -- suffix preamble. Try the literal truncated root before that e form.
     return { stem, stem .. "e" }
   end
@@ -276,7 +275,7 @@ function lexicon.lookup(dictionary, source, options)
           return decode_record(record, source, resolved, row, false)
         end
       end
-      -- 0A4F:07F2 stops at the first table row whose ending matches. Do not
+      -- LTPRO stops at the first table row whose ending matches. Do not
       -- fall through to a shorter ending when its candidate misses. A class
       -- row with no dictionary stem leaves the surface word unchanged.
       -- Derivational nouns still publish noun grammar through surface_noun.
@@ -287,10 +286,10 @@ function lexicon.lookup(dictionary, source, options)
   return nil
 end
 
--- Return field writes performed by the first matching DS:0778 row, before the
+-- Return field writes performed by the first matching suffix row, before the
 -- caller knows whether its derived dictionary candidate will match. The A
 -- dispatch is useful when a larger hyphenated token fails and is split later:
--- native 0A4F:07F2 leaves these two side effects on the first component.
+-- native suffix analysis leaves these two side effects on the first component.
 -- Other dispatches also mutate the node, but are deliberately omitted here
 -- until their failed-candidate lifetime is independently captured.
 function lexicon.attempt_fields(source)
@@ -315,10 +314,10 @@ function lexicon.attempt_fields(source)
 end
 
 -- Noun grammar for a derivational ending that keeps the surface word.
--- 0A4F:07F2 writes tag N, number, and case for an N-class row, and truncates
+-- LTPRO writes tag N, number, and case for an N-class row, and truncates
 -- the source only when the ending contains an apostrophe. With no apostrophe
 -- the caller looks the whole word up, misses, and leaves tag N in place
--- (0A4F:3A63). Possessives and every earlier row are excluded: those either
+-- Possessives and every earlier row are excluded: those either
 -- find a stem or follow a different miss path.
 function lexicon.surface_noun(source)
   assert(type(source) == "string" and source ~= "", "surface noun needs a source word")
@@ -356,7 +355,7 @@ function lexicon.suffix_rows()
   return out
 end
 
--- LTPRO 0A4F:0C0F (file EAFF..F45E): decode one lexical reading's metadata.
+-- LTPRO's reading decoder: decode one lexical reading's metadata.
 -- The caller has consumed the tag; payload and returned offset are CP866 bytes.
 local tag = nodes.tag
 local function has(s,c) return s:find(c,1,true) ~= nil end
@@ -366,12 +365,12 @@ local function macroText(source, value, options, previous)
 	local marker, supplied = value:sub(1, 1), value:sub(2)
 	if marker == "=" and options.transliterate == false then return supplied end
 	if supplied ~= "" and text.is_cyrillic(supplied:byte()) then return supplied end
-	-- 211E:0E82 returns without touching its destination for an empty source.
+	-- LTPRO returns without touching its destination for an empty source.
 	if source == "" then return previous or "" end
 	return transliteration.convert(source, marker == "=")
 end
 
--- 0A4F:0B3C, 0CE1 and 14D6: = honors the transliteration setting; % always
+-- = honors the transliteration setting; % always
 -- transliterates. A supplied Cyrillic spelling takes precedence over the source.
 local function writeReading(node, value, options, ordinaryReadings, macroSource)
 	local marker = value:sub(1, 1)
@@ -395,14 +394,14 @@ function lexicon.decode_reading(node, payload, options, macroSource)
   local p=1
   local function digit(at)
     local b=payload:byte(p)
-    if b and b>=48 and b<=57 then node[layout.key(at)]=b-48; p=p+1; return true end
+    if b and b>=48 and b<=57 then node[at]=b-48; p=p+1; return true end
     return false
   end
   local function paradigm(at)
     local b=payload:byte(p)
     if b and b>=48 and b<=57 then
       local value=b-48
-      node[layout.key(at)]=((node[layout.key(at)] or 0)&0x80)|value|((value&1)<<6)
+      node[at]=((node[at] or 0)&0x80)|value|((value&1)<<6)
       p=p+1
     end
   end
@@ -620,7 +619,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     elseif tag=='e' and oldtag=='G' then tag=oldtag
     elseif tag=='X' then
       for _,at in ipairs({'tense','number','person'}) do
-        if text:match('^%d') then n[layout.key(at)]=tonumber(text:sub(1,1));text=text:sub(2) end
+        if text:match('^%d') then n[at]=tonumber(text:sub(1,1));text=text:sub(2) end
       end
     end
     if text:match('^[=%%]') then
@@ -651,7 +650,7 @@ end
 -- Lexical analyzer over CP866 strings and lossless dictionary data.
 -- Literal and patterned phrases share reading distribution and ordinary records.
 
--- 0A4F:1603 attaches up to ten `word pattern*$action` records to a word node:
+-- LTPRO attaches up to ten `word pattern*$action` records to a word node:
 -- records whose first token matches the word and whose last star is followed
 -- by `$`. Phrase-key matching is separate from these grammatical subrules.
 function lexicon.sub_rules(dictionary,word)
@@ -667,7 +666,7 @@ function lexicon.sub_rules(dictionary,word)
   return rules
 end
 local function boundary(tag, marker, position)
-  return nodes.new(tag,{separator=marker or 0,kind=0x44,[0x09]=0,
+  return nodes.new(tag,{separator=marker or 0,kind=0x44,capitals=0,
     source_position=position or 0,source=tag,lookup='',reading='',previous_tag=0})
 end
 
@@ -683,22 +682,22 @@ local function word(source, position)
   local tag=numeric and 'H' or source:match("^_?[A-Za-z'/-]+$") and '?' or '#'
   fields.counted_word=tag=='?'
   if tag=='#' then fields.person,fields.gender=3,1 end
-  -- 0687:0892 preserves the original length but bounds the source copy.
+  -- LTPRO preserves the original length but bounds the source copy.
   if #source>=0x28 then tag='#';fields.source=source:sub(1,0x50) end
   return nodes.new(tag,fields)
 end
 
--- LTPRO DS:0930..09C0, in original order: ending, inserted word, kind,
+-- rules.contractions, in original order: ending, inserted word, kind,
 -- selector. Selector 3 restricts 's to pronouns; 4 and 2 are whole words.
 local contractions = {}
 for i, row in ipairs(ltpro_rules.contractions) do
 	contractions[i] = { row[1], row[3], row[2], row[5] }
 end
--- DS:09E4 pronouns (rules.lists), plus the exceptions 0A4F:047B tests as
--- literals at DS:0BD1..0BEE (there's, here's, what's, that's, who's); how is
+-- rules.lists.contracted_is, plus the exceptions LTPRO's contraction code tests
+-- as literals (there's, here's, what's, that's, who's); how is
 -- a Lua addition (How's it going?).
 local contractedIs = { there = true, here = true, what = true, that = true, who = true, how = true }
-for i = 0, #ltpro_rules.lists[0x09E4] do contractedIs[ltpro_rules.lists[0x09E4][i]] = true end
+for i = 0, #ltpro_rules.lists.contracted_is do contractedIs[ltpro_rules.lists.contracted_is[i]] = true end
 local negativeStems = { ca = "can", wo = "will", sha = "shall" }
 
 local function contraction(source)
@@ -713,7 +712,7 @@ local function contraction(source)
 		end
 		if stem and (selector ~= 3 or contractedIs[stem:lower()]) then
 			-- Native negatives retain can's n and restore will/shall before
-			-- inserting not (0A4F:063C..0706).
+			-- inserting not.
 			if ending == "n't" then
 				local irregular = negativeStems[stem:lower()]
 				if irregular then
@@ -726,7 +725,7 @@ local function contraction(source)
 	end
 end
 
--- Input splitting from 0687:1B93: whitespace separates chunks, leading and
+-- Input splitting as LTPRO does it: whitespace separates chunks, leading and
 -- trailing punctuation becomes boundary records. Internal hyphens stay in
 -- the word until dictionary analysis has had a chance to recognize them.
 function lexicon.tokenize(input)
@@ -773,7 +772,7 @@ function lexicon.tokenize(input)
         records[#records+1]=n
         if n.counted_word then
           words=words+1
-          if words==1 then local _,caps=chunk:gsub('[A-Z]','');records[1][0x09]=caps end
+          if words==1 then local _,caps=chunk:gsub('[A-Z]','');records[1].capitals=caps end
         end
       end
       for c in tail:gmatch('.') do records[#records+1]=boundary(c,0) end
@@ -829,7 +828,7 @@ local function decode(dictionary,records,index,options)
     if derived and derived.record then
       value=derived.record.value
       node.reading_state,node.tag,node.previous_tag=1,derived.tag:byte(),value:sub(1,1):upper():byte()
-      for at,v in pairs(derived.fields) do node[layout.key(at)]=v end
+      for at,v in pairs(derived.fields) do node[at]=v end
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
     elseif not lookup_error then
@@ -841,7 +840,7 @@ local function decode(dictionary,records,index,options)
         -- endings in compounds follow the same Lua policy without splitting.
         node.reading_state,node.tag=1,surface.tag:byte()
         node.person,node.gender=3,1
-        for at,v in pairs(surface.fields) do node[layout.key(at)]=v end
+        for at,v in pairs(surface.fields) do node[at]=v end
         node.surface_compound=compound
       end
     end
@@ -877,14 +876,14 @@ local function decode(dictionary,records,index,options)
     end
     return lexicon.apply_phrase(phrase,records,index,last,options,captures)
   end
-  -- 10AD3 skips the phrase scan at a sentence boundary. A failed scan at
-  -- 10D36 clears the temporary backreference search string otherwise.
+  -- LTPRO skips the phrase scan at a sentence boundary. A failed scan
+  -- clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end
   if not value and not node.surface_compound then
     local left,separator,right=source:match('^([^/-]+)([/-])(.+)$')
     if left then
       local attempt=lexicon.attempt_fields(source)
-      for at,v in pairs(attempt and attempt.fields or {}) do node[layout.key(at)]=v end
+      for at,v in pairs(attempt and attempt.fields or {}) do node[at]=v end
       node.source,node.source_length=left,#left
       local delimiter=boundary(separator,0);delimiter.marker=0x2F
       if separator=='/' then node.marker=0x2F end
@@ -912,7 +911,7 @@ function lexicon.name_unknown(records,at)
   -- Sentence capitalization belongs to the first word counted by the analyzer;
   -- a name keeps its own capital, as {~=Name~} does.
   for before=1,at-1 do if records[before].counted_word then return end end
-  records[1][0x09]=0
+  records[1].capitals=0
 end
 
 function lexicon.analyze(dictionary,input,options)

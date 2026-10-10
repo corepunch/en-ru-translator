@@ -6,7 +6,7 @@ local encoding = require 'core.encoding'
 local phrasing = {}
 local values = require 'core.grammar_values'
 
--- LTPRO 108F:000F, file 142FF..1608F: the separate T4 function. It rebuilds the
+-- LTPRO's separate T4 function. It rebuilds the
 -- vector, rewrites N readings from cached-tag contexts, applies per-word
 -- sub-rules (node.rules, from `word pattern*$action` dictionary records), then
 -- runs its 9-byte-record rule table from position 0 with a rebuild after each
@@ -19,7 +19,7 @@ local function perfective(n) return (number(n, 'lookup_frame') >> 6) & 1 end
 local function perfective68(n) return (number(n, 'lookup_flags') >> 6) & 1 end
 local function frame(n) return number(n, 'lookup_flags') & 0x3F end
 local function has(s, c) return c ~= '' and s:find(c, 1, true) ~= nil end
--- 0000:3DB0 folds a-z; the ctype test at DS:BF77 bit 0C is an ASCII letter.
+-- LTPRO folds a-z; its character-class test means an ASCII letter.
 local function ascii_letter(c) return c ~= '' and c:match('^[A-Za-z]') ~= nil end
 local function cyrillic(c)
   local b = c:byte()
@@ -663,7 +663,7 @@ function phrasing.run(root, options)
     end
   end
 
-  -- 1432A: cached-context adjective readings.
+  -- Cached-context adjective readings.
   local di = 1
   while count - 3 >= di do
     local n = V(di)
@@ -683,7 +683,7 @@ function phrasing.run(root, options)
     di = di + step
   end
 
-  -- 1450E: per-word sub-rules. Only the first backslash-separated part of the
+  -- Per-word sub-rules. Only the first backslash-separated part of the
   -- action is applied here; the second part feeds the replacement routine and
   -- the character after a second backslash selects a handler.
   local removed = 0
@@ -780,7 +780,7 @@ function phrasing.run(root, options)
   end
   if removed ~= 0 then count = rebuild(); removed = 0 end
 
-  -- 14951: the 9-byte-record rule table.
+  -- The T4 rule table.
   for index, rule in ipairs(options.rules or rules[4]) do
     local handler, pattern, action = table.unpack(rule)
     pattern = encoding.encode(pattern)

@@ -7,7 +7,7 @@ local grammar = {}
 local number, tag, set, mark = nodes.number, nodes.tag, nodes.set_tag, nodes.set_marker
 local reading = nodes.has_reading
 
--- LTPRO 12DC:0005, file 167C5..16AE3. Also called before T2 for questions.
+-- LTPRO's cleanup pass. Also called before T2 for questions.
 local BE_FORMS={am=true,is=true,are=true,was=true,were=true,be=true}
 function grammar.cleanup(root)
   local vector,count,state
@@ -70,7 +70,7 @@ function grammar.cleanup(root)
   return {root=root,vector=vector,count=count,tags=state.tags,removed=removed}
 end
 
--- LTPRO 0E1F:0009, file 11BF9..1254A: native T1 scheduling and handlers.
+-- Native T1 scheduling and handlers.
 
 function grammar.first(root, options)
   options = options or {}
@@ -136,7 +136,7 @@ function grammar.first(root, options)
         local i=1
         while i<last and tag(vector[i])~='*' do
           local n=vector[i]
-          -- Both native DS:2D9B and DS:2DA0 point to the literal "that".
+          -- Both native literals here are "that".
           if tag(n)=='Z' and (vector[i-1].source or ''):lower()~='that'
             and (vector[i+1].source or ''):lower()~='that' then set(n,'N') end
           if tag(n)=='G' or tag(n)=='E' then n.marker=0x6E end
@@ -209,9 +209,9 @@ function grammar.first(root, options)
   return {root=root,vector=vector,count=count,tags=state.tags,events=events,result=1}
 end
 
--- LTPRO 0E1F:095A..1B10, file 1254A..13700: native T2 scheduling and handlers.
+-- Native T2 scheduling and handlers.
 -- Runs over table nodes after grammar.first.
--- Field offsets are the original record offsets. `count` models DS:C7B1, which
+-- `count` models LTPRO's word count, which
 -- several native handlers leave stale after their own vector rebuild.
 -- strrchr on the +98 pointer, which addresses the record's own +11C translation.
 local function initial(n) return (n.source or ''):sub(1, 1) end
@@ -261,8 +261,8 @@ function grammar.second(root, options)
         local head, tail = V(di), V(last)
         events[#events + 1] = {rule = index, handler = handler, first = di, last = last}
         if options.on_match then options.on_match(events[#events], vector, count, state.tags) end
-        -- Exits: 'default' = native replacement at 13670; 'skip' = 125DE (di=last);
-        -- 'finish' = 134FB (di=count); 'step' = 1369D; 'step2' = 12EC4.
+        -- Exits: 'default' = native replacement; 'skip' resumes at the last
+        -- matched node; 'finish' at the count; 'step' and 'step2' advance.
         local exit = 'default'
         if handler == 1 then
           if number(V(di + 1), 'number') ~= 0 then exit = 'skip' end
@@ -421,7 +421,7 @@ function grammar.second(root, options)
             if a ~= 0 and a ~= 3 then
               set(tail, 'v'); tail.tense, tail.number, tail.person = number(head, 'tense'), 1, 3
               set(head, ' ')
-              rebuild() -- native leaves DS:C7B1 unchanged here
+              rebuild() -- native leaves the word count unchanged here
             end
             exit = 'finish'
           end
@@ -522,10 +522,10 @@ function grammar.second(root, options)
   return {root = root, vector = vector, count = count, tags = state.tags, events = events}
 end
 
--- LTPRO 0E1F:1B10..2D77, file 13700..14177: native T3 scheduling and handlers.
+-- Native T3 scheduling and handlers.
 -- Runs over table nodes after grammar.second.
--- `count` models DS:C7B1, which most native handler rebuilds leave unchanged.
--- 0000:3DB0 folds ASCII a-z before comparing.
+-- `count` models LTPRO's word count, which most native handler rebuilds leave
+-- unchanged. LTPRO folds ASCII a-z before comparing.
 local function same_word(n, literal) return (number(n, 'source') and (n.source or '') or ''):upper() == literal:upper() end
 local function perfective(n) return (number(n, 'lookup_frame') >> 6) & 1 end
 local function frame(n) return number(n, 'lookup_flags') & 0x3F end
@@ -568,8 +568,8 @@ function grammar.third(root, options)
         local back = 0
         events[#events + 1] = {rule = index, handler = handler, first = di, last = last}
         if options.on_match then options.on_match(events[#events], vector, count, state.tags) end
-        -- Exits: 'default' = 14104 replacement; 'skip' = 1380E (di=last);
-        -- 'finish' = 1405F (di=count); 'rebuild' = 13976 (rebuild, then skip).
+        -- Exits: 'default' = replacement; 'skip' resumes at the last matched
+        -- node; 'finish' at the count; 'rebuild' rebuilds, then skips.
         local exit = 'default'
         if handler == 1 then
           if number(tail, 'person') == 0 then

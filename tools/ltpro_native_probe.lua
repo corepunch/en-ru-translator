@@ -1,4 +1,4 @@
-local layout = require 'core.record_layout'
+local layout = require 'tools.ltpro_record_layout'
 -- Feed native fixtures to the Lua port; stdout is machine-readable for the 8086 harness.
 local nodes = require 'core.nodes'
 local reorder = require 'core.reorder'

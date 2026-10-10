@@ -74,7 +74,7 @@ handlers[1] = function(ctx, frame, start, finish)
   end
   if (frame.cursor and nodes.tag(frame.cursor) == 'S' and ctx.get(frame.cursor, 'aspect') ~= 0) or
      ctx.element_tag(start) == 'k' or ctx.element_tag(start - 1) == 'k' then
-    prefix(ctx, frame.right, 0x4F66, 0x4F6A)
+    prefix(ctx, frame.right, 'ne', 'ne')
   end
 end
 
@@ -110,7 +110,7 @@ handlers[3] = function(ctx, frame, start, finish)
   if not frame.right or ctx.get(frame.right, 'marker') ~= 0 then return end
   local case = ctx.get(frame.right, 'case_mask')
   if case ~= 8 and case ~= values.case.prepositional then return end
-  if not (ctx.is(frame.right, 0x4F6E) or ctx.is(frame.right, 0x4F71) or ctx.is(frame.right, 0x4F74)) then return end
+  if not (ctx.is(frame.right, 'en_to') or ctx.is(frame.right, 'en_in') or ctx.is(frame.right, 'en_on')) then return end
   frame.cursor = ctx.first(start)
   frame.left = ctx.last(start)
   while frame.cursor do
@@ -188,7 +188,7 @@ handlers[9] = function(ctx, frame, start, finish)
     if frame.left and frame.right then ctx.copy(frame.right, frame.left, 'case_mask') end
   end
   if (frame.right and nodes.tag(frame.right) == 'S' and ctx.get(frame.right, 'aspect') ~= 0) or ctx.element_tag(finish) == 'k' then
-    prefix(ctx, frame.left, 0x4F77, 0x4F7B)
+    prefix(ctx, frame.left, 'ne', 'ne')
   end
 end
 
@@ -225,8 +225,8 @@ handlers[12] = function(ctx, frame, start, finish)
   frame.right = ctx.first(finish)
   if not frame.left or not frame.right then return end
   if ctx.get(frame.left, 'aspect') ~= 0 then
-    if ctx.get(frame.left, 'aspect') == 1 then prefix(ctx, frame.right, 0x4F7F, 0x4F83)
-    else ctx.set_literal(frame.right, 'prefix', 0x4F87) end
+    if ctx.get(frame.left, 'aspect') == 1 then prefix(ctx, frame.right, 'ne', 'ne')
+    else ctx.set_literal(frame.right, 'prefix', 'ni') end
   end
   if ctx.get(frame.right, 'passive') ~= 0 then ctx.set(frame.right, 'gender', 0) end
 end
@@ -262,9 +262,9 @@ handlers[15] = function(ctx, frame, start, finish)
   end
   if ctx.element_tag(start - 1) == 'X' then
     frame.cursor = ctx.first(start - 1)
-    if frame.cursor then ctx.set_literal(frame.cursor, 'prefix', 0x4F8B) end
+    if frame.cursor then ctx.set_literal(frame.cursor, 'prefix', 'ne') end
   elseif frame.left then
-    ctx.set_literal(frame.left, 'prefix', 0x4F8F)
+    ctx.set_literal(frame.left, 'prefix', 'ne')
   end
 end
 
@@ -296,7 +296,7 @@ handlers[17] = function(ctx, frame, start, finish)
   end
   if ctx.element_tag(start + 1) == 'k' then
     frame.right = ctx.first(finish)
-    if frame.right then ctx.set_literal(frame.right, 'prefix', 0x4F93) end
+    if frame.right then ctx.set_literal(frame.right, 'prefix', 'ne') end
   end
   if ctx.element_tag(start - 1) == 'S' and frame.left and ctx.get(frame.left, 'tense') == 0 then
     frame.left.text = ""
@@ -320,14 +320,14 @@ handlers[18] = function(ctx, frame, start, finish)
   end
   if ctx.element_tag(start + 1) == 'k' then
     frame.right = ctx.first(finish)
-    if frame.right then ctx.set_literal(frame.right, 'prefix', 0x4F97) end
+    if frame.right then ctx.set_literal(frame.right, 'prefix', 'ne') end
   end
 end
 
 handlers[19] = function(ctx, frame, start, finish)
   frame.right = ctx.first(finish)
   if not frame.right or ctx.get(frame.right, 'marker') ~= 0 then return end
-  if not (ctx.is(frame.right, 0x4F9B) or ctx.is(frame.right, 0x4F9E) or ctx.is(frame.right, 0x4FA1)) then return end
+  if not (ctx.is(frame.right, 'en_to') or ctx.is(frame.right, 'en_in') or ctx.is(frame.right, 'en_on')) then return end
   frame.cursor = ctx.first(start)
   frame.left = ctx.last(start)
   while frame.cursor do
@@ -389,14 +389,14 @@ handlers[25] = function(ctx, frame, start, finish)
   frame.right = ctx.first(finish)
   if not frame.right or ctx.get(frame.right, 'case_mask') == 2 then return end
   if ctx.get(frame.right, 'marker') ~= 0 then return end
-  if ctx.is(frame.right, 0x4FA4) or ctx.is(frame.right, 0x4FA7) or ctx.is(frame.right, 0x4FAA) then ctx.set(frame.right, 'case_mask', values.case.prepositional) end
+  if ctx.is(frame.right, 'en_to') or ctx.is(frame.right, 'en_in') or ctx.is(frame.right, 'en_on') then ctx.set(frame.right, 'case_mask', values.case.prepositional) end
 end
 
 handlers[26] = function(ctx, frame, start, finish)
   frame.left = ctx.first(start)
   frame.right = ctx.first(finish)
   if not frame.left or not frame.right then return end
-  if ctx.is(frame.left, 0x4FAD) and ctx.get(frame.left, 'marker') == 0 then ctx.set(frame.right, 'case_mask', values.case.prepositional)
+  if ctx.is(frame.left, 'en_to') and ctx.get(frame.left, 'marker') == 0 then ctx.set(frame.right, 'case_mask', values.case.prepositional)
   else ctx.copy(frame.right, frame.left, 'case_mask') end
   if ctx.get(frame.right, 'marker') == 0 then
     frame.right.text = " " .. (frame.right.text or ""):sub(2)
@@ -504,7 +504,7 @@ handlers[39] = function(ctx, frame, start, finish)
   frame.right = ctx.first(finish)
   if not frame.right then return end
   if nodes.tag(frame.right) == 'Y' then
-    ctx.reading(frame.right, 0x4FB0)
+    ctx.reading(frame.right, 'imeetsya')
   else
     frame.left = ctx.first(start)
     if frame.left then ctx.copy(frame.right, frame.left, 'person'); ctx.copy(frame.right, frame.left, 'number') end
@@ -565,24 +565,24 @@ local function insert_element(ctx,at,tag,class,literal)
   return node
 end
 
-handlers[53] = function(ctx,frame,start,finish) frame.cursor=insert_element(ctx,finish-2,0x4C,0x4B,0x4FB8) end
+handlers[53] = function(ctx,frame,start,finish) frame.cursor=insert_element(ctx,finish-2,0x4C,0x4B,'comma_kotoryy') end
 handlers[54] = function(ctx,frame,start,finish)
   if ctx.element_class(finish)=='R' or ctx.element_tag(finish+1)=='*' then return end
-  frame.cursor=insert_element(ctx,finish,0x4C,0x4B,0x4FC2)
+  frame.cursor=insert_element(ctx,finish,0x4C,0x4B,'comma_kotoryy')
 end
 handlers[55] = function(ctx,frame,start,finish)
   frame.left=ctx.first(start)
   if not frame.left then return end
-  local tag,literal=0x4C,0x4FD2
-  if ctx.get(frame.left,'lookup_flags') & 0x3F == 1 and (ctx.get(frame.left,'dictionary_frame') >> 6) & 1 ~=0 then tag,literal=0x4A,0x4FCC end
+  local tag,literal=0x4C,'comma_kotoryy'
+  if ctx.get(frame.left,'lookup_flags') & 0x3F == 1 and (ctx.get(frame.left,'dictionary_frame') >> 6) & 1 ~=0 then tag,literal=0x4A,'comma_chto' end
   frame.cursor=insert_element(ctx,finish-1,tag,0x4B,literal)
   ctx.set(frame.left,'case_mask',4)
 end
 handlers[56] = function(ctx,frame,start,finish)
   frame.left=ctx.find(ctx.first(start),is_tag('V'))
   if not frame.left or ctx.get(frame.left,'lookup_flags') & 0x3F == 0 then return end
-  local literal=ctx.get(frame.left,'lookup_flags') & 0x3F == 1 and 0x4FDC or 0x4FE2
-  if literal==0x4FE2 then frame.right=ctx.first(finish); if frame.right then ctx.set(frame.right,'tense',1) end end
+  local literal=ctx.get(frame.left,'lookup_flags') & 0x3F == 1 and 'comma_chto' or 'comma_chtoby'
+  if literal=='comma_chtoby' then frame.right=ctx.first(finish); if frame.right then ctx.set(frame.right,'tense',1) end end
   frame.cursor=insert_element(ctx,finish-1,0x4A,0x4A,literal)
 end
 local function swap(ctx,i,j) constituents.swap(ctx.state,i,j) end
@@ -621,7 +621,7 @@ handlers[62] = function(ctx, frame, start, finish)
 end
 
 handlers[63] = function(ctx, frame, start, finish)
-  frame.cursor = insert_element(ctx, start, 0x2A, 0x4B, 0x4FEA)
+  frame.cursor = insert_element(ctx, start, 0x2A, 0x4B, 'empty')
   if frame.cursor then swap(ctx, start, finish) end
 end
 

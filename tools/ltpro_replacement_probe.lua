@@ -1,4 +1,4 @@
-local layout = require 'core.record_layout'
+local layout = require 'tools.ltpro_record_layout'
 -- Observe all changed native fields, not only the resulting current-tag sequence.
 local matching = require 'core.matching'
 local function hex(s) return (s:gsub('.', function(c) return string.format('%02x', c:byte()) end)) end

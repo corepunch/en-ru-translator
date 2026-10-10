@@ -3,10 +3,13 @@
 This guide explains how to read the extracted rules, with examples for people and
 agents investigating or editing them. All of LTPRO's grammar data the engine
 uses (rule tables T1-T8, cleanup, T7-adjective, constituent rules, suffixes,
-contractions, inflection and pronoun tables, and the strings handlers name by
-data-segment offset) is generated into [`core/rules.lua`](../core/rules.lua) by
-`lua demo/extract_ltpro.lua > core/rules.lua`; `test/rules_test.lua` requires the
-file to match that extraction and every entry in it to be read by the engine. **We have recovered all 702 records in the
+contractions, inflection, ending and pronoun tables, and the literals handlers
+test and write) is generated into [`core/rules.lua`](../core/rules.lua) by
+`lua demo/extract_ltpro.lua > core/rules.lua`. Everything there has a name
+(`rules.strings.sya`, `rules.lists.pronouns`, `rules.paradigms['noun-m']`);
+LTPRO addresses appear only in the extractor and the research tools.
+`test/rules_test.lua` requires the file to match the extraction, hold no
+addresses, and have every entry read by the engine. **We have recovered all 702 records in the
 known grammar tables, but have not decoded every operator and handler.** A matching
 data dump is not proof that the Lua translator executes every rule like LTPRO.
 

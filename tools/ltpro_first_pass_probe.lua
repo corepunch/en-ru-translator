@@ -1,4 +1,4 @@
-local layout = require 'core.record_layout'
+local layout = require 'tools.ltpro_record_layout'
 local captured = require 'tools.ltpro_records'
 local nodes = require 'core.nodes'
 local grammar = require 'core.grammar'

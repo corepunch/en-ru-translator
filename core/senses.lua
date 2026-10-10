@@ -1,11 +1,10 @@
-local layout = require 'core.record_layout'
 local text = require 'core.text'
 local nodes = require 'core.nodes'
 local russian = require 'core.russian'
 local senses = {}
 local digit,alpha=text.digit,text.alpha
 local get=nodes.number
-local function set(r,f,v) r[layout.key(f)]=v end
+local function set(r,f,v) r[f]=v end
 
 -- Reading text is owned by its node. Parsing advances a string position;
 -- alternatives and phrase components receive independent strings.
@@ -63,43 +62,45 @@ function senses.store_code(r, first, code)
   local function p(i) return code:byte(i+1) or 0 end
   if p(0) == 0 then return end
   local full = first ~= 1
-  local dest = first == 1 and 0x67 or 0x6D
+  -- The first reading's code fills the lookup fields, a full one the dictionary fields.
+  local f = first == 1 and {'lookup_code', 'lookup_flags', 'lookup_paradigm', 'lookup_frame'}
+    or {'dictionary_flags', 'dictionary_frame', 'dictionary_paradigm', 'dictionary_case'}
   local tag = get(r, 'tag')
   -- Decode by the record's own class: a participle node tagged A reads a V
   -- record, whose third byte is government, not an adjective paradigm.
-  local class = get(r, 0x6C)
+  local class = get(r, 'record_class')
   if class == 0x56 or class == 0x76 then tag = 0x56 elseif class == 0x4E then tag = 0x4E elseif class == 0x41 then tag = 0x41 end
   if tag == 0x4E then
-    set(r, dest, p(0)); set(r, dest + 1, p(1))
+    set(r, f[1], p(0)); set(r, f[2], p(1))
     if full then
-      set(r, dest + 2, p(2))
-      if p(2) ~= 0 then set(r, 'paradigm', get(r, dest + 2) & 0x7F) end
-      if (get(r, dest + 1) >> 3) & 1 ~= 0 then set(r, 'number', 1) end
-      if (get(r, dest + 1) >> 2) & 1 ~= 0 then set(r, 'number', 0) end
+      set(r, f[3], p(2))
+      if p(2) ~= 0 then set(r, 'paradigm', get(r, f[3]) & 0x7F) end
+      if (get(r, f[2]) >> 3) & 1 ~= 0 then set(r, 'number', 1) end
+      if (get(r, f[2]) >> 2) & 1 ~= 0 then set(r, 'number', 0) end
     end
-    local b = get(r, dest + 1)
+    local b = get(r, f[2])
     set(r, 'gender', ((b >> 1) & 1) * 2 + (b & 1))
   elseif tag == 0x41 then
-    set(r, dest, p(0))
+    set(r, f[1], p(0))
     if full then
-      if get(r, dest) & 1 ~= 0 then set(r, dest + 1, p(1)); set(r, dest + 2, p(2))
-      else set(r, dest + 2, p(1)) end
-      if (get(r, dest) >> 5) & 1 ~= 0 then set(r, 'short_form', 1) end
-      set(r, 'paradigm', get(r, dest + 2) & 0x7F)
+      if get(r, f[1]) & 1 ~= 0 then set(r, f[2], p(1)); set(r, f[3], p(2))
+      else set(r, f[3], p(1)) end
+      if (get(r, f[1]) >> 5) & 1 ~= 0 then set(r, 'short_form', 1) end
+      set(r, 'paradigm', get(r, f[3]) & 0x7F)
     else
-      set(r, dest + 1, p(1))
+      set(r, f[2], p(1))
     end
   elseif tag == 0x45 or tag == 0x46 or tag == 0x47 or tag == 0x56 or tag == 0x65 or tag == 0x76 then
-    set(r, dest, p(0)); set(r, dest + 1, p(1))
+    set(r, f[1], p(0)); set(r, f[2], p(1))
     if full then
-      set(r, dest + 2, p(2)); set(r, dest + 3, p(3))
+      set(r, f[3], p(2)); set(r, f[4], p(3))
       local case = get(r, 'case_mask')
-      if case == 0 or case == 8 then set(r, 'case_mask', get(r, dest + 1) & 0x3F) end
+      if case == 0 or case == 8 then set(r, 'case_mask', get(r, f[2]) & 0x3F) end
       if get(r, 'lookup_frame') & 0x3F == 0 then
         local v = get(r, 'governed_case')
-        if v == 0 or v == 8 then set(r, 'governed_case', get(r, dest + 3) & 0x3F) end
+        if v == 0 or v == 8 then set(r, 'governed_case', get(r, f[4]) & 0x3F) end
       end
-      set(r, 'paradigm', get(r, dest + 2) & 0x7F)
+      set(r, 'paradigm', get(r, f[3]) & 0x7F)
     elseif get(r, 'tag') == 0x45 or get(r, 'previous_tag') == 0x45 then
       set(r, 'tense', 1)
     end
@@ -110,7 +111,7 @@ function senses.reflexive(state,r)
   r.gender=1
   local value,n=r.text,#r.text
   local function back(i) return text.byte(value,n-i) end
-  if text.ends(value,state.assets:string(0x484A)) then
+  if text.ends(value,state.assets:string('sya')) then
     local c=back(5); r.paradigm=(c==0xE7 or c==0xE8 or c==0xE9) and 2 or 0
     return 0
   end
@@ -316,7 +317,7 @@ function senses.select(state, original, r, alt, wtag, wflag)
   if not l then goto not_found end
   p = l:match("%*(.*)")
   if not p then return 0 end
-  set(r, 0x6C, (p:byte() or 0))
+  set(r, 'record_class', (p:byte() or 0))
   p = p:sub(2)
   senses.store_code(r, 0, p)
   if get(r, 'tag') == 0x41 then
@@ -332,9 +333,9 @@ function senses.select(state, original, r, alt, wtag, wflag)
   if t == 0x41 then
     r.text = r.text:sub(1,length-2) .. adjective_ending .. r.text:sub(length+1)
     set(r, 'gender', 1)
-    if ends(0x486B) or ends(0x486F) or ends(0x4873) or ends(0x4877) then
+    if ends('kiy') or ends('kie') or ends('kaya') or ends('koe') then
       set(r, 'paradigm', 4)
-    elseif ends(0x487B) or ends(0x487E) or ends(0x4881) or ends(0x4884) then
+    elseif ends('yy') or ends('ye') or ends('aya') or ends('oe') then
       set(r, 'paradigm', reading_byte(length - 3) == 0xE6 and 1 or 0)
     end
     set(r, 'person', 3)
@@ -410,10 +411,10 @@ function senses.select(state, original, r, alt, wtag, wflag)
   -- paradigm, which read as a verb table gave "зоню".
   l = lookup(0, 'V')
   set_length()
-  if not l and ends(0x4850) then
+  if not l and ends('sya') then
     put_reading(length - 2, 0)
     l = lookup(0, 'V')
-    append_literal(0x4853)
+    append_literal('sya')
   end
   if not l then
     return 0
@@ -429,30 +430,30 @@ function senses.select(state, original, r, alt, wtag, wflag)
     if text.is_lower_cyrillic(reading_byte(0)) and text.is_lower_cyrillic(reading_byte(1)) then
       l = lookup(0, 'V')
       set_length()
-      if not l and ends(0x4856) then
+      if not l and ends('sya') then
         put_reading(length - 2, 0)
         l = lookup(0, 'V')
-        append_literal(0x4859)
+        append_literal('sya')
       end
       if l then
         p = l:match("%*(.*)") or ""
       end
     end
   end
-  set(r, 0x6C, (p:byte() or 0))
+  set(r, 'record_class', (p:byte() or 0))
   p = p:sub(2)
   senses.store_code(r, 0, p)
   if bit6D(2) ~= 0 and bit6D(3) == 0 then set(r, 'aspect', 1) end
   if bit6D(3) ~= 0 and bit6D(2) == 0 then set(r, 'aspect', 0) end
-  if ends(0x485C) then
+  if ends('sya') then
     set(r, 'case_mask', get(r, 'governed_case'))
   elseif bit6D(4) ~= 0 then
-    append_literal(0x485F)
+    append_literal('sya')
     set(r, 'case_mask', get(r, 'governed_case'))
   elseif get(r, 'verb_flags') & 1 == 0 then
     -- nothing
   elseif bit6D(5) == 0 then
-    append_literal(0x4862)
+    append_literal('sya')
     set(r, 'case_mask', get(r, 'governed_case'))
   else
     set(r, 'verb_flags', get(r, 'verb_flags') & 0xFE)
@@ -474,13 +475,13 @@ function senses.select(state, original, r, alt, wtag, wflag)
   if get(r, 'tag') == 0x56 and get(r, 'passive') ~= 0 and not aux_set() and bit6D(3) ~= 0 and
      get(r, 'lookup_frame') & 0x3F == 0 and get(r, 'aspect') == 0 then
     set(r, 'aspect', 0); set(r, 'verb_flags', 1); set(r, 'tense', 0)
-    append_literal(0x4865)
+    append_literal('sya')
     set(r, 'passive', 0); set(r, 'short_form', 0)
   end
   if get(r, 'passive') ~= 0 and aux_set() then
     if bit6D(3) ~= 0 then
       set(r, 'aspect', 0); set(r, 'verb_flags', 1)
-      append_literal(0x4868)
+      append_literal('sya')
       set(r, 'passive', 0); set(r, 'short_form', 0)
       if same_record() then release_aux() end
     else

@@ -77,16 +77,16 @@ function constituents.build(state,root)
     if word_tag == 'L' or word_tag == 'k' then
       index = index + 1; start_element(index, word_tag, 'k'); append_word(index); goto continue
     end
-    if word_tag == 'P' and not source_is(0x506C) and element_class(index) == 'P' then
+    if word_tag == 'P' and not source_is('en_of') and element_class(index) == 'P' then
       index = index + 1; start_element(index, word_tag, 'W'); append_word(index); goto continue
     end
     -- Element 1's class (the array's byte at +0E) and tag (+0C).
-    if word_tag == 'P' and element_class(1) ~= 'P' and element_tag(1) == 'P' and index == 1 and not source_is(0x506F) and not source_is(0x5072) then
+    if word_tag == 'P' and element_class(1) ~= 'P' and element_tag(1) == 'P' and index == 1 and not source_is('en_of') and not source_is('en_by') then
       set_class(1, 'P'); append_word(index); goto continue
     end
     if word_tag == 'P' and index ~= 0 and element_class(index) ~= 'Y' and element_class(index) ~= 'K' and element_class(index) ~= 'D' and
        following_tag() ~= 'M' then
-      if not source_is(0x5075) or element_tag(index) == 'S' then
+      if not source_is('en_of') or element_tag(index) == 'S' then
         index = index + 1; start_element(index, word_tag, 'W')
       elseif element_class(index) == 'w' then
         set_class(index, 'W')
@@ -95,7 +95,7 @@ function constituents.build(state,root)
       end
       append_word(index); goto continue
     end
-    if word_tag == 'w' and source_is(0x5078) then
+    if word_tag == 'w' and source_is('en_of') then
       if element_class(index) == 'w' then set_class(index, 'W') elseif element_class(index) == 'W' then set_class(index, 'w') end
       append_word(index); goto continue
     end
@@ -114,7 +114,7 @@ function constituents.build(state,root)
       if not one_of(element_class(index), 'WwKP') then index = index + 1; start_element(index, word_tag, 'W') end
       if element_tag(index) ~= 'P' and element_tag(index) ~= 'N' then
         set_tag(index, word_tag)
-        set_class(index, source_is(0x507B) and 'W' or 'K')
+        set_class(index, source_is('en_one') and 'W' or 'K')
       end
       append_word(index); goto continue
     end
@@ -225,7 +225,7 @@ function constituents.pass(state,root,terminator,t7)
         local selector=rule.selector
         if selector==1 then
           local r=first(hit)
-          if r and get(r,'marker')==0 and (is(r,0x5107) or is(r,0x510A) or is(r,0x510D)) then r.case_mask=0x20 end
+          if r and get(r,'marker')==0 and (is(r,'en_to') or is(r,'en_in') or is(r,'en_on')) then r.case_mask=0x20 end
           more=false
         elseif selector==3 then
           t7(state,E(si+1),tag(si+1),si)
@@ -252,13 +252,13 @@ function constituents.pass(state,root,terminator,t7)
           end
           more=false
         elseif selector==10 then
-          local r=nodes.word(state,0x4C,state.assets:string(0x5110))
+          local r=nodes.word(state,0x4C,state.assets:string('comma_kotoryy'))
           if r then r.reading_state=3; constituents.insert(state,{tag=0x4C,class=0x4B,next=r,last=r},hit) end
           more=false
         elseif selector==18 then
           local r=verb(first(hit))
           if r then
-            if is(r,0x511A) then r.text=state.assets:string(0x511E)
+            if is(r,'en_see') then r.text=state.assets:string('smotri')
             elseif get(r,'person')==0 or get(r,'previous_tag')==0x65 then r.tense=0; r.verb_flags=get(r,'verb_flags') | 4 end
           end
           E(hit).class=0x71; more=false
@@ -279,17 +279,17 @@ function constituents.pass(state,root,terminator,t7)
             if get(a,'kind')==0x44 or get(b,'kind')==0x44 then skip=true
             elseif bit(a,1)~=0 then skip=true
             elseif get(b,'tag')==0x50 and get(b,'marker')==0x77 then skip=true
-            elseif get(b,'tag')==0x4A and is(b,0x5125) then skip=true end
+            elseif get(b,'tag')==0x4A and is(b,'en_that') then skip=true end
           end
           if not skip and get(p,'tag')==0x56 and bit(p,0)~=0 and bit(p,5)==0 and bit(p,4)==0 and
-            get(p,'verb_flags')==0 and get(p,'passive')==0 then p.text=p.text..state.assets:string(0x512A) end
+            get(p,'verb_flags')==0 and get(p,'passive')==0 then p.text=p.text..state.assets:string('sya') end
         elseif selector==21 then
           if tag(si-1)~=0x4C then
             local b=first(hit)
             if b and not (get(b,'tag')==0x50 and get(b,'marker')==0x77) then
               local p=E(hit-1).last
               if p and get(p,'tag')==0x56 and bit(p,0)~=0 and bit(p,5)==0 and bit(p,4)==0 and
-                get(p,'verb_flags')==0 and get(p,'passive')==0 then p.text=p.text..state.assets:string(0x512D) end
+                get(p,'verb_flags')==0 and get(p,'passive')==0 then p.text=p.text..state.assets:string('sya') end
             end
           end
         end

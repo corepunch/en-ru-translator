@@ -1,4 +1,4 @@
-local layout = require 'core.record_layout'
+local layout = require 'tools.ltpro_record_layout'
 local lexicon = require 'core.lexicon'
 local fixtures=dofile(assert(arg[1]))
 local file=assert(io.open(arg[2] or 'LTGOLD/BASE.DIC','rb'))

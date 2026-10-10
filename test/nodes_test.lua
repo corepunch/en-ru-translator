@@ -15,7 +15,7 @@ local state={word_count=511}
 assert(nodes.word(state,0x4E,'noun').text=='noun')
 assert(not nodes.word(state,0x4E,'over limit'))
 -- Native fixture offsets are translated once, with opaque captured data retained.
-local layout = require 'core.record_layout'
+local layout = require 'tools.ltpro_record_layout'
 local imported = layout.import({[0x0C] = string.byte('N'), [0x73] = 1, [0x12] = 'source', [0x6B] = 17})
 assert(imported.tag == string.byte('N') and imported.tense == 1 and imported.source == 'source')
 assert(imported[0x0C] == nil and imported[0x73] == nil and imported[0x6B] == 17)

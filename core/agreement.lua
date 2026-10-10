@@ -2,7 +2,7 @@ local matching = require 'core.matching'
 local nodes = require 'core.nodes'
 local text = require 'core.text'
 local agreement = {}
--- T7 and T7-adjective in core/rules.lua (DS 0x4542, 0x4662).
+-- T7 and T7-adjective in core/rules.lua.
 local NOUN_TABLE, ADJECTIVE_TABLE = 8, 'adjective'
 local TAGS = '#BEFGHILNOPQUVWbfk'
 
@@ -39,16 +39,16 @@ function agreement.run(state,list,tag,si)
         local selector=rule.selector
         local default = false
         if selector == 1 then
-          if is(B, 0x47C6) then
+          if is(B, 'en_years') then
             local c = get(A, 'case_mask')
             if c == 4 or c == 0x10 or c == 0x20 then
             elseif c == 2 then
-              reading(B, 0x47CC); B.paradigm = 0xFFFF
-            elseif not (is(A, 0x47D0) or is(A, 0x47D4) or is(A, 0x47DA)) then
-              reading(B, 0x47DF); B.paradigm = 0xFFFF
+              reading(B, 'let'); B.paradigm = 0xFFFF
+            elseif not (is(A, 'en_two') or is(A, 'en_three') or is(A, 'en_four')) then
+              reading(B, 'let'); B.paradigm = 0xFFFF
             end
             copy(B, A, 'case_mask'); set(B, 'number', 0)
-          elseif is(A, 0x47E3) then
+          elseif is(A, 'en_most') then
             set(B, 'case_mask', 2)
             if get(N, 'tag') == 0x41 or get(N, 'tag') == 0x4F then set(N, 'case_mask', 2) end
           else
@@ -78,26 +78,26 @@ function agreement.run(state,list,tag,si)
               -- A composed equivalent supplies its own Russian preposition.
               -- English locative heuristics must not replace authored в by на.
               default = true
-            elseif (c == 8 or c == 0x20) and is(A, 0x47E8) and text.equal(A.text,state.assets:string(0x47EB)) then
-              reading(A, dictionary_bit(B, 6) ~= 0 and 0x47ED or 0x47F0)
+            elseif (c == 8 or c == 0x20) and is(A, 'en_in') and text.equal(A.text,state.assets:string('v')) then
+              reading(A, dictionary_bit(B, 6) ~= 0 and 'na' or 'v')
               default = true
             elseif get(A, 'marker') ~= 0 then
               default = true
             elseif dictionary_bit(B, 1) ~= 0 then
-              if c == 8 and not is(A, 0x480F) then
+              if c == 8 and not is(A, 'en_to') then
                 set(B, 'case_mask', 2)
               else
-                if is(A, 0x4812) then reading(A, 0x4817)
-                elseif is(A, 0x481A) then
+                if is(A, 'en_from') then reading(A, 'ot')
+                elseif is(A, 'en_to') then
                   A.text = ""; set(A, 'case_mask', 4)
                 end
                 default = true
               end
             else
-              if (c == 8 or c == 0x20) and (is(A, 0x47F2) or is(A, 0x47F5) or is(A, 0x47F8) or is(A, 0x47FD)) then
-                reading(A, dictionary_bit(B, 6) ~= 0 and 0x4800 or 0x4803)
+              if (c == 8 or c == 0x20) and (is(A, 'en_to') or is(A, 'en_at') or is(A, 'en_into') or is(A, 'en_on')) then
+                reading(A, dictionary_bit(B, 6) ~= 0 and 'na' or 'v')
               end
-              if is(A, 0x4805) then reading(A, dictionary_bit(B, 6) ~= 0 and 0x480A or 0x480C) end
+              if is(A, 'en_from') then reading(A, dictionary_bit(B, 6) ~= 0 and 's' or 'iz') end
               default = true
             end
           end
@@ -121,7 +121,7 @@ function agreement.run(state,list,tag,si)
           if get(A, 'case_mask') == 0 then
             set(B, 'case_mask', 4)
           elseif get(B, 'source') == 0x69 or get(B, 'source') == 0x49 then
-            reading(B, 0x481D); set(B, 'tag', 0x44)
+            reading(B, 'eto'); set(B, 'tag', 0x44)
             count = rebuild_vector()
           elseif get(A, 'case_mask') ~= 8 then
             default = true
@@ -130,7 +130,7 @@ function agreement.run(state,list,tag,si)
           else
             local t = (E(si + 1).tag or 0)
             set(B, 'case_mask', ('NIHORSQW'):find(string.char(t), 1, true) and 4 or 8)
-            if get(B, 'aspect') ~= 0 then A.prefix = state.assets:string(0x4821) end
+            if get(B, 'aspect') ~= 0 then A.prefix = state.assets:string('ne') end
           end
         elseif selector == 12 then
           copy(A, B, 'number'); copy(A, B, 'gender')
@@ -141,10 +141,10 @@ function agreement.run(state,list,tag,si)
             count = rebuild_vector()
           else
             local done = false
-            if is(B, 0x4825) then
+            if is(B, 'en_years') then
               local last = (A.source or ''):byte(-1) or 0
               if last == 0x30 or last > 0x34 then
-                reading(B, 0x482B); B.paradigm = 0xFFFF; done = true
+                reading(B, 'let'); B.paradigm = 0xFFFF; done = true
               end
             end
             if not done then
@@ -183,8 +183,8 @@ function agreement.run(state,list,tag,si)
             set(A, 'number', 0); copy(A, B, 'gender'); set(B, 'case_mask', get(N, 'case_mask'))
           end
         elseif selector == 21 then
-          if is(A, 0x482F) and dictionary_bit(B, 4) ~= 0 then
-            reading(A, 0x4834); set(A, 'tag', 0x69)
+          if is(A, 'en_some') and dictionary_bit(B, 4) ~= 0 then
+            reading(A, 'nemnogo'); set(A, 'tag', 0x69)
             rebuild_vector()
           end
         elseif selector == 22 then

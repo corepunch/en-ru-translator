@@ -1,4 +1,4 @@
--- LTPRO 211E:003A and 0E82: contextual Latin-to-CP866 transliteration.
+-- LTPRO's contextual Latin-to-CP866 transliteration.
 -- Keep the original spellings, including its unusual pronunciation rules.
 local encoding = require "core.encoding"
 local transliteration = {}

@@ -1,6 +1,8 @@
--- Native record layout used only at decoding boundaries. Runtime records have
--- ordinary named fields; values preserve the original grammar conventions.
+-- LTPRO's native word-record layout: byte offset -> the engine's field name.
+-- Only the probes that compare captured LTPRO memory with Lua records use it;
+-- the engine itself knows fields by name.
 local fields = {
+  [0x09] = 'capitals',
   [0x0B] = 'reading_state',
   [0x0C] = 'tag',
   [0x0D] = 'separator',
@@ -14,6 +16,7 @@ local fields = {
   [0x68] = 'lookup_flags',
   [0x69] = 'lookup_paradigm',
   [0x6A] = 'lookup_frame',
+  [0x6C] = 'record_class',
   [0x6D] = 'dictionary_flags',
   [0x6E] = 'dictionary_frame',
   [0x6F] = 'dictionary_paradigm',

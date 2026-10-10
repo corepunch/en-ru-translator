@@ -72,20 +72,20 @@ function russian.lookup(state, key, prefix, class)
 end
 
 local function tables(class, variant)
-  -- (table offset in DS, list count), from the two native switches.
+  -- The ending list for a class, from the two native switches.
   if class == 0x01 or class == 0x4E then
-    if variant == 1 then return 0x5130, 0x42 end
-    if variant == 2 then return 0x53C4, 0x23 end
-    if variant == 0 then return 0x5522, 0x21 end
-    return 0x5130, 0x42
+    if variant == 1 then return 'endings_noun_m' end
+    if variant == 2 then return 'endings_noun_f' end
+    if variant == 0 then return 'endings_noun_n' end
+    return 'endings_noun_m'
   end
   if class == 0x02 or class == 0x05 or class == 0x06 or class == 0x07 or class == 0x41 or class == 0x49 then
-    return 0x566C, 0x1A
+    return 'endings_adjective'
   end
   if class == 0x03 or class == 0x45 or class == 0x46 or class == 0x47 or class == 0x56 or class == 0x76 then
-    if variant == 1 then return 0x5CCC, 0x71 end
-    if variant == 0x67 or variant == 0x6E or variant == 0xA3 then return 0x6136, 0x2F end
-    return 0x58A8, 0x6A
+    if variant == 1 then return 'endings_verb_perfective' end
+    if variant == 0x67 or variant == 0x6E or variant == 0xA3 then return 'endings_replacement' end
+    return 'endings_verb_imperfective'
   end
   return nil
 end
@@ -104,14 +104,16 @@ end
 
 function russian.ending_matches(state, word, class, variant)
   local a, length = state.assets, #word
-  local offset, count = tables(class, variant)
+  local list_name = tables(class, variant)
   if (class == 3 or class == 0x45 or class == 0x46 or class == 0x47 or class == 0x56 or class == 0x76) and length > 2 then
-    if text.ends(word,a:indirect(0x630C)) or text.ends(word,a:indirect(0x6310)) then length=length-2 end
+    local reflexive=a:list('reflexive')
+    if text.ends(word,reflexive[0]) or text.ends(word,reflexive[1]) then length=length-2 end
   end
   local matches = {}
-  if offset then
-    for id=0,count-1 do
-      for _, suffix in ipairs(tokens(a:indirect(offset+id*4),a:string(0xB97F),a:string(0xB981))) do
+  if list_name then
+    local list = a:list(list_name)
+    for id=0,#list do
+      for _, suffix in ipairs(tokens(list[id],a:string('space'),a:string('space'))) do
         if #suffix > 0 and text.ends(word,suffix,length) then matches[#matches+1]={length=#suffix,id=id} end
       end
     end
@@ -205,7 +207,7 @@ function russian.replace_ending(state, word)
   local matches = russian.ending_matches(state, word, 3, 0x6E)
   if #matches == 0 then return nil end
   sort(matches,1,#matches)
-  local cut, ending = state.assets:paradigm(0x61F2,matches[1].id)
+  local cut, ending = state.assets:paradigm('replacement',matches[1].id)
   if ending == '' or ending:sub(1,1) == '-' then return nil end
   local keep = #word-cut
   local stem = keep > 0 and word:sub(1,keep) or word

@@ -3,7 +3,7 @@ local rules = require "core.rules"
 
 local reorder = {}
 
--- Port of LTPRO 1279:000D (file 0x1619D), operating on original-shaped lexical nodes.
+-- Port of LTPRO's reorder pass, operating on original-shaped lexical nodes.
 -- The native +98 text pointer addresses the record's own +11C translation.
 local number = nodes.number
 
@@ -34,7 +34,7 @@ local handlers = {
   [6] = function(v, first, last) return number(v[last], 'number') ~= 0 end,
   [7] = function(v, first, last) return number(v[last], 'marker') == 0x72 end,
   [8] = function(v, first)
-    -- CP866 "мес)" at DS:43DB; strstr, not an English-source-word special case.
+    -- The month mark "мес)" by substring, not an English-source-word special case.
     return assert(v[first].reading, "missing native lexical text"):find("\xAC\xA5\xE1)", 1, true) ~= nil
   end,
   [9] = function(v, first, last)
@@ -49,7 +49,7 @@ local handlers = {
 }
 
 function reorder.matches(vector, first, pattern)
-  -- 1313:07FD compares resolved tags literally; brackets and W alternatives are not expanded.
+  -- LTPRO compares resolved tags literally; brackets and W alternatives are not expanded.
   for i = 1, #pattern do
     if number(vector[first + i - 1], 'tag') ~= pattern:byte(i) then return false end
   end
@@ -120,7 +120,7 @@ function reorder.apply(root, tables)
     if vector[i].tag == 0x54 then vector[i].tag = 0x20 end
   end
   -- Native rebuilds its vector, count and tag cache only when a record was
-  -- blanked; otherwise DS:C5AE and DS:C7B1 keep their pre-reorder values
+  -- blanked; otherwise LTPRO's counts keep their pre-reorder values
   -- although the linked records are already swapped. The third result says
   -- whether that rebuild happened.
   local rebuilt = false

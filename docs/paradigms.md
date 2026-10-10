@@ -2,19 +2,20 @@
 
 `core.generation` owns both low-level inflection and sentence word generation.
 `core.russian` supplies Russian dictionary metadata and ending operations.
-LTPRO's morphology tables are in `core/rules.lua` (`rules.paradigms`, keyed by
-data-segment offset), extracted byte for byte from the unpacked executable,
-together with the pronoun table (`rules.lists[0x6344]` nominatives,
-`rules.lists[0x6314]` oblique cases). A dictionary directory may carry its own
+LTPRO's morphology tables are in `core/rules.lua` (`rules.paradigms`: `noun-m`,
+`noun-f`, `noun-n`, `adjective-m`, `adjective-f`, `adjective-n`,
+`verb-imperfective`, `verb-perfective`, `replacement`), extracted byte for byte
+from the unpacked executable, together with the pronoun table
+(`rules.lists.pronouns` nominatives, `rules.lists.pronoun_cases` oblique cases). A dictionary directory may carry its own
 text copy: `openrussian/paradigms.txt` (one row per paradigm: cut count, endings
 per slot) takes precedence for the OpenRussian dictionaries. Each `.RUS` record names its paradigm in the native byte
 (`0x80|id`), assigned at build time by `tools/fit_paradigms.lua`.
 
 Every table row has a list of the lemma endings it serves, in the same order as
-the rows: `rules.lists[0x5130]` (masculine nouns, 66 rows), `0x53C4` (feminine,
-35), `0x5522` (neuter, 33), `0x566C` (adjectives, 26), `0x58A8` (imperfective
-verbs, 106), `0x5CCC` (perfective verbs, 113) and `0x6136` (the `0x61F2`
-replacement table, 47). For example `noun-m` row 0 serves `в г д з к л м р с т`
+the rows: `rules.lists.endings_noun_m` (66 rows), `endings_noun_f` (35),
+`endings_noun_n` (33), `endings_adjective` (26), `endings_verb_imperfective`
+(106), `endings_verb_perfective` (113) and `endings_replacement` (the
+`replacement` table, 47). For example `noun-m` row 0 serves `в г д з к л м р с т`
 (дом) and row 2 `г к х йл ок ик рок`. `russian.paradigm_candidates` returns the
 rows whose list matches a lemma, longest ending first in LTPRO's order;
 `tools/fit_paradigms.lua` takes the candidate unless OpenRussian's listed forms

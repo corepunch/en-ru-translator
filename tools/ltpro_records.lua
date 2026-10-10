@@ -1,4 +1,4 @@
-local layout = require 'core.record_layout'
+local layout = require 'tools.ltpro_record_layout'
 local captured = {}
 
 -- Import captured records without treating unnamed bytes as disposable padding.

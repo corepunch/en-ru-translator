@@ -1,49 +1,43 @@
--- LTPRO's grammar data, read from core/rules.lua (extracted from the data
--- segment by demo/extract_ltpro.lua). The engine still names each table and
--- string by its DS offset; an offset the file lacks is an error, never a
--- silent read. Sentence state consists exclusively of Lua values.
+-- LTPRO's grammar data from core/rules.lua, by name: literals, word lists,
+-- inflection tables and rule tables, encoded to CP866 once. A name the file
+-- lacks is an error. Sentence state consists exclusively of Lua values.
 local rules = require 'core.rules'
 local encoding = require 'core.encoding'
 local assets = {}
 assets.__index = assets
 
 local function build()
-  local strings, entries, paradigms = {}, {}, {}
-  for at, value in pairs(rules.strings) do strings[at] = encoding.encode(value) end
-  for base, list in pairs(rules.lists) do
-    local count = 0
-    while list[count] do entries[base + count * 4] = encoding.encode(list[count]); count = count + 1 end
-    if list.terminated then entries[base + count * 4] = false end
+  local strings, lists, paradigms = {}, {}, {}
+  for name, value in pairs(rules.strings) do strings[name] = encoding.encode(value) end
+  for name, list in pairs(rules.lists) do
+    local encoded = {}
+    for i, value in pairs(list) do encoded[i] = encoding.encode(value) end
+    lists[name] = encoded
   end
-  for base, rows in pairs(rules.paradigms) do
-    local table_rows = {}
-    for id, row in pairs(rows) do table_rows[id] = {row[1], encoding.encode(row[2])} end
-    paradigms[base] = table_rows
+  for name, rows in pairs(rules.paradigms) do
+    local encoded = {}
+    for id, row in pairs(rows) do encoded[id] = {row[1], encoding.encode(row[2])} end
+    paradigms[name] = encoded
   end
-  return {strings = strings, entries = entries, paradigms = paradigms, rulesets = {}}
+  return {strings = strings, lists = lists, paradigms = paradigms, rulesets = {}}
 end
 local shared
 
 function assets.new()
   shared = shared or build()
-  return setmetatable({strings = shared.strings, entries = shared.entries, base_paradigms = shared.paradigms,
+  return setmetatable({strings = shared.strings, lists = shared.lists, base_paradigms = shared.paradigms,
     rulesets = shared.rulesets}, assets)
 end
 
-function assets:word(offset)
-  return rules.words[offset] or error(string.format('LTPRO word 0x%04X is not in core/rules.lua', offset))
+function assets:string(name)
+  return self.strings[name] or error('no LTPRO literal ' .. tostring(name) .. ' in core/rules.lua')
 end
-function assets:string(offset)
-  return self.strings[offset] or error(string.format('LTPRO string 0x%04X is not in core/rules.lua', offset))
+-- A word list, entries from 0.
+function assets:list(name)
+  return self.lists[name] or error('no LTPRO list ' .. tostring(name) .. ' in core/rules.lua')
 end
--- A pointer-list entry (DS base + 4*i); nil past a terminated list's end.
-function assets:entry(offset)
-  local value = self.entries[offset]
-  if value == nil then error(string.format('LTPRO list entry 0x%04X is not in core/rules.lua', offset)) end
-  return value or nil
-end
-function assets:indirect(offset)
-  return self:entry(offset) or error(string.format('LTPRO list entry 0x%04X is a terminator', offset))
+function assets:value(name)
+  return rules.values[name] or error('no LTPRO value ' .. tostring(name) .. ' in core/rules.lua')
 end
 -- A rule table by its core/rules.lua key: records of pattern, endpoint order and selector.
 function assets:rules(key)
@@ -57,12 +51,9 @@ function assets:rules(key)
   return self.rulesets[key]
 end
 
--- Inflection tables. A dictionary directory may carry its own copy as text
--- (openrussian/paradigms.txt), which then takes precedence for the eight
--- inflection tables.
-local sections = {[0x5A50]='verb-imperfective',[0x5E90]='verb-perfective',[0x5238]='noun-m',[0x5450]='noun-f',
-  [0x55A6]='noun-n',[0x56D4]='adjective-m',[0x5770]='adjective-f',[0x580C]='adjective-n'}
-assets.paradigm_sections = sections
+-- Inflection tables by name (noun-m, verb-perfective, replacement, ...). A
+-- dictionary directory may carry its own text copy of the eight inflection
+-- tables (openrussian/paradigms.txt), which then takes precedence.
 function assets:load_paradigms(text, encode)
   local tables, current = {}, nil
   for line in text:gmatch('[^\n]+') do
@@ -75,9 +66,9 @@ function assets:load_paradigms(text, encode)
   end
   self.paradigm_tables = tables
 end
-function assets:paradigm(offset, id)
-  local section = self.paradigm_tables and self.paradigm_tables[sections[offset]]
-  local rows = section or self.base_paradigms[offset] or error(string.format('no inflection table 0x%04X', offset))
+function assets:paradigm(name, id)
+  local rows = self.paradigm_tables and self.paradigm_tables[name] or self.base_paradigms[name]
+    or error('no inflection table ' .. tostring(name))
   local row = rows[id]
   if row then return row[1], row[2] end
   return 0, ''

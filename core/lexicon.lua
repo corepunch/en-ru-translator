@@ -840,7 +840,7 @@ function lexicon.tokenize(input,explicit)
     end
   end
   local words=0
-  for _, item in ipairs(directives.chunks(input)) do
+  for _, item in ipairs(directives.chunks(input,explicit~=nil)) do
     local position,chunk=item.position,item.text
     if item.literal then
       local n=word(chunk,position-1)

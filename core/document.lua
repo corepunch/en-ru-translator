@@ -317,7 +317,12 @@ local function translate(doc, count, terminator)
   local options = {}
   for key, value in pairs(doc.options) do options[key] = value end
   options.terminator, options.meaning_start, options.meanings = terminator, doc.next_meaning, false
-  local result, state = engine.run(encoding.decode(sentence), options)
+  -- A {~ left open protects the following sentences too, until a ~}.
+  local text = encoding.decode(sentence)
+  if doc.protected then text = '{~' .. text end
+  local open, close = text:match('.*(){~'), text:match('.*()~}')
+  doc.protected = open ~= nil and (close == nil or close < open)
+  local result, state = engine.run(text, options)
   local alternatives = state.alternatives or 0
   if #doc.appendix < APPENDIX_LIMIT then
     doc.appendix = doc.appendix .. output.meanings(state, state.root)

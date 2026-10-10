@@ -84,7 +84,8 @@ function engine.run(input, options)
   options = {}
   for key, value in pairs(configured) do options[key] = value end
   assert(type(input) == 'string', 'input sentence must be a UTF-8 string')
-  local sections=directives.sections(input)
+  -- A document handles LTPRO's own whole-line list controls itself.
+  local sections=not options.terminator and directives.sections(input)
   if sections then
     local chunks, states, glossary={},{},{}
     local cell_options={}

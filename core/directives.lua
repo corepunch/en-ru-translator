@@ -51,8 +51,10 @@ function directives.items(input)
 end
 
 -- Delimited spans remain one opaque lexical record. Positions are byte offsets
--- into the original CP866 input, including directive markers.
-function directives.chunks(input)
+-- into the original CP866 input, including directive markers. In a document
+-- (`open`), a {~ without its ~} leaves the rest of the text protected, each
+-- further {~ dropped, as LTPRO prints {~\2 cat dog as \2 cat dog.
+function directives.chunks(input, open)
   local chunks, cursor, previous_end = {}, 1, 0
   local function append(value, first, last, literal)
     chunks[#chunks + 1] = {text=value, position=first, literal=literal, joined=first == previous_end + 1 and #chunks > 0}
@@ -69,6 +71,11 @@ function directives.chunks(input)
     ordinary(cursor, start - 1)
     local content = start + 2
     local mode = input:sub(content, content)
+    if open and (mode == '\\' or not input:find('~}', content, true)) then
+      local value = input:sub(content):gsub('{~', ''):gsub('%s+$', '')
+      if value ~= '' then append(value, start, #input, true) end
+      break
+    end
     assert(mode ~= '\\', 'list directives require engine.run or engine.translate')
     if mode == '=' then content = content + 1 end
     local finish = assert(input:find('~}', content, true), 'unterminated inline directive')

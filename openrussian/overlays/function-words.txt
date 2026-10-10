@@ -175,3 +175,7 @@ you*R021тыr021у тебяmтебе
 your*Oваш
 yours*Sваш
 yourself*Mсами
+has to*Uдолжен
+had to*Uдолжен
+wherein*Cв котором
+tons*nтонна

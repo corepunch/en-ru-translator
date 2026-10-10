@@ -377,3 +377,12 @@ suffix-gap:doubled-ing | He is calling the doctor. => Он зовет врача
 suffix-gap:ie-ed | The man lied to me. => Человек соврал мне.
 suffix-gap:ie-ed | Merkel lied. => Меркел соврал.
 suffix-gap:stem-ed-unchanged | He stopped. => Он остановился.
+function:has to | He has to go. => Он должен пойти.
+function:has to | She has to go home. => Она должна пойти домой.
+function:had to | He had to stop. ~> должен
+function:wherein | The talks were successful, wherein it was agreed that we will go. ~> в котором
+function:tons | We bought tons of fuel. => Мы купили тонны топлива.
+function:tons | Ten tons of fuel. ~> тонн
+phrase:over [HI] | Over 300,000 tons of fuel. => Свыше 300,000 тонн топлива.
+phrase:over [HI] | Russia will supply over 300,000 tons of fuel. => Россия доставит свыше 300,000 тонн топлива.
+phrase:over [HI] | The plane flew over the house. !> свыше

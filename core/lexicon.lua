@@ -921,13 +921,30 @@ local function decode(dictionary,records,index,options)
   return index+1
 end
 
+-- Lua policy layered over the native analysis, enabled by the engine: a
+-- capitalized word with no dictionary reading is a proper name and takes the
+-- native `=` transliteration, as if written {~=Name~}. Names need no entries.
+function lexicon.name_unknown(records,at)
+  local node=records[at]
+  if nodes.tag(node)~='?' or not (node.source or ''):match("^[A-Z][a-z][A-Za-z'-]*$") then return end
+  local name=transliteration.convert(node.source,true)
+  node.tag,node.previous_tag,node.counted_word=0x23,0x23,false
+  node.literal,node.source,node.source_length=name,name,#name
+  -- Sentence capitalization belongs to the first word counted by the analyzer;
+  -- a name keeps its own capital, as {~=Name~} does.
+  for before=1,at-1 do if records[before].counted_word then return end end
+  records[1][0x09]=0
+end
+
 function lexicon.analyze(dictionary,input,options)
   options = options or {}
   local records,terminator,word_count=lexicon.tokenize(input)
   local i=1
   while i<=#records do
     if records[i].kind==0x57 and not records[i].literal and (nodes.tag(records[i])=='?' or records[i].reading_state==1) then
+      local at=i
       i=decode(dictionary,records,i,options)
+      if options.proper_names then lexicon.name_unknown(records,at) end
     else i=i+1 end
   end
   assert(#records<=512,'native lexical vector limit exceeded')

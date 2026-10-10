@@ -145,7 +145,10 @@ function engine.run(input, options)
   if options.dic_overlay then
     dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))
   end
-  local analyzed = lexicon.analyze(dict, encoding.encode(input), options)
+  local analysis_options = {}
+  for key, value in pairs(options) do analysis_options[key] = value end
+  analysis_options.proper_names = options.transliterate ~= false
+  local analyzed = lexicon.analyze(dict, encoding.encode(input), analysis_options)
 
   local stages = {}
   stages.lexical_word_count = analyzed.word_count or 0

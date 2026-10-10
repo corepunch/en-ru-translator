@@ -93,7 +93,7 @@ and individually reviewed Lua differences. A changed output or execution error
 fails; a documented known limitation does not. Successful execution therefore
 means no unreviewed regressions, not universally correct Russian.
 
-The checked-in result is 574 exact matches, 47 intentional differences and 6
+The checked-in result is 603 exact matches, 22 intentional differences and 2
 known-limitation cases, with zero unexpected changes or errors. Use
 `--strict-oracle` to fail on any difference, including intentional Lua behavior.
 See the review for separate original/Lua outputs and remaining quality issues.

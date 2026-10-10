@@ -17,15 +17,17 @@ function patterns.match(key, records, first, head)
     if not node then return end
     if parts[part] == '~' then
       local following = parts[part + 1]
-      if following and same(node, following) then
+      -- A key ending in ~ compares the word with a null token: never a match.
+      if not following then return end
+      if same(node, following) then
         captures[#captures + 1] = {}
       elseif node.literal then return
       else
         captures[#captures + 1] = {node}
         index = index + 1
-        if following and not same(records[index], following) then return end
+        if not same(records[index], following) then return end
       end
-      if following then index, part = index + 1, part + 2 else part = part + 1 end
+      index, part = index + 1, part + 2
     elseif same(node, parts[part]) then
       index, part = index + 1, part + 1
     else return end

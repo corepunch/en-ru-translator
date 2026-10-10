@@ -12,12 +12,14 @@ it does not split multiple sentences. Asset options accept paths.
 Inline {~text~} preserves text; {~=text~} transliterates it.
 {~\N starts a list with 1-10 words per row; {~\. returns to sentence mode.
 --meanings appends a glossary of alternative meanings and annotations.
+--trace writes the token tags, readings and matched rules to stderr.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
 --dic-overlay FILE and --rus-overlay FILE add indexed binary dictionary records.
 --domain LABEL prefers readings with that dictionary domain label (e.g. инф).
 ]]
 
 local options, words = {}, {}
+local trace = false
 local asset_options = {
   ['--data'] = 'data_dir', ['--exe'] = 'executable',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
@@ -37,6 +39,9 @@ while i <= #arg do
     i = i + 1
   elseif not end_options and key == '--meanings' then
     options.meanings = true
+    i = i + 1
+  elseif not end_options and key == '--trace' then
+    trace = true
     i = i + 1
   elseif not end_options and key == '--no-prefixes' then
     options.prefixes = false
@@ -72,9 +77,12 @@ if not input:match('%S') then
   os.exit(2)
 end
 
-local ok, result = pcall(engine.translate, input, options)
+local ok, result, state = pcall(engine.translate, input, options)
 if not ok then
   io.stderr:write(tostring(result), '\n')
   os.exit(1)
 end
 io.write(result, '\n')
+if trace then
+  io.stderr:write(require('core.trace').format(result, state), '\n')
+end

@@ -337,7 +337,7 @@ the former Lua-only punctuation-key matcher has been removed.
 additional lexical pronoun readings, contractions, case generation, casing, and
 nearby inputs. These phrases intentionally improve on the original translator;
 original captures remain separate. The
-[dictionary-writing skill](../skills/ltgold-dictionary-writing/SKILL.md)
+[dictionary-writing skill](../skills/dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
 
 The complete source has 67 `W` composites, 24 native T4 subrules, and 20

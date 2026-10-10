@@ -3,7 +3,7 @@
 ## Dictionary writing
 
 When adding or correcting dictionary entries, use
-[`skills/ltgold-dictionary-writing/SKILL.md`](skills/ltgold-dictionary-writing/SKILL.md).
+[`skills/dictionary-writing/SKILL.md`](skills/dictionary-writing/SKILL.md).
 It records the LTGOLD manual's grammatical tags, the active dictionary sources,
 and native T4 grammatical phrase subrules. Prefer one typed grammatical
 rule for a phrase family when its variable words can be retained and inflected.

@@ -107,7 +107,7 @@ phrase-key matcher is needed. Lua corrects the original third-person pronoun
 forms and applies casing to the whole phrase.
 
 See [adding phrases](openrussian/README.md#curated-phrases) and the
-[dictionary-writing skill](skills/ltgold-dictionary-writing/SKILL.md).
+[dictionary-writing skill](skills/dictionary-writing/SKILL.md).
 
 ## Structure
 

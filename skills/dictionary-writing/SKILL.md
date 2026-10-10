@@ -1,5 +1,5 @@
 ---
-name: ltgold-dictionary-writing
+name: dictionary-writing
 description: "Write and review LTGOLD/SARMA English–Russian dictionary entries for en-ru-translator, including grammatical phrase patterns, W readings, and function-word tags. Use when enriching or correcting its .DIC dictionary."
 ---
 
@@ -165,16 +165,43 @@ grammatical defect into an accepted expectation just to make tests pass.
 Diagnose by class of defect, not by sentence. Each failure below was a shared
 data or engine gap that fixed many sentences at once.
 
-1. **Probe in one call.** Run every sub-phrase together
-   (`while read s; do lua init.lua "$s"; done < list`) and capture the original
-   for the same list in one `tools/ltpro_capture.py` run. Do not probe one
-   sentence per command.
-2. **Look the word up in both dictionaries first**
+1. **Trace before editing.** `lua init.lua --trace 'sentence'` writes the
+   translation to stdout and a token/rule trace to stderr. Read the trace
+   before adding a dictionary entry or a phrase. Do not invent a `D` clause
+   to hide a tag the trace already explains.
+
+   ```sh
+   lua init.lua --trace 'He has to stop.'
+   ```
+
+   stderr is tab-separated:
+
+   ```text
+   translation:    Он должен остановиться.
+   # tokens
+   2    source=He    tag=R    kind=W    reading=он    text=Он    person=3
+   3    source=has    tag=U    kind=W    reading=должен
+   4    source=stop    tag=V    kind=W    text=остановиться
+   # rules
+   T2    #21    nodes=3-4    handler=0    pattern=U<KdD>Z    action=@$V
+   # tags    *RUV*
+   ```
+
+   `tag` is the live class after the grammar tables. `lookup` is the
+   dictionary headword when one matched; a capitalized word with no `lookup`
+   was transliterated, not missing a name entry. `# rules` lists every T1–T4
+   record that matched, with its pattern and action. A phrase subrule is
+   marked `sub`. No DOSBox and no LTPRO capture.
+2. **Probe in one call.** Run every sub-phrase together
+   (`while read s; do lua init.lua --trace "$s"; done < list`) and capture the
+   original for the same list in one `tools/ltpro_capture.py` run. Do not
+   probe one sentence per command.
+3. **Look the word up in both dictionaries first**
    (`tools/ltech_dict.py find LTGOLD/BASE.DIC w` and `openrussian/BASE.DIC w`).
    A native record that the OpenRussian build lacks is a data fix, not a
    rule. Search raw bytes (`d.find('свыше'.encode('cp866'))` across `LTGOLD/*`)
    to find which native rule produces an unexplained original word.
-3. **Symptom to cause table** (all verified here):
+4. **Symptom to cause table** (all verified here):
 
    | Symptom | Cause | Fix |
    | --- | --- | --- |
@@ -188,11 +215,11 @@ data or engine gap that fixed many sentences at once.
    | `закрына`, `опреобранные` | native participle tables need a paradigm | `generation.lua` derives from forms |
    | wrong sense of a content word | OpenRussian ranks it | `native-readings.txt` (copy LTGOLD's record) |
 
-4. **Never add name entries.** Capitalized unknown words are transliterated
+5. **Never add name entries.** Capitalized unknown words are transliterated
    by the engine (`lexicon.name_unknown`).
-5. **Iterate cheaply.** `sh tools/rebuild_openrussian.sh` and `sh test/run_all.sh`
+6. **Iterate cheaply.** `sh tools/rebuild_openrussian.sh` and `sh test/run_all.sh`
    are fast; `lua tools/dict_compare.lua` takes about two minutes, so run it
    once per batch in the background (`... > /tmp/dc.txt &`) and read it when it
    finishes. Commit after each fix class, not at the end.
-6. **Before pushing a rebuilt branch**, check `git merge-base` with `main`; a
+7. **Before pushing a rebuilt branch**, check `git merge-base` with `main`; a
    branch cut before a data move must be restarted from `main`.

@@ -2,14 +2,14 @@
 # checks each greeting case for the native rule and retained pronoun fields.
 
 # Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
-phrase:are [RN?#]`home`[D,*] | Are you home? => Ты дом?
+phrase:are [RN?#]`home`[D,*] | Are you home? => Вы дом?
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.
 preposition:about | A book about the war. ~> о войне
-preposition:through your good offices | Through your good offices we won. ~> Благодаря твоим стараниям
-preposition:you are on | You are on the team now. ~> Ты имеешь дело с группой
-preposition:you lack | You lack time. => Тебе не хватает времени.
+preposition:through your good offices | Through your good offices we won. => Благодаря вашим стараниям мы выиграйте.
+preposition:you are on | You are on the team now. => Вы имеете дело с группой теперь.
+preposition:you lack | You lack time. => Вам не хватает времени.
 preposition:across | A bridge across the river. ~> через реку
 preposition:after | After the war. ~> После войны
 preposition:against | A law against the war. ~> против войны
@@ -82,7 +82,7 @@ function:will | We will see. => Мы увидим.
 function:will | I will do it. => Я достаточно это.
 function:will | She will read the book. => Она прочитает книгу.
 function:will | We will deliver the goods tomorrow. => Мы доставим товары завтра.
-function:will | Will you come? => Ты приходишь?
+function:will | Will you come? => Вы приходите?
 function:will | They will not come. => Они не придут.
 function:will | He did it against his will. ~> воли.
 function:shall | The Letter of Credit shall allow for partial shipments. => Аккредитив Позволит частичным грузам{1.поставка}.
@@ -110,11 +110,11 @@ function:this | This is my house. => Это мой дом.
 function:this | This is the girls' book. => Это книга девушек.
 function:me | Call me. => Вызовите{1.называть} меня.
 function:was | He was here. => Он был здесь.
-function:did | Did you see it? => Ты видел это?
+function:did | Did you see it? => Вы видeли это?
 function:do | I don't know. => Я не знаю.
 function:do | Do it. => Это.
 function:will do | I will do it. => Я достаточно это.
-function:if | If you want, I will come. => Если ты хочешь, Я приду.
+function:if | If you want, I will come. => Если Вы хотите, Я приду.
 function:that | I know that he works. => Я знаю, что он работает.
 function:have to | I have to go. => Я должен придти.
 function:like | I like this book. => Я подобно этой заказывать.
@@ -125,7 +125,7 @@ function:nobody | Nobody knows. => Никто не знает.
 literal | It is cold. => Это холодный.
 literal | You know the answer. !> ведь
 irregular:went | He went home. ~> Он шел
-irregular:saw | I saw him. => Я видел его.
+irregular:saw | I saw him. => Я видeл его.
 irregular:gave | I gave it to him. => Я давал это ему.
 irregular:got | I got a letter. => Я получил письмо{1.буква}.
 irregular:bought | I bought a car. => Я купил автомобиль.
@@ -145,10 +145,10 @@ homograph:new | A new house. => Новый дом.
 homograph:ready | I am ready. => Я готов.
 homograph:house | The house door. => Дверь{1.вход} дома.
 function:will | Will he go? => Он идет?
-homograph:call | I will call you. => Я вызову{1.называть} тебя.
+homograph:call | I will call you. => Я вызову{1.называть} Вас.
 homograph:call | The call was short. => Вызов был коротким.
 homograph:supply | We supply food. => Мы поставляем пищу.
-homograph:visit | I will visit you. => Я посещу тебя.
+homograph:visit | I will visit you. => Я посещу Вас.
 homograph:walk | A short walk. => Перемычка проходит.
 homograph:go | Let's go. !> изюминка
 homograph:water | Water the flowers. => Полейте цветок.
@@ -175,7 +175,7 @@ syntax | Zork_x is big. => Zork_x большой.
 name:capitalized-unknown | Putin called Merkel. => Putin Назвало{1.вызывать;созывать} Merkel.
 name:capitalized-unknown | Then Putin said that Merkel lied. => Затем Putin сказал, что Merkel лежал{1.лгать}.
 name:capitalized-unknown | I met Anderson in London. => Я встретился Андерсон в Лондонах.
-name:lowercase-stays-unknown | I saw putin. => Я видел putin.
+name:lowercase-stays-unknown | I saw putin. => Я видeл putin.
 suffix-gap:doubled-ed | He called the doctor. => Он назвал{1.вызывать;созывать} доктора.
 suffix-gap:doubled-ed | He killed the dog. => Он убил{1.уничтожать} собаку.
 suffix-gap:doubled-ed | She pulled the door. => Она потянула дверь{1.вход}.
@@ -201,7 +201,7 @@ proper-noun-gender | Moscow announced it. => Москва заявила это.
 proper-noun-gender | He lives in Russia. => Он живет в России.
 progressive:ing-noun-gloss | He is reading the book. => Он читает книгу.
 progressive:ing-noun-gloss | We are building a house. => Мы строим дом.
-progressive:ing-noun-gloss | They are running. => Они бегут{1.выполнять}.
+progressive:ing-noun-gloss | They are running. => Они бегите{1.выполнять}.
 phrasal-verb:imperfective-first | He knocks out the lights. ~> выбивает
 past-form:ed-gloss-shadow | He opened the door. => Он открыл дверь{1.вход}.
 past-form:ed-gloss-shadow | He closed the door. => Он закрыл дверь{1.вход}.
@@ -244,8 +244,8 @@ past-question | Is she at school? => Она в школе?
 comparative | He is taller than his sister. => Он более высокий чем его сестра.
 comparative | The taller man came. => Более высокий человек приходил.
 comparative | He is stronger. => Он прочен.
-negation-perfect | She has never seen the sea. => Она никогда не увидела море.
-negation-perfect | She never saw the sea. => Она никогда не видела море.
+negation-perfect | She has never seen the sea. => Она никогда не увидeла море.
+negation-perfect | She never saw the sea. => Она никогда не видeла море.
 quantity | There are many people here. => Есть многие люди здесь.
 quantity | He has many books. => Он имеет многие книги.
 adverb | The old man walked slowly. => Старый человек прошел медленно.

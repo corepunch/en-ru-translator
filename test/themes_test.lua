@@ -9,9 +9,9 @@ end
 local plain = text('Advising bank.')
 assert(not plain:find('Авизующий', 1, true), 'BASE.DIC already has the business reading: ' .. plain)
 assert(text('Advising bank.', 'LTGOLD/BUSINESS.DIC') == 'Авизующий Банк.', text('Advising bank.', 'LTGOLD/BUSINESS.DIC'))
-assert(text('Cost benefit.', 'LTGOLD/BUSINESS.DIC') == 'Финансовые Льготы.', text('Cost benefit.', 'LTGOLD/BUSINESS.DIC'))
+assert(text('Cost benefit.', 'LTGOLD/BUSINESS.DIC') == 'Финансовые Льгота.', text('Cost benefit.', 'LTGOLD/BUSINESS.DIC'))
 assert(text('Alarm bell.', 'LTGOLD/COMPUTER.DIC') == 'Сигнальный Звонок.', text('Alarm bell.', 'LTGOLD/COMPUTER.DIC'))
-assert(text('Cost benefit.') ~= 'Финансовые Льготы.', 'overlay must not leak into the shared dictionary')
+assert(text('Cost benefit.') ~= 'Финансовые Льгота.', 'overlay must not leak into the shared dictionary')
 -- By name, as LTGOLD's /C chain; the first topic listed wins for a key.
 local function topic(sentence, names) return (engine.translate(sentence, {topic = names})) end
 assert(topic('Advising bank.', 'BUSINESS') == 'Авизующий Банк.')

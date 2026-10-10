@@ -26,6 +26,8 @@ for line in open('dictionary/changes.txt', encoding='utf-8'):
         section = line[3:]
     elif section == 'informal' and line and not line.startswith('#'):
         keys.add(L.fold_key(L.line_parts(L.encode_cp866(line))[0]))
+if not keys:
+    sys.exit(0)
 formal = L.load_dictionary('LTGOLD/BASE.DIC')
 formal.delete_folded({L.fold_key(k) for k, _v in formal.entries()} - keys)
 missing = keys - {L.fold_key(k) for k, _v in formal.entries()}
@@ -33,7 +35,7 @@ if missing:
     sys.exit('informal keys LTGOLD lacks: ' + ', '.join(sorted(L.decode_cp866(k) for k in missing)))
 L._write_result(formal, sys.argv[1], False)
 PY
-python3 tools/ltech_dict.py check "$work/FORMAL.DIC" | grep -q 'index: valid'
+[ ! -f "$work/FORMAL.DIC" ] || python3 tools/ltech_dict.py check "$work/FORMAL.DIC" | grep -q 'index: valid'
 cp LTGOLD/BASE.RUS "$work/BASE.RUS"
 if grep -qv '^\(#.*\)\?$' dictionary/changes-rus.txt; then
   python3 tools/ltech_dict.py import "$work/BASE.RUS" --entries dictionary/changes-rus.txt --replace --in-place >/dev/null
@@ -41,9 +43,11 @@ fi
 python3 tools/ltech_dict.py check "$work/BASE.RUS" | grep -q 'index: valid'
 
 if [ "${1:-}" = "--verify" ]; then
-  for x in BASE.DIC BASE.RUS FORMAL.DIC; do cmp "$work/$x" "dictionary/$x"; done
+  for x in BASE.DIC BASE.RUS; do cmp "$work/$x" "dictionary/$x"; done
+  if [ -f "$work/FORMAL.DIC" ]; then cmp "$work/FORMAL.DIC" dictionary/FORMAL.DIC; else [ ! -f dictionary/FORMAL.DIC ]; fi
   echo "dictionary/BASE.DIC, BASE.RUS and FORMAL.DIC are reproducible"
 else
-  for x in BASE.DIC BASE.RUS FORMAL.DIC; do cp "$work/$x" "dictionary/$x"; done
+  for x in BASE.DIC BASE.RUS; do cp "$work/$x" "dictionary/$x"; done
+  if [ -f "$work/FORMAL.DIC" ]; then cp "$work/FORMAL.DIC" dictionary/FORMAL.DIC; else rm -f dictionary/FORMAL.DIC; fi
   python3 tools/ltech_dict.py check dictionary/BASE.DIC | grep entries
 fi

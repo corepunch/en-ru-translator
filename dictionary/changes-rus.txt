@@ -9,12 +9,3 @@
 # A new Russian word needs a record only when LTGOLD's defaults (a noun
 # inflects as masculine row 0) are wrong for it; pick its paradigm from the
 # ending lists (docs/ltgold.md). Lines starting with # are comments.
-
-# твой declines like LTGOLD's мой (м) and свой (св): paradigm 11, keyed by the
-# stem without its two-letter ending.
-тв*A 80 8B
-
-# льгота (BUSINESS: cost benefit*WAфинансовыеnльгота) has no LTGOLD record,
-# so it stayed an uninflected masculine (Финансовые Льгота). Feminine, the row
-# its ending list gives (3), as LTGOLD's работа.
-льгота*N 80 82 83

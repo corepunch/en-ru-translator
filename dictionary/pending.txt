@@ -148,3 +148,47 @@ a bit scary*WDстрашновато
 six months*Dполгода
 there is no time*WDнекогда
 it is cold*WDхолодно
+
+## informal
+# LTGOLD addresses the reader with the polite Вы. These records use ты; the
+# build copies LTGOLD's own records for the same keys into FORMAL.DIC, which
+# --formal chains ahead of BASE.DIC. Set formulas (sincerely yours, skoal)
+# keep Вы.
+you*R021тыr021у тебяmтебе
+your*Aтвой
+yours*Sтвой
+yourself*Mсам
+all you'll need*jвсе, что тебе потребуется
+direct your attention to*WVпривлекать твое вниманиеPДк
+during your stay*Dво время твоего пребывания
+during your visit*Dво время твоего визита
+glad to meet you*WAрад с тобой встретиться
+glad to see you*WAрад тебя видеть
+happy birthday to you*Dс днем рождения тебя
+it is very kind of you*Dочень любезно с твоей стороны
+it is very kind of you to*Uочень любезно с твоей стороны
+leave your ~ alone*WVоставлятьAтвой~Dв покое
+let you*WVпозволять тебеb
+specific to your needs*Dпод твои требования
+suit yourself*Dделай как хочешь
+tell you*WVсообщатьMтебе
+thank `you`[*]*$Dблагодарю тебя\ \
+thank you very much for*fВвесьма благодарю тебя за
+through your good offices*Pблагодаря твоим стараниям
+way you want it*Dв соответствии с твоими пожеланиями
+wherever you go*Dкуда бы ты ни пошел
+with you*WPТсNтобой
+you are on*PТты имеешь дело с
+you are required to*bот тебя требуется
+you had better*Dты бы лучше
+you lack*PРтебе не хватает
+you should*WRтебеUследует
+you should ever need to*WRтебе когда-нибудьUпонадобится
+you should not*WRтебе неUследует
+you will be allowed to*bтебе будет позволено
+you will be asked*fтебя попросят
+you will be asked to*Wfтебя попросятB
+you will need to*bтебе понадобится
+you would like to*WRтыUхочешь
+your letter*WAтвойNписьмо
+your letter of*WAтвойNписьмоPРот

@@ -23,8 +23,7 @@ LTGOLD's own dictionaries are the base. Our work is a diff on top of them:
 | `LTGOLD/BASE.DIC`, `LTGOLD/BASE.RUS` | LTGOLD's dictionaries, unchanged |
 | `dictionary/changes.txt` | our English changes: `-headword` removes LTGOLD's records, `headword*code` adds or replaces |
 | `dictionary/changes-rus.txt` | our Russian changes: `-lemma`, or `lemma*C hex…` (`утро*N 80 80 80`) |
-| `dictionary/pending.txt`, `test/pending-translations.txt` | phrases from the OpenRussian period waiting to be checked and moved into `changes.txt` with their tests |
-| `dictionary/paradigms.txt` | LTPRO's inflection tables as text with two fixes (Latin `e`, бежать's missing жим) |
+| `dictionary/pending*.txt`, `test/pending-translations.txt`, `test/pending/` | our phrases, the ты section, Russian records and table fixes, waiting until after the `parity` tag |
 | `dictionary/BASE.DIC`, `dictionary/BASE.RUS` | built by `sh tools/build_dictionary.sh`; the default dictionaries |
 | `dictionary/FORMAL.DIC` | built: LTGOLD's own records for every key in the `## informal` section of `changes.txt`; `--formal` chains it ahead of `BASE.DIC` |
 | `LTGOLD/BUSINESS.DIC`, `LTGOLD/COMPUTER.DIC` | topic dictionaries, `--topic=BUSINESS` (first listed wins) |

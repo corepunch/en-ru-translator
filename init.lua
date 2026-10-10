@@ -15,6 +15,8 @@ Inline {~text~} preserves text; {~=text~} transliterates it.
 --meanings appends a glossary of alternative meanings and annotations.
 --trace writes the token tags, readings and matched rules to stderr.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
+--topic NAME[,NAME] loads topic dictionaries by name (BUSINESS, COMPUTER), as
+LTGOLD's /C chain; the first listed wins.
 --dic-overlay FILE and --rus-overlay FILE add indexed binary dictionary records.
 --domain LABEL prefers readings with that dictionary domain label (e.g. инф).
 --formal addresses the reader as Вы (LTGOLD's own readings); the default is ты.
@@ -27,7 +29,7 @@ local trace = false
 local asset_options = {
   ['--data'] = 'data_dir',
   ['--dic'] = 'dictionary', ['--rus'] = 'russian',
-  ['--prefixes'] = 'prefixes', ['--dic-overlay'] = 'dic_overlay',
+  ['--prefixes'] = 'prefixes', ['--dic-overlay'] = 'dic_overlay', ['--topic'] = 'topic',
   ['--rus-overlay'] = 'rus_overlay',
   ['--domain'] = 'domain',
 }

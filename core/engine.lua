@@ -148,6 +148,24 @@ function engine.run(input, options)
   if options.dic_overlay then
     dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))
   end
+  -- Topic dictionaries by name, as LTGOLD's /C chain: --topic=BUSINESS,COMPUTER
+  -- loads NAME.DIC from the dictionary's directory, else from the data
+  -- directory; the first topic listed wins for a key.
+  if options.topic then
+    assert(type(options.topic) == 'string' and options.topic ~= '', 'topic must be a nonempty name list')
+    local names = {}
+    for name in options.topic:gmatch('[^,%s]+') do names[#names + 1] = name:upper() end
+    local directory = type(dic_source) == 'string' and dic_source:match('^(.*[/\\])') or ''
+    for at = #names, 1, -1 do
+      local found
+      for _, candidate in ipairs({directory .. names[at] .. '.DIC', data .. '/' .. names[at] .. '.DIC'}) do
+        local file = io.open(candidate, 'rb')
+        if file then file:close(); found = candidate; break end
+      end
+      if not found then error('no topic dictionary ' .. names[at] .. '.DIC', 0) end
+      dict = lexicon.overlay(dict, engine.read_asset(found, 'BASE.DIC'))
+    end
+  end
   -- The default dictionary says ты; --formal chains FORMAL.DIC (LTGOLD's own
   -- Вы records) from the dictionary's directory ahead of it.
   if options.formal and type(dic_source) == 'string' then

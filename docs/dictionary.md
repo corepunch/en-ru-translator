@@ -260,8 +260,10 @@ general (1 each). `dic.txt` does not describe them. The Lua engine reads them:
 others appear as `{1.…}` alternatives.
 
 Both mechanisms exist in this project. The dictionary chain is
-`--dic-overlay FILE`: the theme `.DIC` (`LTGOLD/BUSINESS.DIC`,
-`LTGOLD/COMPUTER.DIC`) is chained ahead of `BASE.DIC` and wins for the same key.
+`--topic=BUSINESS` (or `--topic=BUSINESS,COMPUTER`, API `topic`): `NAME.DIC`
+from the dictionary's directory, else from `LTGOLD/`, is chained ahead of
+`BASE.DIC` and wins for the same key; the first topic listed wins, as in
+LTGOLD's `/C` chain. `--dic-overlay FILE` chains any other `.DIC` file.
 
 ## Encoding
 

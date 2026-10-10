@@ -27,7 +27,7 @@ LTGOLD's own dictionaries are the base. Our work is a diff on top of them:
 | `dictionary/paradigms.txt` | LTPRO's inflection tables as text with two fixes (Latin `e`, бежать's missing жим) |
 | `dictionary/BASE.DIC`, `dictionary/BASE.RUS` | built by `sh tools/build_dictionary.sh`; the default dictionaries |
 | `dictionary/FORMAL.DIC` | built: LTGOLD's own records for every key in the `## informal` section of `changes.txt`; `--formal` chains it ahead of `BASE.DIC` |
-| `LTGOLD/BUSINESS.DIC`, `LTGOLD/COMPUTER.DIC` | theme dictionaries, `--dic-overlay` |
+| `LTGOLD/BUSINESS.DIC`, `LTGOLD/COMPUTER.DIC` | topic dictionaries, `--topic=BUSINESS` (first listed wins) |
 
 There are no other sources. Never hand-edit a built file; `--verify` catches it.
 Add only what LTGOLD lacks or gets wrong, and nothing LTGOLD already has.

@@ -12,4 +12,10 @@ assert(text('Advising bank.', 'LTGOLD/BUSINESS.DIC') == 'Авизующий Ба
 assert(text('Cost benefit.', 'LTGOLD/BUSINESS.DIC') == 'Финансовые Льгота.', text('Cost benefit.', 'LTGOLD/BUSINESS.DIC'))
 assert(text('Alarm bell.', 'LTGOLD/COMPUTER.DIC') == 'Сигнальный Звонок.', text('Alarm bell.', 'LTGOLD/COMPUTER.DIC'))
 assert(text('Cost benefit.') ~= 'Финансовые Льгота.', 'overlay must not leak into the shared dictionary')
+-- By name, as LTGOLD's /C chain; the first topic listed wins for a key.
+local function topic(sentence, names) return (engine.translate(sentence, {topic = names})) end
+assert(topic('Advising bank.', 'BUSINESS') == 'Авизующий Банк.')
+assert(topic('Alarm bell.', 'computer') == 'Сигнальный Звонок.')
+assert(topic('Advising bank.', 'BUSINESS,COMPUTER') == 'Авизующий Банк.')
+assert(not pcall(engine.translate, 'Advising bank.', {topic = 'POLITICS'}))
 print('themes_test: passed')

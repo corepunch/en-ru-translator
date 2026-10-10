@@ -548,13 +548,48 @@ static const char *imperfective_partner(const Record *perfective) {
     if(!strcmp(verb_aspect(p),"imperfective")){snprintf(chosen,sizeof chosen,"%s",p);result=chosen;break;}
   free(copy);return result;
 }
+/* The -ing twin of the -s homographs: a noun gloss such as reading -> чтение
+ * hides the verb's own -ing form, so `stop reading the book` never sees the
+ * gerund G. Native LTGOLD codes `calling*GвызыватьNвызов\call`; emit the same
+ * ambiguous record, gerund first, for every noun gloss in -ing whose stem
+ * (plain, +e, or without a doubled consonant) is a verb. */
+static void add_ing_form_homographs(Records *db) {
+  qsort(db->items,db->count,sizeof(Record),record_compare);
+  size_t original=db->count;Records pending={0};
+  for(size_t i=0;i<original;) {
+    size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
+    const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
+    int word=n>5&&k[n-3]=='i'&&k[n-2]=='n'&&k[n-1]=='g';for(size_t j=0;j<n&&word;j++)if(!(k[j]>='a'&&k[j]<='z'))word=0;
+    const Record *noun=word?first_class(db,k,n,"N"):NULL;
+    if(word&&noun&&!has_verb(db,k,n)) {
+      unsigned char stem[64];size_t stem_len=0;const Record *verb=NULL;
+      size_t base=n-3;
+      if(base<sizeof stem-1) {
+        memcpy(stem,k,base);
+        if(has_verb(db,stem,base)){verb=stem_verb(db,stem,base);stem_len=base;}
+        if(!verb){stem[base]='e';if(has_verb(db,stem,base+1)){verb=stem_verb(db,stem,base+1);stem_len=base+1;}}
+        if(!verb&&base>2&&k[base-1]==k[base-2]&&has_verb(db,stem,base-1)){verb=stem_verb(db,stem,base-1);stem_len=base-1;}
+      }
+      if(verb&&verb->value_len>3) {
+        size_t vlen=verb->value_len-3,nlen=noun->value_len,len=1+vlen+nlen+1+stem_len;
+        unsigned char *value=allocate(len),*q=value;
+        *q++='G';memcpy(q,verb->value+3,vlen);q+=vlen;memcpy(q,noun->value,nlen);q+=nlen;*q++='\\';memcpy(q,stem,stem_len);
+        add_record(&pending,(unsigned char *)k,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;free(value);
+      }
+    }
+    i=end;
+  }
+  append_pending(db,&pending);
+}
+
 static void add_verb_noun_homographs(Records *db) {
   qsort(db->items,db->count,sizeof(Record),record_compare);
   size_t original=db->count;Records pending={0};
   for(size_t i=0;i<original;) {
     size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
     const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
-    int word=n>1&&head->value[0]!='z';for(size_t j=0;j<n&&word;j++)if(!((k[j]>='a'&&k[j]<='z')||k[j]=='-'))word=0;
+    /* A phrasal verb (knock out) takes the same imperfective-first rule. */
+    int word=n>1&&head->value[0]!='z';for(size_t j=0;j<n&&word;j++)if(!((k[j]>='a'&&k[j]<='z')||k[j]=='-'||(k[j]==' '&&is_verb_record(head))))word=0;
     if(word) {
       const Record *verb=stem_verb(db,k,n),*noun=first_class(db,k,n,"Nn"),*adj=first_class(db,k,n,"A");
       char *english=from_cp866(k,n);int listed=is_content_first(english);free(english);
@@ -720,6 +755,7 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
   add_s_form_homographs(&source_dic);
+  add_ing_form_homographs(&source_dic);
   add_verb_noun_homographs(&source_dic);
   add_native_suffix_gaps(&source_dic);
   add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);

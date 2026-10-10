@@ -111,3 +111,4 @@ was [TO]N`home`[D,*]*$@\..`Dдома`\
 were [RN?#]`home`[D,*]*$@\.`Dдома`\
 were [TO]N`home`[D,*]*$@\..`Dдома`\
 over [HI]*$PРсвыше
+stop G*$Vпереставать\V

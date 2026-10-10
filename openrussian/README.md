@@ -201,6 +201,26 @@ pronouns carry LTGOLD's possessor and dative readings (`i*R011яrу меняmм�
 `I have a book` → `У меня есть книга`. Unlike the original, a question's future
 verb is perfective (`Will you come?` → `Ты придешь?`).
 
+The same ambiguity hides gerunds. A noun gloss in -ing (`reading` → `чтение`)
+shadowed the verb's own -ing form, so `He is reading the book` printed
+`Он - чтение книга`. The builder emits LTGOLD's ambiguous record
+(`reading*GчитатьNчтение\read`) for every such gloss whose stem, with or without
+a restored `e` or doubled consonant, is a verb. Grammar still reads the noun
+where native rules do (`He stopped reading the book` → `остановил чтение`, as
+in the original), and the progressive works (`Он читает книгу`). The native
+suffix rules cannot reach `-ed`/`-ing` of verbs that end in a doubled consonant
+(call, kill, pass) or `-ie` (lie), so the builder lists those forms as LTGOLD
+does (`called*Eзвать\call`). A phrasal verb whose first source reading is
+perfective (`knock out`) puts its imperfective partner first, like one-word
+verbs. LTGOLD's `stop G*$Vпереставать\V` makes `stop knocking out` an infinitive
+(`перестать выбивать`).
+
+Capitalized OpenRussian lemmas (`Россия`) are stored in `.RUS` and `.MORPH`
+under lowercase headwords, as LTGOLD stores them (`россия`). The runtime lowers
+a capitalized `.DIC` lemma and reads gender and paradigm from the lowercase
+headword; with the capital headword it found nothing, and `Russia announced`
+agreed with a neuter verb.
+
 Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
 Such a literal shadowed suffix analysis of the verb's -s form (“He works” →
 `Он производство`). For a one-word -s gloss whose stem is a verb gloss, which is

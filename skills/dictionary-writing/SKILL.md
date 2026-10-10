@@ -286,3 +286,20 @@ data or engine gap that fixed many sentences at once.
    finishes. Commit after each fix class, not at the end.
 7. **Before pushing a rebuilt branch**, check `git merge-base` with `main`; a
    branch cut before a data move must be restarted from `main`.
+
+## Lessons from issues 16 and 17
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `taller`, `smaller` untranslated | adjective suffix rows undid the doubled `l` and never retried `tall` | `adjective_candidates` returns both stems |
+| `Он более высокий, чем…` | comparative always printed as `более` + adjective | predicate comparatives use the `.RUS` comparative slot (`выше`); attributive ones keep `более` |
+| `Were they at school?` loses `были`, pluralizes `school` | question cleanup read `school` as the verb after a copula | cleanup skips a copula question whose predicate is a bare `Z`/`V` |
+| `Was he here?` → `Он здесь?` | lone `X` rule deleted every sentence-initial copula | past/future copulas move after the subject instead (`phrasing.lua` handler 18) |
+| `Is John a teacher?` → `Джохн Учитель?` | a transliterated name left `first` set, so the next word took the sentence capital | literal nodes clear `first` |
+| `She has never seen…` → masculine participle | `never` was a `k` node between aux and participle | `never*Kникогда неDникогда` follows the `not` path |
+| `the beautiful` → neuter adjective before any noun | generated `WD` literal from a multiword gloss | the builder emits one-word glosses only |
+| a time noun after `for` printed `для часа` | `for` is `PРдля` | typed subrule `for <TAOIH>[`hour``…]` rewrites the head to an empty `PВ` |
+| `took the kids home` → `дом` | bare `home` after a verb and object | one pair of subrules per verb (`take`, `bring`, `send`, `walk`, `see`, `carry`, `lead`); the head action may replace the verb (`Vотводить\|отвести`) |
+
+Open: `He is older than her` prints `чем её` (pronoun case after `than`), and a
+conjoined subject (`Are John and Mary home?`) is not matched by the `home` rules.

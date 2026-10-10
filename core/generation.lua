@@ -329,6 +329,7 @@ function generation.word(state, node)
       r.save(generation.participle_form(state, r.w('paradigm'), r.text(), r.b('aspect'), 0x47, 0, 0))
     end
   elseif tag == 0x41 then -- A
+    local lemma = r.text()
     local numbers = r.b('number') ~= 0 and 'pl' or ({[0]='n',[1]='m',[2]='f'})[r.b('gender')] or 'm'
     local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
     local source_form = russian.source_forms(state,r.text(),'a','decl_' .. numbers .. '_' .. (cases[generation.case(r.b('case_mask'))] or 'nom'))
@@ -358,6 +359,14 @@ function generation.word(state, node)
     end
     if r.b('marker') == 0x61 and (r.b('tense') == 1 or r.b('tense') == 2) then
       local saved = r.text()
+      -- A predicate comparative uses the indeclinable short comparative
+      -- (выше), which an attributive one cannot (более высокий человек).
+      local comparative = r.b('tense') == 1 and russian.source_forms(state, lemma, 'a', 'comparative')
+      local following = comparative and node.next and record(state, node.next)
+      if comparative and comparative[1] and not (following and (following.b('tag') == 0x4E or following.b('tag') == 0x41)) then
+        node.text = comparative[1]:match('^[^;]+')
+        return 1
+      end
       if r.b('tense') == 2 then
         r.save(generation.adjective_form(state, 0, state.assets:string(0x4948), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
       else r.copy(0x494E) end

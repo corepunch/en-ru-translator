@@ -92,8 +92,9 @@ The raw CP866 choices remain available as `node.phrase_readings` for diagnostics
 Our own phrases and readings are a diff on LTGOLD's dictionary in UTF-8
 `dictionary/changes.txt` (`-headword` removes, `headword*code` adds or
 replaces), compiled into the default `.DIC` by `sh tools/build_dictionary.sh`.
-See the [dictionary-writing skill](skills/dictionary-writing/SKILL.md) and
-[how LTGOLD works](docs/ltgold.md).
+The default addresses the reader with ты; `--formal` (API `formal = true`)
+gives LTGOLD's Вы. See the [dictionary-writing skill](skills/dictionary-writing/SKILL.md)
+and [how LTGOLD works](docs/ltgold.md).
 
 ## Structure
 

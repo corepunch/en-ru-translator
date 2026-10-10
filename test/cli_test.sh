@@ -11,6 +11,9 @@ expected='Шаг по отношению к дому.'
 # An unknown capitalized word stays Latin, as in LTPRO; --names transliterates it.
 [ "$(lua init.lua 'Xylophornium is here.')" = 'Xylophornium - здесь.' ]
 [ "$(lua init.lua --names 'Xylophornium is here.')" = 'Ксилофорниум - здесь.' ]
+# The default says ты; --formal restores LTGOLD's Вы.
+[ "$(lua init.lua 'I see your sister.')" = 'Я вижу твою сестру.' ]
+[ "$(lua init.lua --formal 'I see your sister.')" = 'Я вижу вашу сестру.' ]
 lua init.lua --help > "$scratch/help"
 lua init.lua --dic LTGOLD/BASE.DIC --rus LTGOLD/BASE.RUS --meanings 'I agree.' > "$scratch/meanings"
 case "$(cat "$scratch/meanings")" in *agree*) ;; *) exit 1 ;; esac

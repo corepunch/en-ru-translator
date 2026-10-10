@@ -17,6 +17,7 @@ Inline {~text~} preserves text; {~=text~} transliterates it.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
 --dic-overlay FILE and --rus-overlay FILE add indexed binary dictionary records.
 --domain LABEL prefers readings with that dictionary domain label (e.g. инф).
+--formal addresses the reader as Вы (LTGOLD's own readings); the default is ты.
 --names transliterates an unknown capitalized word as a name (Xylophornium ->
 Ксилофорниум); LTPRO leaves it in Latin.
 ]]
@@ -45,6 +46,9 @@ while i <= #arg do
     i = i + 1
   elseif not end_options and key == '--trace' then
     trace = true
+    i = i + 1
+  elseif not end_options and key == '--formal' then
+    options.formal = true
     i = i + 1
   elseif not end_options and key == '--names' then
     options.proper_names = true

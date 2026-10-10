@@ -2,11 +2,14 @@
 # checks each greeting case for the native rule and retained pronoun fields.
 
 # Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
-phrase:are [RN?#]`home`[D,*] | Are you home? => Вы дом?
+phrase:are [RN?#]`home`[D,*] | Are you home? => Ты дом?
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.
 preposition:about | A book about the war. ~> о войне
+preposition:through your good offices | Through your good offices we won. ~> Благодаря твоим стараниям
+preposition:you are on | You are on the team now. ~> Ты имеешь дело с группой
+preposition:you lack | You lack time. => Тебе не хватает времени.
 preposition:across | A bridge across the river. ~> через реку
 preposition:after | After the war. ~> После войны
 preposition:against | A law against the war. ~> против войны
@@ -79,7 +82,7 @@ function:will | We will see. => Мы увидим.
 function:will | I will do it. => Я достаточно это.
 function:will | She will read the book. => Она прочитает книгу.
 function:will | We will deliver the goods tomorrow. => Мы доставим товары завтра.
-function:will | Will you come? => Вы приходите?
+function:will | Will you come? => Ты приходишь?
 function:will | They will not come. => Они не придут.
 function:will | He did it against his will. ~> воли.
 function:shall | The Letter of Credit shall allow for partial shipments. => Аккредитив Позволит частичным грузам{1.поставка}.
@@ -107,11 +110,11 @@ function:this | This is my house. => Это мой дом.
 function:this | This is the girls' book. => Это книга девушек.
 function:me | Call me. => Вызовите{1.называть} меня.
 function:was | He was here. => Он был здесь.
-function:did | Did you see it? => Вы видели это?
+function:did | Did you see it? => Ты видел это?
 function:do | I don't know. => Я не знаю.
 function:do | Do it. => Это.
 function:will do | I will do it. => Я достаточно это.
-function:if | If you want, I will come. => Если Вы хотите, Я приду.
+function:if | If you want, I will come. => Если ты хочешь, Я приду.
 function:that | I know that he works. => Я знаю, что он работает.
 function:have to | I have to go. => Я должен придти.
 function:like | I like this book. => Я подобно этой заказывать.
@@ -142,10 +145,10 @@ homograph:new | A new house. => Новый дом.
 homograph:ready | I am ready. => Я готов.
 homograph:house | The house door. => Дверь{1.вход} дома.
 function:will | Will he go? => Он идет?
-homograph:call | I will call you. => Я вызову{1.называть} Вас.
+homograph:call | I will call you. => Я вызову{1.называть} тебя.
 homograph:call | The call was short. => Вызов был коротким.
 homograph:supply | We supply food. => Мы поставляем пищу.
-homograph:visit | I will visit you. => Я посещу Вас.
+homograph:visit | I will visit you. => Я посещу тебя.
 homograph:walk | A short walk. => Перемычка проходит.
 homograph:go | Let's go. !> изюминка
 homograph:water | Water the flowers. => Полейте цветок.

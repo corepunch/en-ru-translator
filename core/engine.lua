@@ -148,6 +148,16 @@ function engine.run(input, options)
   if options.dic_overlay then
     dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))
   end
+  -- The default dictionary says ты; --formal chains FORMAL.DIC (LTGOLD's own
+  -- Вы records) from the dictionary's directory ahead of it.
+  if options.formal and type(dic_source) == 'string' then
+    local formal = (dic_source:match('^(.*[/\\])') or '') .. 'FORMAL.DIC'
+    local file = io.open(formal, 'rb')
+    if file then
+      file:close()
+      dict = lexicon.overlay(dict, engine.read_asset(formal, 'BASE.DIC'))
+    end
+  end
   local analysis_options = {}
   for key, value in pairs(options) do analysis_options[key] = value end
   -- Off by default, as in LTPRO; --names turns it on.

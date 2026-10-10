@@ -26,6 +26,7 @@ LTGOLD's own dictionaries are the base. Our work is a diff on top of them:
 | `dictionary/pending.txt`, `test/pending-translations.txt` | phrases from the OpenRussian period waiting to be checked and moved into `changes.txt` with their tests |
 | `dictionary/paradigms.txt` | LTPRO's inflection tables as text with two fixes (Latin `e`, бежать's missing жим) |
 | `dictionary/BASE.DIC`, `dictionary/BASE.RUS` | built by `sh tools/build_dictionary.sh`; the default dictionaries |
+| `dictionary/FORMAL.DIC` | built: LTGOLD's own records for every key in the `## informal` section of `changes.txt`; `--formal` chains it ahead of `BASE.DIC` |
 | `LTGOLD/BUSINESS.DIC`, `LTGOLD/COMPUTER.DIC` | theme dictionaries, `--dic-overlay` |
 
 There are no other sources. Never hand-edit a built file; `--verify` catches it.
@@ -54,7 +55,9 @@ Add only what LTGOLD lacks or gets wrong, and nothing LTGOLD already has.
    - A literal multiword key takes its words before any subrule runs, and of a
      word's subrules T4 applies the one whose match ends soonest. A new subrule
      loses to an LTGOLD one-word pattern on the same head (`what [RSXU]`).
-   - LTGOLD's `you` is the polite `Вы`.
+   - The default dictionary addresses the reader with `ты` (`## informal`
+     in `changes.txt`); `--formal` gives LTGOLD's `Вы`. A new record that
+     addresses the reader goes in that section, so `--formal` keeps LTGOLD's.
    - A Russian word LTGOLD has no `.RUS` record for inflects as a masculine
      row-0 noun; give it a record in `changes-rus.txt` when that is wrong.
 

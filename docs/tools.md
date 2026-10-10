@@ -4,8 +4,10 @@
 
 `sh tools/build_dictionary.sh` builds the default `dictionary/BASE.DIC` and
 `dictionary/BASE.RUS` from LTGOLD's dictionaries and our diffs
-(`dictionary/changes.txt`, `dictionary/changes-rus.txt`); `--verify` requires
-the checked-in files to match. `tools/ltech_dict.py` inspects and edits LTech
+(`dictionary/changes.txt`, `dictionary/changes-rus.txt`), and
+`dictionary/FORMAL.DIC` with LTGOLD's own records for the keys the `## informal`
+section replaces (used by `--formal`); `--verify` requires the checked-in files
+to match. `tools/ltech_dict.py` inspects and edits LTech
 images (`find`, `info`, `export`, `import`, `check`); its `import` applies a
 diff file, `-headword` lines included, and takes `.RUS` codes as a class
 letter plus hex bytes.

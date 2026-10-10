@@ -74,11 +74,7 @@ function agreement.run(state,list,tag,si)
             set(B, 'case_mask', get(N, 'case_mask'))
           else
             local c = get(A, 'case_mask')
-            if get(A, 'marker') == 0x77 or get(A, 'marker') == 0x57 then
-              -- A composed equivalent supplies its own Russian preposition.
-              -- English locative heuristics must not replace authored в by на.
-              default = true
-            elseif (c == 8 or c == 0x20) and is(A, 'en_in') and text.equal(A.text,state.assets:string('v')) then
+            if (c == 8 or c == 0x20) and is(A, 'en_in') and text.equal(A.text,state.assets:string('v')) then
               reading(A, dictionary_bit(B, 6) ~= 0 and 'na' or 'v')
               default = true
             elseif get(A, 'marker') ~= 0 then

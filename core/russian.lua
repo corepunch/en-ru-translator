@@ -118,10 +118,28 @@ function russian.from_bytes(bytes, overlay, morphology)
 end
 
 -- Whether OpenRussian has a verb row of this aspect for the lemma.
+-- The .RUS verb record: V, flags, government, paradigm, 0, partner lemma.
+function russian.verb_record(state, word)
+  local line = russian.lookup(state, word, 0, 'V')
+  if not line then return nil end
+  local code = line:match('%*(.*)') or ''
+  local partner = code:sub(6)
+  return {perfective = (code:byte(2) or 0) & 0x06 ~= 0, paradigm = (code:byte(4) or 0) & 0x7F,
+    partner = partner ~= '' and partner or nil}
+end
 function russian.has_verb_aspect(state, word, aspect)
   local verbs=state.russian.openrussian_forms and state.russian.openrussian_forms.v
   local row=verbs and verbs[word]
-  return row ~= nil and row[aspect==1 and 'pf' or 'ipf'] ~= nil
+  if row then return row[aspect==1 and 'pf' or 'ipf'] ~= nil end
+  -- Without stored forms, the .RUS verb record decides: byte 2 carries the
+  -- perfective flags (0x04 forced, 0x02 native), and an imperfective lists
+  -- its partner after the code.
+  local line=russian.lookup(state, word, 0, 'V')
+  if not line then return false end
+  local code=line:match('%*(.*)') or ''
+  local perfective=(code:byte(2) or 0) & 0x06 ~= 0
+  if aspect==1 then return perfective or #code>5 end
+  return not perfective
 end
 
 function russian.source_forms(state, word, pos, slot, aspect)
@@ -152,9 +170,20 @@ end
 -- Dictionary lines are immutable strings; no shared read buffer or DOS handles.
 -- A lemma can be both a noun and a verb (помочь), so callers that know the
 -- class ask for it; without a match the first record is returned as before.
+local function lower_initial(s)
+  local b = s:byte()
+  if not b then return s end
+  if b == 0xF0 then b = 0xF1 elseif b >= 0x80 and b <= 0x8F then b = b + 0x20 elseif b >= 0x90 and b <= 0x9F then b = b + 0x50 else return s end
+  return string.char(b) .. s:sub(2)
+end
 function russian.lookup(state, key, prefix, class)
   local base = key:match('^(.-)%*') or key
   local wanted = key .. (prefix == 0 and '*' or '')
+  -- Records are keyed lowercase (LTGOLD: новый under "нов"); a capitalized
+  -- lemma inside a composite (Новый год) is looked up the same way.
+  if not state.russian.entries[base] and lower_initial(base) ~= base then
+    base, wanted = lower_initial(base), lower_initial(wanted)
+  end
   local first
   for _, line in ipairs(state.russian.entries[base] or {}) do
     local code=line:byte(#wanted+1)

@@ -327,9 +327,44 @@ static char verb_frame(const char *alias) {
   for(size_t i=0;i<frame_count;i++)if(!strcmp(frame_verb[i],alias))return frame_digit_of[i];
   return '0';
 }
+/* Paradigm assignments from tools/fit_paradigms.lua: pos<TAB>lemma<TAB>aspect
+ * <TAB>id<TAB>matched<TAB>forms. A fitted lexeme gets LTGOLD's paradigm byte
+ * (0x80|id) in its .RUS record and no stored forms in BASE.MORPH. */
+typedef struct { char *key; unsigned char id; } Fit;
+static Fit *fits;static size_t fit_count;
+static char *fold_yo(const char *s) {
+  char *out=strdup(s);if(!out)fail("out of memory");
+  for(char *c=out;*c;c++) {
+    if((unsigned char)c[0]==0xD1&&(unsigned char)c[1]==0x91){c[0]=(char)0xD0;c[1]=(char)0xB5;c++;}
+    else if((unsigned char)c[0]==0xD0&&(unsigned char)c[1]==0x81){c[0]=(char)0xD0;c[1]=(char)0x95;c++;}
+  }
+  return out;
+}
+static char *fit_key(const char *pos,const char *lemma,const char *aspect) {
+  char *folded=fold_yo(lemma);size_t n=strlen(folded)+8;char *key=allocate(n);
+  snprintf(key,n,"%c%s%s",pos[0],folded,!strcmp(pos,"verb")&&!strcmp(aspect,"perfective")?"/1":"/0");free(folded);return key;
+}
+static int fit_compare(const void *a,const void *b) { return strcmp(((const Fit *)a)->key,((const Fit *)b)->key); }
+static void load_fits(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;size_t capacity=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    char *f[6];size_t k=0;char *save=NULL;for(char *tok=strtok_r(line,"\t",&save);tok&&k<6;tok=strtok_r(NULL,"\t",&save))f[k++]=tok;
+    if(k<4)fail("fit row needs pos<TAB>lemma<TAB>aspect<TAB>id");
+    if(fit_count==capacity){capacity=capacity?capacity*2:1024;fits=realloc(fits,capacity*sizeof *fits);if(!fits)fail("out of memory");}
+    const char *pos=f[0][0]=='v'?"verb":f[0][0]=='n'?"noun":"adjective";
+    fits[fit_count].key=fit_key(pos,f[1],f[2][0]=='1'?"perfective":"imperfective");fits[fit_count].id=(unsigned char)strtoul(f[3],NULL,10);fit_count++;
+  }
+  free(line);fclose(file);qsort(fits,fit_count,sizeof *fits,fit_compare);
+}
+static int fitted_paradigm(const char *pos,const char *lemma,const char *aspect) {
+  if(!fit_count)return -1;char *key=fit_key(pos,lemma,aspect?aspect:"");Fit probe={key,0};
+  Fit *found=bsearch(&probe,fits,fit_count,sizeof *fits,fit_compare);free(key);return found?found->id:-1;
+}
 static void lower_initial(unsigned char *key) { key[0]=fold(key[0]); }
-static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
+static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only,const char *aspect_cell) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5+256]; size_t used=0;
+  int paradigm=fitted_paradigm(pos,lemma,aspect_cell);unsigned char paradigm_byte=paradigm>=0?(unsigned char)(0x80|paradigm):0;
   if(!strcmp(pos,"noun")) {
     /* Native noun flags: 0x80 base, 0x02 animate (from/от, animate
      * accusative), 0x40 на-location noun. */
@@ -338,7 +373,7 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
     if(is_empty(gender))gender=inferred_gender(lemma);
     int g=!strcmp(gender,"m")?1:!strcmp(gender,"f")?2:0;
     value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
-    value[used++]=0;
+    value[used++]=paradigm_byte;
   } else if(!strcmp(pos,"verb")) {
     /* Byte-2 aspect flags. 0x08 (verified in original LTPRO): future is
      * analytic буду работать, ignoring any partner. 0x04 forces perfective
@@ -346,10 +381,13 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
      * (увидеть e3), which also suppresses the partner lookup. */
     const char *partner=perfective_partner(lemma),*aspect=verb_aspect(lemma);
     value[used++]='V';value[used++]=(unsigned char)(0xc0|(!strcmp(aspect,"perfective")?0x04:partner?0:0x08));
-    value[used++]=verb_government(lemma);value[used++]=0;value[used++]=0;
+    value[used++]=verb_government(lemma);value[used++]=paradigm_byte;value[used++]=0;
     if(partner){size_t m;unsigned char *p=to_cp866(partner,&m);if(m>255)fail("verb partner too long");memcpy(value+used,p,m);used+=m;free(p);}
   }
-  else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
+  else { value[used++]='A';value[used++]=0xc0;value[used++]=paradigm_byte;value[used++]=0; }
+  /* LTGOLD keys adjectives by the stem without the two-letter ending (красн,
+   * больш): the native lookup cuts the ending before searching .RUS. */
+  if(!strcmp(pos,"adjective")&&n>2)n-=2;
   /* One lexeme per (headword, class); a hash set replaces a linear scan. */
   lower_initial(encoded);
   if(!lexeme_seen(encoded,n,value[0])){free(encoded);return;}
@@ -380,6 +418,11 @@ static uint16_t intern_pattern(unsigned char pos,const unsigned char *data,size_
 
 static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,const char *lemma,const char *aspect) {
   if(!strcmp(pos,"other"))return;
+  /* A fitted lexeme declines from its paradigm. Nouns and verbs then need no
+   * stored forms; adjectives keep the comparative, superlative and short forms,
+   * which the native tables do not have. */
+  int fitted=fitted_paradigm(pos,lemma,aspect)>=0;
+  if(fitted&&strcmp(pos,"adjective"))return;
   static const char *noun_slots[]={"sg_nom","sg_gen","sg_dat","sg_acc","sg_inst","sg_prep","pl_nom","pl_gen","pl_dat","pl_acc","pl_inst","pl_prep"};
   static const char *verb_slots[]={"imperative_sg","imperative_pl","past_m","past_f","past_n","past_pl","presfut_sg1","presfut_sg2","presfut_sg3","presfut_pl1","presfut_pl2","presfut_pl3"};
   static const char *adj_slots[]={"decl_m_nom","decl_m_gen","decl_m_dat","decl_m_acc","decl_m_inst","decl_m_prep","decl_f_nom","decl_f_gen","decl_f_dat","decl_f_acc","decl_f_inst","decl_f_prep","decl_n_nom","decl_n_gen","decl_n_dat","decl_n_acc","decl_n_inst","decl_n_prep","decl_pl_nom","decl_pl_gen","decl_pl_dat","decl_pl_acc","decl_pl_inst","decl_pl_prep","comparative","superlative","short_m","short_f","short_n","short_pl"};
@@ -391,7 +434,7 @@ static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,
   size_t cap=1;for(size_t i=0;i<count;i++)cap+=1+3*strlen(cell(row,column(header,slots[i])));
   unsigned char *pattern=allocate(cap);size_t used=0;
   for(size_t i=0;i<count;i++) {
-    const char *source=cell(row,column(header,slots[i]));char *copy=strdup(source);if(!copy)fail("out of memory");
+    const char *source=fitted&&!strncmp(slots[i],"decl_",5)?"":cell(row,column(header,slots[i]));char *copy=strdup(source);if(!copy)fail("out of memory");
     unsigned char *cuts=allocate(strlen(source)+2),**suffixes=allocate((strlen(source)+2)*sizeof(unsigned char *));
     size_t *suffix_lengths=allocate((strlen(source)+2)*sizeof(size_t)),variants=0;char *save=NULL;
     for(char *form=strtok_r(copy,",",&save);form;form=strtok_r(NULL,",",&save)) {
@@ -429,7 +472,7 @@ static void import_file(Records *source_dic,Records *source_rus,Records *morph,c
     if(line[0]=='#'||line[0]=='\n')continue;Fields row=parse_tsv(line);const char *lemma=cell(&row,bare),*english=cell(&row,gloss),*g=cell(&row,gender),*a=cell(&row,aspect);
     if(is_empty(lemma))continue;
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
-    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,animate),cell(&row,sg_only),cell(&row,pl_only));
+    if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,animate),cell(&row,sg_only),cell(&row,pl_only),a);
     if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a,strtol(cell(&row,source_row),NULL,10));
     add_forms(morph,&header,&row,pos,lemma,a);
   }
@@ -748,7 +791,8 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
 }
 
 static void command_build(int argc,char **argv) {
-  if(argc!=6)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH");
+  if(argc!=6&&argc!=7)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH [FIT.tsv]");
+  if(argc==7)load_fits(argv[6]);
   const char *dir=argv[2];size_t need=strlen(dir)+64;char *path=allocate(need);Records source_dic={0},source_rus={0},morph={0};
   /* The demo's closed-class and common-verb readings must outrank unrelated
    * homonyms that become visible when importing the complete tables. */

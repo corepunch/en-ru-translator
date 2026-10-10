@@ -1,4 +1,5 @@
 local assets = require 'core.assets'
+local encoding = require 'core.encoding'
 local russian = require 'core.russian'
 local lexicon = require 'core.lexicon'
 local grammar = require 'core.grammar'
@@ -11,7 +12,6 @@ local agreement = require 'core.agreement'
 local syntax = require 'core.syntax'
 local generation = require 'core.generation'
 local output = require 'core.output'
-local encoding = require 'core.encoding'
 local prefixes = require 'core.prefixes'
 local directives = require 'core.directives'
 
@@ -68,7 +68,13 @@ end
 -- Static binary assets are decoded separately from mutable sentence state.
 function engine.new_state(exe_source,russian_source,russian_overlay,russian_morphology_source)
   russian_morphology_source=russian_morphology_source or sibling_morphology(russian_source)
-  return {assets=memoized_asset(exe_source,'LTPRO.EXE',assets.new),
+  local exe_assets=memoized_asset(exe_source,'LTPRO.EXE',assets.new)
+  if not exe_assets.paradigm_tables then
+    local directory=type(russian_source)=='string' and russian_source:match('^(.*/)') or 'openrussian/'
+    local file=io.open(directory..'paradigms.txt','rb') or io.open('openrussian/paradigms.txt','rb')
+    if file then exe_assets:load_paradigms(file:read('*a'),encoding.encode);file:close() end
+  end
+  return {assets=exe_assets,
     russian=memoized_asset(russian_source,'BASE.RUS',russian.from_bytes,russian_overlay,'BASE.RUS',russian_morphology_source,'BASE.MORPH'),
     elements={},tags={},count=0,word_count=0}
 end

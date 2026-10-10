@@ -65,6 +65,10 @@ function senses.store_code(r, first, code)
   local full = first ~= 1
   local dest = first == 1 and 0x67 or 0x6D
   local tag = get(r, 'tag')
+  -- Decode by the record's own class: a participle node tagged A reads a V
+  -- record, whose third byte is government, not an adjective paradigm.
+  local class = get(r, 0x6C)
+  if class == 0x56 or class == 0x76 then tag = 0x56 elseif class == 0x4E then tag = 0x4E elseif class == 0x41 then tag = 0x41 end
   if tag == 0x4E then
     set(r, dest, p(0)); set(r, dest + 1, p(1))
     if full then
@@ -239,7 +243,8 @@ function senses.select(state, original, r, alt, wtag, wflag)
     local first=reading_byte(0)
     local lower=first==0xF0 and 0xF1 or first<0x90 and first+0x20 or first+0x50
     local lowered=string.char(lower)..r.text:sub(2)
-    if state.russian.entries[lowered] then
+    -- Adjectives are keyed by the stem without the two-letter ending (нов).
+    if state.russian.entries[lowered] or (T == 0x41 and #lowered > 2 and state.russian.entries[lowered:sub(1,-3)]) then
       r.dictionary_capital=true
       r.text=lowered
     end
@@ -401,11 +406,13 @@ function senses.select(state, original, r, alt, wtag, wflag)
   if reading_byte(0) == 0 or not text.is_lower_cyrillic(reading_byte(0)) then return 0 end
   c = reading_byte(1)
   if not text.is_lower_cyrillic(c) and not (c == 0 or c == 0x20 or c == 0x2E or c == 0x2D) then return 0 end
-  l = lookup(0)
+  -- The .RUS record of the verb class: a noun homonym (знать) carries its own
+  -- paradigm, which read as a verb table gave "зоню".
+  l = lookup(0, 'V')
   set_length()
   if not l and ends(0x4850) then
     put_reading(length - 2, 0)
-    l = lookup(0)
+    l = lookup(0, 'V')
     append_literal(0x4853)
   end
   if not l then

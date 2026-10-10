@@ -151,6 +151,16 @@ local function openrussian_participle(state,word,aspect,passive,past)
 end
 function generation.participle_form(state,id,word,aspect,tag,passive,past)
   local a=state.assets
+  -- A perfective participle of an imperfective reading (defined -> определять)
+  -- is built from the partner and its own paradigm (определить, 42), as the
+  -- imperfective paradigm number means something else in the perfective table.
+  if aspect==1 then
+    local record=russian.verb_record(state,word)
+    if record and not record.perfective and record.partner then
+      local partner=russian.verb_record(state,record.partner)
+      if partner then word,id=record.partner,partner.paradigm end
+    end
+  end
   if tag~=0x47 then
     local derived=openrussian_participle(state,word,aspect,passive,past)
     if derived then return derived end

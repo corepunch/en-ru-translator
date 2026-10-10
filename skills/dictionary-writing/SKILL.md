@@ -18,7 +18,9 @@ The default English dictionary is `openrussian/BASE.DIC`. All authored
 English entries live in `openrussian/dictionary.txt`, under `## function-words`,
 `## irregular-verbs`, `## native-readings` and `## phrases`; Russian lemma
 attributes (verb government, aspect, на-nouns) in `openrussian/lexemes.tsv` and
-English word attributes in `openrussian/words.tsv`. Theme dictionaries are
+English word attributes in `openrussian/words.tsv`. Inflection comes from `openrussian/paradigms.txt` (LTGOLD's tables as text) via
+a paradigm number in each `.RUS` record, not from stored forms; the original
+and this engine give the plural imperative (`Помогите мне`). Theme dictionaries are
 `openrussian/themes/<name>.txt` (same `key*code` rows), compiled to
 `openrussian/<NAME>.DIC` and loaded with `--dic-overlay`. There are no other
 sources. Historical `LTGOLD/BASE.DIC` is a separate reference,

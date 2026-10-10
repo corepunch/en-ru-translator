@@ -32,7 +32,31 @@ function assets:rules(offset)
   end
   return self.rulesets[offset]
 end
+-- Inflection tables. LTPRO keeps them in its data segment; this project keeps
+-- the same rows in openrussian/paradigms.txt so they can be read and extended
+-- without the executable. The file, when loaded, takes precedence.
+local sections = {[0x5A50]='verb-imperfective',[0x5E90]='verb-perfective',[0x5238]='noun-m',[0x5450]='noun-f',
+  [0x55A6]='noun-n',[0x56D4]='adjective-m',[0x5770]='adjective-f',[0x580C]='adjective-n'}
+assets.paradigm_sections = sections
+function assets:load_paradigms(text, encode)
+  local tables, current = {}, nil
+  for line in text:gmatch('[^\n]+') do
+    local name = line:match('^## (%S+)')
+    if name then current = {}; tables[name] = current
+    elseif current and not line:match('^#') then
+      local id, cut, endings = line:match('^(%d+)\t(%d+)\t(.*)$')
+      if id then current[tonumber(id)] = {tonumber(cut), encode(endings)} end
+    end
+  end
+  self.paradigm_tables = tables
+end
 function assets:paradigm(offset, id)
+  local section = self.paradigm_tables and self.paradigm_tables[sections[offset]]
+  if section then
+    local row = section[id]
+    if row then return row[1], row[2] end
+    return 0, ''
+  end
   local at = offset + id * 6
   return self:word(at), self:indirect(at+2)
 end

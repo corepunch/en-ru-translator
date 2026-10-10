@@ -443,6 +443,7 @@ drone*Nбеспилотник
 struck*Eударить\strike
 facility*Nпредприятие
 deal with*ZVWVиметь делоPТс/N.WNделоPТс
+attacks*nнападение
 
 ## phrases
 # Phrases: W composites, fixed D equivalents and grammatical subrules (`*$`). Every row needs a `phrase:` case in test/translations.txt.

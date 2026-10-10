@@ -21,6 +21,14 @@ authored input, in the spirit of LTGOLD's single `.DIC` and `.RUS`:
   builder and written into `.RUS` records as LTGOLD stores them.
 - [`words.tsv`](words.tsv): English word attributes for the builder (`adverb`,
   `content-first`, `frame`).
+- [`paradigms.txt`](paradigms.txt): the inflection tables (stem cut + endings
+  per slot) that LTPRO keeps in its data segment, as text: two verb tables, three
+  noun and three adjective tables. The engine reads this file; the builder's
+  `tools/fit_paradigms.lua` assigns every OpenRussian lexeme the paradigm that
+  regenerates its listed forms and writes LTGOLD's paradigm byte into the
+  `.RUS` record. Forms are stored in `BASE.MORPH` only for lexemes no table
+  fits (irregular nouns, pluralia tantum, second locatives) and for adjective
+  comparatives and short forms, which the tables lack.
 - [`themes/`](themes): theme dictionaries, one `key*code` file each
   (`business.txt`, `computer.txt`, LTGOLD's BUSINESS.DIC and COMPUTER.DIC). The
   rebuild compiles each to `openrussian/<NAME>.DIC`; `lua init.lua --dic-overlay

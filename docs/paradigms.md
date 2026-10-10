@@ -2,8 +2,11 @@
 
 `core.generation` owns both low-level inflection and sentence word generation.
 `core.russian` supplies Russian dictionary metadata and ending operations.
-The engine reads morphology tables from the initialized data segment of the
-unpacked executable; there are no separately maintained Lua copies.
+The morphology tables live in `openrussian/paradigms.txt` (one row per
+paradigm: cut count, endings per slot), extracted byte for byte from the data
+segment of the unpacked executable; the executable's copy is the fallback when
+the file is absent. Each `.RUS` record names its paradigm in the native byte
+(`0x80|id`), assigned at build time by `tools/fit_paradigms.lua`.
 
 The form functions accept sentence state, table ID, a CP866 string and
 grammatical arguments. They return a new string, or `nil` when no form exists:

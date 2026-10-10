@@ -11,7 +11,8 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT HUP INT TERM
 
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o "$work/openrussian_db" -liconv
-"$work/openrussian_db" build "$dir/upstream" "$work/BASE.DIC" "$work/BASE.RUS" "$work/BASE.MORPH" >/dev/null
+lua tools/fit_paradigms.lua "$dir/upstream" > "$work/fit.tsv" 2>/dev/null
+"$work/openrussian_db" build "$dir/upstream" "$work/BASE.DIC" "$work/BASE.RUS" "$work/BASE.MORPH" "$work/fit.tsv" >/dev/null
 python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/dictionary.txt" --replace --in-place >/dev/null
 python3 tools/ltech_dict.py check "$work/BASE.DIC" | grep -q 'index: valid'
 for theme in "$dir"/themes/*.txt; do

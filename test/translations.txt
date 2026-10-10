@@ -400,7 +400,7 @@ phrase:stop G | I will stop eating. => Я перестану есть{1.куша
 phrase:stop G | Stop the car. !> перест
 progressive:ing-noun-gloss | He is reading the book. => Он читает книгу{1.книжка}.
 progressive:ing-noun-gloss | We are building a house. => Мы строим дом{1.палата;династия;зрительница;курень}.
-progressive:ing-noun-gloss | They are running. => Они бежат.
+progressive:ing-noun-gloss | They are running. => Они бегут.
 phrasal-verb:imperfective-first | He knocks out the lights. ~> выбивает
 past-form:ed-gloss-shadow | He opened the door. => Он открыл дверь{1.дверца}.
 past-form:ed-gloss-shadow | He closed the door. => Он закрыл дверь{1.дверца}.

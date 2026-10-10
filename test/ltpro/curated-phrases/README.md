@@ -1,6 +1,6 @@
 # Curated phrase verification
 
-This is the complete grammatical rewrite of `reference/openrussian/phrases.txt`:
+This is the complete grammatical rewrite of `openrussian/overlays/phrases.txt`:
 29 W composites, three native T4 subrules, and eleven single-word D equivalents.
 The review below covers every source entry. The single-word D readings retain
 conventional adverbial/interjection senses; none contains a frozen multiword
@@ -53,7 +53,7 @@ python3 tools/ltpro_capture.py --data "$phrase_fixture_dir" \
   --cases test/ltpro/curated-phrases/cases.json \
   --output "$phrase_fixture_dir/reference.json" --repeat 2 --timeout 60
 python3 tools/ltpro_pipeline_probe.py --data "$phrase_fixture_dir" \
-  --dictionary reference/openrussian/BASE.DIC --russian reference/openrussian/BASE.RUS \
+  --dictionary openrussian/BASE.DIC --russian openrussian/BASE.RUS \
   --cases test/ltpro/curated-phrases/cases.json \
   --reference "$phrase_fixture_dir/reference.json" \
   --report "$phrase_fixture_dir/comparison.json"

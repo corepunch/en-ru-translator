@@ -115,7 +115,7 @@ function engine.run(input, options)
       meanings_text=options.meanings and encoding.decode(meanings) or nil}
   end
   local data = options.data_dir or 'LTGOLD'
-  local openrussian = 'reference/openrussian'
+  local openrussian = 'openrussian'
   local executable = options.executable or (data .. '/LTPRO.EXE')
   -- OpenRussian is the standard dictionary set; --data selects runtime assets
   -- only. Alternate dictionary files require explicit --dic/--rus options.

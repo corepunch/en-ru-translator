@@ -14,10 +14,10 @@ for _,case in ipairs(require('test.cases').load()) do
   if case.group=='phrase' then covered[case.entry]=true end
 end
 
-local file=assert(io.open('reference/openrussian/BASE.DIC','rb'))
+local file=assert(io.open('openrussian/BASE.DIC','rb'))
 local dictionary=lexicon.from_bytes(file:read('*a'));file:close()
 local entries=0
-for line in io.lines('reference/openrussian/phrases.txt') do
+for line in io.lines('openrussian/overlays/phrases.txt') do
   if line:match('%S') then
     local key=line:match('^(.-)%*%$') or line:match('^(.-)%*')
     assert(covered[key],'curated entry has no translation test: '..key)
@@ -37,7 +37,7 @@ for line in io.lines('reference/openrussian/phrases.txt') do
 end
 -- The C builder emits OpenRussian literals for these keys; the build removes
 -- them (removed-headwords.txt) so the curated subrules apply instead.
-for line in io.lines('reference/openrussian/removed-headwords.txt') do
+for line in io.lines('openrussian/overlays/removed-headwords.txt') do
   if line:match('%S') then
     -- A curated shorter key may still match its prefix (have to, have to do).
     local found=lexicon.match_phrase(dictionary,lexicon.tokenize(line..' x'),2,line:match('^%S+'))

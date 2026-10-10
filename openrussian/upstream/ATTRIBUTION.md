@@ -8,7 +8,7 @@ Those adapted OpenRussian records are distributed under the same
 license. The repository's LTGOLD base dictionaries are loaded separately by
 the full application and are not copied into the standalone prototype files.
 
-The source CSV URLs and SHA-256 checksums are listed in `source-manifest.json`.
+The source CSV URLs and SHA-256 checksums are listed in `manifest.json`.
 OpenRussian credits sources including Wiktionary attributes and flexions,
 Dicipedia translations, and Starling flexions. The dataset's own README warns
 that the checked-in CSVs are older backup exports.

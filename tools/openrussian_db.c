@@ -628,18 +628,18 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
 
 static void command_build(int argc,char **argv) {
   if(argc!=6)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH");
-  const char *dir=argv[2];size_t need=strlen(dir)+32;char *path=allocate(need);Records source_dic={0},source_rus={0},morph={0};
+  const char *dir=argv[2];size_t need=strlen(dir)+64;char *path=allocate(need);Records source_dic={0},source_rus={0},morph={0};
   /* The demo's closed-class and common-verb readings must outrank unrelated
    * homonyms that become visible when importing the complete tables. */
   add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
   add_utf8_record(&source_dic,"i","R011я");
   add_utf8_record(&source_dic,"want","V21хотеть");add_utf8_record(&source_dic,"wants","vхотеть");
   add_utf8_record(&source_dic,"can","e00мочь");
-  snprintf(path,need,"%s/../na-nouns.txt",dir);load_na_nouns(path);
+  snprintf(path,need,"%s/../overlays/na-nouns.txt",dir);load_na_nouns(path);
   snprintf(path,need,"%s/verbs.tsv",dir);load_verbs(path);
-  snprintf(path,need,"%s/../imperfective-only.txt",dir);load_imperfective_only(path);
-  snprintf(path,need,"%s/../verb-partners.txt",dir);load_verb_partners(path);
-  snprintf(path,need,"%s/../content-first.txt",dir);load_content_first(path);
+  snprintf(path,need,"%s/../overlays/imperfective-only.txt",dir);load_imperfective_only(path);
+  snprintf(path,need,"%s/../overlays/verb-partners.txt",dir);load_verb_partners(path);
+  snprintf(path,need,"%s/../overlays/content-first.txt",dir);load_content_first(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");

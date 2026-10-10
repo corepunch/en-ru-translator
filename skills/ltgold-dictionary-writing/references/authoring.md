@@ -15,8 +15,8 @@ headers or editing them as UTF-8:
 ```sh
 python3 tools/ltech_dict.py find LTGOLD/BASE.DIC are
 python3 tools/ltech_dict.py find LTGOLD/BASE.DIC you
-python3 tools/ltech_dict.py find reference/openrussian/BASE.DIC how --partial
-python3 tools/ltech_dict.py find reference/openrussian/BASE.DIC 'how XR[*]'
+python3 tools/ltech_dict.py find openrussian/BASE.DIC how --partial
+python3 tools/ltech_dict.py find openrussian/BASE.DIC 'how XR[*]'
 ```
 
 Check `find --help` before adapting command options. Inspect both the active
@@ -252,7 +252,7 @@ my `pleasure`[*]*$Dпожалуйста\ \
 a clause-initial `p` preposition the grammar retags the comma `j`, so `after`
 needs `[j,*]` (historical ``as `it``is`[j,*)]``). A
 generated literal with the same first words still wins lexically and hides
-the subrule, so list it in `reference/openrussian/removed-headwords.txt`;
+the subrule, so list it in `openrussian/overlays/removed-headwords.txt`;
 `--replace` only replaces identical keys. “My pleasure” answers thanks, so
 `Пожалуйста` replaces the former “С удовольствием” (accepting an offer).
 
@@ -353,18 +353,18 @@ runs this sequence (about 6 s); `--verify` checks the checked-in files instead:
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
-/tmp/openrussian_db build reference/openrussian/source \
-  reference/openrussian/BASE.DIC reference/openrussian/BASE.RUS \
-  reference/openrussian/BASE.MORPH
-python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
-  --keys-file reference/openrussian/removed-headwords.txt --in-place
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/function-words.txt --replace --in-place
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/irregular-verbs.txt --replace --in-place
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/phrases.txt --replace --in-place
-python3 tools/ltech_dict.py check reference/openrussian/BASE.DIC
+/tmp/openrussian_db build openrussian/upstream \
+  openrussian/BASE.DIC openrussian/BASE.RUS \
+  openrussian/BASE.MORPH
+python3 tools/ltech_dict.py delete openrussian/BASE.DIC \
+  --keys-file openrussian/overlays/removed-headwords.txt --in-place
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/function-words.txt --replace --in-place
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/irregular-verbs.txt --replace --in-place
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/phrases.txt --replace --in-place
+python3 tools/ltech_dict.py check openrussian/BASE.DIC
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 sh test/run_all.sh
 ```
@@ -377,7 +377,7 @@ encodable, and have a unique key within the batch. `--replace` replaces all
 existing records for that exact key; preserve required alternatives in the
 replacement reading. Import validates the batch before writing and is repeatable.
 Full OpenRussian regeneration must apply both source batches after the C build;
-see `reference/openrussian/README.md`.
+see `openrussian/README.md`.
 
 Inspect tags independently of phrase output with `core.lexicon.analyze`, and
 check `state.stages.T4.events` for applied native dictionary subrules. Exercise

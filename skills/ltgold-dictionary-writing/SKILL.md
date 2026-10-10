@@ -14,9 +14,9 @@ additional Lua/internal tags, numeric fields, pattern operators, subrule control
 and worked breakdowns of the greeting entries. Consult it rather than guessing
 what a letter or digit means; distinguish dictionary codes from runtime tags.
 
-The default English dictionary is `reference/openrussian/BASE.DIC`. Keep reviewed
-UTF-8 entries in `reference/openrussian/phrases.txt` and structural word readings
-in `reference/openrussian/function-words.txt`; import them with
+The default English dictionary is `openrussian/BASE.DIC`. Keep reviewed
+UTF-8 entries in `openrussian/overlays/phrases.txt` and structural word readings
+in `openrussian/overlays/function-words.txt`; import them with
 `tools/ltech_dict.py`. Historical `LTGOLD/BASE.DIC` is a separate reference,
 not an automatically merged source. English phrase rules belong in `.DIC`;
 `.RUS` and `.MORPH` supply Russian morphology.
@@ -26,7 +26,7 @@ not an automatically merged source. English phrase rules belong in `.DIC`;
 Each step takes seconds; do all of them.
 
 1. **Look up evidence.** `python3 tools/ltech_dict.py find LTGOLD/BASE.DIC 'good night'`
-   shows the original's coding; the same command on `reference/openrussian/BASE.DIC`
+   shows the original's coding; the same command on `openrussian/BASE.DIC`
    shows what is installed now, including generated OpenRussian literals.
 2. **Pick the shape** (tags: `N` noun, `n` plural noun, `A` adjective, `V` verb,
    `D` adverb/interjection, `K` particle, `R` pronoun, `C` conjunction,
@@ -42,9 +42,9 @@ Each step takes seconds; do all of them.
 
    Never put Russian text after `#`, never freeze a multiword sentence in `D`,
    and lowercase lemmas except proper names (`NРождество`).
-3. **Edit** `reference/openrussian/phrases.txt`. If step 1 showed a generated
+3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
    literal starting with the same words, add its key to
-   `reference/openrussian/removed-headwords.txt`, or it will hide a subrule.
+   `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.
 4. **Rebuild:** `sh tools/rebuild_openrussian.sh` (always from source).
 5. **Check and record:** `lua init.lua 'Good night.'`, then add lines to
    `test/translations.txt`: `phrase:<exact key> | Good night. => Спокойной ночи.`,
@@ -75,7 +75,7 @@ Each step takes seconds; do all of them.
 | Ordinary clause replaced by one word (`This is` → `Это`, `you know` → `ведь`) | Generated grammar-word literal | Add the key to `removed-headwords.txt` |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |
-| Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find reference/openrussian/BASE.RUS <lemma>` |
+| Capitalized lemma does not decline | Lowercase lemma missing from `.RUS` | `python3 tools/ltech_dict.py find openrussian/BASE.RUS <lemma>` |
 | Expected ё, got е | OpenRussian normalizes ё | Expect е |
 | A `function-words.txt` row deleted other meanings | `--replace` removes every record for the key | Pack alternatives into the one record, or leave the word out |
 | Test would need broken Russian to pass | Unrelated defect around the phrase | Check the owned span with `~>`; never bless the defect |

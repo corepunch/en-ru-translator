@@ -2,9 +2,9 @@ package.path = './?.lua;./?/init.lua;' .. package.path
 
 local engine = require 'core.engine'
 local options = {
-  dictionary = 'reference/openrussian/BASE.DIC',
-  russian = 'reference/openrussian/BASE.RUS',
-  russian_morphology = 'reference/openrussian/BASE.MORPH',
+  dictionary = 'openrussian/BASE.DIC',
+  russian = 'openrussian/BASE.RUS',
+  russian_morphology = 'openrussian/BASE.MORPH',
 }
 local examples = {
   'The child reads a book.',

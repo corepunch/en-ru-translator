@@ -269,15 +269,15 @@ Unsupported paths raise explicit errors. Custom overlay merging has been retired
 
 English phrase keys and their Russian readings belong in `.DIC`. `.RUS` holds
 Russian morphology codes. The active dictionary is
-`reference/openrussian/BASE.DIC`; historical `LTGOLD/BASE.DIC` is a separate
+`openrussian/BASE.DIC`; historical `LTGOLD/BASE.DIC` is a separate
 asset and is not automatically combined with OpenRussian.
 
-Keep new entries in UTF-8 `reference/openrussian/phrases.txt`, then import them:
+Keep new entries in UTF-8 `openrussian/overlays/phrases.txt`, then import them:
 
 ```sh
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/phrases.txt --replace --in-place
-python3 tools/ltech_dict.py check reference/openrussian/BASE.DIC
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/phrases.txt --replace --in-place
+python3 tools/ltech_dict.py check openrussian/BASE.DIC
 ```
 
 Each nonblank source line is `headword*code`. Grammatical subrules use
@@ -304,7 +304,7 @@ composite from the native sentence-final `it` rewrite for `How is it?`; see the 
 for this captured limitation.
 
 Structural function words are maintained in
-`reference/openrussian/function-words.txt` and imported before phrase entries.
+`openrussian/overlays/function-words.txt` and imported before phrase entries.
 A literal `W#ты#` is not an `R` pronoun, and an auxiliary classified as a noun
 cannot match `X`. Use proper structural readings rather than enumerating the
 surface spellings of a grammatical family.
@@ -323,7 +323,7 @@ This follows BASE.DIC entries such as ``thank `you`[*]*$Dблагодарю ва
 The auxiliary span may be empty because the native question pass removes `is`.
 `[*]` requires sentence end; final punctuation stays separate from phrase keys.
 The prior Lua-specific final-punctuation matching has been removed. See the
-[curated phrases](../reference/openrussian/README.md#curated-phrases) and the
+[curated phrases](../openrussian/README.md#curated-phrases) and the
 [dictionary-writing skill](../skills/ltgold-dictionary-writing/SKILL.md).
 
 ## BASE.RUS (Russian) Code Format

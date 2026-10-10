@@ -41,9 +41,9 @@ if #inputs == 0 then
   for _, case in ipairs(cases.load()) do add(case.input) end
 end
 
-local old = { dictionary = from_git('reference/openrussian/BASE.DIC'),
-  russian = from_git('reference/openrussian/BASE.RUS'),
-  russian_morphology = from_git('reference/openrussian/BASE.MORPH') }
+local old = { dictionary = from_git('openrussian/BASE.DIC'),
+  russian = from_git('openrussian/BASE.RUS'),
+  russian_morphology = from_git('openrussian/BASE.MORPH') }
 local changed = 0
 for _, input in ipairs(inputs) do
   local ok_old, before = pcall(engine.translate, input, old)

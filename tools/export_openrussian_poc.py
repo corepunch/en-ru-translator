@@ -20,9 +20,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "reference/openrussian"
-SOURCE = DATA / "source"
-MANIFEST_PATH = DATA / "source-manifest.json"
+DATA = ROOT / "openrussian"
+SOURCE = DATA / "upstream"
+MANIFEST_PATH = SOURCE / "manifest.json"
 TABLES = ("nouns", "verbs", "adjectives", "others")
 NOUN_SLOTS = ["sg_nom", "sg_gen", "sg_dat", "sg_acc", "sg_inst", "sg_prep",
               "pl_nom", "pl_gen", "pl_dat", "pl_acc", "pl_inst", "pl_prep"]
@@ -107,7 +107,7 @@ def main() -> int:
         manifest.pop("sample_files", None)
         MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     elif manifest.get("import_files") != import_hashes:
-        raise SystemExit("Full imported table checksum differs from source-manifest.json")
+        raise SystemExit("Full imported table checksum differs from manifest.json")
 
     for name in TABLES:
         path = SOURCE / f"{name}.tsv"
@@ -115,7 +115,7 @@ def main() -> int:
             raise SystemExit(f"Missing complete source table: {path}")
         _fields, rows = read_tsv(path)
         if len(rows) != manifest["files"][name]["rows"]:
-            raise SystemExit(f"Imported {name} row count differs from source-manifest.json")
+            raise SystemExit(f"Imported {name} row count differs from manifest.json")
 
     print("All OpenRussian source table rows are ready for the C binary dictionary builder")
     return 0

@@ -7,7 +7,7 @@ the translation code without DOSBox or process snapshots.
 
 ## Run
 
-Requires Lua 5.3+, the OpenRussian dictionaries in `reference/openrussian/`,
+Requires Lua 5.3+, the OpenRussian dictionaries in `openrussian/`,
 and the supplied unpacked `LTPRO.EXE` in `LTGOLD/` (the original executable is
 not tracked). OpenRussian `BASE.DIC`, `BASE.RUS`, and `BASE.MORPH` are used by
 default; the executable and prefix rules remain in `LTGOLD/`.
@@ -87,7 +87,7 @@ Slash-separated phrase readings default to the first alternative; the Lua option
 `phrase_reading = function(key, readings) return index end` selects another.
 The raw CP866 choices remain available as `node.phrase_readings` for diagnostics.
 
-Curated phrases live in UTF-8 `reference/openrussian/phrases.txt`; structural
+Curated phrases live in UTF-8 `openrussian/overlays/phrases.txt`; structural
 word readings live in `function-words.txt` alongside it. Both are compiled into
 the default `.DIC` with `tools/ltech_dict.py import`. The greeting entries use
 native T4 dictionary-subrule matching and context replacement:
@@ -106,7 +106,7 @@ executed in original LTPRO. No custom retained-slot pass or final-punctuation
 phrase-key matcher is needed. Lua corrects the original third-person pronoun
 forms and applies casing to the whole phrase.
 
-See [adding phrases](reference/openrussian/README.md#curated-phrases) and the
+See [adding phrases](openrussian/README.md#curated-phrases) and the
 [dictionary-writing skill](skills/ltgold-dictionary-writing/SKILL.md).
 
 ## Structure

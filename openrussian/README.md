@@ -48,8 +48,8 @@ The data is from repository commit
 licensed CC BY-SA 4.0. The upstream repository says these checked-in CSVs are
 older backup exports; this import covers every row in those four files, not a
 claim that the 2021 backup is the latest live OpenRussian database. The source
-URLs and SHA-256 hashes are pinned in `source-manifest.json`; see
-`ATTRIBUTION.md` for attribution details.
+URLs and SHA-256 hashes are pinned in `upstream/manifest.json`; see
+`upstream/ATTRIBUTION.md` for attribution details.
 
 The source TSVs are UTF-8. Headwords and template suffixes remain one-byte
 CP866 for the current Lua runtime. The importer removes combining stress marks
@@ -72,17 +72,17 @@ Build the binary databases with `sh tools/rebuild_openrussian.sh` (add
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
-/tmp/openrussian_db build reference/openrussian/source \
-  reference/openrussian/BASE.DIC reference/openrussian/BASE.RUS \
-  reference/openrussian/BASE.MORPH
-python3 tools/ltech_dict.py delete reference/openrussian/BASE.DIC \
-  --keys-file reference/openrussian/removed-headwords.txt --in-place
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/function-words.txt --replace --in-place
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/irregular-verbs.txt --replace --in-place
-python3 tools/ltech_dict.py import reference/openrussian/BASE.DIC \
-  --entries reference/openrussian/phrases.txt --replace --in-place
+/tmp/openrussian_db build openrussian/upstream \
+  openrussian/BASE.DIC openrussian/BASE.RUS \
+  openrussian/BASE.MORPH
+python3 tools/ltech_dict.py delete openrussian/BASE.DIC \
+  --keys-file openrussian/overlays/removed-headwords.txt --in-place
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/function-words.txt --replace --in-place
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/irregular-verbs.txt --replace --in-place
+python3 tools/ltech_dict.py import openrussian/BASE.DIC \
+  --entries openrussian/overlays/phrases.txt --replace --in-place
 ```
 
 `removed-headwords.txt` lists generated OpenRussian literal phrases that would
@@ -119,10 +119,10 @@ Verb records also carry LTGOLD's aspect flags: `0x04` on perfective verbs and
 An imperfective-only verb then takes the analytic future (`I'll work` →
 `Я буду работать`, as in the original). The future auxiliary comes from the
 native быть paradigm, since OpenRussian lists `есть` in every present/future
-slot. [`imperfective-only.txt`](imperfective-only.txt) lists the 152 imperfective
+slot. [`imperfective-only.txt`](overlays/imperfective-only.txt) lists the 152 imperfective
 verbs that LTGOLD codes without a partner although the source names one
 (`работать` would otherwise pair with `поработать`). The partner column mixes
-`;`/`,` and stress marks; [`verb-partners.txt`](verb-partners.txt) adds pairs it
+`;`/`,` and stress marks; [`verb-partners.txt`](overlays/verb-partners.txt) adds pairs it
 lacks (`идти пойти`).
 
 A one-word key whose first reading is a noun and that also has a verb reading
@@ -180,13 +180,13 @@ key's first verb is perfective, its imperfective partner goes first
 (`come*e00приходить`, as in LTGOLD), so `He comes` is present `приходит`.
 OpenRussian's unclassified `others.tsv` adverbs are imported first and hid the
 verb or adjective of 152 basic words (`open` → `открыто`, `new` → `внове`).
-[`content-first.txt`](content-first.txt) lists 307 words: those LTGOLD codes as verb,
+[`content-first.txt`](overlays/content-first.txt) lists 307 words: those LTGOLD codes as verb,
 adjective or `Z`, plus noun-headed adjectives it codes `A`/`d` (`ready`); for
 those the builder puts the `Z` record (with noun and adjective readings) or the
 adjective first. Unlisted adverb-headed words keep the adverb, since LTGOLD does
 for `please`, `welcome` and `again`.
 
-[`irregular-verbs.txt`](irregular-verbs.txt) holds 215 irregular English verb
+[`irregular-verbs.txt`](overlays/irregular-verbs.txt) holds 215 irregular English verb
 forms from LTGOLD's native readings (`went*hидти\go`, `gave*hдавать\give`,
 `left*EоставатьсяAлевый\leave`), imported after the function words. Misspelled
 or regular LTGOLD keys are omitted, and `V.` readings keep only the sense that
@@ -222,12 +222,12 @@ Each preposition in `function-words.txt` is one native record: class `P` or
 where the original uses them (`for*PРдля`, `of*PР`,
 `after*pРпослеDвпоследствииJ2после того, как`). LTGOLD's entries are evidence;
 deliberate differences, omitted homographs, and original captures are in
-[preposition verification](../../test/ltpro/prepositions/README.md).
+[preposition verification](../test/ltpro/prepositions/README.md).
 
 Agreement chooses в/на and из/с/от from noun flags in `.RUS`: bit 1 (`0x02`)
 marks animates and bit 6 (`0x40`) nouns that take на. The builder sets the
 first from OpenRussian `animate` and the second from the curated
-[`na-nouns.txt`](na-nouns.txt), read from the source directory's parent. It
+[`na-nouns.txt`](overlays/na-nouns.txt), read from `overlays/`. It
 previously wrote `0xc0` for every noun.
 
 ## Curated phrases
@@ -281,7 +281,7 @@ the former Lua-only punctuation-key matcher has been removed.
 additional lexical pronoun readings, contractions, case generation, casing, and
 nearby inputs. These phrases intentionally improve on the original translator;
 original captures remain separate. The
-[dictionary-writing skill](../../skills/ltgold-dictionary-writing/SKILL.md)
+[dictionary-writing skill](../skills/ltgold-dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
 
 The complete source has 67 `W` composites, 24 native T4 subrules, and 20
@@ -305,7 +305,7 @@ normalizes ё to е in generated forms, including `С днем рождения.
 contractions, punctuation, longest-phrase selection, and protected/partial-word
 nonmatches. Original-program evidence, the per-entry review, known differences,
 and isolated fixture construction are in
-[curated-phrase verification](../../test/ltpro/curated-phrases/README.md).
+[curated-phrase verification](../test/ltpro/curated-phrases/README.md).
 Some entries deliberately choose historical senses: `by the way` becomes
 `между прочим` and `after all` becomes `в конце концов`.
 
@@ -369,18 +369,18 @@ python3 tools/ltpro_pipeline_probe.py \
   --cases test/ltpro/openrussian-cases.json \
   --reference test/ltpro/openrussian-reference.json \
   --data LTGOLD \
-  --dictionary reference/openrussian/BASE.DIC \
-  --russian reference/openrussian/BASE.RUS
+  --dictionary openrussian/BASE.DIC \
+  --russian openrussian/BASE.RUS
 python3 tools/ltpro_pipeline_probe.py \
   --cases test/ltpro/openrussian-phrase-cases.json \
   --reference test/ltpro/openrussian-phrase-reference.json \
   --data LTGOLD \
-  --dictionary reference/openrussian/BASE.DIC \
-  --russian reference/openrussian/BASE.RUS
+  --dictionary openrussian/BASE.DIC \
+  --russian openrussian/BASE.RUS
 python3 tools/ltpro_pipeline_probe.py \
   --cases test/ltpro/openrussian-full-cases.json \
   --reference test/ltpro/openrussian-full-reference.json \
   --data LTGOLD \
-  --dictionary reference/openrussian/BASE.DIC \
-  --russian reference/openrussian/BASE.RUS
+  --dictionary openrussian/BASE.DIC \
+  --russian openrussian/BASE.RUS
 ```

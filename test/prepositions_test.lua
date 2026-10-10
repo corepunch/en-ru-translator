@@ -6,7 +6,7 @@ for _,case in ipairs(require('test.cases').load()) do
   if case.group=='preposition' then covered[case.entry]=true end
 end
 local entries=0
-for line in io.lines('reference/openrussian/function-words.txt') do
+for line in io.lines('openrussian/overlays/function-words.txt') do
   local key,code=line:match('^(.-)%*(.)')
   if code=='P' or code=='p' then
     assert(covered[key],'preposition entry has no translation test: '..key)

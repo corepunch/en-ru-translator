@@ -13,11 +13,11 @@ also inspect image headers and find all records for a headword.
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
-/tmp/openrussian_db build reference/openrussian/source \
-  reference/openrussian/BASE.DIC reference/openrussian/BASE.RUS \
-  reference/openrussian/BASE.MORPH
-/tmp/openrussian_db info reference/openrussian/BASE.RUS
-/tmp/openrussian_db find reference/openrussian/BASE.RUS читать
+/tmp/openrussian_db build openrussian/upstream \
+  openrussian/BASE.DIC openrussian/BASE.RUS \
+  openrussian/BASE.MORPH
+/tmp/openrussian_db info openrussian/BASE.RUS
+/tmp/openrussian_db find openrussian/BASE.RUS читать
 ```
 
 These tools in `LTGOLD/` were used to reverse-engineer the LTGOLD.EXE binary and

@@ -1,7 +1,7 @@
 # Preposition verification
 
 Original LTPRO captures for the preposition batch in
-`reference/openrussian/function-words.txt`. Every capture was byte-identical in
+`openrussian/overlays/function-words.txt`. Every capture was byte-identical in
 two runs.
 
 - `reference.json` (63 cases) and `adverb-reference.json` (5 cases) use the
@@ -41,7 +41,7 @@ phrase-only keys (*abt, afore, betwixt, ere, thru, qua, therein*) are omitted.
 Agreement picks в/на and из/с/от from flags in the noun's `.RUS` record:
 bit 6 marks на-nouns and bit 1 animates (LTGOLD: стол `c0`, дом `80`,
 мать `82`). The builder now sets bit 1 from OpenRussian `animate` and bit 6
-from the curated `reference/openrussian/na-nouns.txt`. It previously wrote
+from the curated `openrussian/overlays/na-nouns.txt`. It previously wrote
 `c0` for every noun, which would have given “Он - на доме” and “Подарок с брата”.
 
 ## Results

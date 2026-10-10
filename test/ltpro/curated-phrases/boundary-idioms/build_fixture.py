@@ -8,7 +8,7 @@ import ltech_dict as ld
 from ltpro_capture import FILES
 dest = Path(sys.argv[1]); dest.mkdir(parents=True, exist_ok=True)
 for name in FILES: shutil.copyfile(ROOT / 'LTGOLD' / name, dest / name)
-rows = [r for r in (ROOT / 'reference/openrussian/phrases.txt').read_text().splitlines()
+rows = [r for r in (ROOT / 'openrussian/overlays/phrases.txt').read_text().splitlines()
         if r.startswith(('not `at', 'at `all', 'after `all', 'my `pleasure'))]
 assert len(rows) == 5, rows
 entries = [ld.line_parts(r.encode('cp866')) for r in rows]

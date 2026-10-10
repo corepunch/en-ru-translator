@@ -51,6 +51,10 @@ Each step takes seconds; do all of them.
    A phrasal verb is its own key. `иметь дело с` is `deal with`, not `deal`:
    `deal with*ZVWVиметьNделоPТс/N.WNделоPТс`. Bare `deal` is the noun,
    `deal*Nсделка`. Do not hang the preposition's object on the one-word key.
+
+   An idiom is its own key too. `make a deal` is not `deal` and not
+   `deal with`: `make a deal*WVзаключатьNсделка`. The past form matches the
+   key (`Russia made a deal` → `Россия заключила сделку`).
 3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
    literal starting with the same words, add its key to
    `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.

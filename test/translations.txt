@@ -170,7 +170,7 @@ phrase-context | My pleasure is great. !> Пожалуйста
 phrase-context | After all the guests left. !> В конце концов
 phrase-context | It is not at all easy. !> нисколько
 phrase-context | Not at all. !> Совсем
-phrase-context | Hi, John. => Привет, John.
+phrase-context | Hi, Peter. => Привет, Питер.
 phrase-context | GOODBYE! => ДО СВИДАНИЯ!
 phrase-context | Goodbye, my friend. ~> До свидания,
 phrase-context | Nice to meet you too. ~> Приятно познакомиться
@@ -365,3 +365,11 @@ homograph:blind | The sun blinds me. => Солнце ослепляет меня
 # a leading underscore keeps an unknown word, an inner one makes it #.
 syntax | _Ohio is big. => _Ohio большое.
 syntax | Zork_x is big. => Zork_x большой.
+suffix-gap:doubled-ed | He called the doctor. => Он позвал врача.
+suffix-gap:doubled-ed | He killed the dog. => Он убил собаку.
+suffix-gap:doubled-ed | She pulled the door. => Она потянула дверь.
+suffix-gap:doubled-ed | He missed the bus. => Он пропустил автобус.
+suffix-gap:doubled-ing | He is calling the doctor. => Он зовет врача.
+suffix-gap:ie-ed | The man lied to me. => Человек соврал мне.
+suffix-gap:ie-ed | Merkel lied. => Меркел соврал.
+suffix-gap:stem-ed-unchanged | He stopped. => Он остановился.

@@ -3,6 +3,7 @@ local text = require 'core.text'
 local nodes = require 'core.nodes'
 local russian = require 'core.russian'
 local special_cases = require 'core.special_cases'
+local encoding = require 'core.encoding'
 local generation = {}
 local function signed(n) n=n & 0xFFFF; return n >= 0x8000 and n-0x10000 or n end
 local function reflexive(a, word, length)
@@ -115,8 +116,45 @@ function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gend
   if flags & 16 ~= 0 then cat(0xB99A) end
   return result
 end
+-- OpenRussian lexemes carry no native paradigm number, so the native
+-- participle tables would build nonsense (определить -> опреобранный). Derive
+-- the long masculine participle from the lemma's own source forms instead:
+-- passive past from the infinitive (-нный, -тый) or first person (-енный),
+-- passive present from first plural (-емый), active present from third plural
+-- (-ющий), active past from the past masculine (-вший). The native adjective
+-- and short-form code then agrees it as it does any adjective.
+local function ends_with(value,tail) return value:sub(-#tail)==tail end
+local function openrussian_participle(state,word,aspect,passive,past)
+  local function form(slot) local f=russian.source_forms(state,word,'v',slot,aspect); return f and f[1] end
+  local function cut(value,n) return value:sub(1,#value-n) end
+  local e=encoding.encode
+  if ends_with(word,e'ся') then return nil end
+  if passive~=0 and past==1 then
+    if ends_with(word,e'нять') or ends_with(word,e'взять') then return cut(word,3)..e'ятый' end
+    if ends_with(word,e'ать') or ends_with(word,e'ять') then return cut(word,2)..e'нный' end
+    if ends_with(word,e'еть') then return cut(word,2)..e'нный' end
+    if ends_with(word,e'ыть') or ends_with(word,e'оть') or ends_with(word,e'уть') then return cut(word,2)..e'тый' end
+    if ends_with(word,e'ить') then
+      local first=form('presfut_sg1')
+      if first and (ends_with(first,e'ю') or ends_with(first,e'у')) then return cut(first,1)..e'енный' end
+    end
+  elseif passive~=0 then
+    local plural=form('presfut_pl1')
+    if plural and ends_with(plural,e'м') then return plural..e'ый' end
+  elseif past==1 then
+    local masculine=form('past_m')
+    if masculine then return masculine..(ends_with(masculine,e'л') and e'вший' or e'ший') end
+  else
+    local plural=form('presfut_pl3')
+    if plural and ends_with(plural,e'т') then return cut(plural,1)..e'щий' end
+  end
+end
 function generation.participle_form(state,id,word,aspect,tag,passive,past)
   local a=state.assets
+  if tag~=0x47 then
+    local derived=openrussian_participle(state,word,aspect,passive,past)
+    if derived then return derived end
+  end
   local index=tag==0x47 and 8 or past==1 and (passive~=0 and 12 or 11) or (passive~=0 and 10 or 9)
   local refl=passive==0 and reflexive(a,word,#word)
   local result=build(a,id,word,#word-(refl and 2 or 0),aspect==1 and 0x5E90 or 0x5A50,index)

@@ -61,9 +61,9 @@ Each step takes seconds; do all of them.
    make <TAO>`deal`*$заключать\$`Nсделка`\
    ```
 
-   not `make a deal*WVзаключатьNсделка`. Add the literal key to
-   `removed-headwords.txt` or it hides the subrule. `Russia made a deal` and
-   `They made the deal` both give `заключила/заключили сделку`.
+   not `make a deal*WVзаключатьNсделка`, and not a `removed-headwords.txt`
+   deletion. LTGOLD has no such list. `Russia made a deal` and `They made the
+   deal` both give `заключила/заключили сделку`.
 3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
    literal starting with the same words, add its key to
    `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.

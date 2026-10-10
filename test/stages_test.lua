@@ -23,7 +23,8 @@ assert(#result.events==1 and result.events[1].rule==27 and result.events[1].hand
 assert(result.vector[4].previous_tag==string.byte('D'))
 assert(result.vector[4].reading==cp('затемCзатемJзатемjтогда'))
 local unknown=lexicon.analyze(forms,'An unknown word.')
-assert(unknown.tags=='*???*' and unknown.vector[2].source=='unknown')
+-- LTPRO tags an unknown word shorter than four letters # (An), longer ones ?.
+assert(unknown.tags=='*#??*' and unknown.vector[2].source=='unknown')
 assert(unknown.vector[2].person==3 and unknown.vector[2].gender==1)
 
 -- T2 over native nodes: `has` is removed and the participle becomes the verb,

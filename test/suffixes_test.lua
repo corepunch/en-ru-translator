@@ -61,9 +61,11 @@ for _,ending in ipairs({'ness','ment','ion','ence','ance','enc','anc','ity','age
   for _,stem in ipairs({'xyz','strong','foo','unrecognized'}) do
     for _,source in ipairs({stem..ending,(stem..ending):upper(),stem:sub(1,1):upper()..stem:sub(2)..ending}) do
       local result=lexicon.analyze(no_root,source).vector[1]
-      local shadowed=ending=='nes' -- Earlier plural -es wins before truncated -nes.
-      assert(result.source==source and result.tag==string.byte(shadowed and '?' or 'N') and result.previous_tag==0,source)
-      assert(result.reading_state==(shadowed and 0 or 1) and result.person==3 and result.number==0 and result.case_mask==0,source)
+      -- Earlier plural -es (Z13) wins before truncated -nes, and LTPRO tags a
+      -- word a Z row matched without a stem #.
+      local shadowed=ending=='nes'
+      assert(result.source==source and result.tag==string.byte(shadowed and '#' or 'N') and result.previous_tag==0,source)
+      assert(result.reading_state==1 and result.person==3 and result.number==0 and result.case_mask==0,source)
       noun_matrix=noun_matrix+1
     end
   end

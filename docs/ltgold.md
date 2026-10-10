@@ -41,6 +41,17 @@ bits, verified minimal pairs).
   which has its own `.RUS` record (plural-only, paradigm 23); `people*Nлюди`
   the same with paradigm 30. A plural is not built from ребенок.
 
+## Unknown words
+
+LTPRO's lexical routine (file 0x10E91 and 0x119A5) tags a word no lookup
+found as follows. A word shorter than four letters is `#` and gets no suffix
+analysis (`foo`, `enc`). Otherwise the first suffix row whose ending ends the
+word, the bare ending included (`ness`), leaves its class, and a noun row its
+number and case; a `Z` or `A` class or a possessive case then becomes `#`
+(`xyznes`, `cities'`). A word no row matches stays `?` (`Putin`, `_Ohio`). A
+word with a hyphen or slash is split; the left part is looked up again as a
+fresh `?` word (`foo-ness` → `foo` / `-` / `ness`).
+
 ## Russian records (`.RUS`)
 
 Only ~8,800 lemmas have a record: the ones whose paradigm, gender, aspect,

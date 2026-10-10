@@ -341,6 +341,26 @@ function lexicon.surface_noun(source)
   return nil
 end
 
+-- The tag LTPRO leaves on a word no lookup found (its lexical routine at file
+-- 0x10E91 and 0x119A5). A word shorter than four letters is # and gets no
+-- suffix analysis. Otherwise the first suffix row whose ending ends the word,
+-- the bare ending included (ness), leaves its class (a noun row also its
+-- number and case); a Z or A class or a possessive case (2) then becomes #.
+-- No row: the word stays ?. The third result is whether a row matched.
+function lexicon.unknown(source)
+  local word = ascii_lower(source)
+  if #word < 4 then return '#', {}, false end
+  for _, row in ipairs(rows) do
+    if #word >= #row.ending and word:sub(-#row.ending) == row.ending then
+      local class = row.selector:sub(1, 1)
+      local fields = class == 'N' and suffix_fields(row) or {}
+      if class == 'Z' or class == 'A' or fields.case_mask == 2 then return '#', fields, true end
+      return class, fields, true
+    end
+  end
+  return '?', {}, false
+end
+
 -- Expose a defensive copy for fixture tooling; callers cannot change dispatch.
 function lexicon.suffix_rows()
   local out = {}
@@ -819,15 +839,13 @@ local function decode(dictionary,records,index,options)
       for at,v in pairs(derived.fields) do node[at]=v end
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
-    elseif not lookup_error then
-      -- Unknown derivational nouns keep their surface spelling; a word with
-      -- a hyphen or slash is split below, as LTPRO does (foo / - / ness).
-      local surface=not source:find('[-/]') and lexicon.surface_noun(source)
-      if surface then
-        node.reading_state,node.tag=1,surface.tag:byte()
-        node.person,node.gender=3,1
-        for at,v in pairs(surface.fields) do node[at]=v end
-      end
+    else
+      -- The word keeps its surface spelling with LTPRO's tag for an unknown
+      -- word; a word with a hyphen or slash is split below (foo / - / ness).
+      local tag,fields,analyzed=lexicon.unknown(source)
+      node.tag,node.person,node.gender=tag:byte(),3,1
+      if analyzed then node.reading_state=1 end
+      for at,v in pairs(fields) do node[at]=v end
     end
   end
   local phrase,last,captures=lexicon.match_phrase(dictionary,records,index,source:lower())
@@ -870,6 +888,8 @@ local function decode(dictionary,records,index,options)
       local attempt=lexicon.attempt_fields(source)
       for at,v in pairs(attempt and attempt.fields or {}) do node[at]=v end
       node.source,node.source_length=left,#left
+      -- LTPRO looks the left part up again as a fresh word (file 0x118CA).
+      node.tag,node.number,node.person=0x3F,0,0
       local delimiter=boundary(separator,0);delimiter.marker=0x2F
       if separator=='/' then node.marker=0x2F end
       table.insert(records,index+1,delimiter)
@@ -889,7 +909,7 @@ end
 -- native `=` transliteration, as if written {~=Name~}. Names need no entries.
 function lexicon.name_unknown(records,at)
   local node=records[at]
-  if nodes.tag(node)~='?' or not (node.source or ''):match("^[A-Z][a-z][A-Za-z'-]*$") then return end
+  if (nodes.tag(node)~='?' and nodes.tag(node)~='#') or not (node.source or ''):match("^[A-Z][a-z][A-Za-z'-]*$") then return end
   local name=transliteration.convert(node.source,true)
   node.tag,node.previous_tag,node.counted_word=0x23,0x23,false
   node.literal,node.source,node.source_length=name,name,#name

@@ -557,7 +557,10 @@ function senses.choose(state,r)
   end
   if r.text:sub(1,1)=='W' or wtag==0x57 then wflag=1 end
   local last,current=r,r
-  local start=current.text:find('[;{/]')
+  -- 151F:2029 looks for the first alternative with strpbrk(text,"{;"): a
+  -- slash before it is part of the meaning (и/или). Later alternatives end
+  -- at a slash too.
+  local start=current.text:find('[;{]')
   while start do
     local value=current.text
     local i=start

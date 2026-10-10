@@ -1,3 +1,4 @@
 .DS_Store
 LTGOLD/
 .cache/
+__pycache__/

@@ -431,3 +431,5 @@ rat-goodwill | By continuing to hit refineries, he is eroding the good will that
 rat-barrels | Russia agreed to send us millions and millions of barrels of oil, and it is diesel. => Россия согласилась, чтобы послать нам миллион и миллион баррелей нефти, и оно дизельное.
 idiom:make-a-deal | Russia made a deal. => Россия заключила сделку.
 idiom:make-the-deal | They made the deal. => Они заключили сделку.
+phrase:make <TAO>`deal` | Russia made a deal. => Россия заключила сделку.
+phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

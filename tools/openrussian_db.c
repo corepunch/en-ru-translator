@@ -319,6 +319,10 @@ static const char *perfective_partner(const char *lemma) {
   free(copy);return result;
 }
 
+/* The runtime lowers a capitalized DIC lemma (Россия) and looks its metadata
+ * up under the lowercase headword, as LTGOLD stores them (россия). Keep the
+ * capitalized spelling in the DIC reading only. */
+static void lower_initial(unsigned char *key) { key[0]=fold(key[0]); }
 static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5+256]; size_t used=0;
   if(!strcmp(pos,"noun")) {
@@ -341,6 +345,7 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
   }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
   /* One lexeme per (headword, class); a hash set replaces a linear scan. */
+  lower_initial(encoded);
   if(!lexeme_seen(encoded,n,value[0])){free(encoded);return;}
   add_record(rus,encoded,n,value,used);free(encoded);
 }
@@ -407,7 +412,7 @@ static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,
   unsigned char value[8];value[0]='M';value[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a';
   value[2]=!strcmp(pos,"verb")?(!strcmp(aspect,"perfective")?'1':'0'):'0';
   snprintf((char *)value+3,5,"%04X",id);
-  add_record(morph,encoded_lemma,lemma_len,value,7);free(encoded_lemma);free(pattern);
+  lower_initial(encoded_lemma);add_record(morph,encoded_lemma,lemma_len,value,7);free(encoded_lemma);free(pattern);
 }
 
 static void import_file(Records *source_dic,Records *source_rus,Records *morph,const char *path,const char *pos) {

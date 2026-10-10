@@ -179,3 +179,5 @@ has to*Uдолжен
 had to*Uдолжен
 wherein*Cв котором
 tons*nтонна
+soon*Dскоро
+immediately*Dнемедленно

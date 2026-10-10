@@ -272,7 +272,7 @@ others | He and she. => Он и она.
 function:will | We will see. => Мы увидим.
 function:will | I will do it. => Я сделаю это.
 function:will | She will read the book. => Она прочитает книгу.
-function:will | We will deliver the goods tomorrow. => Мы передадим завтра товар.
+function:will | We will deliver the goods tomorrow. => Мы передадим товар завтра.
 function:will | Will you come? => Ты придешь?
 function:will | They will not come. => Они не придут.
 function:will | He did it against his will. ~> воли.
@@ -386,3 +386,7 @@ function:tons | Ten tons of fuel. ~> тонн
 phrase:over [HI] | Over 300,000 tons of fuel. => Свыше 300,000 тонн топлива.
 phrase:over [HI] | Russia will supply over 300,000 tons of fuel. => Россия доставит свыше 300,000 тонн топлива.
 phrase:over [HI] | The plane flew over the house. !> свыше
+adverb:plain-d | Russia will always supply fuel. => Россия всегда доставит топливо.
+adverb:plain-d | Russia will immediately supply fuel. => Россия немедленно доставит топливо.
+adverb:plain-d | Russia will soon supply fuel. => Россия скоро доставит топливо.
+adverb:plain-d | Russia will quickly supply fuel. => Россия быстро доставит топливо.

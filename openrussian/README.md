@@ -94,7 +94,11 @@ output; this sequence reproduces the checked-in `BASE.DIC` byte for byte.
 Rows from `others.tsv` have no part of speech. The builder emits each as a
 one-component `W` composite with native adverb class `D` (`at all*WDсовсем`),
 following LTGOLD's usual `D` coding for such words; the `W` wrapper keeps
-reordering from moving these unclassified prepositions and conjunctions. It
+reordering from moving these unclassified prepositions and conjunctions.
+A one-word adverb is a plain `D` instead, as in LTGOLD (`always*Dвсегда`): native
+rules like `X D V` do not see through a `W` composite, so `Russia will always
+supply fuel` read `supply` as a noun. Every `-ly` word and the words in
+[`plain-adverbs.txt`](overlays/plain-adverbs.txt) get plain `D`; other unclassified words keep `W`. It
 formerly emitted `W#…#`, but native `#` marks nontranslated names and reads a
 leading с/м/ж as gender, so 542 readings lost their first letter
 (`according to` → `огласно`).

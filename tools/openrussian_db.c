@@ -124,6 +124,7 @@ static int coincident_form(const char *alias) {
   return 0;
 }
 static int is_verb_record(const Record *r) { return r->value_len>3&&(r->value[0]=='e'||r->value[0]=='V'); }
+static int is_plain_adverb(const char *alias,const char *lemma);
 static void add_english_alias(Records *dic,const char *alias,const char *pos,const char *lemma,const char *aspect,int plural) {
   /* OpenRussian's `others` table has uninflected words and fixed expressions
    * without a part of speech. Native LTGOLD codes most such words as D
@@ -132,8 +133,11 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
    * class: it is for nontranslated names and reads a leading с/м/ж as gender. */
   if(!strcmp(pos,"other")) {
     size_t alias_len,lemma_len;unsigned char *key=to_cp866(alias,&alias_len),*lemma_bytes=to_cp866(lemma,&lemma_len);
-    unsigned char *value=allocate(lemma_len+2);value[0]='W';value[1]='D';memcpy(value+2,lemma_bytes,lemma_len);
-    add_record(dic,key,alias_len,value,lemma_len+2);free(key);free(lemma_bytes);free(value);return;
+    /* A one-word adverb is a plain D, as in LTGOLD: native rules such as
+     * `X D V` (will always supply) do not see through a W composite. */
+    int plain=is_plain_adverb(alias,lemma);
+    unsigned char *value=allocate(lemma_len+2);size_t at=0;if(!plain)value[at++]='W';value[at++]='D';memcpy(value+at,lemma_bytes,lemma_len);
+    add_record(dic,key,alias_len,value,lemma_len+at);free(key);free(lemma_bytes);free(value);return;
   }
   const char *russian_lemma=plural&&!strcmp(pos,"noun")&&!strcmp(alias,"people")&&!strcmp(lemma,"человек")?"люди":lemma;
   size_t lemma_len; unsigned char *encoded=to_cp866(russian_lemma,&lemma_len);
@@ -205,6 +209,25 @@ static void load_content_first(const char *path) {
     if(!(content_first[content_first_count++]=strdup(line)))fail("out of memory");
   }
   free(line);fclose(file);
+}
+/* One-word adverbs that stay plain D: every -ly word, plus the curated list
+ * (LTGOLD codes always, soon, often... as D). Other unclassified words may
+ * be prepositions or conjunctions and keep the W wrapper. */
+static char **plain_adverbs;static size_t plain_adverb_count;
+static void load_plain_adverbs(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    plain_adverbs=realloc(plain_adverbs,(plain_adverb_count+1)*sizeof *plain_adverbs);if(!plain_adverbs)fail("out of memory");
+    if(!(plain_adverbs[plain_adverb_count++]=strdup(line)))fail("out of memory");
+  }
+  free(line);fclose(file);
+}
+static int is_plain_adverb(const char *alias,const char *lemma) {
+  if(strchr(alias,' ')||strchr(lemma,' '))return 0;
+  size_t n=strlen(alias);if(n>4&&!strcmp(alias+n-2,"ly"))return 1;
+  for(size_t i=0;i<plain_adverb_count;i++)if(!strcmp(plain_adverbs[i],alias))return 1;
+  return 0;
 }
 static int is_content_first(const char *word) { for(size_t i=0;i<content_first_count;i++)if(!strcmp(content_first[i],word))return 1; return 0; }
 /* Curated "imperfective perfective" pairs the partner column lacks. */
@@ -686,6 +709,7 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/../overlays/imperfective-only.txt",dir);load_imperfective_only(path);
   snprintf(path,need,"%s/../overlays/verb-partners.txt",dir);load_verb_partners(path);
   snprintf(path,need,"%s/../overlays/content-first.txt",dir);load_content_first(path);
+  snprintf(path,need,"%s/../overlays/plain-adverbs.txt",dir);load_plain_adverbs(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");

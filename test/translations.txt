@@ -395,3 +395,10 @@ proper-noun-gender | France went home. => Франция шла домой.
 proper-noun-gender | London announced it. => Лондон заявил это.
 proper-noun-gender | Moscow announced it. => Москва заявила это.
 proper-noun-gender | He lives in Russia. => Он живет в России.
+phrase:stop G | He had to stop knocking out diesel fuel in Russia. => Он должен перестать выбивать дизельное топливо в России.
+phrase:stop G | I will stop eating. => Я перестану есть.
+phrase:stop G | Stop the car. !> перест
+progressive:ing-noun-gloss | He is reading the book. => Он читает книгу.
+progressive:ing-noun-gloss | We are building a house. => Мы строим дом.
+progressive:ing-noun-gloss | They are running. => Они бегут.
+phrasal-verb:imperfective-first | He knocks out the lights. ~> выбивает

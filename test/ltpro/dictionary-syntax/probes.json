@@ -1,0 +1,336 @@
+[
+ {
+  "id": "stock",
+  "item": "all",
+  "inputs": [
+   "Bear in mind the rules.",
+   "Bear this in mind.",
+   "Bear it in your mind.",
+   "Ask him to come.",
+   "It will cause him to leave.",
+   "I made up my mind.",
+   "This prevents him from working.",
+   "A few books are here.",
+   "A few book is here.",
+   "As far as possible.",
+   "As far as I know, he is here.",
+   "It rose from 5% to 10%.",
+   "The state _Ohio is big.",
+   "_Ohio is big.",
+   "Zork_x is big.",
+   "Zorkx is big.",
+   "It depends (mostly) on him.",
+   "Follows: the list.",
+   "If any) it works.",
+   "Answer in writing and sign it.",
+   "The admission is free.",
+   "The driver works.",
+   "Check the ground.",
+   "The follower works.",
+   "The collection is big.",
+   "He is abler.",
+   "The afterclap was bad.",
+   "I saw the afterclap.",
+   "He ambled home.",
+   "Bandar is here.",
+   "Corned is good.",
+   "Corned beef is good.",
+   "Buenos Aires is big.",
+   "I like buenos aires.",
+   "I like BUENOS AIRES.",
+   "Are there cats?",
+   "The aborticide works.",
+   "As many as ten cats came.",
+   "It is faster than light.",
+   "I want him to come.",
+   "They allow him to go.",
+   "I advise him to go.",
+   "I hoped to come.",
+   "He could come.",
+   "He might come.",
+   "I will see him.",
+   "I will work.",
+   "He is glad.",
+   "She is glad.",
+   "The glad man came.",
+   "The river is deep.",
+   "I walk rather than run.",
+   "Ten cats came, including him.",
+   "A great deal was done.",
+   "After the war he came.",
+   "After he came, we left.",
+   "Abe is here.",
+   "Ivanova is here.",
+   "Abbott is here.",
+   "Smithers is here."
+  ]
+ },
+ {
+  "id": "third-section-ignored",
+  "item": 1,
+  "entries": [
+   "bear <TAONMw>`in`<AO>`mind`*$Vиметь\\$`Dв`\\$`Dпамяти`"
+  ],
+  "note": "A third section after the selector character is never applied.",
+  "inputs": [
+   "Bear it in your mind."
+  ]
+ },
+ {
+  "id": "third-section-in-tail",
+  "item": 1,
+  "entries": [
+   "bear <TAONMw>`in`<AO>`mind`*$Vиметь\\$`Dв`$`Dвиду`"
+  ],
+  "note": "The same edit placed in the tail action is applied.",
+  "inputs": [
+   "Bear it in your mind."
+  ]
+ },
+ {
+  "id": "selector-2-fourth-section",
+  "item": 2,
+  "entries": [
+   "a `few`N*$?\\`Iмного`\\?\\2"
+  ],
+  "inputs": [
+   "A few books are here.",
+   "A few book is here."
+  ]
+ },
+ {
+  "id": "selector-2",
+  "item": 2,
+  "entries": [
+   "a `few`N*$?\\`Iмного`\\2"
+  ],
+  "inputs": [
+   "A few books are here.",
+   "A few book is here."
+  ]
+ },
+ {
+  "id": "selector-n",
+  "item": 2,
+  "entries": [
+   "a `few`N*$?\\`Iмного`\\N"
+  ],
+  "inputs": [
+   "A few book is here."
+  ]
+ },
+ {
+  "id": "cyrillic-es-class",
+  "item": 4,
+  "entries": [
+   "in `writing`[,С*]*$Dписьменно\\ \\",
+   "in `writing`[Pp,С*]*$Dписьменно\\ \\"
+  ],
+  "delete": [
+   "in writing"
+  ],
+  "inputs": [
+   "Answer in writing and sign it.",
+   "Answer in writing.",
+   "Answer in writing, please."
+  ]
+ },
+ {
+  "id": "latin-c-class",
+  "item": 4,
+  "entries": [
+   "in `writing`[,C*]*$Dписьменно\\ \\",
+   "in `writing`[Pp,C*]*$Dписьменно\\ \\"
+  ],
+  "delete": [
+   "in writing"
+  ],
+  "inputs": [
+   "Answer in writing and sign it.",
+   "Answer in writing.",
+   "Answer in writing, please."
+  ]
+ },
+ {
+  "id": "automatic-meanings-computer",
+  "item": 5,
+  "flags": [
+   "/C",
+   "cu",
+   "/AM"
+  ],
+  "dictionaries": [
+   "COMPUTER.DIC",
+   "BUSINESS.DIC"
+  ],
+  "domain": "инф",
+  "inputs": [
+   "The admission is free.",
+   "The driver works.",
+   "Check the ground.",
+   "The follower works.",
+   "The collection is big."
+  ]
+ },
+ {
+  "id": "automatic-meanings-business",
+  "item": 5,
+  "flags": [
+   "/C",
+   "bu",
+   "/AM"
+  ],
+  "dictionaries": [
+   "COMPUTER.DIC",
+   "BUSINESS.DIC"
+  ],
+  "domain": "дел",
+  "inputs": [
+   "The admission is free.",
+   "The driver works.",
+   "Check the ground.",
+   "The follower works.",
+   "The collection is big."
+  ]
+ },
+ {
+  "id": "single-class-prefix",
+  "item": 6,
+  "entries": [
+   "abler*AWDболееAгодный",
+   "afterclap*NWAнеприятноеNсобытие",
+   "ambled*EWVидти иноходью\\amble"
+  ],
+  "inputs": [
+   "He is abler.",
+   "The afterclap was bad.",
+   "He ambled home."
+  ]
+ },
+ {
+  "id": "no-class-prefix",
+  "item": 6,
+  "entries": [
+   "abler*WDболееAгодный",
+   "afterclap*WAнеприятноеNсобытие",
+   "ambled*WVидти иноходью\\amble"
+  ],
+  "inputs": [
+   "He is abler.",
+   "The afterclap was bad.",
+   "He ambled home."
+  ]
+ },
+ {
+  "id": "reading-punctuation",
+  "item": 6,
+  "entries": [
+   "are*X013fесть ли\\be",
+   "aborticide*NNWNсредство Aвызывающее аборт/WA.вызывающий аборт",
+   "as many as*Dстолько, сколько",
+   "faster than*Dбыстрее чем"
+  ],
+  "delete": [
+   "bandar",
+   "corned"
+  ],
+  "inputs": [
+   "Bandar is here.",
+   "Corned is good.",
+   "Corned beef is good.",
+   "Are there cats?",
+   "The aborticide works.",
+   "As many as ten cats came.",
+   "It is faster than light."
+  ]
+ },
+ {
+  "id": "verb-digits-removed",
+  "item": 7,
+  "entries": [
+   "want*Vхотеть",
+   "allow*Vпозволять",
+   "advise*VсоветоватьNсовет",
+   "hoped*Eнадеяться\\hope",
+   "could*Uмочь\\can",
+   "might*Uмочь\\may"
+  ],
+  "inputs": [
+   "I want him to come.",
+   "They allow him to go.",
+   "I advise him to go.",
+   "I hoped to come.",
+   "He could come.",
+   "He might come."
+  ]
+ },
+ {
+  "id": "rus-verb-future-bit",
+  "item": 8,
+  "rus": [
+   "видеть:1:c9",
+   "работать:1:e0",
+   "увидеть:1:e1"
+  ],
+  "inputs": [
+   "I will see him.",
+   "I will work.",
+   "I see him."
+  ]
+ },
+ {
+  "id": "rus-adjective-no-short",
+  "item": 8,
+  "rus": [
+   "рад:1:80"
+  ],
+  "inputs": [
+   "He is glad.",
+   "The glad man came."
+  ]
+ },
+ {
+  "id": "rus-adjective-short-predicate",
+  "item": 8,
+  "rus": [
+   "рад:1:81"
+  ],
+  "inputs": [
+   "He is glad.",
+   "The man is glad.",
+   "He was glad.",
+   "The glad man came."
+  ]
+ },
+ {
+  "id": "lowercase-tags-uppercased",
+  "item": 9,
+  "entries": [
+   "rather than*C, а не",
+   "including*Gвключать\\include",
+   "great deal*Iмного",
+   "after*PРпослеDвпоследствииJ2после того, как"
+  ],
+  "inputs": [
+   "I walk rather than run.",
+   "Ten cats came, including him.",
+   "A great deal was done.",
+   "After the war he came.",
+   "After he came, we left."
+  ]
+ },
+ {
+  "id": "transliteration-override",
+  "item": 10,
+  "entries": [
+   "abe*#0м=эйб",
+   "ivanova*#0ж=",
+   "smithers*#0м%"
+  ],
+  "inputs": [
+   "Abe is here.",
+   "Ivanova is here.",
+   "Smithers is here."
+  ]
+ }
+]

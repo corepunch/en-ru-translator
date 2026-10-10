@@ -641,6 +641,9 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     if text:match('^[=%%]') then
       n.marker = text:byte()
       text = macroText(n.source or '', text, options)
+      -- A transliterated name follows each English word's capital
+      -- (original Буэнос Айрес, буэнос айрес) rather than sentence casing.
+      if casing then casing.by_source=true end
     end
     n.tag,n.previous_tag,n.reading=tag:byte(),tag:upper():byte(),text
     if not tag:match('[ANVvEhFebPCwX]') then
@@ -692,7 +695,7 @@ local function word(source, position)
   fields.source,fields.lookup,fields.reading,fields.previous_tag=source,'','',0
   fields.source_position,fields.source_length,fields.paradigm,fields.paradigm_high=position,#source,0xFF,0xFF
   local numeric=source:match('^[%d,]+$') ~= nil
-  local tag=numeric and 'H' or source:match("^[A-Za-z'/-]+$") and '?' or '#'
+  local tag=numeric and 'H' or source:match("^_?[A-Za-z'/-]+$") and '?' or '#'
   fields.counted_word=tag=='?'
   if tag=='#' then fields.person,fields.gender=3,1 end
   -- 0687:0892 preserves the original length but bounds the source copy.
@@ -824,6 +827,11 @@ local function decode(dictionary,records,index,options)
     node.source, node.source_length = source, #source
   end
   local value,backref
+  -- A bare ':' reading (bandar*:, corned*:) only lets multiword phrases start
+  -- with this word. Alone it stays an untranslated unknown word, with no
+  -- suffix or prefix analysis (original: Corned хорошее).
+  local placeholder=entry and entry.value==':'
+  if placeholder then entry=nil end
   if entry then
     value=entry.value
     local initial=value:sub(1,1)
@@ -832,7 +840,7 @@ local function decode(dictionary,records,index,options)
     if backref then node.lookup=backref..' ' end
   end
   local derived, lookup_error
-  if not value then
+  if not value and not placeholder then
     derived, lookup_error=lexicon.lookup(dictionary,source,options)
     if not derived and options.prefixes then
       derived, node.derivation_prefix=prefixes.lookup(options.prefixes,source,function(stem)

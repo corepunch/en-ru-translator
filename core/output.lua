@@ -79,10 +79,14 @@ function output.sentence(state,root)
         if r.dictionary_capital then cap_translation(false) end
         if r.phrase_case then
           local casing=r.phrase_case
+          -- A silent sentence-initial article (The afterclap) leaves the
+          -- sentence capital to the phrase's first printed component.
+          local sentence_start=first and initial_caps~=0
           if casing.caps>1 then cap_translation(true)
-          elseif not phrase_started[casing] and casing.caps>0 then cap_translation(false) end
-          if (r.text or '')~='' then phrase_started[casing]=true end
-          first=false
+          elseif casing.by_source then
+            if leading_upper('source') or not phrase_started[casing] and sentence_start then cap_translation(false) end
+          elseif not phrase_started[casing] and (casing.caps>0 or sentence_start) then cap_translation(false) end
+          if (r.text or '')~='' then phrase_started[casing]=true; first=false end
         elseif (marker==0x77 or marker==0x57) and previous and (get(previous,'marker')==0x77 or get(previous,'marker')==0x57) then
           if text.is_upper_cyrillic((previous.text or ''):byte() or 0) or leading_upper('source') then
             cap_translation(false)

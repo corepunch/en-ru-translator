@@ -1,0 +1,40 @@
+{
+ "stock": {
+  "Bear this in mind.": {
+   "lua": "Имейте это в виду.",
+   "reason": "Lua applies phrase-wide sentence casing to W equivalents; the original title-cases every component after a capitalized one (see curated-phrases/README.md)."
+  },
+  "The afterclap was bad.": {
+   "lua": "Неприятное событие было плохим.",
+   "reason": "Lua applies phrase-wide sentence casing to W equivalents; the original title-cases every component after a capitalized one (see curated-phrases/README.md)."
+  },
+  "This prevents him from working.": {
+   "lua": "Это предохраняет его от работы.",
+   "reason": "The original drops the object between prevent and from (also 'ошибки' in 'It prevents errors from occurring'); not yet explained. Lua keeps it, which is the correct Russian."
+  }
+ },
+ "cyrillic-es-class": {
+  "Answer in writing, please.": {
+   "lua": "Ответ письменно, пожалуйста.",
+   "reason": "Lua keeps the space after a comma matched by a subrule boundary; the original marks the comma and glues the next word (core/phrasing.lua 1450E)."
+  }
+ },
+ "latin-c-class": {
+  "Answer in writing, please.": {
+   "lua": "Ответ письменно, пожалуйста.",
+   "reason": "Lua keeps the space after a comma matched by a subrule boundary; the original marks the comma and glues the next word (core/phrasing.lua 1450E)."
+  }
+ },
+ "automatic-meanings-computer": {
+  "The admission is free.": {
+   "lua": "Доступ{1.допущение} свободный.",
+   "reason": "Original defect: promoting a labelled meaning over an unlabelled primary drops the primary's first letter (опущение). Lua keeps the word."
+  }
+ },
+ "reading-punctuation": {
+  "Corned beef is good.": {
+   "lua": "Солонина хороший.",
+   "reason": "Without a corned headword the original no longer finds the corned beef phrase; that is what corned*: is for. Lua finds phrases without a head entry, which generated OpenRussian phrases rely on."
+  }
+ }
+}

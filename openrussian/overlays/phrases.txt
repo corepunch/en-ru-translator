@@ -112,4 +112,4 @@ were [RN?#]`home`[D,*]*$@\.`Dдома`\
 were [TO]N`home`[D,*]*$@\..`Dдома`\
 over [HI]*$PРсвыше
 stop G*$Vпереставать\V
-make a deal*WVзаключатьNсделка
+make <TAO>`deal`*$заключать\$`Nсделка`\

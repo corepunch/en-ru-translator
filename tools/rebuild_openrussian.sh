@@ -12,7 +12,7 @@ trap 'rm -rf "$work"' EXIT HUP INT TERM
 
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o "$work/openrussian_db" -liconv
 lua tools/fit_paradigms.lua "$dir/upstream" > "$work/fit.tsv" 2>/dev/null
-"$work/openrussian_db" build "$dir/upstream" "$work/BASE.DIC" "$work/BASE.RUS" "$work/BASE.MORPH" "$work/fit.tsv" >/dev/null
+"$work/openrussian_db" build "$dir/upstream" "$work/BASE.DIC" "$work/BASE.RUS" "$work/fit.tsv" >/dev/null
 python3 tools/ltech_dict.py import "$work/BASE.DIC" --entries "$dir/dictionary.txt" --replace --in-place >/dev/null
 python3 tools/ltech_dict.py check "$work/BASE.DIC" | grep -q 'index: valid'
 for theme in "$dir"/themes/*.txt; do
@@ -22,11 +22,11 @@ for theme in "$dir"/themes/*.txt; do
 done
 
 if [ "${1:-}" = "--verify" ]; then
-  for x in DIC RUS MORPH; do cmp "$work/BASE.$x" "$dir/BASE.$x"; done
+  for x in DIC RUS; do cmp "$work/BASE.$x" "$dir/BASE.$x"; done
   for f in "$work"/*.DIC; do cmp "$f" "$dir/$(basename "$f")"; done
-  echo "checked-in BASE.DIC/RUS/MORPH and theme .DIC files are reproducible"
+  echo "checked-in BASE.DIC/RUS and theme .DIC files are reproducible"
 else
-  for x in DIC RUS MORPH; do cp "$work/BASE.$x" "$dir/BASE.$x"; done
+  for x in DIC RUS; do cp "$work/BASE.$x" "$dir/BASE.$x"; done
   for f in "$work"/*.DIC; do cp "$f" "$dir/$(basename "$f")"; done
   python3 tools/ltech_dict.py check "$dir/BASE.DIC" | grep entries
 fi

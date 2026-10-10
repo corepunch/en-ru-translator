@@ -2,7 +2,6 @@ local layout = require 'core.record_layout'
 local text = require 'core.text'
 local nodes = require 'core.nodes'
 local russian = require 'core.russian'
-local special_cases = require 'core.special_cases'
 local encoding = require 'core.encoding'
 local generation = {}
 local function signed(n) n=n & 0xFFFF; return n >= 0x8000 and n-0x10000 or n end
@@ -34,37 +33,11 @@ local function build(a,id,word,length,tableoff,index)
   return result
 end
 function generation.noun_form(state,id,word,gender,plural,case)
-  local special=special_cases.noun_form(word,plural,case)
-  if special then return special end
-  local numbers = plural ~= 0 and 'pl' or 'sg'
-  local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
-  local forms = russian.source_forms(state,word,'n',numbers .. '_' .. (cases[case] or 'nom'))
-  if forms and forms[1] then return forms[1] end
   return build(state.assets,id,word,#word,gender==0 and 0x55A6 or gender==2 and 0x5450 or 0x5238,
     signed(case+(plural~=0 and 6 or 0))-1)
 end
--- OpenRussian lists both accusative variants without a fixed order (данный:
--- данного,данный; новый: новый,нового). Pick the one matching the noun's
--- animacy: like the genitive for animates, like the nominative otherwise.
-local function accusative(state,word,numbers,forms,animate)
-  if #forms < 2 or animate == nil then return forms[1] end
-  local like = russian.source_forms(state,word,'a','decl_' .. numbers .. (animate and '_gen' or '_nom'))
-  for _,form in ipairs(forms) do
-    if like and form == like[1] then return form end
-  end
-  return forms[1]
-end
-function generation.adjective_form(state,id,word,gender,plural,case,animate)
+function generation.adjective_form(state,id,word,gender,plural,case)
   local a=state.assets
-  local numbers = plural ~= 0 and 'pl' or 'm'
-  local genders = {[0]='n',[1]='m',[2]='f'}
-  if plural == 0 then numbers = genders[gender] or 'm' end
-  local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
-  local forms = russian.source_forms(state,word,'a','decl_' .. numbers .. '_' .. (cases[case] or 'nom'))
-  if forms and forms[1] then
-    if case == 3 then return accusative(state,word,numbers,forms,animate) end
-    return forms[1]
-  end
   local refl=id~=14 and reflexive(a,word,#word)
   local result=build(a,id,word,#word-(refl and 2 or 0),gender==0 and 0x580C or gender==2 and 0x5770 or 0x56D4,
     signed(case+(plural~=0 and 6 or 0)))
@@ -72,27 +45,6 @@ function generation.adjective_form(state,id,word,gender,plural,case,animate)
 end
 function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gender)
   local a,index=state.assets
-  local source_slot
-  if flags & 4 ~= 0 then source_slot = plural ~= 0 and 'imperative_pl' or 'imperative_sg'
-  elseif past == 1 then
-    source_slot = plural ~= 0 and 'past_pl' or ({[0]='past_n',[1]='past_m',[2]='past_f'})[gender]
-  elseif person ~= 0 and not (past == 2 and aspect == 0 and id == 0x39) then
-    -- An imperfective lemma's present/future slots are present tense. Its
-    -- future (the analytic auxiliary буду, from быть) comes from the native
-    -- paradigm; OpenRussian lists быть as есть in every one of those slots.
-    local numbers = plural ~= 0 and 'pl' or 'sg'
-    local persons = {[1]='1',[2]='2',[3]='3'}
-    if persons[person] then source_slot = 'presfut_' .. numbers .. persons[person] end
-  end
-  local forms = source_slot and russian.source_forms(state,word,'v',source_slot,aspect)
-  if forms and forms[1] then
-    -- Source forms still take the native particles: conditional бы and
-    -- interrogative ли (would like -> хотел бы).
-    local result=forms[1]
-    if past==1 and flags & 2 ~= 0 then result=result..a:string(0xB996) end
-    if flags & 16 ~= 0 then result=result..a:string(0xB99A) end
-    return result
-  end
   if flags & 4 ~= 0 then index,past=6,0
   elseif past==1 then index=7
   elseif person==0 then return word
@@ -116,39 +68,6 @@ function generation.verb_form(state,id,word,aspect,flags,person,plural,past,gend
   if flags & 16 ~= 0 then cat(0xB99A) end
   return result
 end
--- OpenRussian lexemes carry no native paradigm number, so the native
--- participle tables would build nonsense (определить -> опреобранный). Derive
--- the long masculine participle from the lemma's own source forms instead:
--- passive past from the infinitive (-нный, -тый) or first person (-енный),
--- passive present from first plural (-емый), active present from third plural
--- (-ющий), active past from the past masculine (-вший). The native adjective
--- and short-form code then agrees it as it does any adjective.
-local function ends_with(value,tail) return value:sub(-#tail)==tail end
-local function openrussian_participle(state,word,aspect,passive,past)
-  local function form(slot) local f=russian.source_forms(state,word,'v',slot,aspect); return f and f[1] end
-  local function cut(value,n) return value:sub(1,#value-n) end
-  local e=encoding.encode
-  if ends_with(word,e'ся') then return nil end
-  if passive~=0 and past==1 then
-    if ends_with(word,e'нять') or ends_with(word,e'взять') then return cut(word,3)..e'ятый' end
-    if ends_with(word,e'ать') or ends_with(word,e'ять') then return cut(word,2)..e'нный' end
-    if ends_with(word,e'еть') then return cut(word,2)..e'нный' end
-    if ends_with(word,e'ыть') or ends_with(word,e'оть') or ends_with(word,e'уть') then return cut(word,2)..e'тый' end
-    if ends_with(word,e'ить') then
-      local first=form('presfut_sg1')
-      if first and (ends_with(first,e'ю') or ends_with(first,e'у')) then return cut(first,1)..e'енный' end
-    end
-  elseif passive~=0 then
-    local plural=form('presfut_pl1')
-    if plural and ends_with(plural,e'м') then return plural..e'ый' end
-  elseif past==1 then
-    local masculine=form('past_m')
-    if masculine then return masculine..(ends_with(masculine,e'л') and e'вший' or e'ший') end
-  else
-    local plural=form('presfut_pl3')
-    if plural and ends_with(plural,e'т') then return cut(plural,1)..e'щий' end
-  end
-end
 function generation.participle_form(state,id,word,aspect,tag,passive,past)
   local a=state.assets
   -- A perfective participle of an imperfective reading (defined -> определять)
@@ -160,10 +79,6 @@ function generation.participle_form(state,id,word,aspect,tag,passive,past)
       local partner=russian.verb_record(state,record.partner)
       if partner then word,id=record.partner,partner.paradigm end
     end
-  end
-  if tag~=0x47 then
-    local derived=openrussian_participle(state,word,aspect,passive,past)
-    if derived then return derived end
   end
   local index=tag==0x47 and 8 or past==1 and (passive~=0 and 12 or 11) or (passive~=0 and 10 or 9)
   local refl=passive==0 and reflexive(a,word,#word)
@@ -228,14 +143,8 @@ local function record(state,node)
   function r.copy(at) node.text=state.assets:string(at) end
   function r.save(value) if value==nil then return false end; node.text=value; return true end
   function r.valid() return r.w('paradigm')>=0 and r.w('paradigm')<0x7F end
-  -- Animacy of the noun this modifier agrees with (.RUS noun flag bit 1).
-  function r.animate()
-    local n=node.next
-    while n and (n.tag==0x41 or n.tag==0x4F or n.tag==0x44 or n.tag==0x53) do n=n.next end
-    if n and n.tag==0x4E then return (nodes.number(n,'dictionary_flags') & 2) ~= 0 end
-  end
   function r.adjective()
-    return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask')),r.animate()))
+    return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask'))))
   end
   function r.verb(id,aspect)
     -- A let's hortative without perfective forms stays infinitive (Давайте
@@ -281,10 +190,7 @@ function generation.word(state, node)
   local r = record(state, node)
   local tag = r.b('tag')
   if tag == 0x4E then -- N
-    local numbers = r.b('number') ~= 0 and 'pl' or 'sg'
-    local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
-    local source_form = russian.source_forms(state,r.text(),'n',numbers .. '_' .. (cases[generation.case(r.b('case_mask'))] or 'nom'))
-    if (r.valid() or source_form) and (r.b('number') ~= 0 or r.b('case_mask') > 1) then
+    if r.valid() and (r.b('number') ~= 0 or r.b('case_mask') > 1) then
       r.save(generation.noun_form(state, r.w('paradigm'), r.text(), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
     end
   elseif tag == 0x55 then -- U
@@ -339,11 +245,7 @@ function generation.word(state, node)
       r.save(generation.participle_form(state, r.w('paradigm'), r.text(), r.b('aspect'), 0x47, 0, 0))
     end
   elseif tag == 0x41 then -- A
-    local lemma = r.text()
-    local numbers = r.b('number') ~= 0 and 'pl' or ({[0]='n',[1]='m',[2]='f'})[r.b('gender')] or 'm'
-    local cases = {[0]='nom',[1]='gen',[2]='dat',[3]='acc',[4]='inst',[5]='prep'}
-    local source_form = russian.source_forms(state,r.text(),'a','decl_' .. numbers .. '_' .. (cases[generation.case(r.b('case_mask'))] or 'nom'))
-    if (r.b('short_form') ~= 0 and r.b('previous_tag') == 0x41) or r.valid() or source_form then
+    if (r.b('short_form') ~= 0 and r.b('previous_tag') == 0x41) or r.valid() then
       local original = r.b('previous_tag')
       if original == 0x45 or original == 0x56 or original == 0x46 or original == 0x65 or original == 0x47 then
         if original == 0x45 or original == 0x65 or original == 0x46 then
@@ -369,14 +271,6 @@ function generation.word(state, node)
     end
     if r.b('marker') == 0x61 and (r.b('tense') == 1 or r.b('tense') == 2) then
       local saved = r.text()
-      -- A predicate comparative uses the indeclinable short comparative
-      -- (выше), which an attributive one cannot (более высокий человек).
-      local comparative = r.b('tense') == 1 and russian.source_forms(state, lemma, 'a', 'comparative')
-      local following = comparative and node.next and record(state, node.next)
-      if comparative and comparative[1] and not (following and (following.b('tag') == 0x4E or following.b('tag') == 0x41)) then
-        node.text = comparative[1]:match('^[^;]+')
-        return 1
-      end
       if r.b('tense') == 2 then
         r.save(generation.adjective_form(state, 0, state.assets:string(0x4948), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
       else r.copy(0x494E) end

@@ -42,34 +42,23 @@ end
 -- per path so repeatedly translating with the full OpenRussian tables does not
 -- rebuild their indexes for every sentence. Comparing the bytes also keeps
 -- edits to a file visible during long-running Lua sessions.
-local function memoized_asset(source,name,decoder,secondary,secondary_name,tertiary,tertiary_name)
+local function memoized_asset(source,name,decoder,secondary,secondary_name)
   local bytes=engine.read_asset(source,name)
   local secondary_bytes=secondary and engine.read_asset(secondary,secondary_name or name) or nil
-  local tertiary_bytes=tertiary and engine.read_asset(tertiary,tertiary_name or name) or nil
   local key=type(source)=='string' and not source:find('\0',1,true) and name..'\0'..source..
-    (secondary and '\0'..secondary or '')..(tertiary and '\0'..tertiary or '')
+    (secondary and '\0'..secondary or '')
   local cached=key and static_cache[key]
-  if cached and cached.bytes==bytes and cached.secondary_bytes==secondary_bytes and cached.tertiary_bytes==tertiary_bytes then return cached.value end
-  local value=decoder(bytes,secondary_bytes,tertiary_bytes)
-  if key then static_cache[key]={bytes=bytes,secondary_bytes=secondary_bytes,tertiary_bytes=tertiary_bytes,value=value} end
+  if cached and cached.bytes==bytes and cached.secondary_bytes==secondary_bytes then return cached.value end
+  local value=decoder(bytes,secondary_bytes)
+  if key then static_cache[key]={bytes=bytes,secondary_bytes=secondary_bytes,value=value} end
   return value
 end
 
 local paradigm_cache={}
 
-local function sibling_morphology(source)
-  if type(source)~='string' or source:sub(1,20)=='LTech DIC File 2.00 ' then return nil end
-  local directory,name=source:match('^(.*[/\\])([^/\\]+)$')
-  if not name then directory,name='',source end
-  if name~='BASE.RUS' then return nil end
-  local candidate=directory..'BASE.MORPH';local file=io.open(candidate,'rb')
-  if file then file:close();return candidate end
-end
-
 -- Static binary assets are decoded separately from mutable sentence state.
 -- LTPRO's grammar tables come from core/rules.lua; the executable is not read.
-function engine.new_state(russian_source,russian_overlay,russian_morphology_source)
-  russian_morphology_source=russian_morphology_source or sibling_morphology(russian_source)
+function engine.new_state(russian_source,russian_overlay)
   local exe_assets=assets.new()
   -- A dictionary directory with its own paradigms.txt inflects from it; the
   -- original LTGOLD assets keep LTPRO's tables (core/rules.lua).
@@ -85,7 +74,7 @@ function engine.new_state(russian_source,russian_overlay,russian_morphology_sour
   end
   if tables then exe_assets=setmetatable({paradigm_tables=tables},{__index=exe_assets}) end
   return {assets=exe_assets,
-    russian=memoized_asset(russian_source,'BASE.RUS',russian.from_bytes,russian_overlay,'BASE.RUS',russian_morphology_source,'BASE.MORPH'),
+    russian=memoized_asset(russian_source,'BASE.RUS',russian.from_bytes,russian_overlay,'BASE.RUS'),
     elements={},tags={},count=0,word_count=0}
 end
 
@@ -137,8 +126,7 @@ function engine.run(input, options)
   local dic_source = options.dictionary or options.dic or (openrussian .. '/BASE.DIC')
   local rus_source = options.russian or options.rus or (openrussian .. '/BASE.RUS')
 
-  local state = engine.new_state(rus_source, options.rus_overlay,
-    options.russian_morphology or options.rus_morphology)
+  local state = engine.new_state(rus_source, options.rus_overlay)
   state.meaning_start=options.meaning_start
   if options.domain then
     assert(type(options.domain) == 'string' and options.domain ~= '', 'domain must be a nonempty string')

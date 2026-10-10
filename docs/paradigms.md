@@ -10,6 +10,18 @@ text copy: `openrussian/paradigms.txt` (one row per paradigm: cut count, endings
 per slot) takes precedence for the OpenRussian dictionaries. Each `.RUS` record names its paradigm in the native byte
 (`0x80|id`), assigned at build time by `tools/fit_paradigms.lua`.
 
+Every table row has a list of the lemma endings it serves, in the same order as
+the rows: `rules.lists[0x5130]` (masculine nouns, 66 rows), `0x53C4` (feminine,
+35), `0x5522` (neuter, 33), `0x566C` (adjectives, 26), `0x58A8` (imperfective
+verbs, 106), `0x5CCC` (perfective verbs, 113) and `0x6136` (the `0x61F2`
+replacement table, 47). For example `noun-m` row 0 serves `в г д з к л м р с т`
+(дом) and row 2 `г к х йл ок ик рок`. `russian.paradigm_candidates` returns the
+rows whose list matches a lemma, longest ending first in LTPRO's order;
+`tools/fit_paradigms.lua` takes the candidate unless OpenRussian's listed forms
+show another row regenerates more of them. Nothing is stored beyond the
+paradigm number: OpenRussian's dictionaries have no form file, and the tables
+are LTPRO's own, never extended.
+
 The form functions accept sentence state, table ID, a CP866 string and
 grammatical arguments. They return a new string, or `nil` when no form exists:
 

@@ -13,14 +13,11 @@
 typedef struct { unsigned char *key, *value; size_t key_len, value_len, sequence; int primary, gloss; long rank; } Record;
 typedef struct { Record *items; size_t count, capacity; } Records;
 typedef struct { char **items; size_t count; } Fields;
-typedef struct { unsigned char pos, *data; size_t length; uint64_t hash; } Pattern;
-typedef struct { Pattern *items; size_t count, capacity; } Patterns;
 
 static void fail(const char *message) { fprintf(stderr, "openrussian_db: %s\n", message); exit(1); }
 static void *allocate(size_t size) { void *p = malloc(size ? size : 1); if (!p) fail("out of memory"); return p; }
 static size_t next_sequence;
 static size_t unrepresentable_codepoints;
-static Patterns morphology_patterns;
 static void put16(unsigned char *p, uint16_t v) { p[0]=(unsigned char)v; p[1]=(unsigned char)(v>>8); }
 static void put32(unsigned char *p, uint32_t v) { p[0]=(unsigned char)v; p[1]=(unsigned char)(v>>8); p[2]=(unsigned char)(v>>16); p[3]=(unsigned char)(v>>24); }
 static uint32_t get32(const unsigned char *p) { return (uint32_t)p[0] | (uint32_t)p[1]<<8 | (uint32_t)p[2]<<16 | (uint32_t)p[3]<<24; }
@@ -329,7 +326,7 @@ static char verb_frame(const char *alias) {
 }
 /* Paradigm assignments from tools/fit_paradigms.lua: pos<TAB>lemma<TAB>aspect
  * <TAB>id<TAB>matched<TAB>forms. A fitted lexeme gets LTGOLD's paradigm byte
- * (0x80|id) in its .RUS record and no stored forms in BASE.MORPH. */
+ * (0x80|id) in its .RUS record; forms come from the tables alone. */
 typedef struct { char *key; unsigned char id; } Fit;
 static Fit *fits;static size_t fit_count;
 static char *fold_yo(const char *s) {
@@ -394,77 +391,7 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
   add_record(rus,encoded,n,value,used);free(encoded);
 }
 
-static uint64_t pattern_hash(unsigned char pos,const unsigned char *data,size_t length) {
-  uint64_t h=1469598103934665603ULL; h=(h^pos)*1099511628211ULL;
-  for(size_t i=0;i<length;i++)h=(h^data[i])*1099511628211ULL;
-  return h;
-}
-static uint16_t intern_pattern(unsigned char pos,const unsigned char *data,size_t length) {
-  uint64_t hash=pattern_hash(pos,data,length);
-  for(size_t i=0;i<morphology_patterns.count;i++) {
-    Pattern *p=&morphology_patterns.items[i];
-    if(p->hash==hash&&p->pos==pos&&p->length==length&&!memcmp(p->data,data,length))return (uint16_t)i;
-  }
-  if(morphology_patterns.count>=UINT16_MAX)fail("too many distinct morphology patterns");
-  if(morphology_patterns.count==morphology_patterns.capacity) {
-    morphology_patterns.capacity=morphology_patterns.capacity?morphology_patterns.capacity*2:128;
-    morphology_patterns.items=realloc(morphology_patterns.items,morphology_patterns.capacity*sizeof(Pattern));
-    if(!morphology_patterns.items)fail("out of memory");
-  }
-  size_t id=morphology_patterns.count++; Pattern *p=&morphology_patterns.items[id];
-  p->pos=pos;p->data=allocate(length);memcpy(p->data,data,length);p->length=length;p->hash=hash;
-  return (uint16_t)id;
-}
-
-static void add_forms(Records *morph,Fields *header,Fields *row,const char *pos,const char *lemma,const char *aspect) {
-  if(!strcmp(pos,"other"))return;
-  /* A fitted lexeme declines from its paradigm. Nouns and verbs then need no
-   * stored forms; adjectives keep the comparative, superlative and short forms,
-   * which the native tables do not have. */
-  int fitted=fitted_paradigm(pos,lemma,aspect)>=0;
-  if(fitted&&strcmp(pos,"adjective"))return;
-  static const char *noun_slots[]={"sg_nom","sg_gen","sg_dat","sg_acc","sg_inst","sg_prep","pl_nom","pl_gen","pl_dat","pl_acc","pl_inst","pl_prep"};
-  static const char *verb_slots[]={"imperative_sg","imperative_pl","past_m","past_f","past_n","past_pl","presfut_sg1","presfut_sg2","presfut_sg3","presfut_pl1","presfut_pl2","presfut_pl3"};
-  static const char *adj_slots[]={"decl_m_nom","decl_m_gen","decl_m_dat","decl_m_acc","decl_m_inst","decl_m_prep","decl_f_nom","decl_f_gen","decl_f_dat","decl_f_acc","decl_f_inst","decl_f_prep","decl_n_nom","decl_n_gen","decl_n_dat","decl_n_acc","decl_n_inst","decl_n_prep","decl_pl_nom","decl_pl_gen","decl_pl_dat","decl_pl_acc","decl_pl_inst","decl_pl_prep","comparative","superlative","short_m","short_f","short_n","short_pl"};
-  const char **slots=!strcmp(pos,"noun")?noun_slots:!strcmp(pos,"verb")?verb_slots:adj_slots;
-  size_t count=!strcmp(pos,"noun")?sizeof noun_slots/sizeof *noun_slots:!strcmp(pos,"verb")?sizeof verb_slots/sizeof *verb_slots:sizeof adj_slots/sizeof *adj_slots;
-  /* Each source form is stored as a one-byte trim count plus its CP866 suffix.
-   * Identical complete slot maps share one table record. */
-  size_t lemma_len;unsigned char *encoded_lemma=to_cp866(lemma,&lemma_len);
-  size_t cap=1;for(size_t i=0;i<count;i++)cap+=1+3*strlen(cell(row,column(header,slots[i])));
-  unsigned char *pattern=allocate(cap);size_t used=0;
-  for(size_t i=0;i<count;i++) {
-    const char *source=fitted&&!strncmp(slots[i],"decl_",5)?"":cell(row,column(header,slots[i]));char *copy=strdup(source);if(!copy)fail("out of memory");
-    unsigned char *cuts=allocate(strlen(source)+2),**suffixes=allocate((strlen(source)+2)*sizeof(unsigned char *));
-    size_t *suffix_lengths=allocate((strlen(source)+2)*sizeof(size_t)),variants=0;char *save=NULL;
-    for(char *form=strtok_r(copy,",",&save);form;form=strtok_r(NULL,",",&save)) {
-      while(*form==' '||*form=='\t')form++;size_t n=strlen(form);while(n&&(form[n-1]==' '||form[n-1]=='\t'))form[--n]=0;
-      for(size_t j=0;j<n;j++)if(form[j]=='\''){memmove(form+j,form+j+1,n-j);n--;j--;}
-      if(!n)continue;
-      size_t form_len;unsigned char *encoded_form=to_cp866(form,&form_len);size_t common=0;
-      while(common<lemma_len&&common<form_len&&encoded_lemma[common]==encoded_form[common])common++;
-      size_t cut=lemma_len-common,suffix_len=form_len-common;
-      if(cut>255||suffix_len>255||variants>=255)fail("morphology transform exceeds compact byte limits");
-      cuts[variants]=(unsigned char)cut;suffixes[variants]=allocate(suffix_len);memcpy(suffixes[variants],encoded_form+common,suffix_len);suffix_lengths[variants]=suffix_len;variants++;free(encoded_form);
-    }
-    if(variants>255)fail("too many form variants in one slot");
-    pattern[used++]=(unsigned char)variants;
-    for(size_t j=0;j<variants;j++) {
-      pattern[used++]=cuts[j];pattern[used++]=(unsigned char)suffix_lengths[j];
-      memcpy(pattern+used,suffixes[j],suffix_lengths[j]);used+=suffix_lengths[j];free(suffixes[j]);
-    }
-    free(cuts);free(suffixes);free(suffix_lengths);free(copy);
-  }
-  uint16_t id=intern_pattern(!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a',pattern,used);
-  /* This reference is deliberately separate from the native POS code. The
-   * verb generator still receives its imperative flag and selects slots 0/1. */
-  unsigned char value[8];value[0]='M';value[1]=!strcmp(pos,"noun")?'n':!strcmp(pos,"verb")?'v':'a';
-  value[2]=!strcmp(pos,"verb")?(!strcmp(aspect,"perfective")?'1':'0'):'0';
-  snprintf((char *)value+3,5,"%04X",id);
-  lower_initial(encoded_lemma);add_record(morph,encoded_lemma,lemma_len,value,7);free(encoded_lemma);free(pattern);
-}
-
-static void import_file(Records *source_dic,Records *source_rus,Records *morph,const char *path,const char *pos) {
+static void import_file(Records *source_dic,Records *source_rus,const char *path,const char *pos) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;ssize_t n=getline(&line,&cap,file);if(n<0)fail("empty source TSV");
   Fields header=parse_tsv(line);size_t bare=column(&header,"bare"), gloss=column(&header,"translations_en"), gender=column(&header,"gender"), aspect=column(&header,"aspect"), sg_only=column(&header,"sg_only"), animate=column(&header,"animate"), pl_only=column(&header,"pl_only"), source_row=column(&header,"source_row");
   if(bare==(size_t)-1||gloss==(size_t)-1||source_row==(size_t)-1)fail("source TSV is missing required columns");
@@ -474,7 +401,6 @@ static void import_file(Records *source_dic,Records *source_rus,Records *morph,c
     if(is_empty(cell(&row,source_row)))fail("OpenRussian row is missing source_row id");
     if(strcmp(pos,"other"))add_russian_lexeme(source_rus,pos,lemma,g,cell(&row,animate),cell(&row,sg_only),cell(&row,pl_only),a);
     if(!is_empty(english))parse_glosses(source_dic,english,pos,lemma,a,strtol(cell(&row,source_row),NULL,10));
-    add_forms(morph,&header,&row,pos,lemma,a);
   }
   free(line);fclose(file);
 }
@@ -873,20 +799,6 @@ static void add_curated_nouns(Records *rus) {
   add_record(rus,key,length,code,sizeof code);free(key);
 }
 
-static void emit_morphology_patterns(Records *rus) {
-  for(size_t i=0;i<morphology_patterns.count;i++) {
-    Pattern *p=&morphology_patterns.items[i];char key[16];
-    int n=snprintf(key,sizeof key,"@M%05zu",i);if(n<0||(size_t)n>=sizeof key)fail("morphology pattern key overflow");
-    unsigned char *value=allocate(p->length*2+1);size_t used=1;value[0]='T';
-    for(size_t j=0;j<p->length;j++) {
-      if(p->data[j]==0x0a){value[used++]=0xff;value[used++]=1;}
-      else if(p->data[j]==0xff){value[used++]=0xff;value[used++]=0;}
-      else value[used++]=p->data[j];
-    }
-    add_record(rus,(unsigned char *)key,(size_t)n,value,used);free(value);
-  }
-}
-
 static size_t alphabet_index(unsigned char c,int buckets) {
   c=fold(c); if(buckets==26){if(c>='a'&&c<='z')return c-'a';return (size_t)-1;}
   if(c>=0xa0&&c<=0xaf)return c-0xa0;if(c>=0xe0&&c<=0xef)return c-0xe0+16;return (size_t)-1;
@@ -913,9 +825,9 @@ static void write_dictionary(const char *path,Records *db,const char *language,i
 }
 
 static void command_build(int argc,char **argv) {
-  if(argc!=6&&argc!=7)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH [FIT.tsv]");
-  if(argc==7)load_fits(argv[6]);
-  const char *dir=argv[2];size_t need=strlen(dir)+64;char *path=allocate(need);Records source_dic={0},source_rus={0},morph={0};
+  if(argc!=6)fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS FIT.tsv");
+  load_fits(argv[5]);
+  const char *dir=argv[2];size_t need=strlen(dir)+64;char *path=allocate(need);Records source_dic={0},source_rus={0};
   /* The demo's closed-class and common-verb readings must outrank unrelated
    * homonyms that become visible when importing the complete tables. */
   add_utf8_record(&source_dic,"a","T");add_utf8_record(&source_dic,"an","T");add_utf8_record(&source_dic,"the","T");
@@ -925,19 +837,19 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/../lexemes.tsv",dir);load_attributes(path,1);
   snprintf(path,need,"%s/../words.tsv",dir);load_attributes(path,0);
   snprintf(path,need,"%s/verbs.tsv",dir);load_verbs(path);
-  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
-  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
-  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
-  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
+  snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,path,"other");
+  snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,path,"noun");
+  snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,path,"verb");
+  snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,path,"adjective");
   add_s_form_homographs(&source_dic);
   add_inflected_homographs(&source_dic,"ing",'G',"N");
   add_inflected_homographs(&source_dic,"ed",'E',"A");
   add_verb_noun_homographs(&source_dic);
   add_native_suffix_gaps(&source_dic);
   merge_readings(&source_dic);
-  add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);
-  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);write_dictionary(argv[5],&morph,"RS",32);
-  printf("wrote %zu OpenRussian DIC records, %zu RUS records, and %zu morphology records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,morph.count,unrepresentable_codepoints);free(path);
+  add_people_plural(&source_rus);add_curated_nouns(&source_rus);
+  write_dictionary(argv[3],&source_dic,"ERS",26);write_dictionary(argv[4],&source_rus,"RS",32);
+  printf("wrote %zu OpenRussian DIC records and %zu RUS records; replaced %zu unsupported codepoints\n",source_dic.count,source_rus.count,unrepresentable_codepoints);free(path);
 }
 static void command_info(const char *path) {
   FILE *f=fopen(path,"rb");if(!f){perror(path);exit(1);}unsigned char h[HEADER_SIZE];if(fread(h,1,sizeof h,f)!=sizeof h||memcmp(h,"LTech DIC File 2.00 ",20))fail("not an LTech DIC image");
@@ -986,6 +898,6 @@ int main(int argc,char **argv) {
   else if(!strcmp(argv[1],"info")&&argc==3)command_info(argv[2]);
   else if(!strcmp(argv[1],"find")&&argc==4)command_find(argv[2],argv[3]);
   else if(!strcmp(argv[1],"text")&&argc==4)command_text(argv[2],argv[3]);
-  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH | text ENTRIES.txt OUTPUT.DIC | info FILE | find FILE HEADWORD");
+  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS FIT.tsv | text ENTRIES.txt OUTPUT.DIC | info FILE | find FILE HEADWORD");
   return 0;
 }

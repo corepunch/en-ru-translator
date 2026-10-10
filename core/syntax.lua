@@ -664,23 +664,5 @@ function syntax.run(state,root,terminator)
     start=start+1
   end
   constituents.relink(state,root)
-  -- An imperative copula takes a predicate adjective, not an accusative
-  -- object. W equivalents must retain this relation even when their English
-  -- head was a different verb. Inflect the adjective's lemma normally.
-  local copula=state.assets:string(0x4908)
-  local node=root.next
-  while node do
-    if nodes.tag(node)=='V' and node.text==copula and nodes.number(node,'verb_flags') & 4 ~= 0 then
-      local predicate=node.next
-      local slot=nodes.number(node,'number')~=0 and 'short_pl' or
-        ({[0]='short_n',[1]='short_m',[2]='short_f'})[nodes.number(node,'gender')]
-      if predicate and nodes.tag(predicate)=='A' and
-        russian.source_forms(state,predicate.text,'a',slot) then
-        predicate.short_form=1;predicate.case_mask=0
-        predicate.number=nodes.number(node,'number');predicate.gender=nodes.number(node,'gender')
-      end
-    end
-    node=node.next
-  end
 end
 return syntax

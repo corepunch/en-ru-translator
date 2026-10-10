@@ -1,9 +1,9 @@
 local text = require 'core.text'
 local russian = {}
 
-function russian.from_bytes(bytes, overlay, morphology)
-  local entries, source_forms, openrussian_forms, templates = {}, {}, {}, {}
-  local function ingest(image, morphology_only)
+function russian.from_bytes(bytes, overlay)
+  local entries = {}
+  local function ingest(image)
     assert(image:sub(1,20) == 'LTech DIC File 2.00 ', 'unsupported BASE.RUS header')
     local finish = string.unpack('<I4', image, 0x1F)
     assert(string.unpack('<I4',image,0x23) == #image, 'BASE.RUS header length does not match asset')
@@ -12,112 +12,16 @@ function russian.from_bytes(bytes, overlay, morphology)
     for line in image:sub(0x29,finish):gmatch('[^\n]+') do
       local key = line:match('^(.-)%*')
       if key then
-        local code=line:sub(#key+2)
-        local template_id=key:match('^@M(%d+)$')
-        if template_id and code:byte(1)==0x54 then
-          local encoded, decoded, at=code:sub(2), {}, 1
-          while at<=#encoded do
-            local byte=encoded:byte(at);at=at+1
-            if byte==0xff then
-              local escape=encoded:byte(at);assert(escape==0 or escape==1, 'invalid OpenRussian morphology escape');at=at+1
-              byte=escape==0 and 0xff or 0x0a
-            end
-            decoded[#decoded+1]=string.char(byte)
-          end
-          templates[tonumber(template_id)]=table.concat(decoded)
-        elseif key:sub(1,1)~='@' then
-          if code:byte(1)==0x4D then
-            if not morphology_only then
-              entries[key] = entries[key] or {}
-              entries[key][#entries[key]+1] = line
-            end
-            local pos_byte,aspect=code:byte(2,3)
-            local pos=pos_byte and string.char(pos_byte)
-            local id=tonumber(code:sub(4,7),16)
-            assert(id and #code==7, 'invalid OpenRussian morphology reference')
-            local template=assert(templates[id], 'missing OpenRussian morphology template '..id)
-            local slots=pos=='n' and {'sg_nom','sg_gen','sg_dat','sg_acc','sg_inst','sg_prep','pl_nom','pl_gen','pl_dat','pl_acc','pl_inst','pl_prep'}
-              or pos=='v' and {'imperative_sg','imperative_pl','past_m','past_f','past_n','past_pl','presfut_sg1','presfut_sg2','presfut_sg3','presfut_pl1','presfut_pl2','presfut_pl3'}
-              or pos=='a' and {'decl_m_nom','decl_m_gen','decl_m_dat','decl_m_acc','decl_m_inst','decl_m_prep','decl_f_nom','decl_f_gen','decl_f_dat','decl_f_acc','decl_f_inst','decl_f_prep','decl_n_nom','decl_n_gen','decl_n_dat','decl_n_acc','decl_n_inst','decl_n_prep','decl_pl_nom','decl_pl_gen','decl_pl_dat','decl_pl_acc','decl_pl_inst','decl_pl_prep','comparative','superlative','short_m','short_f','short_n','short_pl'}
-            assert(slots, 'unknown OpenRussian morphology part of speech')
-            local row={pos=pos,lemma=key,forms={}}
-            local at=1
-            for _,slot in ipairs(slots) do
-              local count=assert(template:byte(at), 'truncated OpenRussian morphology template');at=at+1
-              local forms={}
-              for _=1,count do
-                local cut,length=template:byte(at,at+1)
-                assert(cut and length, 'truncated OpenRussian morphology transform');at=at+2
-                local suffix=template:sub(at,at+length-1);at=at+length
-                forms[#forms+1]=key:sub(1,#key-cut)..suffix
-              end
-              if #forms>0 then row.forms[slot]=forms end
-            end
-            assert(at==#template+1, 'OpenRussian morphology template has trailing bytes')
-            local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
-            if pos=='v' then
-              local by_lemma=by_pos[key] or {};by_pos[key]=by_lemma
-              by_lemma[aspect==0x31 and 'pf' or 'ipf']=row
-            else by_pos[key]=row end
-          elseif not morphology_only then
-            entries[key] = entries[key] or {}
-            entries[key][#entries[key]+1] = line
-          end
-        end
-        local payload=key:sub(1,2)~='@o' and line:match('^.-%*(O\t.*)$')
-        if payload then
-          local fields={}
-          for field in (payload..'\t'):gmatch('(.-)\t') do
-            local name,value=field:match('^([^=]+)=(.*)$')
-            if name then fields[name]=value end
-          end
-          local pos=key:match('^@([nvao])')
-          local metadata=pos=='n' and fields.gender or fields.aspect
-          if pos and fields.bare and (metadata or pos=='o' or pos=='a') then
-            local row={id=key:sub(3),pos=pos,lemma=fields.bare,metadata=metadata,forms={}}
-            for slot,values in pairs(fields) do
-              if slot:match('^sg_') or slot:match('^pl_') or slot:match('^imperative_') or
-                 slot:match('^past_') or slot:match('^presfut_') or slot:match('^decl_') or
-                 slot=='comparative' or slot=='superlative' or slot:match('^short_') then
-                local forms={}
-                for form in (values..','):gmatch('(.-),') do if form~='' then forms[#forms+1]=form end end
-                row.forms[slot]=forms
-              end
-            end
-            if pos~='o' then
-              local by_pos=openrussian_forms[pos] or {};openrussian_forms[pos]=by_pos
-              local by_lemma=by_pos[fields.bare] or {};by_pos[fields.bare]=by_lemma
-              if pos=='v' then by_lemma[metadata=='perfective' and 'pf' or 'ipf']=row
-              else by_pos[fields.bare]=row end
-            end
-          end
-        end
-        local pos, aspect, slot, form = line:match('^.-%*Q(v)%*([^*]+)%*([^*]+)%*(.*)$')
-        if not pos then pos, slot, form = line:match('^.-%*Q([na])%*([^*]+)%*(.*)$') end
-        if pos then
-          local folded = key:gsub(string.char(0xf0), string.char(0xa5))
-          local by_pos = source_forms[key] or source_forms[folded] or {}
-          source_forms[key], source_forms[folded] = by_pos, by_pos
-          local by_slot = by_pos[pos]
-          if aspect then
-            local by_aspect = by_slot or {}
-            by_pos[pos] = by_aspect
-            by_slot = by_aspect[aspect] or {}
-            by_aspect[aspect] = by_slot
-          else by_slot = by_slot or {}; by_pos[pos] = by_slot end
-          by_slot[slot] = by_slot[slot] or {}
-          by_slot[slot][#by_slot[slot] + 1] = form
-        end
+        entries[key] = entries[key] or {}
+        entries[key][#entries[key]+1] = line
       end
     end
   end
-  ingest(bytes,false)
-  if overlay then ingest(overlay,false) end
-  if morphology then ingest(morphology,true) end
-  return {entries=entries, source_forms=source_forms,openrussian_forms=openrussian_forms}
+  ingest(bytes)
+  if overlay then ingest(overlay) end
+  return {entries=entries}
 end
 
--- Whether OpenRussian has a verb row of this aspect for the lemma.
 -- The .RUS verb record: V, flags, government, paradigm, 0, partner lemma.
 function russian.verb_record(state, word)
   local line = russian.lookup(state, word, 0, 'V')
@@ -127,44 +31,16 @@ function russian.verb_record(state, word)
   return {perfective = (code:byte(2) or 0) & 0x06 ~= 0, paradigm = (code:byte(4) or 0) & 0x7F,
     partner = partner ~= '' and partner or nil}
 end
+-- Whether the lemma has a verb of this aspect: the .RUS verb record's byte 2
+-- carries the perfective flags (0x04 forced, 0x02 native), and an
+-- imperfective lists its perfective partner after the code.
 function russian.has_verb_aspect(state, word, aspect)
-  local verbs=state.russian.openrussian_forms and state.russian.openrussian_forms.v
-  local row=verbs and verbs[word]
-  if row then return row[aspect==1 and 'pf' or 'ipf'] ~= nil end
-  -- Without stored forms, the .RUS verb record decides: byte 2 carries the
-  -- perfective flags (0x04 forced, 0x02 native), and an imperfective lists
-  -- its partner after the code.
   local line=russian.lookup(state, word, 0, 'V')
   if not line then return false end
   local code=line:match('%*(.*)') or ''
   local perfective=(code:byte(2) or 0) & 0x06 ~= 0
   if aspect==1 then return perfective or #code>5 end
   return not perfective
-end
-
-function russian.source_forms(state, word, pos, slot, aspect)
-  local direct=state.russian.openrussian_forms and state.russian.openrussian_forms[pos]
-  local row=direct and direct[word]
-  if row and pos=='v' then
-    local selected=row[aspect==1 and 'pf' or 'ipf']
-    -- Clause-initial imperative analysis can request perfective aspect even
-    -- when the unchanged lemma has only imperfective forms (e.g. быть). A
-    -- perfective-only lemma's present/future slots are its future, the right
-    -- form when an inverted question leaves aspect 0 (Will you come? придёшь);
-    -- the native paradigm fallback would build прийешь from the lemma.
-    if not selected and (slot:match('^imperative_') or slot:match('^presfut_')) then selected=row.ipf or row.pf end
-    row=selected
-  end
-  if row then
-    local forms=row.forms[slot]
-    if forms and #forms>0 then return forms end
-  end
-  local by_pos = state.russian.source_forms[word]
-  if not by_pos then return nil end
-  local forms = by_pos[pos]
-  if not forms then return nil end
-  if pos == 'v' then forms = forms[aspect == 1 and 'pf' or 'ipf'] end
-  return forms and forms[slot] or nil
 end
 
 -- Dictionary lines are immutable strings; no shared read buffer or DOS handles.
@@ -311,6 +187,18 @@ local function sort(items, pivot, count)
       pivot, count = left, right_count
     end
   end
+end
+
+-- LTPRO's paradigm candidates for a lemma: the rows of the class table whose
+-- ending list matches its end, longest ending first, in native order.
+-- class: 0x4E noun (variant: gender 1 m, 2 f, 0 n), 0x41 adjective,
+-- 0x56 verb (variant 1 perfective).
+function russian.paradigm_candidates(state, word, class, variant)
+  local matches = russian.ending_matches(state, word, class, variant)
+  sort(matches,1,#matches)
+  local ids = {}
+  for i, m in ipairs(matches) do ids[i] = m.id end
+  return ids
 end
 
 function russian.replace_ending(state, word)

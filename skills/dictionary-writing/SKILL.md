@@ -28,7 +28,8 @@ segment per part of speech with `;` alternatives, as in LTGOLD; the builder
 folds OpenRussian's readings into it ([record structure](../../docs/dictionary.md#record-structure-one-record-per-key-one-segment-per-part-of-speech)).
 Historical `LTGOLD/BASE.DIC` is a separate reference,
 not an automatically merged source. English phrase rules belong in `.DIC`;
-`.RUS` and `.MORPH` supply Russian morphology.
+`.RUS` supplies Russian morphology: a paradigm number per lemma into LTPRO's
+tables, no stored forms.
 
 ## Quick path: add a phrase to phrases.txt
 

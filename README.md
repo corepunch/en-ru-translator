@@ -9,7 +9,7 @@ the translation code without the executable, DOSBox or process snapshots.
 ## Run
 
 Requires Lua 5.3+ and the OpenRussian dictionaries in `openrussian/`.
-OpenRussian `BASE.DIC`, `BASE.RUS`, and `BASE.MORPH` are used by default; the
+OpenRussian `BASE.DIC` and `BASE.RUS` are used by default; the
 prefix rules come from `LTGOLD/`. The supplied unpacked `LTPRO.EXE` (not tracked)
 is needed only to regenerate `core/rules.lua` and as the translation oracle.
 

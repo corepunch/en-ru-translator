@@ -42,8 +42,7 @@ if #inputs == 0 then
 end
 
 local old = { dictionary = from_git('openrussian/BASE.DIC'),
-  russian = from_git('openrussian/BASE.RUS'),
-  russian_morphology = from_git('openrussian/BASE.MORPH') }
+  russian = from_git('openrussian/BASE.RUS') }
 local changed = 0
 for _, input in ipairs(inputs) do
   local ok_old, before = pcall(engine.translate, input, old)

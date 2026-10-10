@@ -26,7 +26,7 @@ snapshot or native executable execution.
 | `russian` | Indexed Russian dictionary search and ending substitutions |
 | `generation` | Noun/adjective/verb/participle/pronoun forms and word generation |
 | `output` | Sentence formatting and alternative meanings |
-| `assets` | Read-only EXE rule, literal and morphology decoding |
+| `assets` | LTPRO rule, literal and morphology tables from `core/rules.lua` |
 | `text` | CP866 character classes and string operations |
 | `encoding` | CP866 / UTF-8 boundary |
 | `rules` | Extracted grammar data |

@@ -5,7 +5,8 @@ backup exports: 26,982 nouns, 14,871 verbs, 11,941 adjectives, and 5,031 other
 entries (58,825 source rows total). The C builder compiles them into standalone
 indexed binary `.DIC` and `.RUS` databases. This snapshot produces 30,313 DIC
 records (one per English key, as in LTGOLD), 53,397 native-format RUS records,
-and 27,261 compact morphology records.
+and no stored forms: every noun, adjective and verb inflects from LTPRO's tables
+through the paradigm number in its `.RUS` record, as LTGOLD's do.
 
 Like LTGOLD's, every `.DIC` record holds all of its key's readings: one segment
 per part of speech, the alternative meanings after `;`
@@ -27,14 +28,20 @@ authored input, in the spirit of LTGOLD's single `.DIC` and `.RUS`:
   builder and written into `.RUS` records as LTGOLD stores them.
 - [`words.tsv`](words.tsv): English word attributes for the builder (`adverb`,
   `content-first`, `frame`).
-- [`paradigms.txt`](paradigms.txt): the inflection tables (stem cut + endings
-  per slot) that LTPRO keeps in its data segment, as text: two verb tables, three
-  noun and three adjective tables. The engine reads this file; the builder's
-  `tools/fit_paradigms.lua` assigns every OpenRussian lexeme the paradigm that
-  regenerates its listed forms and writes LTGOLD's paradigm byte into the
-  `.RUS` record. Forms are stored in `BASE.MORPH` only for lexemes no table
-  fits (irregular nouns, pluralia tantum, second locatives) and for adjective
-  comparatives and short forms, which the tables lack.
+- [`paradigms.txt`](paradigms.txt): LTPRO's inflection tables (stem cut +
+  endings per slot) as text: two verb tables, three noun and three adjective
+  tables, the same rows as `core/rules.lua` with four Latin `e` endings spelled
+  Cyrillic. The engine reads this file for these dictionaries; the tables are
+  not extended. The builder's `tools/fit_paradigms.lua` gives every lexeme a
+  row the way LTPRO does: the rows whose ending list (`core/rules.lua` lists
+  `0x5130`, `0x53C4`, `0x5522`, `0x566C`, `0x58A8`, `0x5CCC`) matches the
+  lemma's end are the candidates, longest ending first. OpenRussian's listed
+  forms pick among all rows (the one regenerating most of them, the earliest
+  candidate on a tie); a lexeme without forms takes the first candidate. The
+  paradigm byte (`0x80|id`) goes into the `.RUS` record. Like LTGOLD, the
+  tables have one prepositional form (`в саде`), plural imperatives
+  (`Полейте`), and the analytic comparative (`более высокий`); irregular forms
+  no row has come out as the nearest row makes them (`бежат`, `цветки`).
 - [`themes/`](themes): theme dictionaries, one `key*code` file each
   (`business.txt`, `computer.txt`, LTGOLD's BUSINESS.DIC and COMPUTER.DIC). The
   rebuild compiles each to `openrussian/<NAME>.DIC`; `lua init.lua --dic-overlay
@@ -63,11 +70,8 @@ glosses. Native T4 rereads the first English word of a multiword literal
 
 `.DIC` maps English glosses to Russian lexemes and literal expressions. `.RUS`
 keeps the original indexed LTech format, with one-byte CP866 headwords and
-native binary POS codes. The sibling `BASE.MORPH` carries OpenRussian morphology
-references and shared templates. Each form is represented as a byte count to
-trim from its headword and a one-byte CP866 suffix. Noun case slots and verb
-tense, person, and imperative slots stay distinct; the runtime imperative flag
-selects those imperative slots. The template records contain no copied source
+native binary POS codes. Forms are not stored: each record names its LTPRO
+paradigm. The records contain no copied source
 columns, glosses, field names, or row IDs. For example, `people` maps directly
 to `люди`, which keeps LTPRO's original plural-only noun code and paradigm 30.
 
@@ -102,9 +106,9 @@ Build the binary databases with `sh tools/rebuild_openrussian.sh` (add
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
+lua tools/fit_paradigms.lua openrussian/upstream > /tmp/fit.tsv
 /tmp/openrussian_db build openrussian/upstream \
-  openrussian/BASE.DIC openrussian/BASE.RUS \
-  openrussian/BASE.MORPH
+  openrussian/BASE.DIC openrussian/BASE.RUS /tmp/fit.tsv
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
   --entries openrussian/dictionary.txt --replace --in-place
 ```
@@ -237,7 +241,7 @@ perfective (`knock out`) puts its imperfective partner first, like one-word
 verbs. LTGOLD's `stop G*$Vпереставать\V` makes `stop knocking out` an infinitive
 (`перестать выбивать`).
 
-Capitalized OpenRussian lemmas (`Россия`) are stored in `.RUS` and `.MORPH`
+Capitalized OpenRussian lemmas (`Россия`) are stored in `.RUS`
 under lowercase headwords, as LTGOLD stores them (`россия`). The runtime lowers
 a capitalized `.DIC` lemma and reads gender and paradigm from the lowercase
 headword; with the capital headword it found nothing, and `Russia announced`
@@ -312,7 +316,7 @@ previously wrote `0xc0` for every noun.
 Keep reviewed UTF-8 `english key*reading` rows in [`dictionary.txt`](dictionary.txt):
 function words, irregular verb forms, sense readings and phrases, each under its
 `## section` header. One import applies them after the C build. Import converts to CP866, replaces exact keys, and rebuilds the `.DIC`
-index. Repeating an import is safe. `.RUS` and `.MORPH` contain Russian
+index. Repeating an import is safe. `.RUS` contains Russian
 morphology; English-to-Russian phrases belong in `.DIC`.
 
 ```text

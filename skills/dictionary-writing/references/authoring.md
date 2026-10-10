@@ -351,9 +351,9 @@ runs this sequence (about 6 s); `--verify` checks the checked-in files instead:
 
 ```sh
 cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
+lua tools/fit_paradigms.lua openrussian/upstream > /tmp/fit.tsv
 /tmp/openrussian_db build openrussian/upstream \
-  openrussian/BASE.DIC openrussian/BASE.RUS \
-  openrussian/BASE.MORPH
+  openrussian/BASE.DIC openrussian/BASE.RUS /tmp/fit.tsv
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
   --entries openrussian/dictionary.txt --replace --in-place
 python3 tools/ltech_dict.py check openrussian/BASE.DIC
@@ -361,7 +361,7 @@ python3 -m unittest discover -s tools -p test_ltech_dict.py
 sh test/run_all.sh
 ```
 
-The sequence must reproduce the checked-in `.DIC`, `.RUS`, and `.MORPH` byte
+The sequence must reproduce the checked-in `.DIC` and `.RUS` byte
 for byte; a hand edit to a built file is lost on the next rebuild.
 
 Each nonblank source row must contain a nonempty key and code, be CP866

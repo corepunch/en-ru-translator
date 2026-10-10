@@ -15,7 +15,7 @@ tag cache. Stage scheduling remains explicit because cached and live tags can
 intentionally differ. There is no emulated address space, DOS heap, far-pointer
 arithmetic, node serialization or shared string scratch buffer.
 
-`assets` decodes read-only rule and morphology tables from the original EXE.
+`assets` serves LTPRO's rule and morphology tables from `core/rules.lua`, extracted from the original EXE.
 `russian` indexes immutable BASE.RUS entries. Word records use named properties such as `source`, `reading`, `tense`, `person`,
 `gender`, `case_mask`, and `verb_flags`. `record_layout` maps native offsets at
 fixture and packed dictionary decoding boundaries. Uninterpreted captured bytes

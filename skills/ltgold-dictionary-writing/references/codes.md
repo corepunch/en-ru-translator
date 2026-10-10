@@ -8,6 +8,7 @@
 - [Dictionary punctuation](#dictionary-punctuation): readings, phrases, annotations, and macros.
 - [Context patterns and actions](#context-patterns-and-actions): matching and native subrule controls.
 - [Greeting entries](#greeting-entries): complete worked breakdowns.
+- [Verified syntax findings](#verified-syntax-findings): issue 18's minimal pairs, `.RUS` bits, and switches.
 
 This reference describes dictionary authoring for the current Lua translator.
 Paths below are relative to the repository root. Sources of authority are
@@ -89,13 +90,13 @@ historical dictionaries; presence alone does not establish their full meaning.
 
 | Tag | Established behavior and example | Authoring boundary |
 | --- | --- | --- |
-| `c` | Historical `rather than*c, а не`; grammar uses it in coordination-related contexts, e.g. pattern `O[&c]I`. | Compound-conjunction interpretation is consistent with usage, but the supplied appendix does not define `c`; full native distinction from `C` is unresolved. |
-| `g` | Historical `including*gвключать\include`; T1 changes `*GPH,[TORS]` to `@gPHj`. Lua generation has a gerund branch. | Do not assume all `G` readings should be `g`; complete native distinction is unresolved. |
+| `c` | Historical `rather than*c, а не`; grammar uses it in coordination-related contexts, e.g. pattern `O[&c]I`. Verified against `C`: `I walk rather than run` gives `а не бежать` with `c`, `а не бегу` with `C`. | Use `c` for a comparative/contrastive conjunction whose following verb must not become a coordinated finite verb. |
+| `g` | Historical `including*gвключать\include`; T1 changes `*GPH,[TORS]` to `@gPHj`. Verified: `Ten cats came, including him` gives adverbial participle `включая` with `g`, finite `включают` with `G`. | Preposition-like -ing word rendered as an adverbial participle. Do not convert ordinary `G` readings. |
 | `h` | Historical `ate*hесть\eat`, `became*hстановиться\become`. Lexical decoder sets past tense and normalizes initial `h` to `V`. | Irregular-past input code; not an ordinary present verb. |
-| `i` | Historical `great deal*iмного`; grammar produces `i` with `HCa` → `@@i` and `aN` → `i`. | Numeric/modifier-related state; exact native linguistic distinction is unresolved. |
+| `i` | Historical `great deal*iмного`; grammar produces `i` with `HCa` → `@@i` and `aN` → `i`. Verified: `A great deal was done` gives singular `Много был сделан` with `i`, plural `были сделаны` with `I`. | Quantity word taking singular (neuter-style) agreement. |
 | `j` | Historical `although*jхотя`; grammar also creates silent clause boundaries with tag `j`. | Lowercase `j` does not universally mean “insert a comma” or “silent”: a lexical reading may contain printed text. |
-| `p` | Historical `after*pРпослеDвпоследствииJ2после того, как`; grammar has `PL` → `p`. Case decoding is supported. | Preposition-related class with context-dependent conversion to `P/J`; full native distinction from `P` is unresolved. |
-| `s` | `that` has a secondary `s, что`; grammar can change `A` + lexical `one` to `A s`. Initial lexical `s` normalizes to `S`. | Context-generated substitute state; full native meaning is unresolved. |
+| `p` | Historical `after*pРпослеDвпоследствииJ2после того, как`; grammar has `PL` → `p`. Case decoding is supported. Verified: with `p`, `After he came, we left` gives `После того, как он приходил`; with `P`, `После он приходил`. The original also picks the conjunction in `After the war he came` (`После того, как война`). | Preposition/conjunction word whose `J` reading is chosen before a clause. |
+| `s` | `that` has a secondary `s, что`; grammar can change `A` + lexical `one` to `A s`. Initial lexical `s` normalizes to `S`. No dictionary reading starts with `s`; replacing `that`'s `s, что` with `S, что` changed none of the probes. | Context-generated substitute state; do not author it. |
 | `w` | The `W` distributor creates `w` for an uninflected tail, e.g. the space before `помехи` in `WVсоздавать помехи`. | Distinct from uppercase `W`. Initial dictionary `w` is normalized differently; do not copy a runtime tail tag as a normal entry format. |
 | `?` | Tokenizer's unknown alphabetic word, e.g. an unlisted English spelling. Can be tested in `Z[?#]`. | Internal fallback, not an uncertainty operator or a preferred authored class. |
 
@@ -167,9 +168,24 @@ The compact verb decoder preserves high flag bits: for first digit `d`, low
 lookup flags receive `d` and bit `0x40` reflects `d & 1`; the second digit sets
 lookup-frame bit `0x40` from its low bit; the third sets the frame's low six bits.
 Thus `V123делать` yields `lookup_flags=0x41`, `lookup_frame=0x03` on a zeroed node;
-preexisting `0x80` bits remain set. The frame is an internal selector, not a
-documented universal “transitivity number.” Consult handlers before authoring
-nonzero controls. Russian declension/conjugation paradigms come from morphology.
+preexisting `0x80` bits remain set. Russian declension/conjugation paradigms
+come from morphology.
+
+Observed effect of the historical verb digits (original LTPRO, with and without
+the digits; see [verified findings](#verified-syntax-findings)):
+
+| Digits | Historical verbs | Object + `to`-infinitive in the original |
+| --- | --- | --- |
+| none | most verbs | `I want him to come` with plain `Vхотеть`: `Я хочу его, чтобы придти`. |
+| `2x` (`V21`, `G21`, `E21`, `Z21`) | want, wish, recommend, require | чтобы-clause with the object as subject: `Я хочу, чтобы он пришел`. |
+| `1` (`V1`, `E1`, `G1`, `Z1`) | advise, acknowledge, admit, forecast | что-clause in the future: `Я советую, что он придет`. |
+| second digit `1` (`V01`, `V11`, `E11`, `e11`) | allow, assist, agree, hope, let | Bare infinitive: `Они позволяют ему идти`, `Я понадеялся приходить`. |
+| `U1`, `U12` | could, might | Conditional `мог бы`; plain `U` gives present `может`. |
+
+The trailing case letter of `E001В`, `E011Д` names the object case; removing the
+digits from `asked`/`helped` changed nothing because the Russian record already
+governs the case. Copy these digits from a comparable historical verb rather
+than composing new values.
 
 ## Dictionary punctuation
 
@@ -180,14 +196,18 @@ nonzero controls. Russian declension/conjugation paradigms come from morphology.
 | `;` inside reading | Alternative meanings, primary first; selected meanings can have annotations. | `Nэкономика;экономия`. Does not create a new grammatical class. |
 | `{...}` inside reading | Annotation or domain information attached to a meaning. | Historical `N.реферат{synopsis}` in `abstract`. Not a matcher capture. |
 | `\stem` at end of lexical reading | Backreference for stem lookup/derived forms and stem phrase/subrule lookup. | `crossed*Eпересекать\cross`. Not a general substitution command. |
-| `W` | Introduce composite Russian equivalent. For single-word inputs, native encodings may precede it with input-class codes. | `afterclap*NNWAнеприятноеNсобытие`; `interfere*VWVсоздавать помехи`. Preserve existing single/double class prefixes. |
+| `W` | Introduce composite Russian equivalent. For single-word inputs, native encodings precede it with the input class and the reading's class. | `afterclap*NNWAнеприятноеNсобытие` = input class `N`, then reading class `N` for `WAнеприятноеNсобытие`, like `N.` in a packed reading. Verified: `NWA…` loses the first component (`Событие было плохим`) and `WA…` breaks the reading. Keep both letters (`NNW`, `AAW`, `EVW`, `GVW`, `ZVW`). |
+| `,` before a component tag | Literal comma printed before that component. | `aborticide*NNWNсредство ,Aвызывающее аборт` gives `Средство, вызывающее аборт`; without the comma, no comma. |
+| `word*:` | Phrase-head placeholder: the word only starts multiword keys. Alone it stays an untranslated unknown word with no suffix analysis. | Historical `corned*:` beside `corned beef*Nсолонина`: `Corned is good` gives `Corned хорошее`. Deleting `corned*:` makes the original stop finding `corned beef`; Lua finds phrases without it. |
+| `\|` as a reading's class | Fixed separator class, not an adverb. | `faster than*\|быстрее чем`: `Это - быстрее чем свет`; as `D`: `Это быстрее чем светлый`. |
+| `label)` before a meaning | Domain label, such as `инф)` computer, `дел)` business, `мес)` month, `штт)` US state. | `admission*Nдопущение;инф)доступ`. The label is never printed. `инф)`/`дел)` meanings are promoted only by `/AM` with COMPUTER or BUSINESS second in `/C` (Lua `--domain`); other labels serve `!мес!`-style text tests. |
 | Adjacent component tags | Start separately analyzed/agreed output components; no inter-tag spaces required. | `WAпослепродажныйNсервис`. |
 | Space in a `W` payload | Start an uninflected tail. Appropriate only for text that should stay fixed. | Space before `помехи` in `WVсоздавать помехи`. It is not needed between `Dкак` and `nдело`. |
 | `/` in packed reading | End a phrase reading / delimit another tagged reading. | `bond*ZWVподписывать обязательство/Nобязательство;облигация`. |
 | `A.`, `N.`, `V.` etc. | Explicit input-side classification in a compound/ambiguous reading. | `executive*NNWAдолжностноеNлицо/A.исполнительный`. Not a sentence terminator. |
 | `~` in literal phrase key/output | Native manual: arbitrary word position. Lua: bounded gap of zero or more word records, stopping at punctuation/protected spans; output `~` reinserts the capture. | Native `on ~ account*WPВза~Nсчет`. Not a typed pronoun placeholder. |
 | `#` component | Native proper name/nontranslated component, optionally with metadata. Lua also supports delimited `#...#` literal spans. | Historical `article i*WNстатья#I`; never use `W#как дела#` to avoid coding Russian words. |
-| `=` / `%` following a tag | Transliteration macro. `=` honors the transliteration option; `%` forces it. Supplied Cyrillic spelling takes precedence. | Historical `abbott*#0м=`; decoder example `N%` transliterates its source. Distinct from whole-record `*=key`. |
+| `=` / `%` following a tag | Transliteration macro. `=` honors the transliteration option; `%` forces it. Supplied Cyrillic spelling after the macro replaces the transliteration. | Historical `abbott*#0м=` gives `Абботт`; `aeneas*#0м=эней` gives `Эней`. Historical `abe*#0m=эйб` has a Latin `m`, which stops the macro: the original prints `Abe`. Multiword names keep each English word's capital (`Буэнос Айрес`). Distinct from whole-record `*=key`. |
 | `\|` between verb readings | Select the right-hand alternative when runtime aspect is 1, otherwise the left-hand reading. | Illustrative `Vчитать\|прочитать`; not a new phrase-component separator. |
 | Final sentence punctuation | Not part of a native literal phrase key. Use `[*]` in a grammatical context rule to require sentence end. | BASE.DIC ``thank `you`[*]*$Dблагодарю вас\ \``. The former Lua-only punctuation-key matcher has been removed. |
 
@@ -220,6 +240,7 @@ anchor found; a later failure does not retry another anchor.
 | `[$]` | Consume any one lexical node. |
 | Bare `$` | Try the remaining pattern at the current node, then after skipping exactly one node if needed; e.g. `$R`. Not an arbitrary-length wildcard. |
 | Alternatives inside `[]` or `<>` | Lua lexical matcher accepts classes plus backticked word / `!text!` choices. E.g. ``[R`thou`]`` accepts `R` or lexical `thou`. Advanced feature: native parity is not established by this reference. |
+| Punctuation classes | A punctuation token is its own tag: `%` (``from <H%>`to` ``), `(`, `)`, `:`, `"`/`'` (escaped `\"`/`\'` inside a class), `,` and `*`. `_` is a word starting with an underscore (`state [?#_]`), `^` a boundary T4 inserts before a preposition, `{` `}` T2's rewrite of `(#)`. Only ASCII matches: the Cyrillic `С` in historical ``in `writing`[,С*]`` is a typo that never matches `C`. |
 
 In the **constituent** matcher, `.` consumes one constituent, while bare `$`
 and `[$]` are ordinary tag/class tests. Lexical alternatives are not uniformly
@@ -232,7 +253,11 @@ distributed over the entire match. Their format can be
 `head pattern*$head-action\tail-action\selector`. The first backslash-delimited
 part rewrites the head; the second uses `matching.replace` on matched context;
 the first character after the second backslash selects special handling.
-Some historical records have further pieces; do not invent meanings for them.
+Everything after that character is ignored, including further backslash
+sections. Verified: ``bear <TAONMw>`in`<AO>`mind`*$Vиметь\$`Dв`\$`Dвиду` ``
+never produces `виду`; moving `` $`Dвиду` `` into the tail action does. Seven
+historical rules carry such dead sections (`bear`, `ask`, `cause`, `make up`,
+`prevents`, `a few`, `as far as`). Put every context edit in the tail action.
 
 The head action's first tag byte changes its class. A leading `?` or `@` keeps
 the class, and a leading Russian letter begins replacement text without changing
@@ -261,7 +286,7 @@ Recognized T4 subrule selector characters, from `core/phrasing.lua`:
 | --- | --- | --- |
 | absent | No selector-specific handler. | Historical `as RV*$Jкогда`. |
 | `1` | On node before match end: aspect=0, passive=0, tense=0. | Historical `want <AOIHNw\"\'>[Ee][;:*]*$?\$V\1`. |
-| `2` | Apply only if final matched node has nonzero number. | Handler exists; no simple native three-part record found in the supplied audit. Illustrative suffix `\@\2`. |
+| `2` | Apply only if final matched node has nonzero number. | Verified: ``a `few`N*$?\`Iмного`\2`` gives `Много книг` for `A few books` but leaves `A few book` alone. Historical `\?\2` reads selector `?`, so its `2` does nothing. |
 | `3` | Head aspect=1. | Historical `began G*$V\V\3`. |
 | `4` | Sentence-initial head person=1; change head `G` to `V`. | Historical ``look `forward`*$Vожидать\ \4``. |
 | `5` | Remove head; tail case=8, tense=1, conditional flag bit 2 set. | Historical ``would <dDK>`like`*$?\$`Vхотеть`\5``. |
@@ -277,8 +302,8 @@ Recognized T4 subrule selector characters, from `core/phrasing.lua`:
 | `n` | Apply only if head is not currently `N`. | Historical `notice [TAO]*$замечать\\n`. |
 | `r` | Head passive=0, tense=0. | Historical `run [TAONIH\"\']*$Vвыполнять\\r`. |
 
-Any other selector character currently has no selector-specific Lua branch;
-that is not evidence of a valid native no-op. Avoid it unless investigated.
+Any other selector character has no handler in the original either: `N`, `V`,
+`$`, `?` and space behave as no selector (verified for `N` and `V`). Avoid them.
 Handler numbers in extracted grammar tables T1–T8 are a separate namespace,
 not these selector characters and not dictionary grammatical digits.
 
@@ -365,3 +390,46 @@ Do not replace `[*]` with a literal `?` or put a second bare `*` into a literal
 phrase key. The original dictionaries' boundary examples are grammatical
 subrules, and a star in such a pattern is separate from the entry separator.
 Native short-question support must be investigated before adding matcher syntax.
+
+## Verified syntax findings
+
+Issue 18's minimal pairs are frozen in
+[`test/ltpro/dictionary-syntax`](../../../test/ltpro/dictionary-syntax/README.md):
+119 original LTPRO captures, replayed by `test/dictionary_syntax_test.lua`
+(112 exact, 7 reviewed differences). To probe a new construct, add a probe to
+`probes.json`, run its `capture.py`, and review every difference.
+
+### `.RUS` code bits
+
+Byte 2 of a Russian record (after the class letter) carries flags. Flipping one
+bit in an isolated copy of LTGOLD's `BASE.RUS` gave:
+
+| Class | Bit | Verified effect | Example |
+| --- | --- | --- | --- |
+| `V` | `0x08` | Future is analytic `буду` + infinitive, ignoring any partner. Without it, a verb with no partner uses its own present as the future. | работать `e8`: `Я буду работать`; cleared: `Я работаю`. видеть with `0x08`: `Я буду видеть его`. |
+| `V` | `0x02` | Set on native perfectives (увидеть `e3`, помочь `e2`). Lua skips the partner lookup for it. | Clearing it on увидеть changed nothing. |
+| `V` | `0x04` | Lua forces perfective aspect when `0x08` is clear. Native: прийти `a6`, быть `e4`. | Setting it on увидеть changed nothing. The OpenRussian builder writes it for perfectives. |
+| `A` | `0x20` | Short form everywhere, including attributive. | рад `a0`: `Он рад`, `Рад человек`; cleared: `Он радый`. |
+| `A` | `0x01` | Short form as a present predicate after a noun or pronoun; instrumental long form in the past. | рад `81`: `Человек рад`, `Он был радым`, `Радый человек`. |
+
+LTGOLD's `BASE.RUS` has no record for глубокий, and the original prints
+`Река глубока` (but `Дом большой`); what selects that short form without a
+record is not isolated. OpenRussian writes `c0` for every adjective, so the
+default dictionary prints `Река глубокая`.
+
+### Program switches
+
+`/AM` with `/C cu` (computer) or `/C bu` (business) promotes `инф)` or `дел)`
+meanings: `Доступ`, `Драйвер`, `заземление`, or `Последователь`,
+`Инкассирование`. Without `/AM`, or with only the base dictionary, the primary
+meaning stays. The original drops the first letter of a demoted unlabelled
+primary (`Доступ{1.опущение}`); Lua keeps it. `/L-`, `/MM` and `/SM` do not
+change batch output: inline `{1.…}` alternatives are on in the supplied profile.
+
+### Reviewed deliberate differences
+
+Rechecked against the original with the current default dictionaries:
+`Let's go.` is `Давайте идти` there, `Давайте пойдем` here; `Will he come?`
+is present `Он приходит?` there, future `Он придет?` here; `How is it?` is
+`Как У Это?` there because a later English rule rereads `it`, while Lua
+protects authored phrase components (`Как у него дела?`).

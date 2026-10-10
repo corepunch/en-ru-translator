@@ -19,9 +19,9 @@ ablaze*Vпылать
 oil*NнефтьAнефтяной
 terminal*NтерминалAтерминальный
 region*Nобласть
-plant*ZV.устанавливатьN.завод
-power*Nмощность
+plant*ZV.устанавливатьN.завод{facility};растение{shrub}
+power*NN.мощность{ability;electricity};право{the right}
 drone*Nбеспилотник
 struck*Eударить\strike
 facility*Nпредприятие
-deal with*ZVWVиметьNделоPТс/N.WNделоPТс
+deal with*ZVWVиметь делоPТс/N.WNделоPТс

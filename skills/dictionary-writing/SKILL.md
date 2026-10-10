@@ -43,14 +43,16 @@ Each step takes seconds; do all of them.
    Never put Russian text after `#`, never freeze a multiword sentence in `D`,
    and lowercase lemmas except proper names (`NРождество`).
 
-   Every Russian word in a `W`/`V` composite needs its own tag. A space after a
-   tag is a missing tag, not a multiword lemma: `Vиметь дело` is one untagged
-   blob, `VиметьNдело` declines `дело`. Copying a LTGOLD record does not excuse
-   it.
+   A multiword Russian lemma keeps its space inside one tag. LTGOLD's own
+   `deal with*ZVWVиметь делоPТс/N.WNделоPТс` and `dealt*EWEиметь дело\deal`
+   use `Vиметь дело` and print the fixed idiom (`имеет дело`, `имел дело`).
+   Splitting it into `VиметьNдело` makes `дело` agree with the subject
+   (`Он имеет дела`, verified against original LTPRO). Do not "repair" a
+   space in a copied LTGOLD record. Tag each word separately only when each
+   word must inflect independently (`WAспокойныйNночь`).
 
-   A phrasal verb is its own key. `иметь дело с` is `deal with`, not `deal`:
-   `deal with*ZVWVиметьNделоPТс/N.WNделоPТс`. Bare `deal` is the noun,
-   `deal*Nсделка`. Do not hang the preposition's object on the one-word key.
+   A phrasal verb is its own key. `иметь дело с` is `deal with`, not `deal`.
+   Do not hang the preposition's object on the one-word key.
 
    An idiom is its own key too, and an article in it is a placeholder, not a
    literal word. LTGOLD codes this class as `make <TAO>`agreement`*$заключать`:
@@ -63,7 +65,12 @@ Each step takes seconds; do all of them.
 
    not `make a deal*WVзаключатьNсделка`. `Russia made a deal` and `They made
    the deal` both give `заключила/заключили сделку`.
-3. **Edit** `openrussian/overlays/phrases.txt`.
+3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
+   literal starting with the same words (`make a deal*V00рядиться` hides
+   ``make <TAO>`deal` ``), add its key to
+   `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.
+   Without that line the checked-in `BASE.DIC` can look right (hand-edited)
+   while `rebuild_openrussian.sh` regenerates the shadowing literal.
 4. **Rebuild:** `sh tools/rebuild_openrussian.sh` (always from source).
 5. **Check and record:** `lua init.lua 'Good night.'`, then add lines to
    `test/translations.txt`: `phrase:<exact key> | Good night. => Спокойной ночи.`,
@@ -76,10 +83,46 @@ Each step takes seconds; do all of them.
    review every changed corpus line.
 8. Before committing: `sh tools/rebuild_openrussian.sh --verify`.
 
+## Changing the sense of a single word
+
+`BASE.DIC` is generated; a hand edit is lost on rebuild and shows up as a
+failing `--verify`. The only durable way to change a word's reading is a row in
+`openrussian/overlays/native-readings.txt` (imported with `--replace`).
+
+1. `find` the word in `LTGOLD/BASE.DIC` and in `openrussian/BASE.DIC`. If the
+   installed first reading already equals LTGOLD's, add nothing.
+2. Copy LTGOLD's record whole: every `.` second sense, `{gloss}` note and
+   `;`-separated alternative. A trimmed copy loses the native alternatives
+   (`power*NN.мощность{ability;electricity};право{the right}`, not
+   `power*Nмощность`; `plant*ZV.устанавливатьN.завод{facility};растение{shrub}`).
+3. Deviate only on purpose, state why in the commit, and try both with
+   `tools/ltpro_try_entries.py --entry '<row>' '<sentences>'`. Example:
+   native `deal*ZVWVиметь дело/Nсделка` makes `a good deal` → `порядком` and
+   shadows the `make a deal` idiom, so `deal*Nсделка` is kept and the verb is
+   `deal with`.
+4. Add a `native-reading:<word>` case to `test/translations.txt` with the
+   Lua output, rebuild, and run `--verify`.
+
+## Before pushing a dictionary PR
+
+- `sh tools/rebuild_openrussian.sh --verify` passes (the checked-in `.DIC`
+  is exactly what the sources build).
+- `sh test/run_all.sh` passes.
+- Every expected line in `test/translations.txt` was copied from the actual
+  `lua init.lua` output after the final rebuild, never from the PR text.
+- The PR body's "after" examples equal those lines and describe the final
+  entries, not an earlier attempt.
+- You did not delete a pipeline file (`removed-headwords.txt`, rebuild steps)
+  while a phrase still depends on it. Search for the file name in docs, tools
+  and tests before removing it.
+- Docstrings and prose you edit still read as complete sentences and runnable
+  commands.
+
 ## Quick fixes
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
+| Subrule never fires | Literal with the same first words wins lexically | Add that key to `removed-headwords.txt` |
 | Word printed uninflected or frozen | `D`/fixed text where words should agree | Tagged lemmas in a `W` composite |
 | First letter с/м/ж missing | Russian text in a `#` component | `D` or `WD` |
 | Idiom swallows a longer sentence (“You are welcome to stay”) | Literal key | Boundary subrule ending `[*]` or `[,*]` |
@@ -89,6 +132,7 @@ Each step takes seconds; do all of them.
 | Sentence-initial `see …` subrule undone (`Смотри`) | Native T4 rule rewrites initial `see` to `Vсмотри` | Do not author it; the original behaves the same |
 | Imperfective verb needed where grammar asks for perfective (future, imperative) | Builder-written `.RUS` partner (`видеть`→`увидеть`) | Name the verb on both sides of `\|`: `Vпоправляться\|поправляться` |
 | -s verb form translated as a noun (`Он производство`) | Plural-noun gloss literal shadows suffix analysis | Builder emits native `z` (`works*zработатьnпроизводство\work`); check `find` |
+| Ordinary clause replaced by one word (`This is` → `Это`, `you know` → `ведь`) | Generated grammar-word literal | Add the key to `removed-headwords.txt` |
 | Basic English word translated as a content word (`this` → `сего`, `us` → `Америка`) | OpenRussian has no closed-class grammar | Add LTGOLD's native reading to `function-words.txt` |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |

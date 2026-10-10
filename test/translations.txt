@@ -433,3 +433,7 @@ idiom:make-a-deal | Russia made a deal. => Россия заключила сд�
 idiom:make-the-deal | They made the deal. => Они заключили сделку.
 phrase:make <TAO>`deal` | Russia made a deal. => Россия заключила сделку.
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.
+phrase:deal with | He deals with problems. => Он имеет дело с проблематикой.
+phrase:deal with | They deal with it. => Они имеют дело с ним.
+native-reading:power | He has great power. => У него есть большая мощность{1.право}.
+native-reading:power | The region has power. => Область имеет мощность{1.право}.

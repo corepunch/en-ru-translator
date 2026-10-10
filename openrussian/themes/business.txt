@@ -1,0 +1,3141 @@
+# Business terminology (LTGOLD BUSINESS.DIC, 3,136 rows).
+# Theme dictionary: one `headword*code` row per line, same codes as BASE.DIC.
+# `sh tools/rebuild_openrussian.sh` compiles it to openrussian/BUSINESS.DIC;
+# load it after BASE.DIC with `lua init.lua --dic-overlay openrussian/BUSINESS.DIC`,
+# where its records override BASE.DIC for the same key. Lines starting with # are comments.
+abandon goods to the insurer*WVотказываться от товара в пользу страховщика
+absorption of idle capasities*WNзагрузка неиспользуемых производственных мощностей
+absorption of market*WNемкость рынка
+abstain from voting*WVвоздерживаться при голосовании
+abstract of account*WNвыписка из счета
+abstract of title*WNдокумент о правовом титуле
+abundance of capital*WNизобилие капитала
+abundance of labor*WNизбыток рабочей силы
+abuse of credit*WNзлоупотребление кредитом
+abuse of deteriorated quality*Wnзлоупотребление, Aприводящие к ухудшению качества
+abuse of environment*WNзагрязнение окружающей среды
+abuse of monopoly*WNзлоупотребление монопольной властью
+abuse of power*WNзлоупотребление властью
+abuse of skimped quality*Wnзлоупотребление, Aприводящие к ухудшению качества
+abuse of taxation*WNзлоупотребление налогообложением
+accede to an alliance*WVпримыкать к союзу
+accept a lot*WVпринимать партию
+accept as a pledge*WVпринимать в качестве залога
+accept ~ bill*WNакцептовать~ вексель
+accept ~ bill for honor*WNакцептовать~ вексель для спасения кредита векселедателя
+accept ~ equipment*WVпроизводить приемку~ оборудования
+acceptance against documents*WNакцепт против документов
+acceptance bank*Nбанк-акцептант
+acceptance bill*WAакцептованныйNвексель
+acceptance bought outright*WAакцептованныйNвексель, купленный для хранения
+acceptance bought under repurchase agreement*WAакцептованныйNвексель, купленный по соглашению о последующей перепродаже
+acceptance certificate*WNакт приемки
+acceptance commission*WAакцептнаяNкомиссия
+acceptance credit*WAакцептныйNкредит
+acceptance draft*WAакцептованнаяNтратта
+acceptance for honor*WNакцепт векселя для спасения кредита векселедателя
+acceptance in blank*WAбланковыйNакцепт
+acceptance of a bill*WNакцепт векселя
+acceptance of a cheque*WNакцепт чека
+acceptance of a draft*WNакцепт тратты
+acceptance of batch*WNприeмка партии
+acceptance of bid*WNпринятие предложения
+acceptance of bill of exchange*WNакцепт векселя
+acceptance of bonds*WNспрос на облигации
+acceptance of commercial documents*WNакцепт коммерческих документов
+acceptance of contraception*WNприменение методов регулирования рождаемости
+acceptance of freight*WNприем груза
+acceptance of freight for transportation*WNприем груза к перевозке
+acceptance of offer*WNпринятие предложения
+acceptance of tender*WNпринятие предложения о покупке ценных бумаг
+acceptance supra protest*WNакцепт векселя для спасения кредита векселедателя
+acceptance under rebate*WDдосрочноAоплаченныйAакцептованныйNвексель
+acceptances*nакцепт
+accepted cheque*WAакцептованныйNчек
+accepted invoice*WAакцептованныйNсчет
+access to farmland*WNвозможность получения земли
+access to foreign markets*WNвыход на внешний рынок
+accessory after the fact*Nукрыватель
+accessory before the fact*WAпрямойNсоучастник
+accident costs*WAаварийныеnзатрата
+accommodation acceptance*WAдружественныйNакцепт
+accommodation bill*WAдружескийNвексель
+accommodation endorsement*WAдружескийNиндоссамент
+accommodation of conflicting interests*WNсглаживание противоположных интересов
+accomodation-bill*NNWAдружескийNвексель
+accompanying documents*WAсопроводительныеnдокумент
+account agreed upon*WAодобренныйNотчет
+account card*WNкарта -Nсчет
+account current*WAтекущийNсчет
+account day*WNдень финансового отчета
+account executive*WNслужащий по счетам
+account of trade and navigation*WAстатистическийNотчет о торговле и навигации
+accountant-general*NNWAглавныйNбухгалтер-эксперт
+accounting balance sheet*WAбухгалтерскийNотчет
+accounting carriage*WNкаретка бухгалтерской машины
+accounts due from customers*WAдебиторскаяNзадолженность клиентов по открытому счету
+accounts due to customers*WAдебиторскаяNзадолженность клиентам по открытому счету
+accounts payable*Wnсчет к оплате
+accounts receivable*WAдебиторскаяNзадолженность/;счет
+accreditation of agencies*WNаккредитация организаций
+accrued interest*WAнакопленныйnпроцент
+accumulated debt*WAнакопившаясяNзадолжность
+accumulation of funds*WNаккумуляция средств
+acounting regulations*Wnправило отчетности
+act of protest*WNакт о протесте
+action at law*WAсудебныйNиск
+action in rem*WAвещныйNиск
+action prescription*WAисковаяNдавность
+actionable*AWAдающий основания для судебного преследования
+actual weight*фактический вес
+added value*WAдобавленнаяNстоимость
+additional charge*WAдополнительныйnрасход
+additional working capital*WAипотечныйNкредит
+addressed bill*WAдомицилированныйNвексель
+adequate price reduction*WAсоразмернаяNуценка
+advance against payments*WNаванс в счет платежей
+advance bill*WAавансовыйNвексель
+advance money*Nссуда
+advance payment*WAавансовыйNплатеж
+advance to the supplier*WNаванс поставщику
+advice of a letter of credit*WNавизо об открытии аккредитива
+advice of acceptance*WNавизо об акцепте
+advice of collection*WAинкассовоеNавизо
+advice of payment*WNавизо о платеже
+advice on organization*WAорганизационнаяNконсультация
+advice on procedure*WAметодическаяNконсультация
+advising bank*WAавизующийNбанк
+advisory body*WAконсультативныйNорган
+affiliation fee*WAвступительныйNвзнос
+after-tax*:
+after-tax profit*WNприбыль за вычетом налога
+agency commission*WAагентскаяNкомиссия
+agency company*WAагентскаяNфирма
+agency operations*WAпосредническиеnоперация
+agency representation*WAагентскоеNпредставительство
+agency right*WAагентскоеNправо
+agency service for ships*WAморскоеNагентирование
+agency services*WAагентскоеNобслуживание
+agency transaction*WAпосредническаяNсделка
+agent commission*WAагентскоеNвознаграждение
+aggravating circumstances*WAотягчающее винуnобстоятельство
+agio*NNWAкурсоваяNразница/;ажио
+agony column*Wnобъявление о розыске родных
+agrarian laws*WAземельныйnзакон
+agrarian reform*WAаграрнаяNреформа
+agree as follows*WVдоговариваться о следующем
+agreed cost*WAдоговорнаяNстоимость
+agreement in favour of the third person*WNдоговор в пользу третьего лица
+agreement of intent*WNсоглашение о намерении
+agreement on*WNдоговорPПо
+agreement on transfer*WNдоговор о передачеPР
+agricultural commodity exchange*WNбиржа сельскохозяйственных товаров
+agricultural exhibition*WAсельскохозяйственнаяNвыставка
+air waybill*WAавиагрузоваяNнакладная
+alienism*NWNположение иностранцев в стране
+all loss and damage police*WNполис страхования от любой утраты или повреждения
+all risks clause*WNоговорка о всех рисках
+all risks insurance*WNстрахование от всех рисков
+all risks police*WNполис страхования от всех рисков
+allocation of currency*WNквотирование валюты
+allocation of funds*WNвыделение ассигнований
+allocations*nотчисление;ассигнование
+allotment letter*WNуведомление о подписке на акции
+allow credit*WVпредоставлять кредит
+allowable costs*WAдопустимыеNзатраты
+allowance for cash*WNскидка "сконто"
+ambulance chaser*WNюрист по авариям
+amenable to law*WAответственный перед законом
+amount claimed*WAисковаяNсумма
+amount of taxable profit*WNсумма облагаемой прибыли
+analysis of portfolio of activities*WNанализ портфеля направления деятельности
+answering your letter*WNответ на ваше письмо
+anticipated acceptance*WDдосрочноAоплаченныйAакцептованныйNвексель
+antidumping duty*WAантидемпинговаяNпошлина
+appeal to a court of cassation*WNкассация в кассационный суд
+appeal to arbitration*WNкассация в арбитраж
+application for freight transportation*WNзаявка на перевозку грузов
+application for participation*WNзаявка на участие
+application for return*WNзаявление об обратном вывозе
+application for the registration*WNзаявка на регистрацию
+application forms*WAзаявочнаяNдокументация
+application of applicant*WNпросьба заявителя
+arbitrage business*WAбиржевойNарбитраж
+arbitrage in goods*WAтоварныйNарбитраж
+arbitrage of exchange*WAвалютныйNарбитраж
+arbitration clause*WAарбитражнаяNоговорка
+arbitration commission*WAарбитражнаяNкомиссия
+arbitration costs*WAарбитражныеnрасход
+arbitration count*WAтретейскийNсуд
+arbitration fee*WAарбитражныйNсбор
+arbitration protection*WAарбитражнаяNзащита
+arbitration tribunal*Nарбитраж
+area of prime responsibility*WAосновнаяNтерритория
+arrears*NNWNзадолженость по счету
+arrest of cargo*WNарест на груз
+assess interest*WVоблагать штрафом
+assess interest on*WVоблагать штрафомPВ
+assessed value*WAоценочнаяNстоимость
+asset*Nактив
+asset value*WAноминальнаяNстоимость
+asset values*WAноминальнаяNстоимость
+assets*nактив
+assets and liabilities*WNактивCиNпассив
+assets in foreign exchange*Wnавуары в иностранной валюте
+assets of an enterprise*Wnактив предприятия
+assets profit norm*WNнорма прибыли на активы
+assignment agreement*WNдоговор о переуступке прав
+assignor*Nцедент
+assortment of goods*WAтоварныйNассортимент
+assortment planning*WNпланирование ассортимента продукции
+assumption of an office*WNвступление в должность
+at its option*Dпо своему усмотрению
+at its sole option*Dисключительно по своему усмотрению
+attestation of products*WNаттестация продукции
+attraction of financial resources*WNпривлечение финансовых ресурсов
+attraction of foreign investments*WNпривлечение иностранных инвестиций
+auction bill*WNкаталог аукциона
+auction by tender*WAзакрытыйnторг
+auction by tender pricing*WNустановление цены на основе закрытых торгов
+auction rules*WAаукционныеnправило
+auction sale*WNпродажа с аукциона
+audience analysis briefs*Wnотзыв зрителей
+auditing commission*WAревизионнаяNкомиссия
+auditing rights*WAконтрольныеnправо
+auditor*Nаудитор;ревизор
+auditor report*WAревизионныйNотчет
+auditorship*NWNдолжность ревизора
+author of an invention*WNавтор изобретения
+authorization tribunal*WAарбитражныйNсуд
+authorized capital*WAуставныйNкапитал
+authorized clerk*Nброкер
+authorized person*WAдоверенноеNлицо
+authorized representative*WAуполномоченныйNпредставитель
+automatic message accounting*WAавтоматическаяNсистема обработки счетов
+available capital*WAликвидныйNкапитал
+available supplies*WAналичныйNзапас
+average adjuster*Nдиспашер
+average adjusters' bureau*WNбюро диспашеров
+average adjustment*Nдиспаша
+average bond*WAаварийныйNбонд
+average certificate*WAаварийныйNсертификат
+average commissioner*WAаварийныйNкомиссар
+average disbursement*WAаварийныеnрасход
+average insurance*WNстрахование от аварий
+average losses*WAаварийныеnубыток
+average payment*WAаварийныйNвзнос
+average statement*Nдиспаша
+average stater*Nдиспашер
+aviso*Nавизо
+back-to-back*Aкомпенсационный
+back-to-back letter of credit*WAкомпенсационныйNаккредитив
+bad debt*WAбезнадежныйNдолг
+bad debts*WAпросроченныеNссуды
+bad loan*WAпросроченнаяNссуда
+bagged*:
+bagged cargo*WNгруз в мешках
+bailed*:
+bailed goods*WNгруз в кипах
+balance account*WAбалансовыйNсчет
+balance cost*WAбалансоваяNстоимость
+balance model*WAбалансоваяNмодель
+balance of cash and credit flow*WNбаланс движения капиталов и кредитов
+balance of claims and liabilities*WAрасчетныйNбаланс
+balance of foreign trade*WAвнешнеторговыйNбаланс
+balance of mutual settlements*WNбаланс взаимных расчетов
+balance of payments*WAплатежныйNбаланс
+balance of trade*WAторговыйNбаланс
+balance profit*WAбалансоваяNприбыль
+balance sheet*Nбаланс
+balance year*WAбалансовыйNгод
+balanced trade*WAвстречнаяNторговля
+bank acceptance*WAбанковскийNакцепт
+bank accommodation*WAбанковскаяNссуда
+bank account*WNсчет в банке
+bank association*WAбанковскаяNассоциация
+bank balance*WNбаланс банковского счета
+bank balances*WNсальдо банковского счета
+bank bill*WAбанковскийNвексель
+bank cheque*WAбанковскийNчек
+bank clearing*WAбанковскийNклиринг
+bank discount*WAбанковскийNдисконт
+bank discount rate*WAбанковскаяAучетнаяNставка
+bank draft*WAбанковскаяNтратта
+bank endorsement*WAбанковыйNиндоссамент
+bank estimates*WAбанковскаяNоценка
+bank expert examination*WAбанковскаяNэкспертиза
+bank financing*WAбанковскоеNфинансирование
+bank indebtedness*WNзадолженность банку
+bank interest*WAбанковскийNпроцент
+bank loan*WAбанковскаяNссуда
+bank of circulation*WAэмиссионныйNбанк
+bank of issue*WAэмиссионныйNбанк
+bank reference*WAбанковскаяNреференция
+bank shares*WAбанковскиеnакция
+bank stock*WAбанковскийnакция
+bank transfer*WAбанковскийNтрансферт;перевод
+bank-by-phone*NNWAбанковскаяnсделка по телефону
+banker acceptance*WAбанковскийNакцепт
+banker bill*WAбанковскийNвексель
+banker instructions*WAбанковскоеNпоручение
+banking*Aбанковский
+banking circles*WAфинансовыеnкруг
+banking expenses*WAбанковскиеnрасход
+banking institutions*WNучреждения банка
+banking services*WAбанковскиеnуслуга
+banking transaction*WAбанковскаяNсделка
+banknote circulation*WAбанкнотноеNобращение
+bare boat charter*WNдоговор о фрахтовании судна без экипажа
+bare-boat*Aбэрбоут
+bare-boat charter*WNдоговор о фрахтовании судна без экипажа
+bargain currency*WNвалюта сделки
+barter swapping*WAбартерныйNобмен
+barter transaction*WAбартернаяNсделка
+base price*WAбазиснаяNцена
+base price-list*WAбазисныйNпрейскурант
+base rate*WNплата по тарифу
+basic rate*WAбазиснаяNставка
+basic terms*WAбазисныеnусловие
+basis of delivery*WNбазис поставки
+basis price*WAбазиснаяNцена
+be in default of acceptance*WVполучать отказ в акцептованнии
+bearer bill*WNвексель на предъявителя
+bearer check*WAпредъявительскийNчек
+bearer cheque*WNчек на предъявителя
+bearer of a bill*Nвекселепредъявитель
+bearer shares*WAпредъявительскиеnакция
+bearer stocks*WAпредъявительскиеnакция
+become subrogated to*Vполучать
+before tax*WPдо удержания налога
+before-sale*WAпредпродажный
+before-sale service*WAпредпродажноеNобслуживание
+before-sale services*WAпредпродажныйNсервис
+behalf*:
+berth charter*WAлинейныйNчартер
+berth-note*Nберс-нот
+best regards*WAсердечныйNпривет
+bill at sight*WAпредъявительскийNвексель
+bill discount*WNучет векселей
+bill discounting*WNдисконтирование векселей
+bill in blank*WAбланковыйNвексель
+bill of exchange*WAпереводнойNвексель
+bill of health*WAкарантинноеNсвидетельство
+bill of lading*Nконосамент
+bill of lading weight*WAконосаментныйNвес
+bill of rights*WNбилль о правах
+bill of sale*Nзакладная
+bill of work*WNведомость работ
+bill presentation*Nпрезентация
+bill to bearer*WNвексель на предъявителя
+bill travel agent*Nкоммивояжер
+billing*NWNсоставление счетов
+blank bill*WAбланковыйNвексель
+blank cheque*WAбланковыйNчек
+blank credit*WAбланковыйNкредит
+blank letter of credit*WAбланковыйNаккредитив
+blanket contract*WAаккордныйNконтракт
+blanket license*WAобщаяNлицензия
+blanket police*WAгенеральныйNполис
+blanket policy*WAбланковыйNполис
+blanket rate*WAаккорднаяNставка
+blind sale*WNпродажа без предварительного осмотра
+blocked account*WAблокированныйNсчет
+blocked assets*WAзамороженныеnактив
+blocked currency*WAблокированнаяNвалюта
+board of directors*Nдирекция;правление
+board of trade*WAторговаяNпалата
+bold*Aсмелый
+bona fide user*WAдобросовестныйNпользователь
+bond house*WAинвестиционныйNбанк
+bond yield*WNдоход по облигациям
+bond yields*Wnдоход по облигациям
+bonded goods*WKнеAоплаченный пошлинойNгруз
+bonded warehouse*WAбондовыйNсклад
+bonus fund*WAпремиальныйNфонд
+bonus rebate*WAбонуснаяNскидка
+booking list*Nбукинглист
+booking note*Nбукингнот
+booking of cargo*WNбукировка груза
+booklet of a firm*WAфирменныйNбуклет
+border customhouse*WAпограничнаяNтаможня
+border point*WAпограничныйNпункт
+border trade*WAприграничнаяNторговля
+bordereau de expedition*WAплатежнаяNведомость
+borrowed capital*WAзаемныйNкапитал
+borrowed funds*WAпривлеченныеnсредство
+breach of contract*WNнарушение договора;разрыв
+breach of promise*WNнарушение обязательства
+breeding abilities*WAплеменныеnкачество
+bring a suit*WVпредъявлять иск
+bring a suit against*WVпредъявить иск
+bring an action against*Vвозбудить дело против
+brisk trade*WAбойкаяNторговля
+brockerage*NNWAброкерскиеnоперация/;комиссионные
+broker fee*WAагентскоеNвознаграждение
+broker firm*WAброкерскаяNфирма
+brokerage*NNWAброкерскйNкомиссия
+budget year*WAбюджетныйNгод
+budgetary appropriations*WAбюджетныеnассигнование
+buffer stocks*WAбуферныеnзапас
+bulk cargo*WAнавалочныйNгруз/;насыпной груз;неупакованный груз;груз россыпью
+bulk purchases*WAмассовыеnзакупка
+bunkering clause*WAбункернаяNоговорка
+burden of taxation*WAналоговоеNбремя
+business accounting*WAкоммерческаяnработа
+business activities*WAделоваяnоперация
+business address*WNадрес предприятия
+business application*WAкоммерческоеNприменение
+business failure*WAнеудавшийсяNсделка
+business failures*WAнеудавшийсяnсделка
+business initiative*WAпредпринимательскаяNинициатива
+business investment*Wnкапиталовложение предприятий
+business liquidation strategy*WNстратегия ликвидации бизнеса
+business trip*WAслужебнаяNкомандировка
+business trip abroad*WAзарубежнаяNкомандировка
+businesses*nпредприятие
+businessmen*WAделовыеnлюди
+buyer rate*WNкурс покупателя
+buying broker*WNброкер по покупке
+buyout*NаукционAпокупательский
+c & f*Nкаф
+c.i.f*Nсиф
+c.i.f.*Nсиф
+c.i.f. charges police*WNполис страхования расходов по сделкам сиф
+calculation documents*WAрасчетнаяNдокументация
+calculation of interest*WNначисление процентов
+call deposit*WNвклад до востребования
+call loan*WAонкольнаяNссуда
+call option*WNопцион покупателя
+call to my house*WVзвонить домой
+call transaction*WAонкольнаяNсделка
+canal toll*WAканальныйNсбор
+cancellation of a contract*WNаннулирование контракта
+cancellation of a license*WNаннулирование лицензии
+cancellation of an order*WNаннулирование заказа
+capital amount*WAосновнаяNсумма
+capital appropriations*Wnассигнование на капиталовложения
+capital export*WNвывоз капитала
+capital export national debt*WAкапитальныйAвнешнийAгосударственныйNдолг
+capital gain*WNдоход от прироста капитала
+capital gains*Wnдоход от прироста капитала
+capital investment*nкапиталовложение
+capital investments*WAкапитальныйnвложение
+capital levy*WNналог на капитал
+capital market*WNрынок капитала
+capital outlay*Wnрасход капитала
+capital point*WAглавныйNвопрос
+capital property*WAкапитальноеNимущество
+capital spending*Nкапиталовложение
+capital spendings*nкапиталовложение
+captain declaration*WNдекларация капитана
+card advance*Nаванс
+care of securities*WNхранение ценных бумаг
+cargo certificate*WAгрузовойNсертификат
+cargo damaged during transportation*WAповрежденный в путиNгруз
+cargo damaged en route*WAповрежденный в путиNгруз
+cargo damaged in storage*WAповрежденный во время храненияNгруз
+cargo dues*WAгрузовойnсбор
+cargo handling*Aпогрузочно-разгрузочный
+cargo in bulk*WAнавалочныйNгруз/;насыпной груз
+cargo in transit*WAтранзитныйNгруз
+cargo option*WAгрузовойNопцион
+cargo owner*Nгрузовладелец
+cargo pallet*WAгрузовойNподдон
+cargo police*WAфрахтовыйNполис
+cargo pool*WAгрузовойNпул
+carry out investment*WVосуществлять капиталовложения
+carry-over funds*WAналичныеNсредства
+cartonised*:
+cartonised cargo*WNгруз в коробках
+case-law*NNWAсудебныйNпрецедент
+caselaw*NNWAсудебныйNпрецедент
+cash a cheque*WVполучать деньги по чеку
+cash and account information*WNинформация о наличности и счете
+cash book*WNжурнал кассовых операций
+cash department*Nкасса
+cash deposit*WAденежныйNвзнос
+cash discounting*WAкартельнаяNцена
+cash dispansing bank teller*WAавтоматическийNкассир
+cash expenditures*WAденежныеnзатрата
+cash flow*WNскидка за платеж наличными
+cash flow statement*WNдвижение наличных средств
+cash fund*WAденежнныйNфонд
+cash in hand*Nналичность
+cash income*WAденежныйNдоход
+cash indemnity*WAденежнаяNкомпенсация
+cash letter of credit*WNаккредитив в наличной форме
+cash loan*WAденежныйNзаем
+cash on delivery*Dналоженным платежом
+cash order*WAкассовыйNордер
+cash paywent*WNбаланс оборотных средств
+cash purchase*WNпокупка за наличные
+cash receipts*WAкассовыеnпоступление
+cash receipts and payments book*WAприходно-расходнаяNкнига
+cash resources*WAденежныеnресурс
+cash security*WNденежноеNобеспечение
+cash servises*WAкассовоеNобслуживание
+cash stamps*WNсертификат;гербовая бумага
+cash transaction*WAкассоваяNсделка
+central bank*WAцентральныйNбанк
+certificate of audit*WNакт проверки
+certificate of damage*WAрекламационныйNакт
+certificate of deposit*WAдепозитныйNсертификат
+certificate of expert's examination*WNакт экспертизы
+certificate of origin*WNсвидетельство о происхождении
+certificate of pledge*WAзалоговыйNсертификат
+certification*NсертификацияAсертификационный
+certification documents*WAсертификационнаяNдокументация
+certification of products*WNсертификация продукции
+certification test*WAаттестационныйNиспытание
+certified copy*WAзавереннаяNкопия
+certified products*WAсертифицируемаяNпродукция
+certified public accountant*Nаудитор
+certifying commission*WAаттестационнаяNкомиссия
+cessavit*NNWNиск о выселениии арендатора
+charge*Nпопечение
+charter of a joint stock company*WNустав акционерного общества
+charter of a joint verture*WNустав совместноно предприятия
+charter party*WNдоговор о фрахтовании судна
+chartered accountant*WNконсультант по налогам
+charterer*Nфрахтователь
+charterer agent*WNагент фрахтователя
+chartering*GфрахтоватьNфрахтAфрахтовый
+chartering broker*WAфрахтовыйNброкер
+chartering fee*WAфрахтовыйNсбор
+chartering order*WAфрахтовыйNордер
+check investment*WVограничивать капиталовложения
+check of accounts*WNпроверка бухгалтерского учета
+cheque in settlement*WAрасчетныйNчек
+cheque payable to a named person*WAименнойNчек
+cheque rate*WAчековыйNкурс
+choice of market segments*WNвыбор целевых сегментов рынка
+choice of marketing means*WNвыбор маркетинговых средств
+cif*Nсиф
+circular letter*WAциркулярноеNписьмо
+circular letter of credit*WAциркулярныйNаккредитив
+circulate*Vобращаться;циркулировать
+circulating*GциркулироватьAоборотный
+circulating assets*WAоборотныеnсредство
+circulating capital*WAоборотныйNкапитал
+civil case*WAгражданскоеNдело
+civil law*WAгражданскоеNправо
+civil liability*WAгражданскаяNответственность
+civil offense*WAгражданскоеNправонарушение
+civil procedure laws*WAгражданскоеNзаконодательство
+civil responsibility*WAгражданскаяNответственность
+civil rights*WAгражданскиеNправа
+claim damages*WVтребовать возмещения убытков
+claim for a discovery*WNзаявка на изобретение
+claim for an invention*WNзаявка на изобретение
+claim for damages*WNиск об убытках
+claim to property*WNвзыскание на имущество
+claimant*Nистец
+clause*Nстатья;пункт;оговорка
+clause in a bill of lading*WNотметка в коносаменте
+claused*:
+claused bill of lading*WNконосамент с оговорками
+clean acceptance*WAбезусловныйNакцепт
+clean bill of exchange*WAнедокументированныйNвексель
+clean credit*WAтоварныйNаккредитив
+clean encashment*WAчистоеNинкассо
+clean letter of credit*WAчистыйNаккредитив
+clean policy*WAчистыйNполис
+clearance based on a general license*WNпропуск имущества по генеральному разрешению
+clearance of transit goods*WNпропуск транзитных товаров
+clearing*NклирингAклиринговый
+clearing account*WAклиринговыйNсчет
+clearing agreement*WAклиринговоеNсоглашение
+clearing bank*WNклиринг -Nбанк
+clearing currency*WNвалюта расчета
+clearing house*WAклиринговаяNпалата
+clearing house association*WNaссоциация банков членов расчетной палаты
+clearing office*WAклиринговаяNпалата
+clearing settlement*WAбезналичныйNрасчет
+closing down of an enterprise*WNликвидация предприятия
+closing out a contract*WNликвидация контракта
+closing price*WNкурс на момент закрытия биржи
+closing quotation*WNкотировка при закрытии биржи
+closing rate*WAзаключительныйNкурс
+coastal trade*WAприбрежнаяNторговля
+coasting trade*WAприбрежнаяNторговля/;каботаж
+cocoa exchange*WNбиржа какао
+cod*Dналоженным платежом;треска
+coefficient of discounting*WNкоэффициент дисконтирования
+coffee exchange*WNбиржа кофе
+collateral acceptance*WAгарантийныйNакцепт
+collateral loan*WNссуда под двойное обеспечение
+collection against bank cable notification*WAтелеграфноеNинкассо
+collection of a loan*WNвзыскание ссуды
+collection of commercial documents*WNинкассация коммерческих документов
+collection of documents*WNинкассо против документов
+collection of duties*WNвзыскание пошлин
+collection of payments*WNинкассо
+collection order*WAинкассовоеNпоручение
+collection transaction*WAинкассоваяNсделка
+collection with immediate payment*WNинкассо с немедленной оплатой
+collection with prior acceptance*WNинкассо с предварительным акцептом
+collection with subsequent acceptance*WNинкассо с последующим акцептом
+collective currency*WAколлективнаяNвалюта
+collective display*WAсовместнаяNвыставка
+collective investment fund*WAуставныйNфонд
+commandite*NNWAкоммандитноеNтоварищество
+commanditer*Nкоммандитист
+commercial credit*WAкоммерческийNкредит
+commercial dispute*WAторговыйNспор
+commercial draft*WAкоммерческаяNтратта
+commercial events*WAкоммерческиеnмероприятие
+commercial expert*WAторговыйNэксперт
+commercial invoice*WAкоммерческаяNфактура
+commercial law*WAторговоеNправо
+commercial letter of credit*WAтоварныйNаккредитив
+commercial paper*WAкраткосрочныйAкоммерческийNвексель
+commercial papers*WAкоммерческийnбумага
+commercial payments*WAторговыеnплатеж
+commercial port*WAторговыйNпорт
+commercial range of goods*WAтоварныйNассортимент
+commercial realization*WAкоммерческаяNреализация
+commercial register*WAторговыйNрегистр
+commercial risk*WAкоммерческийNриск
+commercial rival*WAторговыйNконкурент
+commercial secrets*WAкоммерческаяNтайна
+commercial terms*WAкоммерческиеnусловие
+commercial traveller*Nкоммивояжер
+commercialism*NNWAторгашескийNдух
+comminity of goods*WNобщность владения имуществом
+commission for collection*WAинкассоваяNкомиссия
+commission for the obligation*WNкомиссия за обязательство
+commission percentage*WAкомиссионныйNпроцент
+commissioning tests*WAпусковыеnиспытание
+commitment free*WNкомиссия за обязательство предоставить кредит
+commodities and materials*WAтоварно-материальныеnценность
+commodity bill*WAподтоварныйNвексель
+commodity circulation*Nтоварооборот
+commodity credit*WAтоварныйNкредит
+commodity department*WAтоварноеNотделение
+commodity dumping*WAтоварныйNдемпинг
+commodity exchange*WAтоварнаяNбиржа
+commodity expert*Nтоваровед
+commodity futures*WAсрочныеNсделки с товарами
+commodity introduction*WNвнедрение товара
+commodity item*WAтоварнаяNпозиция
+commodity nomenclature*WNноменклатура товаров
+commodity positioning*WNпозиционирование товара на рынке
+commodity producer*Nтоваропроизводитель
+commodity reserves*WAтоварныеnрезерв
+commodity stocks*WAтоварныеnзапас
+common production profitability*WAобщаяNрентабельность производства
+common share*WAобыкновеннаяNакция
+common shares*WAобыкновенныеnакция
+common stock*WAобыкновенныеnакция
+company credit*WAфирменныйNкредит
+comparable prices*WAсопоставимыеnцена
+compensable accident*NNWAнесчастныйNслучай с компенсацией
+compensation basis*WAкомпенсационнаяNоснова
+compensation deal*WAкомпенсационнаяNсделка
+compensation duty*WAкомпенсационнаяNпошлина
+compensation expenses*WAкомпенсационныеnрасход
+compensation for breakage*WNвозмещение за поломку
+compensation for damage*WNвозмещение ущерба
+compensation for expenses*WNвозмещение расходов
+compensation for losses*WNвозмещение убытков
+compensation in kind*WAтоварнаяNкомпенсация
+compensation transaction*WAкомпенсационнаяNсделка
+compensatory credit*WAкомпенсационныйNкредит
+compensatory duty*WAкомпенсационнаяNпошлина
+compensatory trade*WAкомпенсационнаяNторговля
+completion for and submission to*WNзаполнениеCиNподача документов
+compound arbitration*WAмногостороннийNарбитраж
+comprehensive policy*WNполис комбинированного страхования
+comprehensive programme*WAкомплекснаяNпрограмма
+compulsory clearing*WAпринудительныйNклиринг
+computed interest*WAначисленныеnпроцент
+concentrated marketing*WAконцентрированныйNмаркетинг
+concentric diversification*WAконцентрическаяNдиверсификация
+concept of goods*WNконцепция товара
+concept of marketing*WNконцепция маркетинга
+concept of production improvement*WNконцепция совершенствования производства
+concept of sale*WNконцепция сбыта
+concept of social and ethic aspects of marketing*WNконцепция социально-этического маркетинга
+concerned parties*WAзаинтересованнаяnсторона
+conditional acceptance*WAусловныйNакцепт
+conference line*WAконференциальнаяNлиния
+confirmed letter of credit*WAподтвержденныйNаккредитив
+congestion of cargo*WNскопление грузов
+consignation*Nконсигнация
+consignee*Nгрузополучатель;консигнатор
+consigner*Nгрузоотправитель
+consignment*Nгруз;консигнацияAконсигнационный
+consignment agent*WAконсигнационныйNагент
+consignment business*WAконсигнационнаяNсделка
+consignment goods centre*WAконсигнационныйNцентр
+consignment note*WAтранспортныйNконосамент
+consignment of goods*WNпартия товара
+consignor*Nгрузоотправитель;консигнант
+consolidated budget*WAсводныйNбюджет
+consolidated report*WAсводныйNотчет
+constituent documents*WAучредительныеnдокумент
+construction and assembly firm*WAстроительно-монтажнаяNфирма
+construction project*WNпроект строительства
+consuetudinary law*WAобычноеNправо
+consular invoice*WAконсульскийNсчет
+consultation*NконсультацияAконсультационный
+consultation services*WAконсультационныеnуслуга
+consulting engineering firm*WAинженерно-консультационнаяNфирма
+consulting firm*WAконсультационнаяNфирма
+consumer acceptance*WAрыночноеNпризнание потребителя
+consumption fund*WNфонд потребления
+consumption model*WNмодель сферы потребления
+consumption models*Wnмодель сферы потребления
+contango*NWNпроцент за отсрочку платежа
+contango-day*NWNдата отсрочки платежа
+contangoes*nWnпроцент за отсрочку платежа
+contempt of court*WNнеуважение к суду
+contingent costs*WAнепредвиденныеnрасход
+contingent fee*WAнепредвиденнаяNплата
+contingent fund*WNрезерв для непредвиденных расходов
+contract agreement*WNдоговор подряда
+contract award*WNвыдача заказа
+contract cargo*WAконтрактныйNгруз
+contract clause*WNстатья контракта
+contract for construction work*WNподряд на выполнение строительных работ
+contract for mutual deliveries*WNконтракт на взаимные поставки
+contract for services*WNконтракт на оказание услуг
+contract for the supply*WNконтракт на поставку
+contract form*WNформа контракта
+contract law*WAдоговорноеNправо
+contract note*WAдоговорнаяNрасписка
+contract obligations*WAконтрактныеnобязательство
+contract of employment*WNдоговор о найме
+contract of marine insurance*WNдоговор морского страхования
+contract of purchase*WNдоговор купли-продажи
+contract of sale*WNдоговор купли-продажи
+contract of sea carriage*WNдоговор морской перевозки
+contract on a compensatory basis*WNконтракт на компенсационных условиях
+contract on immediate delivery terms*WNсделка с немедленной поставкой
+contract payments*WNвыплаты по контракту
+contract police*WAдоговорнойNполис
+contract price*WAконтрактнаяNцена
+contract terms*Wnусловие контракта
+contract value*WAконтрактнаяNстоимость
+contracting party*Nконтрагент
+contractual deliveries*WAдоговорныеnпоставка
+contractual dispute*WNспор по контракту
+contractual fine*WAдоговорныйNштраф
+contractual license*WAдоговорнаяNлицензия
+contractual licensing*WAдоговорноеNлицензирование
+contractual sanctions*WAдоговорныеnсанкция
+contribution to the budget*WNвзнос в бюджет
+controlling block of shares*WAконтрольныйNпакет акций
+controlling interest*WAконтрольныйNпакет акций
+controlling person*Nруководитель
+contumacy*NWNнеявка в суд
+conventional duty*WAконвенционнаяNпошлина
+conventional tariff*WAконвенционныйNтариф
+conversion according to the official exchange rate*WNпересчет по официальному курсу
+conversion rate*WNкурс перевода
+convertibility*WNконвертируемость
+convertible currency*WAконвертируемаяNвалюта
+convertion marketing*WAконверсионныйNмаркетинг
+conveyancer*NWNнотариус по передаче имущества
+conveyancing*NWNсоставление нотариальных актов по передаче имущества
+cooperation agreement*WNдоговор о сотрудничестве
+cooperation in production*WAпроизводственнаяNкооперация
+cooperation ties*WAкооперационныеnсвязь
+cooperative bank*WAкооперативныйNбанк
+cooperative deliveries*WAкооперативныеnпоставка
+cooperative production*WAкооперированноеNпроизводство
+copy of a bill*WNэкземпляр векселя
+copyright act*WNзакон об авторском праве
+copyright inquiry*WNизучение авторского права
+copyright issues*Wnразногласие по авторскому праву
+copyright law*WNзакон об авторском праве
+corn-exchange*NNWAзерноваяNбиржа
+corner the market*WVвладеть рынком
+corporate body*WAкорпоративнаяNорганизация
+corporate town*WNгород с самоуправлением
+correspondence relation*WAкорреспондентскийnотношение
+correspondent account*WAкорреспондентскийNсчет
+correspondent accounts*WAкорреспондентскиеnсчет
+correspondent bank*WNбанк -Nкорреспондент
+correspondent relations with account*WAкорреспондентскийnотношение со счетом
+corresponding banks*Wnбанк корреспонденты
+corresponding patent*WNпатент -Nаналог
+corrupt in blood*WAутерявший гражданские права
+cost & freight*WNстоимостьСиNфрахт
+cost absorption*WNпоглощение издержек
+cost accounting*WNведение отчетности
+cost and freight*WNстоимостьСиNфрахт
+cost and freight price*WNцена КАФ
+cost benefit*WAфинансовыеnльгота
+cost estimate*WAстоимостнаяNоценка
+cost factor*WAэкономическийNпоказатель
+cost insurance freight*WNстоимость страхования фрахта
+cost insurance freight price*WNцена СИФ
+cost management*WNуправление расходами
+cost of borrowing*WNстоимость кредита
+cost of goods and services*WNстоимость товаров и услуг
+cost of living index*WNиндекс прожиточного минимума
+cost risk analysis*WAсравнительныйNанализ затрат и степени риска
+cost sheet*WNведомость издержек
+cost-benefit*NNWnзатратаCиnдоход
+cost-benefit analysis*WNанализ затрат и доходов
+costs as much to*Wvстоит столько жеPПна
+cotton exchange*WAхлопковаяNбиржа
+counsel for the defence*Nзащитник
+count of law*Nсуд
+counter action*WAвстречныйNиск
+counter bill*WAвстречныйNвексель
+counter claim*WAвстречныйNиск
+counter mark*WAконтрольноеNклеймо
+counter offer*WAвстречноеNпредложение
+counter planning*WAвстречноеNпланирование
+counter purchases*WAвстречныеnзакупка
+counter-claim*NNWAвстречныйNиск
+counter-offer*Nконтрпредложение
+counter-purchases*NNWAвстречныеnзакупка
+counteractive marketing*WAпротиводействующийNмаркетинг
+countersign*ZподписыватьNконтрассигнация;пароль
+countersignatory*Nконтрассигнант
+counting room*Nбухгалтерия
+counting-house*Nбухгалтерия
+cover for a debt*WNпокрытие долга
+cover under*WVвозмещатьPДпо
+coverage under*WNкомпенсацияPДпо
+crash cost estimate*WNоценка стоимости аварии
+crash time estimate*WNоценка стоимости аварии
+crated*:
+crated cargo*WNгруз в обрешетке
+credit accommodation*Nкредит
+credit account*WAкредитныйNсчет
+credit against goods*WAтоварныйNкредит
+credit against the guarantee*WNкредит под гарантию
+credit agreement*WAкредитноеNсоглашение;договор
+credit and settlement services*WAкредитно-расчетноеNобслуживание
+credit blockade*WAкредитнаяNблокада
+credit card association*WNассоциация по страхованию кредитов
+credit counselling*WNконсультация по кредиту
+credit for capital investments*WNкредит на капитальные вложения
+credit funds*WAкредитныйnсредство
+credit grace period*WAльготныйNпериод кредита
+credit indebtedness*WNзадолжность по кредиту
+credit insurance*WNстрахование кредитов
+credit limit*WNлимит кредитования
+credit market*WAкредитныйNрынок
+credit money*WAкредитныеNденьги
+credit note*WAкредитовоеNавизо
+credit of an account*WNкредит счета
+credit on easy terms*WNкредит на льготных условиях
+credit payments period*WNсрок погашения кредита
+credit policy*WAкредитнаяNполитика
+credit recipient*WNполучатель кредита
+credit requirements*WAкредитныеnпотребность
+credit resources*WAкредитныеnресурс
+credit risk*WAкредитныйNриск
+credit slip*WAприходныйNордер
+credit standing*Nкредитоспособность
+credit sum*WNсумма кредита
+credit use period*WNсрок использования кредита
+credit-note*Nкредит-нота
+crediting against*WNкредитованиеPВпод
+crediting against commodities*WNкредитование под товары
+crediting against commodities in ports*WNкредитование под товары, находящиеся в портах
+crediting against commodities in transit*WNкредитование под товары, находящиеся в пути
+crediting against commodities in warehouses*WNкредитование под товары, находящиеся на складах
+crediting and settlement operations*WAкредитно-расчетныеnоперация
+crediting of export transactions*WNкредитование экспортных операций
+creditor bank*WNбанк -Nкредитор
+creditor indebtedness*WAкредиторскаяNзадолжность
+creditor institution*WAкредитующееNучреждение
+creditworthy*Aкредитоспособный
+cross license*WAперекрестнаяNлицензия
+cross licensing*WAперекрестноеNлицензирование
+cross-border merges*Wnслияние зарубежных предприятий
+cross-rate*NNWAвалютныйNкурс
+crossed cheque*WAкроссированныйNчек
+crossing of a cheque*WNкроссирование чека
+crossing point*WAпропускнойNпункт
+crown law*WAуголовноеNправо
+currency account*WAвалютныйNсчет
+currency allocations*WAвалютныеnотчисление
+currency arbitrage*WAвалютныйNарбитраж
+currency area*WAвалютнаяNзона
+currency clause*WAвалютнаяNоговорка
+currency clearing*WAвалютныйNклиринг
+currency control*WAвалютныйNконтроль
+currency convertibility*WNконвертируемость валюты
+currency credit*WAвалютныйNкредит
+currency crediting*WAвалютноеNкредитование
+currency crisis*WAвалютныйNкризис
+currency declaration*WAвалютнаяNдекларация
+currency deductions*WAвалютныеnотчисление
+currency dumping*WAвалютныйNдемпинг
+currency earnings*WAвалютнаяNвыручка
+currency fluctuations*WAвалютныеnколебание
+currency intervention*WAвалютнаяNинтервенция
+currency liquidity*WAвалютнаяNликвидность
+currency loan*WAвалютныйNзаем
+currency note*WAденежныеNзнак
+currency notes*WAденежныеnзнак
+currency of a bill*WNвалюта векселя
+currency of a contract*WNвалюта контракта
+currency of a transaction*WNвалюта сделки
+currency of an account*WNвалюта счета
+currency of credit*WNвалюта кредита
+currency of payment*WNвалюта платежа
+currency of price*WNвалюта цены
+currency of transfer*WNвалюта перевода
+currency parity*WAвалютныйNпаритет
+currency pegged*WAпривязаннаяNвалюта
+currency protecting duty*WAвалютнаяNпошлина
+currency quotation*WAвалютнаяNкотировка
+currency rate*WAвалютныйNкурс
+currency receipt*WAвалютнаяNвыручка
+currency receipts*WAвалютнаяNвыручка
+currency regulations*WAвалютныеnправило
+currency reservation*WAвалютнаяNоговорка
+currency reserves*WAвалютныеnзапас
+currency returns*WAвалютнаяNвыручка
+currency saving*WAвалютнаяNэкономия
+currency security*WAвалютноеNобеспечение
+currency self-repayment*WAвалютнаяNокупаемость
+currency speculation*WAвалютнаяNспекуляция
+currency unit*WAвалютнаяNединица
+currency values*WAвалютныеnценность
+custody bill of lading*WAскладскойNконосамент
+custom dues*WAтаможеннаяNпошлина
+custom entry*WAтаможеннаяNдекларация
+custom of trade*WNправило торговли
+customary law*WAобычноеNправо
+customer acceptance*WNприeмка заказчика
+customhouse fees*WAтаможенныеnсбор
+customs administration*WAтаможенноеNуправление
+customs blockade*WAтаможеннаяNблокада
+customs bond*WAтаможеннаяNзакладная
+customs clearance*WAтаможеннаяNочистка
+customs clearing*WAтаможенноеNоформление
+customs control*WAтаможенныйNконтроль
+customs delaration*WAтаможеннаяNдекларация
+customs documents*WAтаможенныеnдокумент
+customs duty*WAтаможенныеNпошлина
+customs examination*WAтаможенныйNдосмотр
+customs in trade*WAторговыеnобычай
+customs inspector*WAтаможенныйNинспектор
+customs license*WAтаможеннаяNлицензия
+customs luggage inspection*WAтаможенныйNосмотр
+customs of the port*WAпортовыеnобычай
+customs permit*WNразрешение таможни
+customs policy*WAтаможеннаяNполитика
+customs privileges*WAтаможенныеnльгота
+customs surveyor report*WNакт таможенного досмотра
+customs union*WAтаможенныйNсоюз
+customs warrant*WAтаможенныйNваррант
+cutting inflation*GWGснижать инфляцию/WNснижение инфляции
+cutting inventories*WNснижение оборотных фондов
+date of entering into force*WNвремя вступления в силу
+day trading*WNдень продажи
+dead assets*WAмертвыйnактив
+dead stock*Nзатоваривание
+deadfreight*NNWAмертвыйNфрахт
+dear friend*WAдорогойNдруг
+dear friends*WAдорогиеnдрузья
+dear sir*WAмилостивыйNгосударь
+dear sirs*WAуважаемыеnгоспода
+debenture*Nоблигация
+debet*ZдебитоватьNдебитAдебетовый
+debet note*WAдебетовоеNавизо
+debit*ZдебитоватьNдебитAдебетовый
+debit note*Nдебет-нота
+debit slip*WAрасходныйNордер
+debt of an enterprise*WNзадолжность предприятия
+debt owed by*WNзадолженностьPР
+debt securities*nвексель
+debt security*Nвексель
+debt-laden*AWAобремененный долгами
+debtor*Nдолжник;дебиторAдебиторский
+debtor indebtedness*WAдебиторскаяNзадолжность
+deck cargo*WAпалубныйNгруз
+declared profit*WAобъявленнаяNприбыль
+deductible*Nфраншиза
+deductibles*Nфраншиза
+deduction from income*WNвычет из прибыли
+deduction from payments*WNудержание из платежей
+deductions*nотчисление
+deductions from profit*nотчисление от прибыли
+deductions from profit after tax*nотчисление от прибыли после налогообложения
+deductions from profit before tax*nотчисление от прибыли до налогообложения
+deed of cession*WNакт об уступке
+deed of conveyance*WNакт о передаче правового титула
+deed of protest*WNакт о протесте
+default of credit*WNнеуплата задолжности по кредиту
+defendant before the court*WNответчик в суде
+defer payments*WVотсрочивать платежи
+deferment of repayment of a loan*WNотсрочка погашения ссуды
+deficit in foreign exchange*WNдефицит валюты
+deficit of the balance of payments*WNдефицит платежного баланса
+deficit of the balance of trade*WNдефицит торгового баланса
+deficit on current account*WNдефицит текущего счета
+del credere*Nделькредере
+del credere agent*WNброкер делькредере
+delay in opening a letter of credit*WNзадержка в открытии аккредитива
+delay in payment*WNзадержка платежа
+delay in shipment*WNзадержка в отгрузке
+delivery against acceptance*WNвыдача против акцепта
+delivery against payment*WNвыдача против платежа
+delivery by lots*WNпоставка партиями
+delivery c and f*WNпоставка на условиях каф
+delivery cif*WNпоставка на условиях сиф
+delivery fob*WNпоставка на условиях фоб
+delivery fob airport*WNпоставка на условиях фоб аэропорт
+delivery fob plant*WNпоставка на условиях франко-завод
+delivery for to the frontier of the seller's country*WNпоставка на условиях франко-вагон граница страны продавца
+delivery free exhibition*WNпоставка на условиях франко-выставка
+delivery list*WAкомплектовочнаяNведомость
+delivery of the balance of goods*Nдопоставка
+delivery on credit terms*WNпоставка на условиях кредита
+delivery permit*WNразрешение на поставку
+delivery schedule*WNплан поставок
+demand*ZтребоватьNспрос
+demand analysis*WNанализ спроса
+demand and consumption*WNспросCиNпотребление
+demand bill*WAпредъявительскийNвексель
+demand deposit*WNвклад до востребования
+demand for credit*WNспрос на кредит
+demand for foreign currency*WNпотребность в иностранной валюте
+demand for goods*WNспрос на товары
+demand from*WVтребоватьPРот
+demand making*WNформирование спроса
+demand pinch*WNповышение спроса
+demand research*WNисследование спроса
+demand saturation*WNнасыщение спроса
+demarketing*Nдемаркетинг
+demise*ZпередаватьNпередача
+demise charter*Nдимайз-чартер
+denominination*Nдостоинство;купюра
+dependent demand*WAзависимыйNспрос
+deposit*Zдепонировать;вкладыватьNдепозит;вкладAдепозитный
+deposit account*AдепозитныйNсчет
+deposit at short notice*WNвклад до востребования
+deposit bank*WAдепозитныйNбанк
+deposit receipt*WAдепозитнаяNквитанция
+depositary*Nдепозитарий
+deposited*EдепонироватьAдепонированный
+deposited shares*WAдепонированныеnакция
+deposited stocks*WAдепонированныеnакция
+depositing*GдепонироватьNдепонирование
+deposition*Nдепонирование
+depositor*Nдепонент;вкладчик
+depreciated currency*WAобесцененнаяNвалюта
+depreciation*NамортизацияAамортизационный
+depreciation costs*WAамортизационныеnрасход
+depreciation funds*WAамортизационныйNфонд
+depreciation of money*WNобесценение денег
+depth of commodity nomenclature*WNглубина номенклатуры товаров
+deputy chairman*WNзаместитель председателя
+deputy director*WNзаместитель директора
+derived demand*WAпроизводственныйNспрос
+design and construction work*WAпроектно-конструкторскиеnработа
+design and exploration work*WAпроектно-изыскательскиеnработа
+design documentation*WAпроектнаяNдокументация
+designated purpose*WAцелевоеNназначение
+designing estimates*WAпроектно-сметнаяNдокументация
+detention of a vessel*WNзадержание судна
+detention of cargo*WNзадержание груза
+detrimental clause*WNпометка в коносаменте
+devalorization*Nдевалоризация
+devalorize*Vдевалоризовать
+devaluate*Vдевальвировать
+devalue*Vдевальвировать
+devalued*Eдевальвировать
+devalued currency*WAобесцененнаяNвалюта
+developing marketing*WAразвивающийсяNмаркетинг
+development fund*WNфонд развития
+difference in rates of exchange*WAкурсоваяNразница
+difference in taxes*WAналоговаяNразница
+differential duty*WAдифференциальнаяNпошлина
+differentiation strategy*WNстратегия дифференциации
+direct bill of lading*WAпрямойNконосамент
+direct cooperation*WAпрямаяNкооперация
+direct costs*WAпрямыеnзатрата
+direct crediting*WAпрямоеNкредитование
+direct economic connections*WAпрямыеAхозяйственныеnсвязь
+direct exchange*WAпрямойNобмен
+direct expenses*WAпеременныеnиздержка
+direct sales*WVперепоручать продажу
+direct tax*WAпрямойNналог
+directed cargo*WAадресованныйNгруз
+disbursement*NвыплатаAдисбурсментский
+disbursement account*WAдисбурсментскийNсчет
+disbursements*nрасход
+discharge*Nвыгрузка;уплата;погашение
+disciplinary proceeding*WAдисциплинарноеNразбирательство
+disciplinary tribunal*WAдисциплинарныйNтрибунал
+disclaimer*Nотказ
+discount*ZучитыватьNскидка;дисконт
+discount house*WAвексельнаяNконтора
+discount policy*WAдисконтнаяNполитика
+discount price*WAсниженнаяNцена
+discount rate*WAучетныйNпроцент
+discount sale*WNпродажа со скидкой
+discount transaction*WAучетнаяNсделка
+discounted*Eучитывать
+discounted bill*WAучтенныйNвексель
+discounted price*WNцена со скидкой
+discounting*GучитыватьNдисконтирование
+discounts*nскидка;учтенные векселя
+discovery of the loss*WNобнаружение убытка
+discrepancy in exchange*WAкурсовойNперекос
+discretionary account*WAброкерскийNсчет
+discrimination*NдискриминацияAдискриминационный
+discriminatory duty*WAдискриминационнаяNпошлина
+discriminatory pricing*WNустановление дискриминационных цен
+dispatch of cargo*WNотправка груза
+dispersion od responsibility*WNвозложение ответственности на многих
+display advertising*WAизобразительнаяNреклама
+display of goods*WNпоказ товара
+disposable income*WAрасполагаемыйNдоход
+distribution agreement*WNсоглашение об оптовом размещении
+distribution grant*WAраспределяемаяNсубсидия
+distribution point*WNпункт дистрибьютерства
+diversification*Nдиверсификация;расхождение
+dividend*Nдивиденд;делимое
+divisible letter of credit*WAделимыйNаккредитив
+division of labour*WNразделение труда
+dock dues*WAдоковыйNсбор
+document against acceptance*WNдокумент против акцепта
+document of carriage*WAперевозочныйNдокумент
+documentary collection*WAдокументарноеNинкассо
+documentary draft*WAдокументированнаяNтратта
+documentary encashment*WAдокументарноеNинкассо
+documentary letter of credit*WAдокументарныйNаккредитив
+dollar acceptance*WAакцептованныйAдолларовыйNвексель
+dollar bill*WAбумажныйNдоллар
+dollar round trip*WAкруговоеNдвижение долларов
+domestic acceptance*WAакцептованныйNвексель в местном обороте
+domestic exhibitor*WAотечественныйNэкспонент
+domicile*Nдомициль
+domiciled*Aдомицилированный
+domiciled bill*WAдомицилированныйNвексель
+dormant account*WAнеактивныйNдепозит
+dormitory accommodation*Nобщежитие
+downturn*Nспад
+draft discounting*WNучет тратт
+drawee*Nтрассат
+drawee of a bill*Nвекселеполучатель
+drawer*Nтрассант;секция
+drawer of a bill*Nвекселедатель
+drawer of a cheque*Nчекодатель
+drawing*GрисоватьNпротягивание;чертеж;трассирование
+drawing up of documents*WNоформление документов
+duty free*Aбеспошлинный
+duty free exportation*WAбеспошлинныйNвывоз
+duty free importation*WAбеспошлинныйNввоз товаров
+duty free zone*WAбеспошлиннаяNзона
+duty on import*WAимпортнаяNпошлина
+duty rate*WAтаможенныеnтариф
+duty-free*AAWKнеAоблагаемый пошлиной
+duty-paid*AAWAоплаченный пошлиной
+each quarter*WAкаждыйNквартал
+early-bid*:
+early-bid price*WNцена проникновения на рынок
+earnings reports*Wnсообщение о зарплате
+economic activity*WAхозяйственнаяNдеятельность
+economic and mathematical*Aэкономико-математический
+economic area*WAэкономическаяNзона
+economic blockade*WAэкономическаяNблокада
+economic boom*WAэкономическийNбум
+economic boycott*WAэкономическийNбойкот
+economic incentive*WAэкономическийNстимул
+economic incentives fund*WNфонд экономического стимулирования
+economic requirements*WAэкономическиеNпотребности
+economic training*WAэкономическийNтренинг
+econonic integration looming*WNпреувеличение экономической интеграции
+effecting payments*WNисполнение платежей
+effective date*WNдата вступления в силу
+effective demand*WAплатежеспособныйNспрос
+efficiency of investments*WNэффективность капиталовложений
+eligible acceptance*WAакцептованныйNвексель ,Aприемлемый для переучета
+elude detection*WVускользать от наблюдения
+elude the vigilance*WVобманывать бдительность
+emergency purchase*WAэкстреннаяNзакупка
+emitter*Nэмитент
+employment company*Nкомпания по найму
+encashment*Nинкассо
+encashment bill*WAкомиссионныйNвексель
+endorse*Vиндоссировать
+endorsed*Eиндоссировать
+endorsed bill*WNвексель с передаточной надписью
+endorsee*Nиндоссат
+endorsement*Nиндоссамент;подтверждение
+endorsement without recourse*WAбезоборотныйNиндоссамент
+endorser*Nиндоссант
+enforce an agreement*WVпридавать исковую силу соглашению
+engineering firm*WAинжиниринговаяNфирма
+engineering services*WAинжиниринговыеnуслуга
+entering into force*WNвступление в силу
+environmental pollution*WNзагрязнение окружающей среды
+equipment purchased with credit funds*WAзакупленное в счет кредитаNоборудование
+equipment spending*Wnзатрата на оборудование
+equity capital*WAуставныйNкапитал
+equity strategist*WAбеспристрастныйNстратег
+escalation clause*WNоговорка о скользящей цене
+estimate documentation*WAсметнаяNдокументация
+estimate of costs*WNсмета расходов
+estimate of design costs*WNсмета на проектные работы
+estimate of production costs*WNсмета затрат на производство
+estimate price*WAсметнаяNцена
+estimated cost*WAсметнаяNсебестоимость
+estimated costs*WAсметныйnиздержка
+estimated expenditures*WAсметныйnрасход
+estimated profit*WAсметнаяNприбыль
+estimated value*WAрасценочнаяNстоимость
+european development fund*WAевропейскийNфонд развития
+evaluation of a contribution*WNоценка вклада
+evaluation of the property*WNоценка имущества
+evaluation sheet*WAоценочнаяNведомость
+ex*Aэкс
+ex lighter*Nфранко-лихтер
+ex mill*Nфранко-завод
+ex quay*Nфранко-пристань
+ex ship*WNфранко-порт назначения
+ex tank*Nфранко-резервуар;франко-цистерна
+ex-employee*NNWAбывшийNслужащий
+exaction*Nвзыскание
+exaction of a fine*WNвзыскание пени
+examination of accounts*WNпроверка счетов
+examiner-in-chief*NNWAглавныйNэксперт
+excess profit*Nсверхприбыль
+excess profit tax*WNналог на сверхприбыль
+excess weight*WAизбыточныйNвес
+excessive amounts of goods*WNизлишки товаров
+excessive demand*WAповышенныйNспрос
+exchange broker*WAбиржевойNброкер
+exchange bulletin*WAбиржевойNбюллетень
+exchange business*WAбиржевыеnоперация
+exchange dealer*WAбиржевойNдилер
+exchange department*WAбиржевоеNотделение
+exchange losses*WAкурсовыеnпотеря
+exchange market*WAвалютныйNрынок
+exchange of commodities*WAтоварныйNобмен
+exchange of currency*WNобмен валюты
+exchange of licenses*WNобмен лицензиями
+exchange parity*WAобменныйNпаритет
+exchange permit*WAвалютноеNразрешение
+exchange premium*WAвалютнаяNпремия
+exchange price*WAбиржеваяNцена
+exchange profit*WAбиржеваяNприбыль
+exchange quotation*WAбиржеваяNкотировка
+exchange rate*WAобменныйNкурс
+exchange rate fluctuations*WAкурсовыеnколебание
+exchange regulations*WAвалютныеnпредписание
+exchange report*WAбиржевойNбюллетень
+exchange restrictions*WAвалютныеnограничение
+exchange sale*WAбиржеваяNпродажа
+exchange trade*WAбиржеваяNторговля
+exchange transaction*WAбиржеваяNсделка
+exchange value*WAменоваяNстоимость
+exchange-rate-adjusted*PРпо обменному курсу
+excise*NакцизAакцизный
+excise duty*Nакциз;акцизная пошлина
+exclusive agency*WNагенство с исключительными правами
+exclusive agent*WAисключительныйNагент
+exclusive license*WAисключительнаяNлицензия
+exclusive representative*WNпредставитель с исключительными правами
+exclusive right*WAисключительноеNправо
+exclusive use*WAисключительноеNпользование
+executed contract*WAисполненныйNдоговор
+execution of an order*WNисполнение заказа
+executive*NNWAдолжностноеNлицо/A.исполнительный
+executive director*Nдиректор-распорядитель
+executory contract*WAподлежащий исполнениюNдоговор
+exemption certificate*WAналоговыйNсертификат
+exemption from taxes*WNосвобождение от налогов
+eximbank*NNWAэкспортно-импортныйNбанк
+expense account*WAрасходныйNсчет
+expense item*WNстатья расходов
+expenses analysis*WNанализ издержек
+expenses of circulation*WNиздержки обращения
+expenses on storage of goods en route*Wnрасход по хранению товара в пути
+expert findings*WNзаключение эксперта
+expiration date*WNдата истечения срока
+export and import deliveries*WAэкспортно-импортныеnпоставка
+export cost of commodity*WAэкспортнаяNстоимость товара
+export credit*WAэкспортныйNкредит
+export deliveries*WAэкспортныеnпоставка
+export duty*WAэкспортнаяNпошлина
+export financing*WNфинансирование экспорта
+export leasing*WAэкспортныйNлизинг
+export letter of credit*WAэкспортныйNаккредитив
+export license*WAэкспортнаяNлицензия
+export marking*WAэкспортнаяNмаркировка
+export of goods and services*WNэкспорт товаров и услуг
+export of research and development products*WNэкспорт научно-технической продукции
+export order*WAэкспортныйNзаказ
+export packing*WAэкспортнаяNупаковка
+export permit*WAразрешение на экспорт
+export price*WAэкспортнаяNцена
+export promotion*WNпоощрение экспорта
+export quality*WAэкспортноеNисполнение
+export restrictions*WAэкспортныеnограничение
+export sale*WNпродажа на экспорт
+export services*WAэкспортныйNсервис
+export tariff*WAэкспортныйNтариф
+export tax*WAэкспортныйNналог
+export transaction*WAэкспортнаяNсделка
+export version*WAэкспортноеNисполнение
+export-import*NNWNэкспортNимпорт/Aэкспортно-импортный
+export-import plan*WAплан экспорта и импорта
+exporter currency*WNвалюта страны-экспортера
+ext*Nрасширение;распространениеAдобавочный
+extended bill*WAпролонгированныйNвексель
+extension of a credit*WNпродление кредита
+extension of a guarantee period*WNпродление гарантийного периода
+extension of a letter of credit*WNпродление аккредитива
+extension of an agreement*WNпродление соглашения
+extension of the time limit*WNпродление срока
+external accountant*WAвнешнийNэксперт
+external reserve*WAвалютныйNрезерв
+extra charge*Nнаценка
+extra cost*WAдобавочнаяNстоимость
+extra payment*Nдоплата
+extract from a protocol*WNвыписка из протокола
+extraordinary expenses*WAчрезвычайныеnрасход
+f.p.a. police*WNполис на условиях "Свободно от частной аварии"
+face amount*WAнарицательнаяNсумма
+factor absorption*WNпоглощение производственных факторов
+factor abundance*WNизобилие производственного фактора
+failure to pay on time*WNнеуплата в срок
+fair average quality*WAсреднееAсправедливоеNкачество
+fair committee*WAярмарочныйNкомитет
+fair rate*WAльготныйNкурс
+fall price clause*WNоговорка о падении цен
+falling currency*WAпадающаяNвалюта
+familial income*WAсемейныйNдоход
+farm income*WAфермерскийNдоход
+fatal accident*NNWAнесчастныйNслучай со смертельным исходом
+feasibility study*WAтехнико-экономическоеNобоснование
+federal funds*WAфедеральныйAрезервныйnфонд
+fighting inflation*GWGбороться с инфляцией/WNборьба с инфляцией
+filled demand*WAполноценныйNспрос
+film advertising*WAфильмоваяNреклама
+final acceptance procedures*WNправила приемки
+final fee*WAединовременнаяNпошлина
+final project acceptance protocol*WNпротокол приемки окончательного проекта
+final recipient*WAконечныйNполучатель
+finance bill*WAфинансовыйNвексель
+financial advantage*WAфинансоваяNвыгода
+financial analysis*WNанализ финансовых аспектов
+financial balance*WAфинансовыйNбаланс
+financial base*WAфинансоваяNбаза
+financial boycott*WAфинансовыйNбойкот
+financial law*WAфинансовоеNправо
+financial leasing*WAфинансовыйNлизинг
+financial report*WAфинансовыйNотчет
+financial security*WAфинансовоеNобеспечение
+financial settlements centre*WAрасчетныйNцентр
+find market acceptance*WVнаходить признание рынка
+fine bill*WAпервоклассныйNвексель
+firm activity research*WNисследование деятельности фирмы
+firm contract price*WAтвердаяAконкретнаяNцена
+firm liquidity*WNликвидность фирмы
+firm offer*WAтвердоеNпредложение
+firm order*WAтвердыйNзаказ
+firm price*WAтвердаяNцена
+first bill*WNприма -Nвексель
+first option*WNправо первой руки
+fiscal*NисполнительAналоговый
+fiscal year*WAфинансовый год
+fixed assets*WAнеликвидныеnактив
+fixed capital stock*WAосновнойNкапитал
+fixed costs*WAпостоянныеnиздержка
+fixed debt liability*WNзадолженность по основному долгу
+fixed deposit*WAсрочныйNвклад
+fixed exchange*WAфиксированныйAвалютныйNкурс
+fixed income*WAфиксированныйNдоход
+fixed parity*WAтвердыйNпаритет
+fixed rate*WAтвердыйNкурс
+fixed-date*Aсрочный
+fixed-date loan*WAсрочнаяNссуда
+floating exchange*WAплавающийAвалютныйNкурс
+floating police*WAгенеральныйNполис
+floating rate*WAплавающийNкурс
+fob*Nфоб (с бесплатной погрузкой)
+following execution of*PРс момента подписания
+for account only*Dтолько для расчетов
+force majeur*Nфорс-мажор
+force majeure*Nфорс-мажор
+force majeure clause*WNоговорка о форс-мажоре
+force-majeure*Nфорс-мажор
+forecasting of demand*WNпрогнозирование спроса
+forecasting of tendencies and events*WNпрогнозирование отдельных тенденций и событий
+foregone income*WAупущенныйNдоход
+foreign balance*WAплатежныйNбаланс
+foreign contracting parties*WAзарубежныеnконтрагент
+foreign currency*WAиностраннаяNвалюта
+foreign currency account*WAвалютныйNсчет
+foreign currency coefficient*WAвалютныйNкоэффициент
+foreign currency equivalent rouble*WAинвалютныйNрубль
+foreign currency policy*WAвалютнаяAдевизнаяNполитика
+foreign exchange account*WAинвалютныйNсчет
+foreign exchange cover*WAвалютноеNпокрытие
+foreign exchange earnings*WAвалютныйNдоход
+foreign exchange reserves*WAвалютныеnрезерв
+foreign exchange transaction*WAвалютнаяNсделка
+foreign exschange stock*WAвалютныйNотдел
+forward operation*WAфорварднаяNоперация
+forward operations*WAфорвардныеnоперация
+forward purchase*WAфорварднаяNпокупка
+forward transaction*WNсделка на срок
+forwarder*NNWAтранспортно-экспедиционноеNагенство
+forwarding*NпересылкаAтрансопртно-экспедиторский
+forwarding agency*WAтранспортно-экспедиционноеNагенство
+forwarding agent*Nэкспедитор
+forwarding company*WAтранспортно-экспедиционнаяNкомпания
+forwarding services*WAтранспортно-экспедиторскиеnуслуга
+founder shares*WAучредительскиеnакция
+founder stocks*WAучредительскиеnакция
+founding partners*WNпартнеры -Nучредители
+franchise*Nпривилегия;франшиза
+free alongside ship*WNфранко вдоль борта судна
+free alongside ship price*WNцена фас
+free carriage to*WDфранко-железнодорожная станция назначения
+free currency*WAсвободнаяNвалюта
+free discharge*WAбесплатнаяNвыгрузка
+free dock*Nфранко-док
+free economic area*WAсвободнаяAэкономическаяNзона
+free exhibition*Nфранко-выставка
+free goods*WKнеAоблагаемый пошлинойNгруз
+free harbour*Nфранко-гавань
+free into barge*Nфранко-баржа
+free into bunker*Nфранко-бункер
+free on board*Nфоб;с бесплатной погрузкой
+free on board airplance*WNфранко-борт самолета
+free on board and stowed*WNфранко-борт и штивка
+free on board price*WNцена фоб
+free on board truck*Nфранко-грузовик
+free on car*Nфранко-вагон
+free on quay*Nфранко-набережная
+free on rail*Nфранко-вагон
+free on rail to the frontier*WNфранко-вагон граница
+free on truck*WNфранко-железнодорожнная платформа
+free overside*WNфранко-строп судна в порту разгрузки
+free port*Nпорто-франко
+free warehouse*Nфранко-склад
+freely convertible currency*WDсвободноAконвертируемаяNвалюта
+freely floating currency*WDсвободноAплавающаяNвалюта
+freight*NфрахтAфрахтовый
+freight absorption*WNвключение транспортных издержек в цену
+freight charge*Nфрахт
+freight forwarder*WNэкспедитор груза
+freight insurance*WNстрахование фрахта
+freight market*WAфрахтовыйNрынок
+freight owner*Nгрузовладелец
+freight packing*WAтранспортнаяNупаковка
+freight policy*WAфрахтовыйNполис
+freight rates*WAфрахтовыеnставка
+freight reduction*WAфрахтовыеnльгота
+freight transport*Nгрузопоток
+freight turnover*Nгрузооборот
+freight warrant*WAтоваросопроводительнаяNквитанция
+frozen assets*WAзамороженныеnактив
+fuelling*Nбункеровка
+full member*WAполноправныйNчлен
+full service agency*WNагенство с полным циклом услуг
+full term of credit*WAполныйNсрок кредита
+full-size sample*WNобразец в натуральную величину
+functional marketing organization*WAфункциональнаяNорганизация маркетинга
+functional rebate*WAфункциональнаяNскидка
+funded loan*WAоблигационныйNзаем
+funds of an enterprice*Wnфонд предприятия
+funtional and cost analysis*WAфункционально-стоимостнойNанализ
+fur auction*WAпушнойNаукцион
+further capital*WAуставнойNкапитал
+futures*WAфьючерскийnоперация/A.фьючерский
+futures contract*WAфьючерскийNконтракт
+futures deal*WAфьючерснаяNсделка
+gaiming ability*WNспособность к откорму
+gap of assortment*Wnпробел ассортимента
+gap of realization*Wnпробел реализации
+general acceptance*WAбезусловныйNакцепт
+general agent*WAгенеральныйNагент;представитель
+general average*WAобщеаварийныйnубыток
+general average act*WAаварийныйNакт
+general average adjustment*WNдиспаша по общей аварии
+general average statement*WAаварийныйNакт
+general cargo*WAсборныйNгруз
+general charter*WAгенеральныйNчартер
+general conditions*WAобщиеnусловие
+general conditions of delivery*WAобщиеnусловие поставок
+general contract*WAгенеральныйNконтракт;подряд
+general contractor*WAгенеральныйNподрядчик
+general director*WAгенеральныйNдиректор
+general economic situation analysis*WNанализ общеэкономической ситуации
+general forwarding agent*WAгенеральныйNэкспедитор
+general insurance policy*WAгенеральныйNполис страхования
+general license*WAгенеральнаяNлицензия
+general lien*WNправо удержания груза
+general supplier*WAгенеральныйNпоставщик
+general system of preferences*WAвсеобщаяNсистема преференций
+general tariff*WAодноколонныйNтариф
+gentlemen agreement*WAджентельменскоеNсоглашение
+going rate*WAдействующаяNставка
+gold content*WAзолотоеNсодержание
+gold reservation*WAзолотаяNоговорка
+gold reserves*WAзолотойNзапас
+goods auction*WAтоварныйNаукцион
+goods in bond*WKнеAоплаченный пошлинойNгруз
+goods outlay*WNвыкладка товара
+goods receipt*WAгрузоваяNквитанция
+governmental charges*WAправительственныйnналог
+governments*NNWAгосударственныйAценныйnбумага
+grace days*WAльготныйnдень
+grace for novelty*WNльготы по новизне
+grace period*WAльготныйNсрок
+gross domestic product*WAваловыйAнациональныйNпродукт
+gross expenses*WAваловыеnиздержки
+gross for net*WNбрутто за нетто
+gross freight*WDбруттоNфрахт
+gross income*WAваловыйNдоход
+gross premium*WDбруттоNставка
+gross proceeds*WAваловаяNвыручка
+gross product*WAваловаяNпродукция
+gross profit*WAваловаяNприбыль
+gross receipts*WAваловаяNвыручка
+gross revenue*WAваловыйNдоход
+gross social product*WAваловыйAобщественныйNпродукт
+gross ton*WDбруттоNтонна
+gross weight for net*WNвес брутто за нетто
+guarantee amount*WAгарантийнаяNсумма
+guarantee deposit*WAгарантийныйNдепозит
+guarantee in international commerce*WAгарантийныйNсрок в международной торговле
+guarantee of reproduction*WNобеспечение воспроизводства
+guarantee of the return of property into*WNобязательство об обратном ввозе имуществаPв
+guarantee of the return of property out*WNобязательство об обратном вывозе имуществаPиз
+guaranteed bill*WAгарантийныйNвексель
+guaranteed price*WAгарантированнаяNцена
+habitual income*WAобычныйNдоход
+harmony of goods nomenclature*WNгармоничность товарной номенклатуры
+hedge*ZхеджироватьNхедж
+hedge against inflation*WNстрахованиеPРот инфляции
+hedger*Nхеджер
+hedging*GхеджироватьNхеджирование\hegde
+holder of a bill*Nвекселедержатель
+holder of a cheque*Nчекодержатель
+holder of a patent*WNвладелец патента
+holder of an account*WNвладелец счета
+holder of securities*WNвладелец ценных бумаг
+holding ag*##02
+holding company*WAхолдинговыйNкомпания
+holdings*nвклад;авуары;владения;пакет акций
+holiday trip*WAтуристическийNпоездка
+home*NдомAвнутренний
+home buyer*WNпокупатель жилых зданий
+home buyers*Wnпокупатель жилых зданий
+home buying*WNпокупка жилья
+home sales*WNпродажа жилья
+horizontal audit*WAгоризонтальнаяNревизия
+house of cards*WAучетнаяNконтора
+household income*WAличныйNдоход
+housing accommodation*WNпомещение для содержания животных
+humble income*WAскромныйNдоход
+idle capasities*WAнеиспользуемыAпроизводственныеnмощность
+illegal considerations*WAнезаконноеAвстречноеNудовлетворение
+illiquid assets*nнеликвид
+illiquid funds*WAнеликвидныеnсредство
+immediate payment*WAнемедленныйNплатеж
+import agent*WAимпортныйNагент
+import assignment*WAимпортноеNпоручение
+import cost of commodity*WAимпортнаяNстоимость товара
+import duties*WNналог на импорт
+import financing*WNфинансирование импорта
+import leasing*WAимпортныйNлизинг
+import permit*WNразрешение на импорт
+import price*WAимпортнаяNцена
+import quota*WAимпортнаяNквота
+import regulations*WNрегулирование импорта
+import restrictions*WAимпортныеnограничение
+import tariff*WAимпортныйNтариф
+import tax*WAимпортныйNналог
+import transactions*WAимпортныеnоперация
+import-substituting*Aимпортозамещающий
+imported goods*WAимпортныеnтовар
+imported inflation*WAимпортируемаяNинфляция
+imported products*WAимпортнаяNпродукция
+importer currency*WNвалюта страны-импортера
+imports in bond*WAбеспошлинныйNввоз
+imposition of a duty*WNобложение пошлиной
+imposition of a tax*WNобложение налогом
+imposition of customs duties*WAтаможенноеNобложение
+impostor acceptance*WAнеправомерноеNпризнание постороннего лица
+imprest*NNWAподотчетнаяNсумма
+improper execution*WAненадлежащееNисполнение
+imputed income*WAвмененныйNдоход
+in and out documents*WAвходнаяCиAвыходнаяNдокументация
+in dollar terms*Dв переводе на доллары
+inaccurate payer*WAнеаккуратныйNплательщик
+inactive account*WAнеактивныйNдепозит
+inadequate quality*WAненадлежащееNкачество
+inc*Dинк
+inc.*Dинк.
+incentive bonus*WAпоощрительнаяNпремия
+income from self-supporting performance*WAхозрасчетныйNдоход
+income of an enterprise*WNдоход предприятия
+income tax*WNналог с дохода
+income term*WNиндекс дохода
+income-expenditure*NNWNдоходCиNрасход
+income-expenditure analysis*WNанализ доходов и расходов
+incomplete production*WAнезавершенноеNпроизводство
+inconvertible currency*WAнеконвертируемаяNвалюта
+increase of a price*Nнаценка
+indebtedness*Nзадолжность
+independent balance*WAсамостоятельныйNбаланс
+independent demand*WAнезависимыйNспрос
+independent examination*WAнезависимаяNэкспертиза
+index reservation*WAиндекснаяNоговорка
+indirect damage*WAкосвенныйNущерб
+indirect expenses*WAкосвенныеnрасход
+indirect tax*WAкосвенныйNналог
+individual income*WAличныйNдоход
+individual license*WAиндивидуальнаяNлицензия
+industrial accident*NNWAнесчастныйNслучай на производстве
+industrial cooperation*WAпроизводственноеNсотрудничество
+industrial desputes tribunal*WNсуд по производственным конфликтам
+industrial efficiency*WNэффективность производства
+industrial equity*##01
+industrial equity pacific*##01
+industrial norms*WAпромышленныеnнорматив
+industrial resources*WAпроизводственныеnресурс
+industrial sample*WAпромышленныйNобразец
+inpulse trading*Nимпалс трейдинг
+inspection at the manufacturing plant*WNинспектирование на заводе-изготовителе
+inspection certificate*WAакт осмотра
+inspection of cargo*WNдосмотр груза
+inspection of luggage*WNдосмотр багажа
+inspection report*WAакт осмотра
+installment letter of credit*WNаккредитив с платежом в рассрочку
+installment sum*WNсумма фирменного кредита
+instalment payment*WNплатеж в рассрочку
+instalment payment transaction*WNсделка с платежом в рассрочку
+instalment purchasing*WNпокупка в рассрочку
+instalment sale*WNпродажа в рассрочку
+instalment to repay*WNвзнос в счет погашения
+instruction for transfer*WNпоручение на перевод
+instruction to open a letter of credit*WNпоручение на открытие аккредитива
+insurance against construction and assembly risks*WNстрахование строительно-монтажных рисков
+insurance against fire and natural calamities*WNстрахование от огня и стихийных бедствий
+insurance against losses*WNстрахование убытков
+insurance against non-payment*WNстрахование риска неплатежа
+insurance against risks*WNстрахование рисков
+insurance expenses*WNиздержка по страхованию
+insurance fee*WAстраховойNсбор
+insurance indemnity*WAстраховоеNвозмещение
+insurance of export and import cargoes*WNстрахование экспортно-импортных грузов
+insurance of means of conveyance*WNстрахование средств транспорта
+insurance on goods*WNстрахование товара
+insurance on goods in transit*WAтранзитноеNстрахование товара
+insurance policy*WNполис страхования
+insurance premium*WAстраховойNвзнос/;премия
+insurance terms and conditions*Wnусловие страхования
+insuring clause*WNстатья страхования
+insuring clauses*Wnстатья страхования
+intangible assets*WAнеосязаемыеnактив
+integral index of competitiveness*WAинтегральныйNпоказатель конкурентоспособности
+integral part of a contract*WAнеотъемлемаяNчасть контракта
+integration looming*WNпреувеличение интеграции
+intended use of credit*WAцелевоеNиспользование кредита
+interest bearing*Aпроцентный
+interest bearing bonds*WAпроцентныеnоблигация
+interest bearing deposit*WAпроцентныйNвклад
+interest bearing loan*WAпроцентнаяNссуда
+interest debt*WNзадолженность по процентам
+interest income*WAпроцентныйNдоход
+interest on credit*WNпроцент за кредит
+interest on deposits*WNпроцент по вкладам
+interest on loans*WNпроцент по займам
+interest rate*WAпроцентнаяNставка
+interest rates*WAпроцентнаяnставка
+interest-free*Aбеспроцентный
+interest-free loan*WAбеспроцентныйNзайм
+interest-free loans*WAбеспроцентныеnзайм
+intermediate sellers market*WNрынок промежуточный продавцов
+intermediate term financing*WAсреднесрочноеNфинансирование
+intermediate term of credit*WAсреднийNсрок кредита
+internal cost of export commodity*WAвнутренняяNстоимость экспортного товара
+internal funds*WAсобственныеnсредство
+international arbitration*WAмеждународныйNарбитраж
+international auction*WAмеждународныйNаукцион
+international bank*WAмеждународныйNбанк
+international clearing*WAмеждународныеnрасчет
+international company*WAмеждународнаяNкомпания
+international convention*WAмеждународнаяNконвенция
+international cooperation*WAмеждународнаяNкооперация
+international credit*WAмеждународныйNкредит
+international currency*WAмеждународнаяNвалюта
+international currency liquidity*WAмеждународнаяAвалютнаяNликвидность
+international currency relations*WAмеждународныеAвалютныеnотношение
+international customs*WAмеждународныеnобычай
+international law*WAмеждународноеNправо
+international means of payments*WAмеждународныйAплатежныйnсредство
+international monetary fund*WAмеждународныйAвалютныйnфонд
+international monetary units*WAмеждународныйAденежныйnединица
+international settlements*WAмеждународныйnрасчет
+international tender*WAмеждународныйNтендер
+international tenders*WAмеждународныеnторг
+inventory holdings*WAтоварно-материальныеnзапас
+inventory investment*WNинвестиция в товарно-материальные запасы
+invested capital*WAинвестированныйNкапитал
+investment*NинвестицияAинвестиционный
+investment bank*WAинвестиционныйNбанк
+investment exchange*WAинвестиционныйNбиржа
+investment measures*WAинвестиционныеNмероприятия
+investment of foreign currency funds*WNинвестирование валютных фондов
+investments by the state*WAгосударственныеNинвестиции
+investments ltd.*##01
+investments profit norm*WNнорма прибыли на инвестиции
+invoice*Nсчет-фактураAфактурный
+invoice value*WAфактурнаяNстоимость
+invoice-specification*Nфактура-спецификация
+invoiced*Aфактурный
+invoiced price*WAфактурнаяNцена
+invoices*Nсчет-фактура
+irrevocable financing*WAбезвозвратноеNфинансирование
+irrevocable guarantee*WAбезотзывнаяNгарантия
+irrevocable letter of credit*WAбезотзывныйNаккредитив
+island*Nостров
+issue of a license*WNвыдача лицензии
+issue of a patent*WNвыдача патента
+issue of a visa*WNвыдача визы
+issue of money*WNэмиссия денег
+issue of police*WNзаключение договора о страховании
+issue of securities*WNэмиссия ценных бумаг
+issuer*NNWAзапрашивающаяNсторона/;трассант;чекодатель
+issuing bank*WNбанк -Nэмитент
+it is agreed*yоговорено
+it is agreed that*Jоговорено, что
+it is understood and agreed*v1оговорено и согласовано
+item in the budget*WAбюджетнаяNстатья
+item of export*WNстатья экспорта
+item of import*WNстатья импорта
+itemized*EWEсоставлять перечень
+itemized assessment*WAпопозиционнаяNоценка
+itemized price*WAпозиционнаяNцена
+itemized quotation*WAпопозиционнаяNкортирова
+itinerary of travel*WNмаршрут следования
+joint note*WAпростойNвексель
+joint stock*WAакционерныйNкапитал
+joint stocks company*WAакционернаяNкомпания
+joint venture*WAсовместноеNпредприятие
+joint venture zone*WNзона совместного предпринимательства
+joint-stock*Aакционерный
+joint-stock bank*WAакционерныйNбанк
+joint-stock company*WAакционерноеNобщество
+kind of you to*bочень любезно с вашей стороны
+kind regards*WAсердечныйNпривет
+kindness in advising*WNодолжениеbVсообщить
+kludge around*WVобходить трудности с помощью клуджа
+kludge up*WVвставлять клудж
+kluge*Nклудж
+l/c*Nаккредитив
+landed weight*WAвыгруженныйNвес
+landing charges*Nлэндинг
+landing weight*WAвыгруженныйNвес
+lapsed police*WDдосрочноAпрекращенныйNполис
+large coastal shipping*WAбольшойNкаботаж
+large-scale consumer*WAоптовыйNпотребитель
+last copy*WAпоследнийNэкземпляр
+last trade*WAпоследняяNраспродажа
+latent competition*WAскрытаяNконкуренция
+launching of a product*WNвыпуск товара на рынок
+law professor*WNпрофессор права
+law professors*Wnпрофессор права
+lawfully constituted authority*WDзаконноAустановленнаяNвласть
+lay days*WAсталийноеNвремя
+laying ability*Nяйценоскость
+leading indicator*WAопережающийNиндикатор
+leading indicators*WAопережающийnиндикатор
+leads and lags*Dлидз энд лэгз
+lease agreement*WNдоговор аренды
+lease period*WNвремя действия лицензии
+leased property*WAарендноеNимущество
+leaseholder*Nарендатор
+leasing*NлизингAлизинговый
+leasing transactions*WAлизинговыеnоперация
+ledger audit*Nбухучет
+legal action*WAсудебныйNиск
+legal adviser*Nюрисконсульт
+legal costs*WAсудебныеnиздержка
+legal department*WAюридическийNотдел
+legal documents*WAправовыеnдокумент
+legal exp.*WAсудебныеnиздержка
+legal expenditures*WAсудебныеnиздержка
+legal liability*WAюридическаяNответственность
+legal obligations of parties*WAюридическиеNобязанности сторон
+legal offence*Nправонарушение
+legal party*WAюридическоеNлицо
+legal person*WAюридическоеNлицо
+legal protection*WAправоваяNзащита
+legal regulations*WAправовыеnпредписание
+legal relations between the parties*WNправоотношения сторон
+legal right*WAюридическоеNправо
+legal status*WAюридическийNстатус
+legislative act*WAзаконодательныйNакт
+legislative history*WNистория законодательства
+lender*Nкредитор
+lending officer*WNпредставитель по кредиту
+lending officers*Wnпредставитель по кредиту
+lessor*Nарендодатель
+lessor agent*WNагент арендодателя
+letter of*WNписьмоPРот
+letter of advice*WAуведомительноеNписьмо
+letter of attorney*Nдоверенность
+letter of authority*Nдоверенность
+letter of credit*Nаккредитив
+letter of credit drawn on*WNаккредитив ,AвыставленныйPРна
+letter of credit payable in*WNаккредитив с платежомPТв
+letter of credit valid for*WNаккредитив сроком действия на
+letter of deposit*WAзалоговоеNписьмо
+letter of guarantee*WAгарантийноеNписьмо
+letter of intend*WNписьмо о намерениях
+letter of introduction*WAрекомендательноеNписьмо
+letter to be paid on delivery*WNписьмо с наложным платежом
+liability of indemnity*WNобязательство возместить убытки
+libor*Nлибор
+license contract*WAлицензионныйNдоговор
+license duty*WAлицензионнаяNпошлина
+license fee*WAлицензионныйNсбор
+license law*WAлицензионноеNправо
+license of items and technologies*WNлицензия на изделия и технологию
+license price*WNоплата лицензированных продуктов
+license remuneration*WAлицензионноеNвознаграждение
+license right*WAлицензионноеNправо
+license trade*WAлицензионнаяNторговля
+license transaction*WAлицензионнаяNсделка
+license value*WNцена лицензии
+licensee*Nлицензиат
+licensing pool*WAлицензионныйNпул
+life assurance*WNстрахование жизни
+limit liability*WAограниченнаяNответственность
+limit of liability*WNлимит ответственности
+limitation of actions*WAисковаяNдавность
+limited cheque book*WAлимитированнаяAчековаяNкнижки
+limited liability company*WNкомпания с ограниченной ответственностью
+limited license*WAограниченнаяNлицензия
+liquid assets*WAликвидныеnактив
+liquid funds*WAликвидныеnсредство
+liquidation commission*WAликвидационная комиссия
+liquidation statement*WAликвидационныйNотчет
+liquidation value*WAликвидационнаяNстоимость
+liquidity of assets*WNликвидность активов
+list of standard equipment*WAкомплектовочнаяNведомость
+loan account*WAссудныйNсчет
+loan against a guarantee*WNссуда под гарантию
+loan against a pledge*WNссуда под поручительство
+loan against commodities and materials*WNссуда под товарно-материальные ценности
+loan against goods*WAподтоварнаяNссуда
+loan against payment documents*WNссуда под платежные документы
+loan against pledge*WNзаем под залог
+loan against redered services*WNссуда под оказанные услуги
+loan against securities*WNссуда под ценные бумаги
+loan against security*WNссуда под залог
+loan application*WNзаявка на получение ссуды
+loan at interest*WNссуда под проценты
+loan bank*WAссудныйNбанк
+loan capital*WAссудныйNкапитал
+loan capital market*WNрынок ссудного капитала
+loan certificate*WAдолговаяNрасписка
+loan interest*WAссудныйNпроцент
+loan market*WNрынок ссудных капиталов
+loan of money*WAденежнаяNссуда
+loan on call*WNссуда до востребования
+loan on easy terms*WNзаем на льготных условиях
+local norms*WAместныеnнорматив
+local tax*WAместныйNналог
+location of an enterprise*WNместонахождение предприятия
+loco*Dфранко-место нахождения
+long goods*WAдлинномерныйNгруз
+long lease*WAдолгосрочнаяNаренда
+long rent*WAдолгосрочнаяNаренда
+long-distance runs*WNперевозки на дальние расстояния
+long-range investments bank*WNбанк долгосрочных вложений
+long-range planning of activity*WAдолгосрочноеNпланирование деятельности
+long-term credit*WAдолгосрочныйNкредит
+long-term crediting*WAдолгосрочноеNкредитование
+long-term deposit*WAдолгосрочныйNвклад
+long-term letter of credit*WAдолгосрочныйNаккредитив
+long-term marketing program*WAдолгосрочнаяNпрограмма маркетинга
+long-term plan*WAперспективныйNплан
+look forward to meeting*WVнадеяться встретитьсяPТс
+loose cargo*WNгруз россыпью
+loro account*WNсчет лоро
+lorry convoy*Nавтопоезд
+loss allowance*Nрефакция
+loss of interest*WNпотеря процентов
+loss of profit insurance*WNстрахование упущенной выгоды
+loss of property*WNутрата имущества
+lot size*WNобъем партии
+low expenses strategy*WNстратегия низких издержек
+lower earnings*WAминимальныйNзаработок
+lump sum*WAпаушальныйNплатеж
+lumpsum*NлумпсумAпаушальный
+lumpsum bonus*WAединовременнаяNпремия
+lumpsum charter*WNлумпсум -Nчартер
+lumpsum freight*WNлумпсум -Nфрахт
+lumpsum remuneration*WAединовременноеNвознаграждение
+magazine advertising*WAжурнальнаяNреклама
+major shareholding*WAконтрольныйNпакет акций
+management by exception*WNуправление по отклонениям
+management by objectives*WNуправление по задачам
+management by procedure*WNуправление по процессу
+management by product*WNуправление по продукту
+management information system*WAадминистративнаяAинформационнаяNсистема
+management of an enterprise*WNуправление предприятием
+managerial abilities*WAорганизаторскиеnспособности
+mandatory contribution*WAобязательныйNвзнос
+manifest of cargo*WAгрузовойNманифест;судовой манифест
+manufacturing costs*WNиздержки производства
+manufacturing expenses*WAпроизводственныеnрасход
+manufacturing income*WAпроизводственныйNдоход
+many thanks for*fВбольшое спасибо за
+marginal income*WAмаргинальныйNдоход
+marine police*WNполис морского страхования
+maritime customhouse*WAморскаяNтаможня
+marketing audit*WAмаркетинговаяNревизия
+marketing chance of the firm*WAмаркетинговаяNвозможность фирмы
+marketing control*WNуправление маркетингом
+marketing expert*WNэксперт по маркетингу
+marketing firm medium*WAмаркетинговаяNсреда фирмы
+marketing management*WNуправление маркетингом
+marketing manager*WNуправляющий по маркетингу
+marketing margin*WAторговаяNнаценка
+marketing means*WAмаркетинговыеnсредство
+marketing mediator*WAмаркетинговыйNпосредник
+marketing mediators*WAмаркетинговыеnпосредник
+marketing network*WAсбытоваяNсеть
+marketing organization by production of commodities*WNорганизация маркетинга по товарному производству
+marketing plan analysis*WNанализ плана маркетинга
+marketing realization*WNприменение маркетинга
+marketing research*WAмаркетинговоеNисследование
+marketing service*WAмаркетинговаяNслужба
+marketing services*WAмаркетинговыеnуслуга
+marketing system of vertical agreement*WAдоговорнаяAвертикальнаяAмаркетинговаяNсистема
+marketing tactics*WNтактика маркетинга
+markup*NNWAрозничнаяNнаценка
+mass produced articles*Wnизделие массового производства
+master declaration*WNдекларация капитана
+master receipt*WNрасписка капитана
+material and financial*Aматериально-финансовый
+material and financial resources*WAматериально-финансоваяNбаза
+material and technical*Aматериально-технический
+material and technical base*WAматериально-техническаяNбаза
+material costs*WAматериальныеnзатрата
+material incentives*WAматериальноеNстимулирование
+material incentives fund*WNфонд материального поощрения
+material loss*WAматериальныйNущерб
+material remuneration*WAматериальноеNвознагрождение
+material values*WAматериальныеnценность
+mean income*WAсреднийNдоход
+means of conveyance*WAтранспортныеnсредство
+means of liquidity*WAликвидныеNсредства
+means of production marketing*WNмаркетинг средств производства
+medium-term*Aсреднесрочный
+medium-term credit*WAсреднесрочныйNкредит
+medium-term crediting*WAсреднесрочноеNкредитование
+meet the contract dates*WVустанавливать сроки контракта
+meeting the expenses*WNпокрытие расходов
+minority interests*Wnдоля дочерних компаний
+minority shareholder*WNакционер дочернего предприятия
+minority shareholders*Wnакционер дочернего предприятия
+minority stockholder*WNакционер дочернего предприятия
+minority stockholders*Wnакционер дочернего предприятия
+modification of a letter of credit*WNизменение аккредитива
+modification of conditions*WNизменение условий
+modification to a contract*WNизменение к контракту
+monetary accommodation*WAденежно-кредитноеNрегулирование
+monetary agreement*WAвалютноеNсоглашение
+monetary and financial*Aвалютно-финансовый
+monetary crisis*WAденежно-кредитныйNкризис
+monetary damage*WAденежныйNущерб
+monetary dispute*WAвалютно-финансовыйNспор
+monetary policy*WAвалютнаяNполитика
+monetary regulation*WAденежно-кредитноеNрегулирование
+monetary reward*WAденежноеNвознаграждение
+monetary unit*WAденежнаяNединица
+money broker*WNмаклер денежного рынка
+money devaluation*WNобесценение денег
+money receipt*WNквитанция в получении денег
+money supply*WAденежнаяNмасса
+money turnover*WAденежноеNобращение
+money value*WAденежнаяNстоимость
+money-agent*Nбанкир
+money-bill*NNWAфинансовыйNзаконопроект
+monitoring and disciplining members*WAсудебныйnисполнитель
+mortgage bond*WAзакладнойNлист
+mortgage credit*WNкредит под залог
+mortgage rate*WAпроцентнаяNставка
+mortgage rates*WAпроцентнаяnставка
+mortgage right*WAзалоговоеNправо
+mortgaged*Aзаложенный
+mortgaged valuables*WAзаложенныеnценность
+most favoured nation clause*WNоговорка о наибольшем благоприятствовании
+most favoured nation treatment*WNрежим наибольшего благоприятствования
+most-favoured*AAWDнаиболеeAпрeдпочтительный
+most-favoured nation treatment*WNрежим наибольшего благоприятствования
+moving average*WAскользящееAсреднееNзначение
+multilinear tariff*WAмногоколонныйNтариф
+multiple currency clause*WAмультивалютнаяNоговорка
+multiple visa*WNвиза многократного пользования
+multiplicity of exchange*WNмножественность валютных курсов
+mutually supplied articles*WAвзаимопоставляемыеnизделие
+myriad*Nмириад
+national bank*WAнациональныйNбанк
+national currency*WAнациональнаяNвалюта
+national debt*WAгосударственныйNдолг
+national duty*WAгосударственнаяNпошлина
+national economy*WAнациональнаяNэкономика
+national economy balance*WNбаланс народного хозяйства
+national income*WAнациональныйNдоход
+natural wear*WAестественныйNизнос
+need assistance*WNпотребность в помощи
+negative demand*WAнегативныйNспрос
+negative goodwill*WAотрицательныйNактив
+negotiable document*WAоборотныйNдокумент
+negotiated bidding*WAзакрытыйnторг
+negotiation of bills*WNнегоциация тратт
+net amount*WAчистаяNсумма
+net corporate income tax*WAчистыйNналог с дохода
+net corporate income taxes*WAчистыйnналог с дохода
+net cost*WAчистаяNстоимость
+net demand deposits*WAчистаяNсумма банковских депозитов до востребования
+net efficiency*WAчистыйNк п д
+net encashment*WAчистоеNинкассо
+net income*WAчистыйNдоход
+net payment*WNплатеж нетто
+net price*WNцена нетто
+net proceeds*WNвыручка нетто
+net profit*WAчистаяNприбыль
+net profits*WAчистаяNприбыль
+net receipts*WAчистыеnпоступление
+net weight*WNвес нетто
+next payment*WAочереднойNплатеж
+no account correspondent relations*WAкорреспондентскиеnотношение без счета
+nominal account*WAпассивныйNсчет
+nominal amount*WAноминальнаяNсумма
+nominal income*WAноминальныйNдоход
+nominal value*WAноминальнаяNстоимость
+non-acceptance*Nнеакцепт
+non-commercial operations*WAнеторговыеnоперация
+non-commercial payment*WAнеторговыйNплатеж
+non-competitive*Aнеконкурентоспособный
+non-delivery*Nнепоставка
+non-equivalent*Aнеэквивалентный
+non-equivalent exchange*WAнеэквивалентныйNобмен
+non-exclusive*Aнеисключительный
+non-exclusive license*WAнеисключительнаяNлицензия
+non-execution*Nнеисполнение
+non-instalment*Aразовый
+non-instalment credit*WAразовыйNкредит
+non-interest*Aбеспроцентный
+non-interest bearing*Aбеспроцентный
+non-interest bearing account*WAбеспроцентныйNсчет
+non-interest bearing credit*WAбеспроцентныйNкредит
+non-interest bearing deposit*WAбеспроцентныйNвклад
+non-negotiable*Aнедоговорный
+non-negotiable bill of lading*WNконосамент без права передачи
+non-payment*Nнеплатеж
+non-payment of taxes*WNнеуплата налогов
+non-recoverable debt*WAбезвозвратныйNдолг
+non-recoverablet*Aневосстановимый
+non-repayable*Aбезвозвратный
+non-repayable subsidy*WAбезвозвратнаяNссуда
+non-returnable*Aбезвозвратный
+non-returnable packing*WAбезвозвратнаяNупаковка
+non-tariff*Aнетарифный
+non-tax*Aненалоговый
+non-transferable*Aнепердаваемый
+non-transferable license*WNлицензия без права передачи
+non-validity*Nнедействительность
+non-validity of documents*WNнедействительность документов
+non-voting*Aнеголосующий
+non-voting member*WNчлен без права голоса
+nonfarm*Aнефермерский
+nonfatal accident*NNWAнесчастныйNслучай без смертельного исхода
+nonpatent license*WAбезпатентнаяNлицензия
+nonprice competition*WAнеценоваяNконкуренция
+nonproductive sphere*WAнепроизводственнаяNсфера
+norm of profit*WNнорма прибыли
+normative*NнормативAнормативный
+normative act*WAнормативныйNакт
+normative income*WAнормативныйNдоход
+normative legal*Aнормативно-правовой
+normative period*WAнормативныйNсрок
+normative technical*Aнормативно-технический
+nostro*Nностро
+nostro account*WNсчет ностро
+nostro overdraft*WNовердрафт ностро
+not replying ~ to*WNзадержка с ответомPВна
+note of hand*WAдолговойNрасписка
+noteholder*Nвекселедержатель
+notes of hand*WAдолговойnрасписка
+notice of a vessel's arrival*WNизвещение о прибытии судна
+notice of claim*WAисковоеNуведомление
+notice of discovery*WNуведомление об обнаружении
+notice of expected arrival*WNизвещение о предполагаемом подходе
+notice of readiness to discharge*WNизвещение о готовности к выгрузке
+notice of readiness to load*WNизвещение о готовности к погрузке
+notice of the readiness of the goods for loading*WNизвещение о готовности товара к погрузке
+notification of dispatch*WNизвещение об отправке
+notification of shipment*WNизвещение об отгрузке
+number of premiums*WNсумма взносов
+number of years*WNсрок действия
+numerical discounts*WAколичественныеnскидки
+obtain acceptance*WVполучать акцепт
+occupational accident*NNWAнесчастныйNслучай на производстве
+occurrence thereof*WOэтотNсобытие
+of the cessation of employment*Dоб увольнении
+of their occurence*Dс их появления
+offer for a tender*WNзаявка на участие в торгах
+offer to supply*WNпредложение на поставку
+offeree*NNWNадресат оферты
+offerer*Nоферент
+offical*NNWAдолжностноеNлицо
+official goods*WAпредставительскиеnтовар
+official weigher*WAофициальныйNвесовщик
+offset deal*WNсделка "оффсет"
+omni*##02
+omni's*##02
+on board bill of lading*WAбортовойNконосамент
+on call*Aонкольный
+on credit*WNрасчет в кредит
+on deposit*WPвNбанк
+on ~ account*WPВза~Nсчет
+on-call*Aонкольный
+on-call account*WAонкольныйNсчет
+on-site*Nна месте
+on-the-job accident*NNWAнесчастныйNслучай на рабочем месте
+oncall*Aонкольный
+online*Aуправляемый
+open account*WAоткрытыйNсчет
+open charter*WAоткрытыйNчартер
+open cheque*WAоткрытыйNчек
+open credit*WAоткрытыйNкредит
+open policy*WAоткрытыйNполис
+opening an account*WNоткрытие счета
+opening quotation*WNкотировка при открытии биржи
+opening rate*WNкурс при открытии биржи
+operating budget*WAтекущийNбюджет
+operating enterprise*WAдействующееNпредприятие
+operating-time clock*WNоборудование для определения общего времени счета
+operation and maintenance rules*Wnправило эксплуатации и ремонта
+operation instructions*Wnинструкция по эксплуатации
+operation profitability*WNприбыльность операций
+operational check*WAрегламентнаяNпроверка
+operational leasing*WAоперационныйNлизинг
+operational requirements*WAэксплутационныеnтребование
+option of exchange*WAвалютныйNопцион
+option to double*WAдвойнойNопцион
+option to purchase*WNопцион на закупку
+option to sell*WNопцион на продажу
+optional cargo*WAопционныйNгруз
+optional port*WNпорт выгрузки по выбору отправителя или получателя
+order bill of lading*WAордерныйNконосамент
+order book*WNкнига заказов
+order cheque*WAордерныйNчек
+order for goods*WNзаказ на товар
+ordinary bill*WAпростойNвексель
+ordinary license*WAпростаяNлицензия
+ordinary shares*WAобыкновенныеnакция
+ordinary stocks*WAобыкновенныеnакция
+ordinary visa*WAобыкновеннаяNвиза
+organization-consignee*Nорганизация-консигнатор
+organizational abilities*WAорганизаторскиеnспособности
+organizing*GорганизовыватьAорганизационный
+origin of goods*WNпроисхождение товара
+original document*WNоригинал документа
+original packing*WAзаводскаяNупаковка
+out-the-job accident*NNWAнесчастныйNслучай вне рабочего места
+outdoor advertising*WAнаружнаяNреклама
+outside funds*WAпривлеченныйNкапитал
+outside market*WAнеофициальнаяNбиржа
+outstanding computer debtor balance*WAпросроченныйAкомпьютерныйAдебиторныйNбаланс
+outstanding debt*WAнепогашенныйNдолг
+outstanding debtor balance*WAпросроченныйAдебиторныйNбаланс
+outturn report*WNведомость выгруженных грузов
+overall dimensions*WAгабаритныйNразмер
+overdraft rate*WNпроцент по овердрафту
+overdue bill*WAпросроченныйNвексель
+overdue instalment*WAпросроченныйNвзнос
+overdue payments account*WNсчет просроченных ссуд
+overdue repayment of debts*WAпросроченнаяNзадолжность
+overdue shipment*WAпросроченнаяNотгрузка
+overextended money*WAзавышеннаяNсуммаPР
+overhead allocation*WNраспределение накладных расходов
+overhead costs*WAпостоянныеnиздержки
+overhead expenses*WAнакладныеnрасход
+ownership capital*WAсобственныйNкапитал
+package proposal*WAкомплексноеNпредложение
+packaged cargo*WAштучныйNгруз
+packaging*Nпакетирование
+packed cargo*WAупакованныйNгруз
+packed weight*WNвес с упаковкой
+packing expenses*Wnиздержка по упаковке
+packing instructions*WAупаковочныеnинструкция
+packing list*WAупаковочныйNлист
+packing sheet*WAупаковочныйNлист
+packing specification*WAупаковочнаяNспецификация
+paid services*WAплатныеnуслуга
+paid-in*Aоплаченный
+paid-in capital*WAоплаченныйAакционерныйNкапитал
+paid-up*Aоплаченный
+paid-up capital*WAоплаченныйAакционерныйNкапитал
+pallet*Nпаллет
+palletise*VWVукладывать в штабеля
+palletised*Aпакетированный
+palletised cargo*WAпакетированныйNгруз
+palletize*=palletise
+pan*Aплавный
+paper currency*WAбумажнаяNвалюта
+par of exchage*WAинтервалютарныйNпаритет
+parity of currency*WAвалютныйNпаритет
+parity rate*WAпаритетныйNкурс
+part payment*WAчастичныйNвзнос
+partial acceptance*WAнеполныйNакцепт
+participation financing*WAдолевоеNфинансирование
+party to the contract*WNсторона по договору
+pawn ticket*WAломбарднаяNрасписка
+pay sheet*WAрасчетныйNлист
+pay-roll*NNWAплатежнаяNведомость
+pay-roll processing*WNобработка платежных ведомостей
+payable on demand*WVподлежать оплате
+payment by a letter of credit*WNплатеж по аккредитиву
+payment by acceptance*WAакцептныйNплатеж
+payment by instalment*WNплатеж взносами
+payment by instalments*WNрассрочка платежа
+payment documents*WAплатежнаяNдокументация
+payment for carriage of goods*WAпровознаяNплата
+payment for credits*WNвыплата по кредитам
+payment from the credit*WNплатеж в счет кредита
+payment in advance*WAавансовыйNплатеж
+payment in cash*WNплатеж наличными
+payment in the form of a letter of credit*WNплатеж в форме аккрдитива
+payment of a cheque*WNплатеж по чеку
+payment of an advance*WNвыплата аванса
+payment of damages*WNвыплата денежного возмещения
+payment of dividends*WNвыплата дивидендов
+payment of interest*WNвыплата процентов
+payment of premium*WNоплата страхового взноса
+payment of profits*WNвыплата прибыли
+payment on a clearing basis*WAбезналичныйNплатеж
+payment on a collection basis*WNплатеж в форме инкассо
+payment on an open account*WNплатеж по открытому счету
+payment order*WAплатежныйNордер
+payment period*WNсрок платежа
+payment request*WAплатежноеNтребование
+payment to the state budget*WNотчисления в государственный бюджет
+payment to the supplier in advance*WNаванс поставщику
+payment unit*WAрасчетнаяNединица
+payments*nплатежAплатежный
+payments agreements*WAплатежныеnсоглашения
+payments balance*WAплатежныйNбаланс
+payments production profitability*WAрасчетнаяNрентабельность производства
+penalizing*NNWNобложение штрафом
+penalty under a contract*WAдоговорнаяNнеустойка
+per kg prices*Nстоимость за килограмм
+per unit consumption of materials*Nматериалоемкость
+percent premium*WAпроцентнаяNнадбавка
+percentage deductions*WAпроцентныеnотчисление
+percentage points*nпункт
+perform a contract*WVисполнять договор
+performance standards*WAэкономическиеnнорматив
+performance tests*WAэксплуатационныеnиспытание
+period of repayment*WNсрок окупаемости
+period of validity of an agreement*WNсрок действия соглашения
+perishable*Aскоропортящийся
+persistent demand*WAпостоянныйNспрос
+personal account*WAлицевойNсчет
+personal sale*WAперсональнаяNпродажа
+personal trust fund*WAтраст-Nфонд
+personnel audit*WNпроверка работы персонала
+personnel department*WNотдел кадров
+personnel requirements*WNпотребность в персонале
+pickup*Nоживление
+place in trust*WVпомещать в траст
+placing of an order*WNвыдача заказа
+plaintiff*Nистец
+plaintiff before the count*WNистец в суде
+point of entry*WNпункт ввоза
+point of exit*WNпункт вывоза
+point of export*WNпункт экспорта
+point of loading*WNпункт погрузки
+point of unloading*WNпункт выгрузки
+policy holder*Nполисодержатель
+policy of economy*WNрежим экономии
+policy of marine insurance*WNполис морского страхования
+policy of reinsurance*WNполис перестрахования
+pollution abatement*WNснижение степени загрязнения
+pool of data*WNбанк данных
+port congestion*WNперегруженность порта
+port of buyer's choice*WNпорт по выбору покупателя
+port of call*WNпорт захода
+port of delivery*WNпорт поставки
+port of departure*WNпорт отправления
+port of destination*WNпорт назначения
+port of discharge*WNпорт выгрузки
+port of entry*WNпорт ввоза
+port of loading*WNпорт погрузки
+port of origin*WNпорт происхождения
+port of registry*WNпорт приписки
+port of shipment*WNпорт отгрузки
+port of transhipment*WNпорт перевалки
+portfolio investments*WAпортфельныеnинвестиции
+portfolio of bills*WAвексельныйNпортфель
+postage stamp*WAпочтовыйNштемпель
+postal receipt*WAпочтоваяNквитанция
+posted rate*WAсправочныйNкурс
+power of attorney*Nдоверенность
+practical approval*Nапробация
+pre-shipment*:
+pre-shipment weight*WNвес до отгрузки
+predictive ability*WAпрогнозирующаяNспособность
+preference shares*WAпривилегированныеnакция
+preference stock*WAпривилегированныеNакция
+preference stocks*WAпривилегированныеnакция
+preferential*Aпреференциальный
+preferential advantages*WAпреференциальныеnльгота
+preferential duty*WAльготнаяNпошлина
+preferential rate*WAльготнаяNставка
+preferential tariff zone*WNзона преференциальных тарифов
+preferred share*WAпривилегированнаяNакция
+preferred shares*WAпривилегированныеnакция
+preliminary acceptance*WAпредварительныйNакцепт
+preliminary acceptance protocol*WAпредварительныйNпротокол приемки
+preliminary balance*WAпредварительныйNбаланс
+preliminary hearing*WAпредварительныйNслушание дела
+preliminary hearing officer*Nследователь
+preliminary project acceptance protocol*WNпротокол приемки предварительного проекта
+premium price*WNнадбавка к цене
+price adjustment*WNкорректирование цен
+price adjustments*WNкорректирование цен
+price bonification*Nбонификация
+price breakdown*WAрасценочнаяNведомость
+price competition*WAценоваяNконкуренция
+price concession*WNуступка в цене
+price cut*WNснижение цен
+price discount*WAценовыеnскидки
+price escalation*WNэскалация цен
+price escalation clause*WNоговорка о повышении цен
+price formation*Nценообразование
+price freeze*WNзамораживание цен
+price index*WNиндекс цен
+price leader*WAценовыйNлидер
+price marketing*WAценовыйNмаркетинг
+price plus markup*WNцена с надбавкой
+price risk*WAкурсовойNриск
+price scissors*WNножницы цен
+prime banker's acceptance*WAпервокласныйNвексель ,Aакцептованный банком
+prime rate*Nпрайм-рейт
+principal debt*WAосновнойNдолг
+printed advertisement*WAпечатнаяNреклама
+printed memoranda*WAпечатныйnмеморандум
+prior acceptance*WAпредварительныйNакцепт
+prior agreement*WAпредварительныйNсоглашение
+prior delivery*WAдосрочнаяNпоставка
+prior shipment*WAдосрочнаяNотгрузка
+private funds*WAчастныйNкапитал
+pro*#
+pro forma invoice*WAпредварительнаяNфактура
+pro rata freight*WAпропорциональнаяNчасть фрахта
+proceed of sales*WNвыручка от продажи
+produce exchange*WNбиржа сельскохозяйственных товаров
+producer market*WNрынок производителя
+producer prices*WNцена проиэводителей
+product assessment*WNаттестация продукции
+product class cycle*WNцикл жизни класса продуктов
+product cost*WNсебестоимость продукции
+product life cycle*WAжизненныйNцикл продукта
+product line diversification*WAмногоотраслеваяNдиверсификация
+product profitability*WNрентабельность продукции
+product quality control*WNуправление качеством продукции
+product strategy*WNстратегия в отношении продукта
+production and sales*WNпроизводствоCиNсбыт
+production and sales analysis*WNанализ возможностей производства и сбыта
+production and sales indicator analysis*WNанализ показателей производственно-сбытовой деятельности
+professor of law*WNпрофессор права
+profit after tax*WNприбыль после уплаты налога
+profit and loss account*WNсчет прибылей и убытков
+profit before tax*WNприбыль до уплаты налога
+profit of payments*WAрасчетнаяNприбыль
+profit plan*WNплан прибыли
+profit ratio*WNпроцент прибыли
+profit sharing*WNучастие в прибылях
+profit taker*WAудачливыйNпредприниматель
+profit takers*WAудачливыйnпредприниматель
+profit tax*WNналог на прибыль
+profit-sharing*NWNучастие в прибылях
+profitability of an enterprise*WNрентабельность предприятия
+profitability of outlay*WNрентабельность затрат
+profitability rates*Wnнорматив рентабельности
+proforma bill of lading*WNпроформа коносамента
+proforma charter party*WNпроформа чартера
+proforma invoice*WAпредварительнаяNфактура
+proforma quotation*WAпредварительнаяNкотировка
+prolonged bill*WAпролонгированныйNвексель
+promisee*NNWAпринимающийNобещание
+promisor*NNWAдающийNобещание
+promissory*Aдолговой
+promissory note*Nвексель
+promissory notes*WAдолговоеnобязательство
+promote investments*WVучитывать капиталовложения
+promotion of trade*WNстимулирование торговли
+promotion planning*WNпланирование товародвижения
+promotion structure*WNструктура продвижения товаров
+property insurance*WNстрахование собственности
+property interests*WAимущественныеnинтерес
+property of an enterprise*WNимущество предприятия
+property of the state*WAгосударственнаяNсобственность
+property right*WAимущественноеNправо
+property rights protection*WNзащита права собственности
+proposal date*WNдата заключения договора
+proposal form*WNбланк заявления;форма договора
+prospectus of a company*WAфирменныйNпроспект
+protection document*WAохранныйNдокумент
+protection tariff*WAпокровительственныйNтариф
+protective duty*WAпокровительственнаяNпошлина
+protest expenses*WNиздержки протеста
+protocol of intentions*WNпротокол о намерениях
+protocol of trade turnover*WNпротокол о товарообороте
+provision of economic incentives*WAэкономическоеNстимулирование
+public funds*WAгосударственныйnсредство
+purchase requirements*Wnтребование по приобретению
+purchasing management*WNуправление снабжением
+purchasing manager's index*WNиндекс покупательной способности
+purchasing power index*WNиндекс покупательной способности
+put option*WNопцион продавца
+qualified acceptance*WAограниченныйNакцепт
+qualified appraiser*WAофициальныйNоценщик
+quality bonus*WNнадбавка за качество
+quality check*WNпроверка качества
+quality claim*WNпретензия по качеству
+quantitative*Aколичественный
+quantitative regulation*Nконтингентирование
+quantity check*WNпроверка количества
+quantity claim*WNпретензия по количеству
+quantity delivered*WAвыгруженноеNколичество
+quantity loaded*WAпогруженноеNколичество
+quantity rebate*WNскидка с цены за количество
+quarantine and sanitary examination*WAсанитарно-карантинныйNдосмотр
+quarantine dues*WAкарантинныйNсбор
+quarterly goal*WAквартальныйnобязательство
+questionnaire of a standard type*WNанкета установленного образца
+railway receipt*WAжелезнодорожнаяNквитанция
+ram*Nбаран
+range of export goods*WAэкспортныйNассортимент
+range of works*WNкомплекс работ
+rate for mail transfers*WNкурс почтовых переводов
+rate for telegraphic transfers*WNкурс телеграфных переводов
+rate of discharge*WNнорма разгрузки
+rate of exchange*WAвалютныйNкурс
+rate of interest*WAпроцентнаяNставка
+rate of interest on credit*WAпроцентнаяNставка за кредит
+rate of issue*WAэмиссионныйNкурс
+rate of loading*WNнорма погрузки
+rate of mandatory reserves*WNнорма обязательных резервов
+rate of profit*WNнорма прибыли
+rate of securities*WNкурс ценных бумаг
+rate of stevedoring operations*WNнорма грузовых работ
+rate of the day*WNкурс дня
+rates for currency allocations*Wnнорматив валютных отчислений
+rates of duties*Wnставка таможенных пошлин
+rates on the world money market*Wnставка мирового денежного рынка
+raw materials reserves*WAсырьевыеnрезерв
+raw materials resources*WAсырьевыеnресурс
+readdressing of cargo*WNпереадресование груза
+readiness for commissioning*WNготовность к приемке
+readiness for inspection*WNготовность к приемке
+readiness for putting into operation*WNготовность к пуску в эксплуатацию
+readiness for shipment*WNготовность к отгрузке
+real action*WAвещественныйNиск
+real bargain*WAреальнаяNсделка
+real cost*WAреальнаяNстоимость
+real estate*Nнедвижимость
+real income*WAреальныйNдоход
+real investments*WAреальныеnинвестиции
+real wages*WAреальнаяAзаработнаяNплата
+rebated acceptance*WDдосрочноAоплаченныйAакцептованныйNвексель
+receipts*Nвыручка
+receipts from marketing goods and services*WNвыручка от реализации товаров и услуг
+receipts from sales of*WNпоступления от реализацииPР
+received-on-board*Nпринято на борт
+received-on-board bill of lading*WNконосамент "принято на борт"
+reciprocal crediting*WAвзаимноеNкредитование
+reciprocal trade arrangement*WAвстречнаяNсделка
+recognized exchange*WAофициальнаяNбиржа
+recoupment*Nокупаемость
+recoupment of capital investments*WNокупаемость капитальных вложений
+recoupment of contributions to the authorized fund*WNокупаемость вклада в уставный фонд
+recovery against property*WNвзыскание на имущество
+recovery of a sum*WNвзыскание суммы
+recovery of damages*WNвзыскание убытков
+recovery of losses*WNвозмещение потерь
+rediscount*Nпереучет;редисконт
+rediscount of a bill*WNпереучет векселя
+rediscounted*Aпереучтенный
+rediscounted bill*WAпереучтенныйNвексель
+redraft*Nретратта
+redrafting*Nпереоформление
+reduce prices*WVснижать цены
+reduced expenditures*WAприведенныеnзатраты
+reduced price*WAльготнаяNцена
+reduced tariff*WAльготныйNтариф
+reduction of prices*WNснижение товарных цен
+registered bonds*WAименныеnоблигация
+registered exchange*WAзарегистрированнаяNбиржа
+registered letter with declared value*WAценноеNписьмо
+registered person*Nнотариус
+registered persons*nнотариус
+registered share*WAименнаяNакция
+registered shares*WAименныеnакции
+registered stocks*WAименныеnакция
+registration fee*WAрегистрационныйNвзнос
+regressive action*WAрегрессныйNиск
+regular production*WAобычноеNпроизводство
+reimbursement credit*WAакцептно-рамбурсныйNкредит
+reimbursement of credit*WNвозмещение кредита
+reimbursement of expenses*WNвозмещение расходов
+release of a blocked account*WNразблокирование блокированного счета
+release of cargo*WNвыдача груза
+release of weak and strong aspects of firm activity*WNвыявление сильных и слабых сторон деятельности фирмы
+relevant provision*WAотносящееся к делуNусловие
+relief fund*WNфонд выдачи пособий
+remit*Vпередавать
+remittance order*WNпоручение на перевод
+remittee*NWNполучатель перевода
+remitter*Nремитент;переводоотправитель
+remitting*GпередаватьNперевод
+remitting bank*WNбанк -Nремитент
+remunerate*Vвознаграждать
+remuneration*Nвознаграждение
+remuneration in kind*WNвознаграждение натурой
+remuneration in money*WNденежное вознаграждение
+remunerative*Aвыгодный
+remunerative income*WAхозрасчетныйNдоход
+render an account*WVпредставлять счет
+renewal of a draft*WNпролонгация тратты
+renewal of credit*WNвозобновление кредита
+renewal of expiring coverage*WNпролонгация страхования
+rent of a stand*WNаренда стенда
+rent of space*WNаренда площади
+rental income*WAрентныйNдоход
+repair damages*WVвозмещать убытки
+repayment of a credit*WNвозврат кредита
+repayment of a debt*WNвозврат долга
+repayment of a loan*WNвозврат займа
+replacement cost*WNстоимость возмещения
+replacement parts*WAсменныйnчасть
+replacement value*WNстоимость возмещения
+report deal*WAрепортнаяNсделка
+report of enterprises*WNотчетность предприятий
+representation expenses*WAпредставительскийnрасход
+representation of a firm*WNпредставительство фирмы
+representation of a joint venture*WNпредставительство совместного предприятия
+representation purposes*WAпредставительскиеnцель
+reprisal*Nрепрессалия
+request for a bank account*WNзаявление на открытие счета
+request for credit*WNзаявка на кредит
+requirement of the market*WNпотребность рынка
+requisite of*WNреквизитPР
+resent*V1возмущаться
+reserve assets*WAрезервныеnактив
+reserve currency*WAрезервнаяNвалюта
+reserve fund*WAрезервныйNфонд
+reserve stock*WAстраховойNзапас
+reserve supplies*WAрезервныеnзапас
+residual value*WAостаточнаяNстоимость
+respondent*Nреспондент
+responsive group of consumers*WAконтактнаяNаудитория
+rest fund*WAобязательныйNрезерв
+restricted liability society*WNобщество с ограниченной ответственностью
+restriction on profit margin*WNограничение размера прибыли
+retail chains*WNсеть розничных магазинов
+retail franchise*WAрозничнаяNфраншиза
+retail price*WAрозничнаяNцена
+retail purchasing*WNпокупка в розницу
+retail sale*WAрозничнаяNторговля
+retail trade*WAрозничнаяNторговля
+retaliate*Vотплачивать
+retaliation*Nответ
+retaliatory*Aответный
+retaliatory duty*WAкарательнаяNпошлина
+retaliatory tariff*WAкарательныйNтариф
+retooling*Nпереоборудование
+retroactive date*WNсрок ,Aимеющий обратную силу
+return of a contribution*WNвозврат вклада
+return of an amount overpaid*WNвозврат ошибочно переплаченной суммы
+return of the tax sum*WNвозврат суммы налога
+returns*zвозвращатьNвыручка
+returns from sales*WNвыручка от продажи
+revalorization*Nревалоризация
+revenue*NдоходAдоходный
+reversal of a judgement*WNкассация судебного решения
+reverse an entry*WVсторнировать запись
+reversibility*Nобратимость
+reviewing ~ files*WGпросматривать~nбумага
+revival*Nоживление
+revival of a contract*WNвозобновление котракта
+revocable*Aвозвратный
+revocable crediting*WAвозвратноеNкредитование
+revocation of a license*WNаннулирование лицензии
+revocation of an offer*WNотзыв оферты
+revoke an offer*WVотзывать оферту
+revolving credit*WDавтоматическиAвозобновляемыйNкредит
+revolving fund*WAвозобновляемыйNфонд
+revolving letter of credit*WDавтоматическиAвозобновляемыйNаккредитив
+right of a legal entity*WNправо юридического лица
+right of access to foreign markets*WNправо выхода на внешние рынки
+right of appeal*WNправо обжалования
+right of common*WNправо на совместное пользование
+right of disposal of goods*WNправо распоряжения грузом
+right of pre-emption*WNправо преимущественной покупки
+right of prior use*WNправо преждепользования
+right of protest*WNправо протеста
+right of readdressing*WNправо переадресовки
+right of recourse*WNправо регресса
+right of veto*WNправо вето
+right to industrial property*WNправо на промышленную собственность
+right to use*WNправо пользованияPР
+risk business*WAрисковыйNбизнес
+risk cost*WAожидаемаяNвеличина потерь вследствие риска
+risk investments*Nрискоинвестиции
+risk of currency depreciation*WAвалютныйNриск
+risk of non-acceptance*WNриск неакцепта
+risk of non-payment*WNриск неплатежа
+risk premium*WNнадбавка за риск
+river bill of lading*WAречнаяNнакладная
+river charter*WAречнойNчартер
+road waybill*Nавтонакладная
+roll-on*NNWAбескрановаяNпогрузка
+rouble account*WAрублевыйNсчет
+rough balance*WDбруттоNбаланс
+round trip*WNрейс туда и обратно
+rubber exchange*WAкаучуковаяNбиржа
+run up debts of*Weдоводить долгPРдо
+salary and wages*WAзаработнаяNплатаCиNоклад
+sale at a profit*WNпродажа с прибылью
+sale by commission*WAкомиссионнаяNпродажа
+sale by sample*WNпродажа по образцу
+sale by weight*WNпродажа на вес
+sale ex stand*WNпродажа со стенда
+sale for cash*WNпродажа за наличные
+sale for future delivery*WNпродажа на срок
+sale for prompt delivery*WNпродажа с немедленной поставкой
+sale from stock*WNпродажа со склада
+sale on credit*WNпродажа в кредит
+sales agent*WNагент по продаже
+sales channels*Wnканал сбыта
+sales expenses*WAторговаяnиздержка
+sales force*WAторговыйnагент
+sales forces*WAторговыйnагент
+sales or use taxes*WNналог с продажи или за использование
+sales proceeds*WNвыручка от реализации товаров и услуг
+sales promotion*WNпродвижение товара
+sales promotion standard*WNстандарт товародвижения
+sales revenue*WNдоход от продаж
+sales strategy*WNстратегия поддержания уровня сбыта
+sales tax*WNналог с оборота
+saving book processing*WNобработка вкладов
+saving of expense*WNэкономия в расходах
+savings account*WAсберегательныйNсчет
+savings bank*WAсберегательныйNбанк
+savings deposit*WAсберегательныйNвклад
+savings depositor*WNвладелец сберегательного вклада
+scale of prices*WNмасштаб цен
+schedule of deliveries*WNграфик поставок
+schedule of materials on order*WNведомость заказанных материалов
+schedule of payments*WNграфик платежей
+sdr*Nсдр
+seasonal adjustment*WNпоправка на сезонные колебания
+seasonal discount*WAсезоннаяNскидка
+seasonal duty*WAсезоннаяNпошлина
+seasonal sale*WAсезоннаяNраспродажа
+seasonal stocks*WAсезонныеnзапас
+seasonal surcharge*WAсезоннаяNнадбавка
+sectoral management*WAотраслевоеNуправление
+secured credit*WAобеспеченныйNкредит
+secured debt*WAобеспеченныйNдолг
+securities exchange*WAфондоваяNбиржа
+securities market*WNрынок ценных бумаг
+security for a claim*WNобеспечение иска
+security for a debt*WNобеспечение долга
+security for a loan*WNобеспечение ссуды
+security for credit*WNобеспечение кредита
+security in the form*WNобеспечение в виде
+security stocks*WAгарантийныеnзапас
+seizure note*WNакт о конфискации груза
+seizure of contraband*WNизъятие контрабанды
+selection of documents*WNкомплектация документов
+sell at a discount*WVпродавать со скидкой
+seller rate*WNкурс продавца
+selling broker*WNброкер по продаже
+selling price*WAреализационнаяNцена
+selling the crop*WNпродажа на корню
+senior accountant*WAстаршийNбухгалтер
+serial production*WAсерийноеNпроизводство
+serial products*WAсерийнаяNпродукция
+service ability to product*WAэксплуатационнаяNпригодность изделия
+service marketing*WNмаркетинг услуг
+service passport*WAслужебныйNпаспорт
+service wear*WAэксплуатационныйNизнос
+settle accounts*WVоплачивать счета/;рассчитаться
+settlement account*WAрасчетныйNсчет
+settlement by payment orders*WNрасчет платежными поручениями
+settlement by payment requests*WNрасчет платежными требованиями
+settlement for a debt*WNпокрытие долга
+settlement house*WAрасчетнаяNпалата
+settlement in the form*WNрасчет в форме
+settlement of an account*WNпокрытие счета
+settlement rate*WAрасчетныйNкурс
+settlement under license agreements*WNрасчет по лицензионным соглашениям
+shareholder*Nакционер;держатель акций
+shareholding*WNучастие в акционерном капитале
+shareholdings*NWNпакет акций
+sharing commitment*WAдолевоеNобязательство
+sharing of currency risks*WNраспределение валютных рисков
+shark*Nакула
+shifting of a vessel*WNперешвартовка судна
+ship broker*WAсудовойNброкер
+shipment of freight*WNпартия груза
+shipping broker*WNброкер по фрахтованию
+shipping documents*WAпогрузочныеNдокументы
+shipping instructions*WAотгрузочноеNпоручение
+shipping line*WAсудоходнаяNлиния
+shipping marks*WAгрузоваяNмаркировка
+shipping note*WAпогрузочныйNордер
+shipping order*WAпогрузочныйNордер
+shipping pool*WAсудоходныйNпул
+shipping requisites*WAотгрузочныеnреквизит
+shipping schedule*WNграфик отгрузок
+shipping specification*WAотгрузочнаяNспецификация
+shipping weight*WAотгрузочныйNвес
+short delivery*WNнедостача в поставке
+short lease*WAкраткосрочнаяNаренда
+short rate table*WNтаблица краткосрочной процентной ставки
+short rent*WAкраткосрочнаяNаренда
+short weight*WNнедостача в весе
+short-distance*:
+short-distance runs*WAкороткопробежныеNперевозка
+short-shipment*WKнеAпринятая на судноNчасть груза
+short-term credit*WAкраткосрочныйNкредит
+short-term crediting*WAкраткосрочноеNкредитование
+short-term deposit*WAкраткосрочныйNвклад
+short-term fund*WAкраткосрочныйNкапитал
+shortage of cargo*WNнедостача груза
+shortage of goods*WNнедостача товара
+shortage of manpower*WNдефицит рабочей силы
+shorthaul*Aкороткопробежный
+shorthaul market*WNрынок короткопробежных перевозок
+shrink*ZуменьшатьNуменьшение
+sight deposit*WAбессрочныйNвклад
+sign of*WNпризнакPР
+signatory*NподписавшийAподписавший
+signed*Eподписывать;отмечатьAподписанный\sign
+signed receipt*WAподписаннаяNквитанция
+single copy*WAединственныйNэкземпляр
+single delivery*WAразоваяNпоставка
+single index of competitiveness*WAединичныйNпоказатель конкурентоспособности
+single license*WAразоваяNлицензия
+single loan*WAразоваяNссуда
+single order*WAразовыйNзаказ
+single payment*WAразовыйNплатеж
+single trip*WNрейс в один конец
+single-name*:
+single-name paper*WAсоло -Nвексель
+sinking fund*WNфонд погашения
+slow assets*WAтруднореализуемыеnактив
+smart money*WAотступныеNденьги
+sole agency*WAмонопольноеNагенство
+sole agent*WAисключительныйNагент
+sole importer*WAисключительныйNимпортер
+sole source award*WAбесконкурентныйNконтракт
+special acceptance*WAусловныйNакцепт
+special account*WAособыйNсчет
+special allowances*WAспециальныеnскидки
+special appropriations*WAспециальныеnассигнование
+special deposit*WAименнойNвклад
+special endorsement*WAименнойNиндоссамент
+specialization in production*WNспециализация производства
+specialized fair*WAспециализированнаяNярмарка
+specialty goods*Wnтовар повышенного спроса
+specific duty*WAспецифическаяNпошлина
+specific software suppliers*Wnпоставщик специализированных программ
+specification of products*WAтоварнаяNспецификация
+speculative boom*WAспекулятивныйNбум
+speculative transaction*WAспекулятивнаяNсделка
+spot delivery*WAнемедленнаяNпоставка
+spot exchange operations*WAналичныеAвалютныеnоперации "cпот"
+spot price*WNцена спот
+spot transaction*WNсделка с немедленной поставкой
+spring fair*WAвесенняяNярмарка
+stable currency*WAустойчиваяNвалюта
+stacked cargo*WAштабелированныйNгруз
+stake in a company*WNдоля в акционерной компании
+stale debt*WAпросроченныйNдолг
+stamp duty*WAгербовыйNсбор
+stand-by*NрезервированиеAрезервный
+stand-by letter of credit*WAрезервныйNаккредитив
+standard act*WAнормативныйNакт
+standard contract*WAтиповойNдоговор
+standard cost*WAнормативнаяNстоимость
+standard of judgement*WNкритерий оценки
+standard weight*WAстандартныйNвес
+start-up*:
+start-up work*WAпуско-наладочныеnработа
+state arbitration*WAгосударственныйNарбитраж
+state attestation*WAгосударственнаяNаттестация
+state bank*WAгосударственныйNбанк
+state border*WAгосударственнаяNграница
+state budget*WAгосударственныйNбюджет
+state calibration of measuring instruments*WAгосударственнаяNповерка средств измерений
+state credit*WAгосударственныйNкредит
+state examination*WAгосударственнаяNэкспертиза
+state institutions market*WNрынок государственных учреждений
+state loan*WAгосударственныйNзаем
+state order*WAгосударственныйNзаказ
+state price adjustment*WAгосударственноеNрегулирование цен
+state purchases*WAгосударственныеnзакупка
+state supervision*WAгосударственныйNнадзор
+state surveillance*WAгосударственныйNнадзор
+state testing*WAгосударственныеnиспытание
+statement of claim*WAисковоеNзаявление
+statement of obligation*WNзаявление -Nобязательство
+statistical abstract*WAстатистическийNобзор
+sterling acceptance*WAакцептованныйNвексель в фунтах стерлингов
+stevedore*ZгрузитьNстивидор
+stevedoring*GгрузитьAстивидорный
+stevedoring company*WAстивидорнаяNкомпания
+stock-note*Nстокнота
+stockist*Nстокист
+storage*Nхранение
+storage at a customhouse warehouse*WNхранение на таможенном складе
+storage certificates*WAскладскойnквитанция
+storage inspection*WNпроверка хранения
+storage of cargoes*WNхранение грузов
+storage of goods en route*WNхранение товара в пути
+store for goods in transit*WAперевалочныйNсклад
+stowage*Nукладка
+strategic goods*WAстратегическиеnтовар
+strategy of differential marketing*WNстратегия дифференцированного маркетинга
+strategy of diversification*WNстратегия диверсификации
+strategy of gradual operation curtailment*WNстратегия постепенного сворачивания операций
+strategy of product elaboration*WNстратегия разработки товара
+strategy of reactive realization*WNстратегия реактивной реализации
+strategy of vertical integration*WNстратегия вертикальной интеграции
+strike clause*WNоговорка о забастовках
+structural exchange policy*WAструктурнаяAвалютнаяNполитика
+stub*Nпень
+subject to receipt of relevant bordereaou*Dс правом выписки рассчетного ордера
+sublease*Nсубаренда
+sublicensee*Nсублицензиат
+sublicensor*Nсублицензиар
+subrogation clause*WNоговорка о суброгации
+subrogation form*WNакт о суброгации
+subrogation right*WNправо суброгации
+subscribe hereto*WVподписыватьсяDпод этим
+subsequent acceptance*WAпоследующийNакцепт
+subsidiary company*WAдочерняяNкомпания
+subsidiary enterprise*WAдочернееNпредприятие
+subtotal*NNWAпромежуточнаяNсумма
+succeeding policy*WAпоследующийNполис
+sugar exchange*WAсахарныйNбиржа
+sum of profits*WNсумма прибыли
+summary balance*WAсводныйNбаланс
+summary plan*WAсводныйNплан
+supervision of erection*Nшефмонтаж
+supervisory board*WAконтрольныйNсовет
+supervisory personnel*Nшефперсонал
+supplementary protocol*WNдополнение к протоколу
+supplier account*WNсчет поставщика
+supplier plant*WNзавод -Nпоставщик
+supply of materials*WAматериальноеNобеспечение
+surety for a bill*WNаваль векселя
+surplus commodities*Wnизлишек товаров
+surplus value*WAприбавочнаяNстоимость
+surtax*ZVWVоблагать добавочным налогом/N.WAдобавочныйNналог
+surveyor dues*WAсюрвейерскийNсбор
+surveyor of the port*WAпортовыйNинспектор
+surveyor of weights and measures*WNконтроллер мер и весов
+surveyor report*WNакт сюрвейера
+swap currency operations*WAвалютныеnоперации "cвоп"
+swap transaction*WAобменнаяNсделка
+swing credit*WAсвинговыйNкредит
+switch-over*Nперевод
+switching currency*WNконверсия валюты
+switching currency operations*WAконверсионныеAвалютныеnоперации
+sworn weigher*WAприсяжныйNвесовщик
+synchromarketing*Nсинхромаркетинг
+system of gaining*WNсистема сбора
+tally sheet*WAтальманскийNлист
+tallyman*NтальманAтальманский
+tallyman receipt*WAтальманскаяNрасписка
+tanker cargo*WAналивнойNгруз
+tape abbreviation*WAкодовоеоNбозначениеPТна ленте
+tax abatement*WAналоговая скидка
+tax authorities*WAналоговаяNинспекция
+tax collection*WNвзыскание налогов
+tax cuts*WNснижение налогов
+tax declaration*WAналоговаяNдекларация
+tax deduction*WNудержание налога
+tax deductions*WAналоговыеnвычет
+tax haven*WAналоговаяNгавань
+tax in kind*WAнатуральныйNналог
+tax incentives*WAналоговыеNльготы
+tax officer*WAналоговыйNинспектор
+tax on non-commercial operations*WNналог с нетоварных операций
+tax payer*Nналогоплательщик
+tax privileges*WAналоговыеnльгота
+tax rates*WAналоговыйNтариф
+tax refund*WNвозврат суммы налога
+tax surcharge*WAдополнительныйNналог
+taxable income*WAоблагаемый налогомNдоход
+taxable profit*WAоблагаемаяNприбыль
+taxation*NналогообложениеAналоговый
+taxation rate*WAналоговаяNставка
+taxation rates*WAналоговыеnставка
+technical characteristics*WAтехническаяNхарактеристика
+technical examination*WAтехническаяNэкспертиза
+technical office*WAтехническоеNбюро
+technical risk insurance*WNстрахование технических рисков
+temporary retreat*WAвременноеNпонижение курса
+tender committee*WAтендерныйNкомитет
+tender documentation*WAтендернаяNдокументация
+tender documents*WAтендернаяNдокументация
+tenders*nторг
+term bill*WAсрочныйNвексель
+term of direction*Nположение инструкции
+terminate distributor*WVотказываться от дистрибьютера
+termination liabilities*Wnобязательство ,Aсвязанное с закрытием контракта
+termination of a contract*WNаннулирование контракта
+terms and conditions of a contract*Wnусловие контракта
+terms of credit*Wnусловие предостовления кредита
+terms of delivery*Wnусловие поставки
+terms of payment*Wnусловие платежа
+terms of repayment of credit*Wnусловие погашения кредита
+terms of settlement*WAрасчетныеnдень
+terms of shipment*Wnусловие отгрузки
+terms of trade*Wnусловие торговли
+test marketing*WAпробныйNмаркетинг
+third-party audit*WNпровекрка незаинтересованной стороной
+through bill of lading*WAсквознойNконосамент
+through freight*WAсквознойNфрахт
+through rate*WAсквознойNтариф
+through route*WAсквознойNмаршрут
+tight credit*WAстесненныйNкредит
+timber auction*WAлеснойNаукцион
+timber yard*WAлеснаяNбиржа
+time bill*WAсрочныйNвексель
+time deposit*WAсрочныйNвклад
+time draft*WAсрочнаяNтратта
+time policy*WAсрочныйNполис
+tonnage booking*WAфрахтоваяNсделка
+total assets*WNсумма баланса;общая стоимость имущества
+total liabilities*WAобщаяNсумма обязательств
+total value*WAобщаяNстоимость
+trade acceptance*WAакцептованныйAторговыйNвексель
+trade agency*WAторговоеNагенство
+trade and economic*NNWNторговляCиNэкономика/A.торгово-экономический
+trade and industrial*Aторгово-промышленный
+trade and operation efficiency*WAторгово-операционнаяNэффективность
+trade and payments agreements*WAторговыеCиAплатежныеnсоглашение
+trade balance*WAторговыйNбаланс
+trade bill*WAторговаяNтратта
+trade blockade*WAторговаяNблокада
+trade credit*WAторговыйNкредит
+trade delegation*WAторговоеNпредставительство
+trade discount*WAторговаяNскидка
+trade event*WAотраслеваяNярмарка
+trade financing*WNфинансирование торговли
+trade firm*WAторговаяNфирма
+trade liabilities*WAкредиторскаяNзадолженность
+trade magazine*WAотраслевойNжурнал
+trade negotiations*WAторговыеnпереговор
+trade policy*WAторговаяNполитика
+trade preference*WAторговаяNпреференция
+trade preferences*WAторговыеnпреференция
+trade report*WAторговыйNбюллетень
+trade representation*WAторговоеNпредставительство
+trade turnover*Nтоварооборот
+trading conditions*Wnусловие торговли
+trading discount*WAторговаяNскидка
+trading enterprise*WAторговоеNпредприятие
+trading network*WAторговаяNсеть
+traditional fair*WAтрадиционнаяNярмарка
+traffic accident*NNWAнесчастныйNслучай на транспорте
+traffic expert*WNэксперт по перевозке грузов
+traffic volume*WNобъем перевозок
+tramp*NтрампAтрамповый
+tramp service*WAтрамповаяNлиния
+transactions currency*WNвалюта расчета
+transfer abroad*WNперевод за границу
+transfer against documents*WNперевод против документов
+transfer by clearing*WAбезналичноеNперечисление
+transfer by exchange*WNпереуступка права путем обмена
+transfer by post*WNпересылка по почте
+transfer by sale*WNпереуступка права путем продажи
+transfer of a right*WNпереуступка права
+transfer of funds to the budget*WNперечисление в бюджет
+transfer of money*WNпересылка денег
+transfer of profit*WNтрансферт прибыли
+transfer of share*WNпередача доли участия
+transfer of sums*WNперечисление средств
+transfer to an account*WNперечисление на счет
+transferable letter of credit*WAпереводныйNаккредитив
+transferee*WNполучатель
+transhipment*Nперегрузка
+transhipment expenses*Wnрасход по перегрузке
+transhipment of cargo*WNперегрузка груза
+transit commodity circulation*WAтранзитныйNтоварооборот
+transit permit*WNразрешение на транзит
+transport agency*WAтранспортноеNагенство
+transport by road*Nавтоперевозки
+transport marking*WAтранспортнаяNмаркировка
+transport routes*Wnпуть сообщения
+transportable*Aтранспортабельный
+transportation expenses*WAтранспортныеnиздержка
+transportation margin*WAтранспортнаяNнаценка
+transportation order*WAтранспортноеNпоручение
+transportation packing*WAвнешняяNтара
+transportation rates*WAтранспортныйNтариф
+transportation services*WAтранспортно-экспедиторскоеNобслуживание
+travel agency*WAтуристическоеNагенство
+travel expenses*WAдорожныеnрасход
+traveller*NпутешественникAдорожный
+traveller cheque*WAдорожныйNчек
+traveller cheques*WAдорожныйnчек
+travelling allowance*WAкомандировочныеnрасход
+travelling expenses*WAпутевыеnрасход
+treaty on commerce*WNдоговор о торговле
+treaty port*WAдоговорныйNпорт
+trial consignment*WAпробнаяNпартия
+trial order*WAпробныйNзаказ
+trip charter*WAрейсовыйNчартер
+tropical version*WAтропическоеNисполнение
+trust officer*WAслужащий траст-отдела банка
+unaccepted*Aнепринятый
+unaccepted cheque*WAнеакцептованныйNчек
+unadjusted*Aнерегулируемый
+unadjusted demand*WAнерегулируемыйNспрос
+uncompensable accident*NNWAнесчастныйNслучай без компенсации
+unconditional acceptance*WAбезусловныйNакцепт
+unconfirmed*Aнеподтвержденный
+unconfirmed letter of credit*WAнеподтвержденныйNаккредитив
+uncovered*Aнепокрытый
+uncovered acceptance*WAакцептованныйNвексель без покрытия
+uncrossed cheque*WAнекроссированныйNчек
+undeclared cargo*WAнезаявленныйNгруз
+under this policy*Dпо этому полису
+under-elastic demand*WAнеэластичныйNспрос
+underwriter*Nгарант;страхователь
+underwriters*nстрахователь
+undesirable group of consumers*WAнежелательнаяNаудитория
+unenforceable*AAWAнеимеющий исковыю силу
+unexclusive license*WAнеисключительнаяNлицензия
+unfavourable pay balance*WAпассивныйAплатежныйNбаланс
+unfavourable trade balance*WAпассивныйAторговыйNбаланс
+unit of account*WAрасчетнаяNединица
+unit of value*WNединица стоимости
+united marketing program*WAединаяNпрограмма маркетинга
+universal exchange*WAуниверсальнаяNбиржа
+unlimited company*WNкомпания с неограниченной ответственностью
+unloading*GразгружатьNвыгрузка
+unloading expenses*Wnрасход по выгрузке товара
+unloading of a vessel*WNразгрузка судна
+unmet needs reveal*WNвыявление неудовлетворенных потребностей
+unpaid amount*WAнепроизведенныйNплатеж
+unproductive expenses*WAнепроизводительныеnрасход
+unqualified acceptance*WAбезусловныйNакцепт
+unsecured credit*WNкредит без обеспечения
+unsecured debt*WAнеобеспеченнаяNзадолженность
+unsecured overdraft*WAнепокрытыйNовердрафт
+unstable currency*WAнеустойчиваяNвалюта
+unstamped*:
+unstamped letter*WNписьмо с доплатой
+untransferable*Aнепереводимый
+untransferable letter of credit*WAнепереводныйNаккредитив
+up-to-date share price information*WAпоследниеNданные о курсе акций
+updated norms*WAпрогрессивныеnнорма
+upon acceptance*WPпо акцептованнии
+upon the terms and conditions*WPВвnсрокCиPПприnусловие
+valid claim*WAзаконныйNиск
+valid contract*WAдействительныйNдоговор
+value added tax*WNналог на добавленную стоимость
+value of a contribution*WNстоимость вклада
+value-added tax*WNналог на добавленную стоимость
+variable exchange*WAколеблющийсяAвалютныйNкурс
+vendors analysis*WNанализ поставщиков
+venture operations*WAвенчурныеnоперация
+verification of credit standing*WNпроверка кредитоспособности
+verification of financial position*WNпроверка финансового положения
+verification on the spot*WNпроверка на месте
+vertical audit*Nвертикальная ревизия
+vertical marketing system*WAвертикальнаяAмаркетинговаяNсистема
+veterinary health certificate*WAветеринарныйNсертификат
+volatile food*WAнеосновнойnпродукт питания
+voluntary agreement*WAдобровольнаяNдоговоренность
+voyage policy*WAрейсовыйNполис
+waiting for berth*WNожидание причала
+waive any liability*WVосвобождать от любой ответственности
+warehouse bond*WAскладскаяNзакладная
+warehouse commodity circulation*WAскладскойNтоварооборот
+warehouse fee*WAскладскойNсбор
+warehouse goods*WAскладскойNгруз
+warehouse receipt*WAскладскаяNквитанция
+warehouse warrant*WAскладскойNваррант
+warehousing*Nскладирование
+warmest regards*WAсердечныйNпривет
+warmest thanks to*WAбольшаяNпризнательностьPД
+warrant for receipt*WNдоверенность на получение
+warrant in the name*WNдоверенность на имя
+warranty contract*WAгарантийныйNконтракт
+warranty police*WAгарантийноеNобязательство
+waybill*NNWAтранспортныйNконосамент
+weighing*GвеситьAвесовой
+weighing fee*WAвесовойNсбор
+wet weight*WNвес во влажном состоянии
+wholesale fair*WAоптоваяNярмарка
+wholesale firm*WAоптоваяNфирма
+wholesale price*WAоптоваяNцена
+wholesale purchases*WAоптовыеnзакупка
+wholesale trade*WAоптоваяNторговля
+wholesaler*Nоптовик
+wire tranfer room*WNотдел перечислений
+with all good wishes*Dс наилучшими пожеланиями
+withdraw an offer*WVотзывать оферту
+withdrawal of an offer*WNотзыв оферты
+without loss pricing*WNрасчет цены на основе принципа безубыточности
+without recourse clause*WAбезоборотнаяNоговорка
+work in progress*WAнезавешенноеNпроизводство
+work test report*WNпротокол заводского испытания
+working exhibit*WAдействующийNэкспонат
+world economy*WAмироваяNэкономика
+world finance markets*WAмироваяAфинансоваяNконъюнктура
+world market*WAмировойNрынок
+world market conjuncture*WNконьюктура мирового рынка
+world market demand*WNконъюнктура спроса на мировых рынках
+world market of loan capital*WAмировойNрынок ссудных капиталов
+world market price*WNцена мирового рынка
+world trade*WAмироваяNторговля
+world trade centre*WNцентр международной торговли
+writing sums off an account*WNсписание сумм со счета
+written acceptance*WAписьменноеNсогласие
+written notice*WAписьменноеNуведомление
+written notification*WAписьменноеNуведомление
+written permission*WAписьменноеNразрешение
+written rejection*WAписьменныйNотказ
+written submission*WAписьменныйNдокумент
+your kind and*WOвашAсердечныйCи
+yours faithfully*Dс совершенным почтением
+yours truly*Dпреданный вам
+yours very truly*Dпреданный вам
+zeroing*Gнаправляться
+zone of exclusive rights*WNзона исключительного права
+zone of joint enterprise*WNзона совместного предпринимательства
+zone of non-exclusive rights*WNзона неисключительного права
+zone price*WAзональнаяNцена
+zone pricing*WNустановление зональных цен

@@ -799,11 +799,26 @@ static void command_find(const char *path,const char *wanted) {
   }
   if(!found)printf("no entries\n");free(key);free(line);fclose(f);
 }
+/* A theme dictionary (a .txt in openrussian/themes): UTF-8 `key*code` rows, the
+ * same codes as BASE.DIC, compiled to an indexed .DIC the engine loads with
+ * --dic-overlay. LTGOLD shipped BUSINESS.DIC and COMPUTER.DIC this way. */
+static void command_text(const char *input,const char *output) {
+  FILE *file=fopen(input,"r");if(!file){perror(input);exit(1);}char *line=NULL;size_t cap=0;Records db={0};
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    char *star=strchr(line,'*');if(!star||star==line||!star[1]){fprintf(stderr,"%s: expected headword*code: %s\n",input,line);exit(1);}
+    *star=0;add_utf8_record(&db,line,star+1);
+  }
+  free(line);fclose(file);if(!db.count)fail("no dictionary rows");
+  write_dictionary(output,&db,"ERS",26);printf("wrote %zu records to %s\n",db.count,output);
+}
+
 int main(int argc,char **argv) {
   if(argc<2)fail("usage: openrussian_db build|info|find ...");
   if(!strcmp(argv[1],"build"))command_build(argc,argv);
   else if(!strcmp(argv[1],"info")&&argc==3)command_info(argv[2]);
   else if(!strcmp(argv[1],"find")&&argc==4)command_find(argv[2],argv[3]);
-  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH | info FILE | find FILE HEADWORD");
+  else if(!strcmp(argv[1],"text")&&argc==4)command_text(argv[2],argv[3]);
+  else fail("usage: openrussian_db build SOURCE_DIR OUTPUT.DIC OUTPUT.RUS OUTPUT.MORPH | text ENTRIES.txt OUTPUT.DIC | info FILE | find FILE HEADWORD");
   return 0;
 }

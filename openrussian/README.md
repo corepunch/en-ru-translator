@@ -21,6 +21,11 @@ authored input, in the spirit of LTGOLD's single `.DIC` and `.RUS`:
   builder and written into `.RUS` records as LTGOLD stores them.
 - [`words.tsv`](words.tsv): English word attributes for the builder (`adverb`,
   `content-first`, `frame`).
+- [`themes/`](themes): theme dictionaries, one `key*code` file each
+  (`business.txt`, `computer.txt`, LTGOLD's BUSINESS.DIC and COMPUTER.DIC). The
+  rebuild compiles each to `openrussian/<NAME>.DIC`; `lua init.lua --dic-overlay
+  openrussian/BUSINESS.DIC` loads one after `BASE.DIC`, where it wins for the
+  same key (`Advising bank` → `Авизующий банк`). A new theme is a new file there.
 
 The builder generates only one-word English keys; every multiword entry is a
 `dictionary.txt` row.

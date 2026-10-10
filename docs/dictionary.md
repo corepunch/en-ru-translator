@@ -394,13 +394,18 @@ april*Nмес)апрельAапрельский
 
 Marks in the shipped `BASE.DIC`: `штт)` US states (41), `инф)` informatics (32),
 `мес)` months (25), `дел)` business (10), `врм)` time (5), `юр)` law and `общ)`
-general (1 each). `dic.txt` does not describe them, and the Lua engine does not
-interpret them: the first sense is used and the others appear as `{1.…}`
-alternatives in the output.
+general (1 each). `dic.txt` does not describe them. The Lua engine reads them:
+`--domain инф` prefers the sense carrying that mark (`core/senses.lua`,
+`test/domain_test.lua`); without `--domain` the first sense is used and the
+others appear as `{1.…}` alternatives.
 
-For this project a theme dictionary is the same shape as
-`openrussian/dictionary.txt`: a `key*code` file imported after it with
-`--replace`.
+Both mechanisms exist in this project. The dictionary chain is
+`--dic-overlay FILE`: the theme `.DIC` is loaded after `BASE.DIC` and wins for
+the same key. The themes are text sources in `openrussian/themes/` (one
+`key*code` file each, `business.txt` and `computer.txt` carried over from
+LTGOLD) that `tools/rebuild_openrussian.sh` compiles to `openrussian/BUSINESS.DIC`
+and `openrussian/COMPUTER.DIC`. A politics or any other theme is one more file
+there. The `тема)` marks can be written in any `dictionary.txt` or theme row.
 
 ## Encoding
 

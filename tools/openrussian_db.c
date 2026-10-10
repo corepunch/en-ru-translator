@@ -322,6 +322,36 @@ static const char *perfective_partner(const char *lemma) {
 /* The runtime lowers a capitalized DIC lemma (Россия) and looks its metadata
  * up under the lowercase headword, as LTGOLD stores them (россия). Keep the
  * capitalized spelling in the DIC reading only. */
+/* 5,122 OpenRussian nouns leave the gender column empty, which became neuter
+ * (main factor -> Главное фактор). Read the gender off the lemma ending. */
+static int has_suffix(const char *word,const char *tail) { size_t n=strlen(word),m=strlen(tail);return n>=m&&!strcmp(word+n-m,tail); }
+static const char *inferred_gender(const char *lemma) {
+  static const char *feminine[]={"а","я","сть","знь","вь","бь","пь","мь","чь"};
+  static const char *neuter[]={"о","е","ё","мя"};
+  for(size_t i=0;i<sizeof neuter/sizeof *neuter;i++)if(has_suffix(lemma,neuter[i]))return "n";
+  for(size_t i=0;i<sizeof feminine/sizeof *feminine;i++)if(has_suffix(lemma,feminine[i]))return "f";
+  return "m";
+}
+/* LTGOLD's native government byte (0x80 intransitive, 0x84 dative, 0x90
+ * instrumental, ...) for the verbs it codes; OpenRussian has no valency, so
+ * every other verb stays transitive 0x88. tools/export_verb_government.py. */
+static char **government_lemma;static unsigned char *government_byte;static size_t government_count;
+static void load_verb_government(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    char *tab=strchr(line,'\t');if(!tab)fail("verb government row needs lemma<TAB>hex");*tab=0;
+    government_lemma=realloc(government_lemma,(government_count+1)*sizeof *government_lemma);
+    government_byte=realloc(government_byte,(government_count+1)*sizeof *government_byte);
+    if(!government_lemma||!government_byte||!(government_lemma[government_count]=strdup(line)))fail("out of memory");
+    government_byte[government_count++]=(unsigned char)strtoul(tab+1,NULL,16);
+  }
+  free(line);fclose(file);
+}
+static unsigned char verb_government(const char *lemma) {
+  for(size_t i=0;i<government_count;i++)if(!strcmp(government_lemma[i],lemma))return government_byte[i];
+  return 0x88;
+}
 static void lower_initial(unsigned char *key) { key[0]=fold(key[0]); }
 static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
   size_t n; unsigned char *encoded=to_cp866(lemma,&n), value[5+256]; size_t used=0;
@@ -330,6 +360,7 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
      * accusative), 0x40 на-location noun. */
     value[used++]='N';value[used++]=(unsigned char)(0x80|(!strcmp(animate,"1")?0x02:0)|(is_na_noun(lemma)?0x40:0));
     /* Keep the legacy RUS number bits beside the 2-bit gender code. */
+    if(is_empty(gender))gender=inferred_gender(lemma);
     int g=!strcmp(gender,"m")?1:!strcmp(gender,"f")?2:0;
     value[used++]=(unsigned char)(0x80|g|(!strcmp(pl_only,"1")?0x08:0)|(!strcmp(sg_only,"1")?0x04:0));
     value[used++]=0;
@@ -340,7 +371,7 @@ static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,co
      * (увидеть e3), which also suppresses the partner lookup. */
     const char *partner=perfective_partner(lemma),*aspect=verb_aspect(lemma);
     value[used++]='V';value[used++]=(unsigned char)(0xc0|(!strcmp(aspect,"perfective")?0x04:partner?0:0x08));
-    value[used++]=0x88;value[used++]=0;value[used++]=0;
+    value[used++]=verb_government(lemma);value[used++]=0;value[used++]=0;
     if(partner){size_t m;unsigned char *p=to_cp866(partner,&m);if(m>255)fail("verb partner too long");memcpy(value+used,p,m);used+=m;free(p);}
   }
   else { value[used++]='A';value[used++]=0xc0;value[used++]=0;value[used++]=0; }
@@ -548,32 +579,38 @@ static const char *imperfective_partner(const Record *perfective) {
     if(!strcmp(verb_aspect(p),"imperfective")){snprintf(chosen,sizeof chosen,"%s",p);result=chosen;break;}
   free(copy);return result;
 }
-/* The -ing twin of the -s homographs: a noun gloss such as reading -> чтение
- * hides the verb's own -ing form, so `stop reading the book` never sees the
- * gerund G. Native LTGOLD codes `calling*GвызыватьNвызов\call`; emit the same
- * ambiguous record, gerund first, for every noun gloss in -ing whose stem
- * (plain, +e, or without a doubled consonant) is a verb. */
-static void add_ing_form_homographs(Records *db) {
+/* The -ing/-ed twin of the -s homographs: a gloss such as reading -> чтение or
+ * opened -> открыто hides the verb's own inflected form, so `He is reading`
+ * printed a noun and `He opened the door` an adverb. Native LTGOLD codes
+ * `calling*GвызыватьNвызов\call` and `opened*EоткрыватьAоткрытый\open`; emit the
+ * same ambiguous record, verb form first, for every one-word gloss in -ing or
+ * -ed whose stem (plain, +e, -ied -> y, or without a doubled consonant) is a
+ * verb. The gloss's noun or adjective reading follows the verb. */
+static const Record *inflection_stem(Records *db,const unsigned char *k,size_t n,size_t suffix,unsigned char *stem,size_t *stem_len) {
+  size_t base=n-suffix;const Record *verb=NULL;
+  if(base>=63)return NULL;
+  memcpy(stem,k,base);
+  if(suffix==2&&base>=2&&k[base-1]=='i'){stem[base-1]='y';if(has_verb(db,stem,base)){*stem_len=base;return stem_verb(db,stem,base);}memcpy(stem,k,base);}
+  if(has_verb(db,stem,base)){*stem_len=base;return stem_verb(db,stem,base);}
+  stem[base]='e';if(has_verb(db,stem,base+1)){*stem_len=base+1;return stem_verb(db,stem,base+1);}
+  if(base>2&&k[base-1]==k[base-2]&&has_verb(db,stem,base-1)){*stem_len=base-1;return stem_verb(db,stem,base-1);}
+  return verb;
+}
+static void add_inflected_homographs(Records *db,const char *ending,char code,const char *classes) {
   qsort(db->items,db->count,sizeof(Record),record_compare);
-  size_t original=db->count;Records pending={0};
+  size_t original=db->count,suffix=strlen(ending);Records pending={0};
   for(size_t i=0;i<original;) {
     size_t end=i;while(end<original&&!key_compare(&db->items[end],db->items[i].key,db->items[i].key_len))end++;
     const Record *head=&db->items[i];const unsigned char *k=head->key;size_t n=head->key_len;
-    int word=n>5&&k[n-3]=='i'&&k[n-2]=='n'&&k[n-1]=='g';for(size_t j=0;j<n&&word;j++)if(!(k[j]>='a'&&k[j]<='z'))word=0;
-    const Record *noun=word?first_class(db,k,n,"N"):NULL;
-    if(word&&noun&&!has_verb(db,k,n)) {
-      unsigned char stem[64];size_t stem_len=0;const Record *verb=NULL;
-      size_t base=n-3;
-      if(base<sizeof stem-1) {
-        memcpy(stem,k,base);
-        if(has_verb(db,stem,base)){verb=stem_verb(db,stem,base);stem_len=base;}
-        if(!verb){stem[base]='e';if(has_verb(db,stem,base+1)){verb=stem_verb(db,stem,base+1);stem_len=base+1;}}
-        if(!verb&&base>2&&k[base-1]==k[base-2]&&has_verb(db,stem,base-1)){verb=stem_verb(db,stem,base-1);stem_len=base-1;}
-      }
+    int word=n>suffix+2&&!memcmp(k+n-suffix,ending,suffix);for(size_t j=0;j<n&&word;j++)if(!(k[j]>='a'&&k[j]<='z'))word=0;
+    if(word&&!has_verb(db,k,n)) {
+      unsigned char stem[64];size_t stem_len=0;
+      const Record *verb=inflection_stem(db,k,n,suffix,stem,&stem_len);
+      const Record *other=verb?first_class(db,k,n,classes):NULL;
       if(verb&&verb->value_len>3) {
-        size_t vlen=verb->value_len-3,nlen=noun->value_len,len=1+vlen+nlen+1+stem_len;
+        size_t vlen=verb->value_len-3,olen=other?other->value_len:0,len=1+vlen+olen+1+stem_len;
         unsigned char *value=allocate(len),*q=value;
-        *q++='G';memcpy(q,verb->value+3,vlen);q+=vlen;memcpy(q,noun->value,nlen);q+=nlen;*q++='\\';memcpy(q,stem,stem_len);
+        *q++=(unsigned char)code;memcpy(q,verb->value+3,vlen);q+=vlen;if(other){memcpy(q,other->value,olen);q+=olen;}*q++='\\';memcpy(q,stem,stem_len);
         add_record(&pending,(unsigned char *)k,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;free(value);
       }
     }
@@ -750,12 +787,14 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/../overlays/verb-partners.txt",dir);load_verb_partners(path);
   snprintf(path,need,"%s/../overlays/content-first.txt",dir);load_content_first(path);
   snprintf(path,need,"%s/../overlays/plain-adverbs.txt",dir);load_plain_adverbs(path);
+  snprintf(path,need,"%s/../overlays/verb-government.txt",dir);load_verb_government(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");
   snprintf(path,need,"%s/adjectives.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"adjective");
   add_s_form_homographs(&source_dic);
-  add_ing_form_homographs(&source_dic);
+  add_inflected_homographs(&source_dic,"ing",'G',"N");
+  add_inflected_homographs(&source_dic,"ed",'E',"A");
   add_verb_noun_homographs(&source_dic);
   add_native_suffix_gaps(&source_dic);
   add_people_plural(&source_rus);add_curated_nouns(&source_rus);emit_morphology_patterns(&morph);

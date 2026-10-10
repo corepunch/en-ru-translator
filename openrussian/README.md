@@ -221,6 +221,31 @@ a capitalized `.DIC` lemma and reads gender and paradigm from the lowercase
 headword; with the capital headword it found nothing, and `Russia announced`
 agreed with a neuter verb.
 
+Four more repairs close gaps the source tables leave:
+
+- [`native-readings.txt`](overlays/native-readings.txt) takes LTGOLD's own record
+  where OpenRussian has none or ranks the wrong sense first (`both*Iоба`,
+  `rising*GподниматьсяAрастущий\rise`, `refinery`, `marketplace`, `export*…Aэкспортный`
+  so `export bans` is adjectival, `million*I1…`). It is imported after the
+  irregular verbs with `--replace`, like the function words.
+- OpenRussian leaves the gender of 5,122 nouns empty, which became neuter
+  (`Главное фактор`). The builder reads it off the lemma ending (`а/я/сть` feminine,
+  `о/е/мя` neuter, otherwise masculine).
+- OpenRussian has no valency, so every verb was coded transitive (`0x88`), and
+  `Help me` printed `Помоги меня`. [`verb-government.txt`](overlays/verb-government.txt)
+  carries LTGOLD's government byte for the 946 shared verbs whose case differs from
+  the plain accusative (dative `0x84`, instrumental `0x90`, intransitive `0x80`);
+  regenerate it with `tools/export_verb_government.py`.
+- An English `-ed` or `-ing` gloss that is also a verb's inflected form
+  (`opened*WDоткрыто`, `reading*Nчтение`) hides the verb. The builder emits
+  LTGOLD's ambiguous record (`opened*EоткрыватьAоткрытый\open`), verb first.
+
+The native participle tables are indexed by a paradigm number that OpenRussian
+lexemes lack. `generation.lua` therefore derives the long masculine participle
+from the lexeme's own forms (`определить` → `определенный`, `открыть` → `открытый`,
+present passive `-емый`, active `-ющий`/`-вший`) and lets the native adjective
+and short-form code agree it (`Дверь закрыта`, `Условия определены`).
+
 Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
 Such a literal shadowed suffix analysis of the verb's -s form (“He works” →
 `Он производство`). For a one-word -s gloss whose stem is a verb gloss, which is

@@ -150,13 +150,20 @@ function russian.source_forms(state, word, pos, slot, aspect)
 end
 
 -- Dictionary lines are immutable strings; no shared read buffer or DOS handles.
-function russian.lookup(state, key, prefix)
+-- A lemma can be both a noun and a verb (помочь), so callers that know the
+-- class ask for it; without a match the first record is returned as before.
+function russian.lookup(state, key, prefix, class)
   local base = key:match('^(.-)%*') or key
+  local wanted = key .. (prefix == 0 and '*' or '')
+  local first
   for _, line in ipairs(state.russian.entries[base] or {}) do
-    local wanted = key .. (prefix == 0 and '*' or '')
     local code=line:byte(#wanted+1)
-    if line:sub(1,#wanted) == wanted and code ~= 0x51 and code ~= 0x4D then return line end
+    if line:sub(1,#wanted) == wanted and code ~= 0x51 and code ~= 0x4D then
+      if not class or code == class:byte() then return line end
+      first = first or line
+    end
   end
+  return first
 end
 
 local function tables(class, variant)

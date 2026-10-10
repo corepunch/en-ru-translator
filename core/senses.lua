@@ -214,7 +214,7 @@ function senses.select(state, original, r, alt, wtag, wflag)
   local function put_reading(i,v) r.text=text.put(r.text,i,v) end
   local function skip_character() r.text=r.text:sub(2) end
   local function set_length() length=#r.text end
-  local function lookup(prefix) return russian.lookup(state,r.text,prefix) end
+  local function lookup(prefix,class) return russian.lookup(state,r.text,prefix,class) end
   local function ends(at) return text.ends(r.text,a:string(at),length) end
   local function append_literal(at) r.text=r.text..a:string(at) end
   local function bit6D(n) return (get(r,'dictionary_flags') >> n) & 1 end
@@ -420,11 +420,11 @@ function senses.select(state, original, r, alt, wtag, wflag)
     -- The perfective partner named after the code ("V....partner").
     copy_from(p:sub(6))
     if text.is_lower_cyrillic(reading_byte(0)) and text.is_lower_cyrillic(reading_byte(1)) then
-      l = lookup(0)
+      l = lookup(0, 'V')
       set_length()
       if not l and ends(0x4856) then
         put_reading(length - 2, 0)
-        l = lookup(0)
+        l = lookup(0, 'V')
         append_literal(0x4859)
       end
       if l then

@@ -422,3 +422,7 @@ capitalization:dropped-article | The crude oil burns. => Сырая нефть �
 capitalization:dropped-article | the refineries burn. => нефтеперегонные заводы горят.
 native-reading:noun-adjunct | Export bans. => Экспортные запреты.
 native-reading:marketplace | The marketplace is large. => Рынок большой.
+verb-frame:that-clause | They know that Russia will help. => Они знают, что Россия поможет.
+verb-frame:that-clause | They agreed that Russia will help. => Они согласились, что Россия поможет.
+verb-frame:that-clause | He decided that Russia will help. => Он решил, что Россия поможет.
+verb-frame:that-clause | They hope that Russia will help. => Они надеются, что Россия поможет.

@@ -125,6 +125,7 @@ static int coincident_form(const char *alias) {
 }
 static int is_verb_record(const Record *r) { return r->value_len>3&&(r->value[0]=='e'||r->value[0]=='V'); }
 static int is_plain_adverb(const char *alias,const char *lemma);
+static char verb_frame(const char *alias);
 static void add_english_alias(Records *dic,const char *alias,const char *pos,const char *lemma,const char *aspect,int plural) {
   /* OpenRussian's `others` table has uninflected words and fixed expressions
    * without a part of speech. Native LTGOLD codes most such words as D
@@ -143,7 +144,7 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
   size_t lemma_len; unsigned char *encoded=to_cp866(russian_lemma,&lemma_len);
   unsigned char *value=allocate(lemma_len+8); size_t used=0;
   if(!strcmp(pos,"noun")){value[used++]=plural?'n':'N';}
-  else if(!strcmp(pos,"verb")){value[used++]=coincident_form(alias)?'e':'V';value[used++]='0';value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
+  else if(!strcmp(pos,"verb")){value[used++]=coincident_form(alias)?'e':'V';value[used++]=verb_frame(alias);value[used++]=!strcmp(aspect,"perfective")?'1':'0';}
   else value[used++]='A';
   memcpy(value+used,encoded,lemma_len);used+=lemma_len;
   size_t alias_len; unsigned char *key=to_cp866(alias,&alias_len);add_record(dic,key,alias_len,value,used);
@@ -351,6 +352,24 @@ static void load_verb_government(const char *path) {
 static unsigned char verb_government(const char *lemma) {
   for(size_t i=0;i<government_count;i++)if(!strcmp(government_lemma[i],lemma))return government_byte[i];
   return 0x88;
+}
+/* English verbs LTGOLD codes with a that-clause frame (V1, V11): the digit that
+ * follows the class letter. tools/export_verb_frames.py. */
+static char **frame_verb;static char *frame_digit_of;static size_t frame_count;
+static void load_verb_frames(const char *path) {
+  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
+  while(getline(&line,&cap,file)>=0) {
+    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
+    char *tab=strchr(line,'\t');if(!tab)fail("verb frame row needs verb<TAB>digit");*tab=0;
+    frame_verb=realloc(frame_verb,(frame_count+1)*sizeof *frame_verb);frame_digit_of=realloc(frame_digit_of,frame_count+1);
+    if(!frame_verb||!frame_digit_of||!(frame_verb[frame_count]=strdup(line)))fail("out of memory");
+    frame_digit_of[frame_count++]=tab[1];
+  }
+  free(line);fclose(file);
+}
+static char verb_frame(const char *alias) {
+  for(size_t i=0;i<frame_count;i++)if(!strcmp(frame_verb[i],alias))return frame_digit_of[i];
+  return '0';
 }
 static void lower_initial(unsigned char *key) { key[0]=fold(key[0]); }
 static void add_russian_lexeme(Records *rus,const char *pos,const char *lemma,const char *gender,const char *animate,const char *sg_only,const char *pl_only) {
@@ -608,9 +627,9 @@ static void add_inflected_homographs(Records *db,const char *ending,char code,co
       const Record *verb=inflection_stem(db,k,n,suffix,stem,&stem_len);
       const Record *other=verb?first_class(db,k,n,classes):NULL;
       if(verb&&verb->value_len>3) {
-        size_t vlen=verb->value_len-3,olen=other?other->value_len:0,len=1+vlen+olen+1+stem_len;
+        size_t vlen=verb->value_len-3,olen=other?other->value_len:0,len=2+vlen+olen+1+stem_len;
         unsigned char *value=allocate(len),*q=value;
-        *q++=(unsigned char)code;memcpy(q,verb->value+3,vlen);q+=vlen;if(other){memcpy(q,other->value,olen);q+=olen;}*q++='\\';memcpy(q,stem,stem_len);
+        *q++=(unsigned char)code;if(verb->value[1]!='0')*q++=verb->value[1];memcpy(q,verb->value+3,vlen);q+=vlen;if(other){memcpy(q,other->value,olen);q+=olen;}*q++='\\';memcpy(q,stem,stem_len);
         add_record(&pending,(unsigned char *)k,n,value,len);pending.items[pending.count-1].sequence=head->sequence-1;free(value);
       }
     }
@@ -651,7 +670,7 @@ static void add_verb_noun_homographs(Records *db) {
         if(n1&&verb->primary&&!other&&!has_primary(db,k,n,"Nn"))n1=NULL;
         if(!n1&&!a1){memcpy(value,verb->value,verb->value_len);len=verb->value_len;}
         else {
-        value[len++]='Z';value[len++]='V';value[len++]='.';memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
+        value[len++]='Z';if(verb->value[1]!='0')value[len++]=verb->value[1];value[len++]='V';value[len++]='.';memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
         if(n1){value[len++]=n1->value[0];value[len++]='.';memcpy(value+len,n1->value+1,n1->value_len-1);len+=n1->value_len-1;}
         if(a1){value[len++]='A';value[len++]='.';memcpy(value+len,a1->value+1,a1->value_len-1);len+=a1->value_len-1;}
         }
@@ -687,8 +706,8 @@ static void add_inflected_form(Records *db,Records *pending,size_t original,cons
   size_t m=n-drop+strlen(suffix);unsigned char *key=allocate(m);memcpy(key,stem,n-drop);memcpy(key+n-drop,suffix,strlen(suffix));
   const Record *existing=NULL;size_t at=group_start(db,key,m);
   if(at<original&&!key_compare(&db->items[at],key,m))existing=&db->items[at];
-  unsigned char *value=allocate(verb->value_len+(existing?existing->value_len:0)+n+4);size_t len=0;
-  value[len++]=code;memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
+  unsigned char *value=allocate(verb->value_len+(existing?existing->value_len:0)+n+5);size_t len=0;
+  value[len++]=code;if(verb->value[1]!='0')value[len++]=verb->value[1];memcpy(value+len,verb->value+3,verb->value_len-3);len+=verb->value_len-3;
   if(existing&&!memchr(existing->value,'\\',existing->value_len)){memcpy(value+len,existing->value,existing->value_len);len+=existing->value_len;}
   value[len++]='\\';memcpy(value+len,stem,n);len+=n;
   add_record(pending,key,m,value,len);
@@ -788,6 +807,7 @@ static void command_build(int argc,char **argv) {
   snprintf(path,need,"%s/../overlays/content-first.txt",dir);load_content_first(path);
   snprintf(path,need,"%s/../overlays/plain-adverbs.txt",dir);load_plain_adverbs(path);
   snprintf(path,need,"%s/../overlays/verb-government.txt",dir);load_verb_government(path);
+  snprintf(path,need,"%s/../overlays/verb-frames.txt",dir);load_verb_frames(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");

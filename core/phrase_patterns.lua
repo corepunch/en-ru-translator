@@ -1,40 +1,36 @@
 local patterns = {}
 
--- Dictionary ~ gaps capture zero or more word records, stopping at punctuation
--- or a protected span. Memoize failed suffixes to bound ambiguous searches.
+-- A dictionary ~ gap is at most one record (0A4F:1713): when the record at
+-- the gap already equals the next key word the gap is empty, otherwise it
+-- holds that record and the next key word must follow it.
 function patterns.match(key, records, first, head)
   local parts = {}
   for part in key:gmatch('%S+') do parts[#parts + 1] = part:lower() end
   if #parts < 2 or parts[1] ~= head then return end
-  local failed = {}
-  local function match(part, index)
-    if part > #parts then return index - 1, {} end
-    local memo=part .. ':' .. index
-    if failed[memo] then return end
-    if parts[part] == '~' then
-      local finish=index
-      while true do
-        local last, captures=match(part + 1, finish)
-        if last then
-          local capture={}
-          for at=index,finish-1 do capture[#capture + 1]=records[at] end
-          table.insert(captures,1,capture)
-          return last,captures
-        end
-        local node=records[finish]
-        if not node or node.kind ~= 0x57 or node.literal then break end
-        finish=finish+1
-      end
-    else
-      local node=records[index]
-      if node and not node.literal and node.source:lower() == parts[part] then
-        return match(part+1,index+1)
-      end
-    end
-    failed[memo]=true
+  local captures, index = {}, first + 1
+  local function same(node, part)
+    return node and not node.literal and (node.source or ''):lower() == part
   end
-  -- The head can be a dictionary backreference rather than the surface token.
-  return match(2,first+1)
+  local part = 2
+  while part <= #parts do
+    local node = records[index]
+    if not node then return end
+    if parts[part] == '~' then
+      local following = parts[part + 1]
+      if following and same(node, following) then
+        captures[#captures + 1] = {}
+      elseif node.literal then return
+      else
+        captures[#captures + 1] = {node}
+        index = index + 1
+        if following and not same(records[index], following) then return end
+      end
+      if following then index, part = index + 1, part + 2 else part = part + 1 end
+    elseif same(node, parts[part]) then
+      index, part = index + 1, part + 1
+    else return end
+  end
+  return index - 1, captures
 end
 
 function patterns.segments(value)
@@ -47,6 +43,24 @@ function patterns.segments(value)
   end
   segments[#segments+1]=value:sub(start)
   return segments
+end
+
+-- How many records a W reading's components take: one per selector letter,
+-- a space starting a w component (the loop of lexicon.apply_phrase).
+function patterns.components(value)
+  local pos, tag, count = 3, value:sub(2, 2), 0
+  while tag ~= '' and tag:match('[A-Za-z#]') do
+    local stop = pos
+    while stop <= #value and not value:sub(stop, stop):match(tag == '#' and '#' or '[A-Za-z ~#/]') do
+      if value:sub(stop, stop) == '{' then stop = value:find('}', stop, true) or #value end
+      stop = stop + 1
+    end
+    local following = value:sub(stop, stop)
+    if tag == '#' and following == '#' then stop = stop + 1; following = value:sub(stop, stop) end
+    if following == ' ' then following = 'w' end
+    count, tag, pos = count + 1, following, stop + 1
+  end
+  return count
 end
 
 function patterns.readings(value)

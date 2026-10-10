@@ -536,13 +536,18 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   -- phrase keeps LTPRO's casing of each component (Рыбная Мука).
   local casing=record.casing
   if captures and #captures>0 then
+    -- 0A4F:18F8 gives each component of the reading the next record of the
+    -- phrase in order; at ~ it links the gap word back in and goes on with
+    -- the record after it. Missing records are made, extra ones dropped.
     local held,literals,rendered={},{},{}
     for _,capture in ipairs(captures) do for _,n in ipairs(capture) do held[n]=true end end
     for at=first,last do if not held[records[at]] then literals[#literals+1]=records[at] end end
     local template={}
     for k,v in pairs(node) do template[k]=v end
-    local used=0
     local segments=phrase_patterns.segments(value)
+    local final=0
+    for segment,part in ipairs(segments) do if part~='' and part~='W' then final=segment end end
+    local taken=0
     for segment,part in ipairs(segments) do
       if part~='' and part~='W' then
         if segment>1 then
@@ -550,9 +555,12 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
           elseif not part:sub(1,1):match('[A-Za-z#]') then part='Ww'..part
           elseif value:sub(1,1)=='W' then part='W'..part end
         end
-        local pieces
-        if used==0 then pieces=literals
-        else
+        local pieces={}
+        local want=segment==final and #literals-taken or phrase_patterns.components(part)
+        for _=1,want do
+          if taken<#literals then taken=taken+1; pieces[#pieces+1]=literals[taken] end
+        end
+        if #pieces==0 then
           local fresh={}
           for k,v in pairs(template) do fresh[k]=v end
           fresh.source,fresh.source_length,fresh.rules='',0,nil
@@ -560,10 +568,14 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
         end
         lexicon.apply_phrase({value=part,casing=casing},pieces,1,#pieces,options)
         for _,n in ipairs(pieces) do rendered[#rendered+1]=n end
-        used=used+1
       end
       if segment<#segments then
-        for _,n in ipairs(captures[segment] or {}) do rendered[#rendered+1]=n end
+        for _,n in ipairs(captures[segment] or {}) do
+          -- The gap word is marked W (native trace: at BUYERS cost): output
+          -- cases it as a phrase word, reorder still moves it.
+          if (n.marker or 0)==0 then n.marker=0x57 end
+          rendered[#rendered+1]=n
+        end
       end
     end
     -- Only explicit output gaps reinsert captured words. Idioms such as

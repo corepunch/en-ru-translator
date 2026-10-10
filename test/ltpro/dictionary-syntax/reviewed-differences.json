@@ -1,9 +1,5 @@
 {
  "stock": {
-  "Bear this in mind.": {
-   "lua": "Имейте это в виду.",
-   "reason": "Lua applies phrase-wide sentence casing to W equivalents; the original title-cases every component after a capitalized one (see curated-phrases/README.md)."
-  },
   "This prevents him from working.": {
    "lua": "Это предохраняет его от работы.",
    "reason": "The original drops the object between prevent and from (also 'ошибки' in 'It prevents errors from occurring'); not yet explained. Lua keeps it, which is the correct Russian."

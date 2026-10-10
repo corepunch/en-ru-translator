@@ -87,13 +87,6 @@ function output.sentence(state,root)
             if leading_upper('source') or not phrase_started[casing] and sentence_start then cap_translation(false) end
           elseif not phrase_started[casing] and (casing.caps>0 or sentence_start) then cap_translation(false) end
           if (r.text or '')~='' then phrase_started[casing]=true; first=false end
-          elseif not phrase_started[casing] and (casing.caps>0 or (first and initial_caps~=0)) then
-            -- The sentence capital belongs to the first printed word, even when
-            -- a dropped article (The refinery) carried it.
-            cap_translation(false)
-          end
-          if (r.text or '')~='' then phrase_started[casing]=true end
-          first=false
         elseif (marker==0x77 or marker==0x57) and previous and (get(previous,'marker')==0x77 or get(previous,'marker')==0x57) then
           if text.is_upper_cyrillic((previous.text or ''):byte() or 0) or leading_upper('source') then
             cap_translation(false)

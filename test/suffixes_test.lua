@@ -79,14 +79,9 @@ end
 assert(marked and marked.tag == string.byte('N') and marked.previous_tag == 0)
 assert(marked.reading_state == 1 and marked.person == 3 and marked.gender == 1)
 assert(marked.number == 0 and marked.case_mask == 0)
+-- A hyphenated unknown word splits, as in LTPRO (foo / - / ness).
 local hyphenated = lexicon.analyze(no_root, 'foo-ness')
-local left
-node = hyphenated.root.next
-while node do
-  if node.source == 'foo-ness' then left = node end
-  node = node.next
-end
-assert(left and left.tag == string.byte('N') and left.surface_compound)
+assert(hyphenated.count == 5 and hyphenated.vector[1].source == 'foo' and hyphenated.vector[3].source == 'ness')
 result = assert(lexicon.lookup(derived, 'stronger'))
 assert(result.candidate == 'strong' and result.tag == 'A' and result.native_suffix == 'er')
 assert(result.fields.marker == 0x61 and result.fields.tense == 1)
@@ -100,11 +95,13 @@ assert(result.candidate == 'dog' and result.native_suffix == "s'")
 assert(result.fields.number == 1 and result.fields.case_mask == 2)
 result = assert(lexicon.lookup(derived, 'busier'))
 assert(result.candidate == 'busy' and result.native_suffix == 'ier' and result.fields.tense == 1)
-local possessives=lexicon.from_bytes('city*Nгород\nhouse*Nдом\nclass*Nкласс\n')
-for source,stem in pairs({["cities'"]='city',["houses'"]='house',["classes'"]='class'}) do
+-- LTPRO cuts ies' without restoring y (ladies' -> lad, cities' -> cit).
+local possessives=lexicon.from_bytes('city*Nгород\nlad*Nпарень\nhouse*Nдом\nclass*Nкласс\n')
+for source,stem in pairs({["ladies'"]='lad',["houses'"]='house',["classes'"]='class'}) do
   local found=assert(lexicon.lookup(possessives,source))
   assert(found.candidate==stem and found.fields.number==1 and found.fields.case_mask==2)
 end
+assert(not lexicon.lookup(possessives,"cities'"))
 
 local duplicate = lexicon.from_bytes('book*Zкнига\nbook*Nкнижка\n')
 result, reason = lexicon.lookup(duplicate, 'books')

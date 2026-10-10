@@ -228,7 +228,9 @@ local function class_candidates(word, row)
   if class == "A" then return adjective_candidates(word, ending) end
   local stem = word:sub(1, #word - #ending)
   if class == "V" then return with_extra(stem, ending:sub(1, 1) == "e" and "e" or nil) end
-  if ending == "ies'" then return {stem .. 'y'} end
+  -- LTPRO cuts ies' without restoring y: ladies' reads lad (парень), and
+  -- cities' finds no cit and stays untranslated.
+  if ending == "ies'" then return {stem} end
   if ending == "es'" then return with_extra(stem, 'e') end
   return { stem }
 end
@@ -337,18 +339,6 @@ function lexicon.surface_noun(source)
     end
   end
   return nil
-end
-
-local function derivational_compound(dictionary,source,options)
-  local left, right = ascii_lower(source):match('^([^/-]+)[/-]([^/-]+)$')
-  if not left then return false end
-  -- A standalone dictionary word (ion, age, or, ...) is not merely a suffix.
-  -- Preserve whole unknown compounds only when neither part has a reading.
-  if lookup(dictionary,left,options) or lookup(dictionary,right,options) then return false end
-  for _, row in ipairs(rows) do
-    if row.selector == 'N00' and (left == row.ending or right == row.ending) then return true end
-  end
-  return false
 end
 
 -- Expose a defensive copy for fixture tooling; callers cannot change dispatch.
@@ -830,16 +820,13 @@ local function decode(dictionary,records,index,options)
       if derived.native_selector=='Z13' and derived.tag=='V' then node.number=0 end
       node.lookup=derived.candidate
     elseif not lookup_error then
-      local compound=derivational_compound(dictionary,source,options)
-      local surface=compound and {tag='N',fields={number=0,case_mask=0}}
-        or not source:find('[-/]') and lexicon.surface_noun(source)
+      -- Unknown derivational nouns keep their surface spelling; a word with
+      -- a hyphen or slash is split below, as LTPRO does (foo / - / ness).
+      local surface=not source:find('[-/]') and lexicon.surface_noun(source)
       if surface then
-        -- Unknown derivational nouns keep their surface spelling. Bare
-        -- endings in compounds follow the same Lua policy without splitting.
         node.reading_state,node.tag=1,surface.tag:byte()
         node.person,node.gender=3,1
         for at,v in pairs(surface.fields) do node[at]=v end
-        node.surface_compound=compound
       end
     end
   end
@@ -877,7 +864,7 @@ local function decode(dictionary,records,index,options)
   -- LTPRO skips the phrase scan at a sentence boundary. A failed scan
   -- clears the temporary backreference search string otherwise.
   if not derived and records[index+1] and records[index+1].separator~=0x2A then node.lookup='' end
-  if not value and not node.surface_compound then
+  if not value then
     local left,separator,right=source:match('^([^/-]+)([/-])(.+)$')
     if left then
       local attempt=lexicon.attempt_fields(source)

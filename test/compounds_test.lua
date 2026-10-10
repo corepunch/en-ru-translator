@@ -5,11 +5,12 @@ for _, separator in ipairs({'-', '/'}) do
   assert(analyzed.vector[1].reading == 'кот')
   assert(analyzed.vector[2].source == separator)
   assert(analyzed.vector[3].reading == 'собака')
+  -- An unknown word with a derivational ending splits like any other
+  -- (LTPRO: foo / - / ness).
   for _, ending in ipairs({'ness', 'ment', 'ion', 'ence', 'ity', 'or'}) do
     for _, source in ipairs({'foo' .. separator .. ending, ending .. separator .. 'foo'}) do
       local state = lexicon.analyze(dictionary, source)
-      assert(state.count == 3 and state.vector[1].source == source)
-      assert(state.vector[1].tag == string.byte('N'))
+      assert(state.count == 5 and state.vector[2].source == separator, source)
     end
   end
 end

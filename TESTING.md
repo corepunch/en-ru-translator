@@ -49,7 +49,7 @@ contractions, capitalization, longest-match behavior, and polite-response
 boundaries. The 58 repeated native captures, per-entry review, and reproduction
 instructions are in `test/ltpro/curated-phrases/` (captured for the
 earlier 43-entry source). Boundary-subrule cases may check only the span the
-entry owns. Raw native differences remain
+entry owns; the test also fails if a `removed-headwords.txt` literal remains. Raw native differences remain
 visible; the default expectations are not assertions of exact LTPRO parity.
 `prepositions_test.lua` maps every `P`/`p` row in `function-words.txt` to a
 case checking the preposition and governed noun form, plus в/на, из/с/от and

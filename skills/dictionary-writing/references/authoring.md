@@ -252,6 +252,7 @@ my `pleasure`[*]*$Dпожалуйста\ \
 a clause-initial `p` preposition the grammar retags the comma `j`, so `after`
 needs `[j,*]` (historical ``as `it``is`[j,*)]``). A
 generated literal with the same first words still wins lexically and hides
+the subrule, so list it in `openrussian/overlays/removed-headwords.txt`;
 `--replace` only replaces identical keys. “My pleasure” answers thanks, so
 `Пожалуйста` replaces the former “С удовольствием” (accepting an offer).
 
@@ -355,6 +356,8 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
 /tmp/openrussian_db build openrussian/upstream \
   openrussian/BASE.DIC openrussian/BASE.RUS \
   openrussian/BASE.MORPH
+python3 tools/ltech_dict.py delete openrussian/BASE.DIC \
+  --keys-file openrussian/overlays/removed-headwords.txt --in-place
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
   --entries openrussian/overlays/function-words.txt --replace --in-place
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \

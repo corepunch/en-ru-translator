@@ -113,3 +113,10 @@ were [TO]N`home`[D,*]*$@\..`Dдома`\
 over [HI]*$PРсвыше
 stop G*$Vпереставать\V
 make <TAO>`deal`*$заключать\$`Nсделка`\
+according to*PДсогласно
+a bit scary*WDстрашновато
+letter of credit*Nаккредитив
+six months*Nполгода
+there is no time*WDнекогда
+it is cold*WDхолодно
+knock out*Vвыбивать

@@ -65,12 +65,9 @@ Each step takes seconds; do all of them.
 
    not `make a deal*WVзаключатьNсделка`. `Russia made a deal` and `They made
    the deal` both give `заключила/заключили сделку`.
-3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
-   literal starting with the same words (`make a deal*V00рядиться` hides
-   ``make <TAO>`deal` ``), add its key to
-   `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.
-   Without that line the checked-in `BASE.DIC` can look right (hand-edited)
-   while `rebuild_openrussian.sh` regenerates the shadowing literal.
+3. **Edit** `openrussian/overlays/phrases.txt`. The builder emits no multiword
+   literals, so nothing generated can hide a subrule. If a multiword English
+   phrase is needed, it is an overlay row; never a delete list.
 4. **Rebuild:** `sh tools/rebuild_openrussian.sh` (always from source).
 5. **Check and record:** `lua init.lua 'Good night.'`, then add lines to
    `test/translations.txt`: `phrase:<exact key> | Good night. => Спокойной ночи.`,
@@ -112,9 +109,9 @@ failing `--verify`. The only durable way to change a word's reading is a row in
   `lua init.lua` output after the final rebuild, never from the PR text.
 - The PR body's "after" examples equal those lines and describe the final
   entries, not an earlier attempt.
-- You did not delete a pipeline file (`removed-headwords.txt`, rebuild steps)
-  while a phrase still depends on it. Search for the file name in docs, tools
-  and tests before removing it.
+- Sources stay `.upstream tsv → builder → overlays`. No post-build delete or
+  blocklist step: fix the builder or add an overlay row. Search docs, tools
+  and tests for any file name you remove.
 - Docstrings and prose you edit still read as complete sentences and runnable
   commands.
 
@@ -122,7 +119,6 @@ failing `--verify`. The only durable way to change a word's reading is a row in
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| Subrule never fires | Literal with the same first words wins lexically | Add that key to `removed-headwords.txt` |
 | Word printed uninflected or frozen | `D`/fixed text where words should agree | Tagged lemmas in a `W` composite |
 | First letter с/м/ж missing | Russian text in a `#` component | `D` or `WD` |
 | Idiom swallows a longer sentence (“You are welcome to stay”) | Literal key | Boundary subrule ending `[*]` or `[,*]` |
@@ -132,7 +128,7 @@ failing `--verify`. The only durable way to change a word's reading is a row in
 | Sentence-initial `see …` subrule undone (`Смотри`) | Native T4 rule rewrites initial `see` to `Vсмотри` | Do not author it; the original behaves the same |
 | Imperfective verb needed where grammar asks for perfective (future, imperative) | Builder-written `.RUS` partner (`видеть`→`увидеть`) | Name the verb on both sides of `\|`: `Vпоправляться\|поправляться` |
 | -s verb form translated as a noun (`Он производство`) | Plural-noun gloss literal shadows suffix analysis | Builder emits native `z` (`works*zработатьnпроизводство\work`); check `find` |
-| Ordinary clause replaced by one word (`This is` → `Это`, `you know` → `ведь`) | Generated grammar-word literal | Add the key to `removed-headwords.txt` |
+| Ordinary clause replaced by one word or a stray sense (`Rising prices` → `рост`) | A gloss fragment became a key | Fix the builder's gloss parsing (`parse_glosses` in `tools/openrussian_db.c`), not a delete list |
 | Basic English word translated as a content word (`this` → `сего`, `us` → `Америка`) | OpenRussian has no closed-class grammar | Add LTGOLD's native reading to `function-words.txt` |
 | Subrule on a sentence-final one-word head never fires | Native: no subrules attach at the end | Choose another shape; the original behaves the same |
 | Wrong в/на or из/с/от | Noun flags in `.RUS` | Add the noun to `na-nouns.txt`; animacy comes from OpenRussian |

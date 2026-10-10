@@ -10,7 +10,7 @@ prints the original output next to the current Lua/OpenRussian output.
       --delete 'after all' 'After all, he knows.' 'After all the guests left.'
 
   python3 tools/ltpro_try_entries.py --entries openrussian/overlays/phrases.txt \\
-      --delete-file openrussian/overlays/removed-headwords.txt 'Good night.'
+      'Good night.'
 
 With no --entry/--entries it captures the untouched supplied assets. The
 supplied DOS build fails when BASE.DIC grows, so unused ``z`` headwords are

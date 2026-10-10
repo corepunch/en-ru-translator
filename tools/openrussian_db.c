@@ -152,7 +152,7 @@ static void add_english_alias(Records *dic,const char *alias,const char *pos,con
 }
 static void parse_glosses(Records *dic,const char *gloss,const char *pos,const char *lemma,const char *aspect,long rank) {
   char *copy=strdup(gloss); if(!copy)fail("out of memory");
-  char *group_save=NULL;int first=1,index=0;
+  char *group_save=NULL;int first=1,index=0,depth=0;
   for(char *group=strtok_r(copy,";",&group_save);group;group=strtok_r(NULL,";",&group_save)) {
     char *alias_save=NULL;
     for(char *alias=strtok_r(group,",",&alias_save);alias;alias=strtok_r(NULL,",",&alias_save)) {
@@ -162,6 +162,13 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
       /* Some verb glosses carry the infinitive marker (to go); as keys they
        * shadowed every infinitive (I want to go -> пройнный). */
       if(!strcmp(pos,"verb")&&!strncmp(alias,"to ",3)){alias+=3;while(*alias==' ')alias++;if(!*alias)continue;}
+      /* A multiword gloss is a description, not a headword: as a literal key
+       * it would win over grammar and phrase rules. Phrases live in overlays. */
+      /* "growth (in quantity, prices, etc)" splits at its commas; everything
+       * from an open parenthesis to its close is a note, not a gloss. */
+      {int was=depth;for(char *c=alias;*c;c++){if(*c=='(')depth++;else if(*c==')'&&depth>0)depth--;}
+       if(was||depth){index++;first=0;continue;}}
+      if(strchr(alias,' ')){index++;first=0;continue;}
       int plural=!strcmp(pos,"noun")&&(!strcmp(alias,"people")||!strcmp(alias,"children"));
       add_english_alias(dic,alias,pos,lemma,aspect,plural);
       /* The first gloss is the row's primary sense (visit: посещать). */

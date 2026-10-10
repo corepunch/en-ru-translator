@@ -18,7 +18,10 @@ The default English dictionary is `openrussian/BASE.DIC`. All authored
 English entries live in `openrussian/dictionary.txt`, under `## function-words`,
 `## irregular-verbs`, `## native-readings` and `## phrases`; Russian lemma
 attributes (verb government, aspect, на-nouns) in `openrussian/lexemes.tsv` and
-English word attributes in `openrussian/words.tsv`. There are no other sources. Historical `LTGOLD/BASE.DIC` is a separate reference,
+English word attributes in `openrussian/words.tsv`. Theme dictionaries are
+`openrussian/themes/<name>.txt` (same `key*code` rows), compiled to
+`openrussian/<NAME>.DIC` and loaded with `--dic-overlay`. There are no other
+sources. Historical `LTGOLD/BASE.DIC` is a separate reference,
 not an automatically merged source. English phrase rules belong in `.DIC`;
 `.RUS` and `.MORPH` supply Russian morphology.
 
@@ -111,8 +114,8 @@ failing `--verify`. The only durable way to change a word's reading is a row in 
 - The PR body's "after" examples equal those lines and describe the final
   entries, not an earlier attempt.
 - Sources stay `upstream/*.tsv` + `lexemes.tsv` + `words.tsv` → builder →
-  `dictionary.txt`. No new source files, no post-build delete or blocklist
-  step: fix the builder or add a row. Search docs, tools and tests for any
+  `dictionary.txt`, plus `themes/*.txt`. No other source files, no post-build
+  delete or blocklist step: fix the builder or add a row. Search docs, tools and tests for any
   file name you remove.
 - Docstrings and prose you edit still read as complete sentences and runnable
   commands.

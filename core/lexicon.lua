@@ -40,19 +40,37 @@ function lexicon.from_bytes(bytes)
   return result
 end
 
+-- Theme dictionaries (BUSINESS.DIC, COMPUTER.DIC) load after the base and win
+-- for the same key, as in LTGOLD's dictionary chain. The base is a shared,
+-- memoized asset, so the merge copies what it touches instead of mutating it.
 function lexicon.overlay(dictionary, bytes)
   local addition = lexicon.from_bytes(bytes)
+  local merged = {}
+  for field, value in pairs(dictionary) do merged[field] = value end
+  merged.records, merged.by_key, merged.by_token = {}, {}, {}
+  for i, record in ipairs(dictionary.records) do merged.records[i] = record end
+  for key, list in pairs(dictionary.by_key) do merged.by_key[key] = list end
+  for token, list in pairs(dictionary.by_token) do merged.by_token[token] = list end
+  local owned = {}
+  local function own(map, key)
+    local list = map[key]
+    if not list or not owned[list] then
+      local copy = {}
+      for i, record in ipairs(list or {}) do copy[i] = record end
+      map[key], list = copy, copy
+      owned[copy] = true
+    end
+    return list
+  end
   for _, record in ipairs(addition.records) do
-    dictionary.records[#dictionary.records + 1] = record
-    local by_key = dictionary.by_key[record.key] or {}
-    dictionary.by_key[record.key] = by_key
+    merged.records[#merged.records + 1] = record
+    local by_key = own(merged.by_key, record.key)
     by_key[#by_key + 1] = record
     local token = record.key:match('^([^ *]*)'):gsub('[A-Z]', string.lower)
-    local by_token = dictionary.by_token[token] or {}
-    dictionary.by_token[token] = by_token
+    local by_token = own(merged.by_token, token)
     by_token[#by_token + 1] = record
   end
-  return dictionary
+  return merged
 end
 
 -- Narrow lexical fallback recovered from LTPRO 0A4F:07F2 (file 0x0E6E2).

@@ -1,8 +1,9 @@
-# Inflection paradigms: stem cut + endings per slot, as in LTGOLD/LTPRO (data segment tables).
+# LTPRO's inflection tables (core/rules.lua) as text, with two fixes; the engine
+# uses this copy for the dictionaries in this directory.
 # LTPRO's tables spell four endings with a Latin e (жeте, дeл); this file uses Cyrillic е.
 # LTPRO's imperfective row 18 (бежать) lacks the 1pl ending жим, which shifts the rest
 # (Они бегите); this file restores it, as in the perfective row 18 (побежать).
-# Row: id<TAB>cut<TAB>endings separated by spaces. "=" keeps the word, "-" has no form.
+# Row: id<TAB>cut<TAB>endings separated by spaces. "=" is the stem itself, "-" has no form.
 # verb slots: 1sg 2sg 3sg 1pl 2pl 3pl imperative-pl past-stem gerund act-pres-part pass-pres-part act-past-part pass-past-part
 # noun slots: gen dat acc inst prep | pl: nom gen dat acc inst prep   (nominative singular is the headword)
 # adjective slots: nom gen dat acc inst prep | pl: nom gen dat acc inst prep

@@ -1,0 +1,8 @@
+# Our changes to LTGOLD's English dictionary, as a diff. dictionary/BASE.DIC is
+# LTGOLD/BASE.DIC with this file applied by tools/build_dictionary.sh
+# (`tools/ltech_dict.py import --replace`). UTF-8, one entry per line:
+#   -headword          remove LTGOLD's records for that headword
+#   headword*code      add a record, replacing LTGOLD's records for that key
+#                      (a leading + is allowed)
+# Lines starting with # are comments. Every entry needs a case in
+# test/translations.txt, and LTGOLD's own entries need none here.

@@ -8,12 +8,22 @@ It records the LTGOLD manual's grammatical tags, the active dictionary sources,
 and native T4 grammatical phrase subrules. Prefer one typed grammatical
 rule for a phrase family when its variable words can be retained and inflected.
 
+## How LTGOLD works
+
+Read [`docs/ltgold.md`](docs/ltgold.md) before changing dictionaries, tables or
+inflection. Use only LTGOLD's own mechanisms: never extend its record formats,
+tables or paradigm IDs, and never add a store LTGOLD does not have. If
+something seems to need an extension, the format has been misread. Engine
+changes must keep parity with the original on LTGOLD's dictionaries (the
+`tools/ltpro_pipeline_probe.py` commands in that document).
+
 ## Commits
 
 Commit and push every completed step of work to the current branch without
 waiting to be asked. Each commit should cover one coherent step with passing
 tests (`sh test/run_all.sh`) and, for dictionary changes, a verified rebuild
-(`sh tools/rebuild_openrussian.sh --verify`).
+(`sh tools/build_dictionary.sh --verify`). Engine changes must also keep the
+parity numbers in [`docs/ltgold.md`](docs/ltgold.md#verifying).
 
 ## Icon generation
 

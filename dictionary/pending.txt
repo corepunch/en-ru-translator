@@ -1,0 +1,150 @@
+# Our phrases from the OpenRussian period, waiting to be moved into
+# changes.txt one group at a time, each checked against LTGOLD's own records
+# (native casing of W composites, LTGOLD's pronoun and you readings, subrule
+# precedence) and given its test back from test/pending-translations.txt.
+
+## phrases
+# Our phrases: W composites, fixed D equivalents and grammatical subrules (`*$`).
+how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\
+what <X>`up`[*]*$DDWDкакnдело\ $ \
+# LTGOLD's what [RSXU] and the literal is it take these words before the
+# subrules above can (T4 prefers the shortest match), so the questions are literals.
+what is up*WDкакnдело
+how is it*Dкак у него дела
+good morning*WAдобрыйNутро
+good afternoon*WAдобрыйNдень
+good evening*WAдобрыйNвечер
+good night*WPРAспокойныйNночь
+good luck*WPРNудача
+thank you*Dспасибо
+thank you very much*WAбольшойNспасибо
+thanks a lot*Dбольшое спасибо
+you `are``welcome`[*]*$Dпожалуйста\  \
+excuse me*WVизвинитьM011я
+long time no see*WR11мыDдавноKнеhвидеться
+so far so good*WDпокаSвсёDхорошо
+just a moment*WPВNминутка
+my `pleasure`[*]*$Dпожалуйста\ \
+happy birthday*WPТсNденьPРNрождение
+merry christmas*WPТсNРождество
+happy new year*WPТсAНовыйNгод
+bless you*WVбытьAздоровый
+get well soon*WVпоправляться|поправлятьсяDскорее
+welcome back*WPТсNвозвращение
+enjoy your meal*WPРAприятныйNаппетит
+not `at``all`[,*]*$Dнисколько\  \
+not `at``all`~[,*]*$DDWDсовсемKне\  .\
+by the way*WPТмеждуAпрочий
+as soon as possible*WDкакDможноDскорее
+on the other hand*WPРсAдругойNсторона
+after `all`[j,*]*$DDWPПвNконецPРnконец\ \
+at least*WPДпоAкрайнийNмера
+in any case*WPПвAлюбойNслучай
+in other words*WPТAдругойnслово
+for a while*WPВнаOнекоторыйNвремя
+sooner or later*WDраноCилиDпоздно
+behind [,*]*$Dпозади
+inside [,*]*$Dвнутри
+hi*Dпривет
+goodbye*DDWPРдоNсвидание
+good bye*WPРдоNсвидание
+nice to meet you*WDприятно познакомиться
+pleased to meet you*WDприятно познакомиться
+no `problem`[,*]*$DDWPРбезnпроблема\ \
+have a nice day*WPРAхорошийNдень
+have a good day*WPРAхорошийNдень
+have a good trip*WPРAсчастливыйNпуть
+bon voyage*WPРAсчастливыйNпуть
+bon appetit*WPРAприятныйNаппетит
+sweet dreams*WPРAсладкийnсон
+happy holidays*WPТсnпраздник
+happy easter*WPТсNПасха
+thank god*WNславаPДNбог
+what a pity*WDкакDжаль
+what a shame*WDкакDжаль
+what time is it*WOкоторыйNчас
+at `the``moment`[j;,*]*$DDWPВвAданныйNмомент\  \
+at `last`[j;,*]*$Dнаконец\ \
+right now*WDпрямоDсейчас
+just in case*WPВнаAвсякийNслучай
+for now*Dпока
+for free*Dбесплатно
+this morning*WDсегодняDутром
+at night*Dночью
+in the afternoon*Dднём
+wait a minute*WVподождатьPВNминутка
+never again*WDбольшеDникогда
+as usual*WDкакDобычно
+for sure*Dнаверняка
+in `the``end`[j;,*]*$DDWPПвNконецPРnконец\  \
+go home*WVидтиDдомой
+come home*WVприходитьDдомой
+walk home*WVидтиDдомой
+run home*WVбежатьDдомой
+return home*WVвозвращатьсяDдомой
+get home*WVдобиратьсяDдомой
+hurry home*WVспешитьDдомой
+fly home*WVлететьDдомой
+welcome home*WPТсNвозвращениеDдомой
+am home*WX001Dдома
+is home*WX003Dдома
+are home*WX013Dдома
+was home*WX103бытьDдома
+were home*WX113бытьDдома
+be home*WXбытьDдома
+stay home*WVоставатьсяDдома
+is [RN?#]`home`[D,*]*$@\.`Dдома`\
+is [TO]N`home`[D,*]*$@\..`Dдома`\
+are [RN?#]`home`[D,*]*$@\.`Dдома`\
+are [TO]N`home`[D,*]*$@\..`Dдома`\
+am [RN?#]`home`[D,*]*$@\.`Dдома`\
+was [RN?#]`home`[D,*]*$@\.`Dдома`\
+was [TO]N`home`[D,*]*$@\..`Dдома`\
+were [RN?#]`home`[D,*]*$@\.`Dдома`\
+were [TO]N`home`[D,*]*$@\..`Dдома`\
+many thanks*WDбольшоеNспасибо
+is afraid of*WVбоятьсяPР
+am afraid of*WVбоятьсяPР
+are afraid of*WVбоятьсяPР
+was afraid of*WEбоятьсяPР
+were afraid of*WEбоятьсяPР
+go to*WVидтиPВв
+it rains*WNдождьVидти
+it is raining*WNдождьVидти
+it rained*WNдождьhидти
+it was raining*WNдождьhидти
+it will rain*WNдождьVидти
+speak english*WVговоритьDпо-английски
+speak russian*WVговоритьDпо-русски
+speak french*WVговоритьDпо-французски
+speak german*WVговоритьDпо-немецки
+speak spanish*WVговоритьDпо-испански
+speak italian*WVговоритьDпо-итальянски
+speak chinese*WVговоритьDпо-китайски
+speak japanese*WVговоритьDпо-японски
+wait for*WVждатьPВ
+for <TAOIH>[`second``seconds``minute``minutes``hour``hours``day``days``week``weeks``month``months``year``years``decade``decades``century``centuries`]*$PВ\ \
+drive home*WVехатьDдомой
+ride home*WVехатьDдомой
+travel home*WVехатьDдомой
+head home*WVнаправлятьсяDдомой
+rush home*WVспешитьDдомой
+bring [RMO]`home`[D,*]*$@\.`Dдомой`\
+bring [TO]N`home`[D,*]*$@\..`Dдомой`\
+carry [RMO]`home`[D,*]*$@\.`Dдомой`\
+carry [TO]N`home`[D,*]*$@\..`Dдомой`\
+lead [RMO]`home`[D,*]*$@\.`Dдомой`\
+lead [TO]N`home`[D,*]*$@\..`Dдомой`\
+take [RMO]`home`[D,*]*$Vотводить|отвести\.`Dдомой`\
+take [TO]N`home`[D,*]*$Vотводить|отвести\..`Dдомой`\
+walk [RMO]`home`[D,*]*$Vпровожать|проводить\.`Dдомой`\
+walk [TO]N`home`[D,*]*$Vпровожать|проводить\..`Dдомой`\
+see [RMO]`home`[D,*]*$Vпровожать|проводить\.`Dдомой`\
+see [TO]N`home`[D,*]*$Vпровожать|проводить\..`Dдомой`\
+send [RMO]`home`[D,*]*$Vотправлять|отправить\.`Dдомой`\
+send [TO]N`home`[D,*]*$Vотправлять|отправить\..`Dдомой`\
+make <TAO>`deal`*$заключать\$`Nсделка`\
+a bit scary*WDстрашновато
+six months*Dполгода
+there is no time*WDнекогда
+it is cold*WDхолодно

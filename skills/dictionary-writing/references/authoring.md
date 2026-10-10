@@ -15,8 +15,8 @@ headers or editing them as UTF-8:
 ```sh
 python3 tools/ltech_dict.py find LTGOLD/BASE.DIC are
 python3 tools/ltech_dict.py find LTGOLD/BASE.DIC you
-python3 tools/ltech_dict.py find openrussian/BASE.DIC how --partial
-python3 tools/ltech_dict.py find openrussian/BASE.DIC 'how XR[*]'
+python3 tools/ltech_dict.py find dictionary/BASE.DIC how --partial
+python3 tools/ltech_dict.py find dictionary/BASE.DIC 'how XR[*]'
 ```
 
 Check `find --help` before adapting command options. Inspect both the active
@@ -157,8 +157,7 @@ composition: `after-sale services*WAпослепродажныйNсервис`,
 `be in charge of*WXбытьAответственныйPВза`.
 
 The `#` decoder reads a leading Cyrillic с/м/ж as gender, so `#` text must not
-start with Russian prose: the OpenRussian builder's former `W#согласно#`
-printed `огласно`. Its unclassified `others.tsv` words are now `WDсогласно`.
+start with Russian prose: `W#согласно#` prints `огласно`; use `WDсогласно`.
 
 Do not put final `.`, `!`, or `?` in a literal phrase key to restrict sentence
 end. The former Lua-only matching behavior has been removed. Use a native
@@ -209,8 +208,7 @@ for missing lexical morphology.
 Choose person, number and register deliberately. The curated imperative entries
 currently produce informal singular “Извини меня”, “Будь здоров”, and
 “Поправляйся скорее”; do not silently switch to formal/plural forms or modify
-expected output to conceal a mistake. Generated OpenRussian forms currently
-normalize `ё` to `е`; distinguish that data convention from failed inflection.
+expected output to conceal a mistake.
 
 ### Preserve native actions and constrain idioms
 
@@ -344,32 +342,20 @@ sentence-final head. Both are native behaviors confirmed by captures in
 
 ## Build and verify
 
-Keep UTF-8 source rows, then rebuild from the C builder output. Importing into
-the existing `BASE.DIC` never removes a row you deleted or rekeyed in a source
-file, so always start from a fresh build. `sh tools/rebuild_openrussian.sh`
-runs this sequence (about 6 s); `--verify` checks the checked-in files instead:
+Edit `dictionary/changes.txt` (and `dictionary/changes-rus.txt` for Russian
+records), then `sh tools/build_dictionary.sh`; `--verify` checks the checked-in
+files instead. A hand edit to a built file is lost on the next build.
 
 ```sh
-cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
-lua tools/fit_paradigms.lua openrussian/upstream > /tmp/fit.tsv
-/tmp/openrussian_db build openrussian/upstream \
-  openrussian/BASE.DIC openrussian/BASE.RUS /tmp/fit.tsv
-python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/dictionary.txt --replace --in-place
-python3 tools/ltech_dict.py check openrussian/BASE.DIC
+sh tools/build_dictionary.sh
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 sh test/run_all.sh
+sh tools/build_dictionary.sh --verify
 ```
 
-The sequence must reproduce the checked-in `.DIC` and `.RUS` byte
-for byte; a hand edit to a built file is lost on the next rebuild.
-
-Each nonblank source row must contain a nonempty key and code, be CP866
-encodable, and have a unique key within the batch. `--replace` replaces all
-existing records for that exact key; preserve required alternatives in the
-replacement reading. Import validates the batch before writing and is repeatable.
-Full OpenRussian regeneration must apply both source batches after the C build;
-see `openrussian/README.md`.
+Each nonblank row must contain a nonempty key and code, be CP866 encodable, and
+have a unique key within the file. A row replaces all of LTGOLD's records for
+that key; preserve required alternatives in the replacement reading.
 
 Inspect tags independently of phrase output with `core.lexicon.analyze`, and
 check `state.stages.T4.events` for applied native dictionary subrules. Exercise

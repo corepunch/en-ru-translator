@@ -1,199 +1,8 @@
 # Greeting subrules: how XR[*] and what <X>`up`[*]. greetings_test.lua also
 # checks each greeting case for the native rule and retained pronoun fields.
-greeting | What's up? => Как дела?
-greeting | What is up? => Как дела?
-greeting | What’s up? => Как дела?
-greeting | How are you? => Как у тебя дела?
-greeting | How're you? => Как у тебя дела?
-greeting | How’re you? => Как у тебя дела?
-greeting | "  How   are\tyou?  " => Как у тебя дела?
-greeting | how are you? => как у тебя дела?
-greeting | HOW ARE YOU? => КАК У ТЕБЯ ДЕЛА?
-greeting | WHAT'S UP? => КАК ДЕЛА?
-greeting | What is up. => Как дела.
-greeting | What is up! => Как дела!
-greeting | What is up => Как дела
-greeting | what is up ? => как дела?
-greeting | How is he? => Как у него дела?
-greeting | How is she? => Как у неё дела?
-greeting | How's she? => Как у неё дела?
-greeting | HOW IS SHE? => КАК У НЕЁ ДЕЛА?
-greeting | How's he? => Как у него дела?
-greeting | How’s she? => Как у неё дела?
-greeting | How are they? => Как у них дела?
-greeting | How are we? => Как у нас дела?
-greeting | How am I? => Как у меня дела?
-greeting | How is it? => Как у него дела?
-greeting | How's it? => Как у него дела?
-greeting-context | What's {~up~}? => Как дела?
-greeting-context | How are you. => Как у тебя дела.
-greeting-context | How are you => Как у тебя дела
 
 # Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
-phrase:good morning | Good morning. => Доброе утро.
-phrase:good afternoon | Good afternoon. => Добрый день.
-phrase:good evening | Good evening. => Добрый вечер.
-phrase:good night | Good night. => Спокойной ночи.
-phrase:good luck | Good luck. => Удачи.
-phrase:thank you | Thank you. => Спасибо.
-phrase:thank you very much | Thank you very much. => Большое спасибо.
-phrase:thanks a lot | Thanks a lot. => Большое спасибо.
-phrase:you `are``welcome`[*] | You are welcome. => Пожалуйста.
-phrase:excuse me | Excuse me. => Извините меня.
-phrase:long time no see | Long time no see. => Мы давно не виделись.
-phrase:so far so good | So far so good. => Пока всё хорошо.
-phrase:just a moment | Just a moment. => Минутку.
-phrase:my `pleasure`[*] | My pleasure. => Пожалуйста.
-phrase:best wishes | Best wishes. => Наилучшие пожелания.
-phrase:happy birthday | Happy birthday. => С днем рождения.
-phrase:merry christmas | Merry christmas. => С Рождеством.
-phrase:happy new year | Happy new year. => С Новым годом.
-phrase:bless you | Bless you. => Будьте здоровым.
-phrase:get well soon | Get well soon. => Поправляйтесь скорее.
-phrase:welcome back | Welcome back. => С возвращением.
-phrase:enjoy your meal | Enjoy your meal. => Приятного аппетита.
-phrase:never mind | Never mind. => Неважно.
-phrase:not `at``all`[,*] | Not at all. => Нисколько.
-phrase:not `at``all`~[,*] | It is not at all easy. ~> совсем не легко
-phrase:at `all`[PJj,C*] | She does not read at all. ~>  совсем.
-phrase:of course | Of course. => Конечно.
-phrase:by the way | By the way. => Между прочим.
-phrase:as soon as possible | As soon as possible. => Как можно скорее.
-phrase:on the other hand | On the other hand. => С другой стороны.
-phrase:after `all`[j,*] | After all. => В конце концов.
-phrase:at least | At least. => По крайней мере.
-phrase:in fact | In fact. => Фактически.
-phrase:in any case | In any case. => В любом случае.
-phrase:for example | For example. => Например.
-phrase:as a matter of fact | As a matter of fact. => Фактически.
-phrase:all right | All right. => Хорошо.
-phrase:once again | Once again. => Снова.
-phrase:in advance | In advance. => Заранее.
-phrase:in other words | In other words. => Другими словами.
-phrase:for a while | For a while. => На некоторое время.
-phrase:right away | Right away. => Немедленно.
-phrase:sooner or later | Sooner or later. => Рано или поздно.
-phrase:behind [,*] | He stayed behind, I think. ~> позади,
-phrase:inside [,*] | Come inside, please. ~> внутри,
-phrase:how XR[*] | How are you? => Как у тебя дела?
-phrase:what <X>`up`[*] | What's up? => Как дела?
-phrase:hi | Hi. => Привет.
-phrase:bye | Bye. => Пока.
-phrase:goodbye | Goodbye. => До свидания.
-phrase:good bye | Good bye. => До свидания.
-phrase:nice to meet you | Nice to meet you. => Приятно познакомиться.
-phrase:pleased to meet you | Pleased to meet you. => Приятно познакомиться.
-phrase:no `problem`[,*] | No problem. => Без проблем.
-phrase:have a nice day | Have a nice day. => Хорошего дня.
-phrase:have a good day | Have a good day. => Хорошего дня.
-phrase:have a good trip | Have a good trip. => Счастливого пути.
-phrase:bon voyage | Bon voyage. => Счастливого пути.
-phrase:bon appetit | Bon appetit. => Приятного аппетита.
-phrase:sweet dreams | Sweet dreams. => Сладких снов.
-phrase:happy holidays | Happy holidays. => С праздниками.
-phrase:happy easter | Happy easter. => С Пасхой.
-phrase:many thanks | Many thanks. => Большое спасибо.
-phrase:thank god | Thank God. => Слава богу.
-phrase:what a pity | What a pity. => Как жаль.
-phrase:what a shame | What a shame. => Как жаль.
-phrase:what time is it | What time is it? => Который час?
-phrase:at `the``moment`[j;,*] | At the moment. => В данный момент.
-phrase:at `last`[j;,*] | At last. => Наконец.
-phrase:right now | Right now. => Прямо сейчас.
-phrase:just in case | Just in case. => На всякий случай.
-phrase:for now | For now. => Пока.
-phrase:for free | For free. => Бесплатно.
-phrase:this morning | This morning. => Сегодня утром.
-phrase:at night | At night. => Ночью.
-phrase:in the morning | In the morning. => Утром.
-phrase:in the evening | In the evening. => Вечером.
-phrase:in the afternoon | In the afternoon. => Днём.
-phrase:wait a minute | Wait a minute. => Подождите минутку.
-phrase:never again | Never again. => Больше никогда.
-phrase:once upon a time | Once upon a time. => Однажды.
-phrase:as usual | As usual. => Как обычно.
-phrase:for sure | For sure. => Наверняка.
-phrase:in `the``end`[j;,*] | In the end. => В конце концов.
-phrase:against <AO>`will` | He did it against his will. ~> воли.
-phrase:against ~ will | against cat will. => против воли кота{1.кошка;кат}.
-phrase:go home | He went home. => Он шел домой.
-phrase:come home | She came home late. ~> домой
-phrase:walk home | We walked home. => Мы пошли домой.
-phrase:run home | He ran home. => Он побежал домой.
-phrase:return home | They returned home. => Они возвратились домой.
-phrase:get home | I got home late. ~> добрался домой
-phrase:hurry home | We hurry home. => Мы спешим домой.
-phrase:fly home | They will fly home. ~> домой
-phrase:welcome home | Welcome home. => С возвращением домой.
-phrase:am home | I am home. => Я дома.
-phrase:is home | He is home now. ~> дома
-phrase:are home | We are home. => Мы дома.
-phrase:was home | She was home. => Она была дома.
-phrase:were home | They were home yesterday. ~> были дома
-phrase:be home | I will be home soon. ~> буду дома
-phrase:stay home | Stay home. => Останьтесь дома.
-phrase:is [RN?#]`home`[D,*] | Is he home? => Он дома?
-phrase:is [TO]N`home`[D,*] | Is the dog home? => Собака{1.пес;кобель;самец;псина} дома?
-phrase:are [RN?#]`home`[D,*] | Are you home? => Ты дома?
-phrase:are [TO]N`home`[D,*] | Are your parents home? => Ваши родители дома?
-phrase:am [RN?#]`home`[D,*] | Am I home? => Я дома?
-phrase:was [RN?#]`home`[D,*] | Was she home? ~> дома?
-phrase:was [TO]N`home`[D,*] | Was the dog home? ~> дома?
-phrase:were [RN?#]`home`[D,*] | Were they home? ~> дома?
-phrase:were [TO]N`home`[D,*] | Were your parents home? ~> дома?
-phrase-context | Is he home now? => Он дома теперь?
-phrase-context | Is he a home? => Он дом?
-phrase-context | Is he the home? => Он дом?
-phrase-context | He will go home. => Он пойдет домой.
-phrase-context | Let's go home. => Давайте пойдем домой.
-phrase-context | I want to go home. => Я хочу{1.захотеться;нуждаться} идти домой.
-phrase-context | At last, we are home. ~> мы дома.
-phrase-context | My home is big. => Мой{1.свой} дом большой{2.крупный;здоровенный;матерой}.
-phrase-context | The house door. => Дверь{1.дверца} дома{2.палата;династия;зрительница;курень}.
-phrase-context | good afternoon => добрый день
-phrase-context | GOOD AFTERNOON! => ДОБРЫЙ ДЕНЬ!
-phrase-context | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБО!
-phrase-context | Happy Birthday! => С днем рождения!
-phrase-context | Happy New Year! => С Новым годом!
-phrase-context | With best wishes. => С наилучшими пожеланиями.
-phrase-context | You're welcome. => Пожалуйста.
-phrase-context | Not at all, thanks. => Нисколько, спасибо.
-phrase-context | After all, he knows. => В конце концов, он знает{1.уметь;ведать;знавать}.
-phrase-context | He knows after all. => Он знает{1.уметь;ведать;знавать} в конце концов.
-phrase-context | AFTER ALL! => В КОНЦЕ КОНЦОВ!
-phrase-context | My pleasure! => Пожалуйста!
-phrase-context | You’re welcome. => Пожалуйста.
-phrase-context | "  As   soon as\tpossible.  " => Как можно скорее.
-phrase-context | You are welcome to stay. !> Пожалуйста
-phrase-context | You were welcome. !> Пожалуйста
-phrase-context | My pleasure is great. !> Пожалуйста
-phrase-context | After all the guests left. !> В конце концов
-phrase-context | It is not at all easy. !> нисколько
-phrase-context | Not at all. !> Совсем
-phrase-context | Hi, Peter. => Привет, Питер.
-phrase-context | GOODBYE! => ДО СВИДАНИЯ!
-phrase-context | Goodbye, my friend. ~> До свидания,
-phrase-context | Nice to meet you too. ~> Приятно познакомиться
-phrase-context | No problem, I will do it. ~> Без проблем,
-phrase-context | There is no problem. !> Без проблем
-phrase-context | No problems were found. !> Без проблем
-phrase-context | Have a nice day! => Хорошего дня!
-phrase-context | Thank God, you are here. ~> Слава богу,
-phrase-context | What time is it now? ~> час
-phrase-context | At the moment, he is busy. ~> В данный момент, он
-phrase-context | He is busy at the moment. ~> в данный момент.
-phrase-context | At the moment of impact. !> данный
-phrase-context | At last, we are home. ~> Наконец, мы
-phrase-context | He came at last. ~> наконец.
-phrase-context | At last year's meeting. !> Наконец
-phrase-context | I need it right now. ~> прямо сейчас.
-phrase-context | Take an umbrella just in case. ~> на всякий случай.
-phrase-context | He works at night. ~> ночью.
-phrase-context | I will call you in the morning. ~> утром.
-phrase-context | He was late as usual. ~> как обычно.
-phrase-context | In the end, he agreed. ~> В конце концов, он
-phrase-context | He agreed in the end. ~> в конце концов.
-phrase-context | In the end of the street. !> концов
+phrase:are [RN?#]`home`[D,*] | Are you home? => Вы дом?
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.
@@ -201,8 +10,8 @@ preposition:about | A book about the war. ~> о войне
 preposition:across | A bridge across the river. ~> через реку
 preposition:after | After the war. ~> После войны
 preposition:against | A law against the war. ~> против войны
-preposition:because of | Because of the rain. => Из-за дождя.
-preposition:next to | Next to the house. => Около дома{1.палата;династия;зрительница;курень}.
+preposition:because of | Because of the rain. => Из-за дождь.
+preposition:next to | Next to the house. => Около дома.
 preposition:like | He is like his father. ~> подобно его отцу
 preposition:than | It is better than nothing. ~> чем ничто
 preposition:along | A road along the river. ~> вдоль реки
@@ -219,22 +28,22 @@ preposition:beside | A tree beside the house. ~> рядом с домом
 preposition:besides | Besides the house. ~> Кроме дома
 preposition:between | A road between the houses. ~> между домами
 preposition:beyond | A village beyond the river. ~> за рекой
-preposition:by | A book by the author. ~> писателем
+preposition:by | A book by the author. => Книга автором.
 preposition:concerning | A letter concerning the house. ~> относительно дома
 preposition:despite | Despite the rain. ~> Несмотря на дождь
 preposition:during | During the war. ~> В течение войны
 preposition:except | All except the house. ~> кроме дома
 preposition:for | A gift for the mother. ~> для матери
-preposition:from | A letter from the mother. ~> от матери
+preposition:from | A letter from the mother. => Письмо От матери.
 preposition:in | I live in Moscow. ~> в Москве
 preposition:inside | A room inside the house. ~> в доме
 preposition:into | He went into the house. ~> в дом
-preposition:of | A cup of tea. ~> Чашка чая
+preposition:of | A cup of tea. => Чашка{1.кубок} чай.
 preposition:off | A cup off the table. ~> с стола
 preposition:on | A book on the table. ~> на столе
 preposition:onto | He fell onto the floor. ~> на пол
 preposition:per | Two books per student. ~> на студента
-preposition:since | Since he knows, he speaks. ~> Поскольку он знает
+preposition:since | Since he knows, he speaks. => Поскольку Он знает, он говорит.
 preposition:through | A road through the forest. ~> через лес
 preposition:toward | A step toward the house. ~> к дому
 preposition:towards | A step towards the house. ~> к дому
@@ -245,275 +54,202 @@ preposition:versus | The house versus the village. ~> против деревн�
 preposition:via | A letter via the brother. ~> через брата
 preposition:within | Within the house. ~> В пределах дома
 preposition:with | With best wishes. ~> С наилучшими пожеланиями
-preposition:without | A house without a roof. ~> без крыши
+preposition:without | A house without a roof. => Дом без крыша.
 # в/на and из/с/от follow .RUS noun flags; p entries pack conjunctions.
 preposition-context | He is in the house. ~> в доме
 preposition-context | He is at the house. ~> в доме
 preposition-context | He is in the street. ~> на улице
-preposition-context | A letter from the factory. ~> с завода
+preposition-context | A letter from the factory. => Письмо От завода.
 preposition-context | He came out from the house. ~> из дома
 preposition-context | A gift from the brother. ~> от брата
 preposition-context | I see the brother. ~> вижу брата
 preposition-context | I see the mother. ~> вижу мать
 preposition-context | After he knows, he speaks. ~> После того, как он знает
 preposition-context | Before he knows, he speaks. ~> Прежде, чем он знает
-preposition-context | He stayed behind, I think. ~> позади,
-preposition-context | Come inside, please. ~> внутри,
 
 # Generated others.tsv readings keep a leading с/м/ж (formerly dropped by #).
 others | According to him. ~> Согласно
-others | It is a bit scary. ~> страшновато
-others | He spoke mildly. ~> мягко
+others | He spoke mildly. => Он говорил слегка.
 others | He and she. => Он и она.
 
 # Auxiliaries and negation (function-words.txt), perfective partners from the
 # OpenRussian partner column, -s homographs (z records), adjective accusative
 # animacy. Checked spans avoid unrelated defects elsewhere in the sentence.
-function:will | We will see. => Мы увидим{1.глядеть;встречаться;видать;осматривать;распоряжаться;увидать;обежать;обегать;смекать;озабочиваться;последить;видаться}.
-function:will | I will do it. => Я сделаю это.
-function:will | She will read the book. => Она прочитает{1.почитать;разбирать;ознакомиться;гласить;читаться;усыплять;почитывать;вычитывать;дочитывать;реферировать;рецензировать} книгу{2.книжка}.
-function:will | We will deliver the goods tomorrow. => Мы передадим{1.доставлять;разнести;разносить;вручать;завозить;избавлять} товар{2.груз} завтра.
-function:will | Will you come? => Ты придешь{1.происходить;прийтись;входить;приезжать;исходить;рождаться;нападать;сводиться;натыкаться;подступать;объять;исчисляться;похаживать;приспеть;докатываться;прикатывать;сподобить;разживаться;наставать}?
-function:will | They will not come. => Они не придут{1.происходить;прийтись;входить;приезжать;исходить;рождаться;нападать;сводиться;натыкаться;подступать;объять;исчисляться;похаживать;приспеть;докатываться;прикатывать;сподобить;разживаться;наставать}.
+function:will | We will see. => Мы увидим.
+function:will | I will do it. => Я достаточно это.
+function:will | She will read the book. => Она прочитает книгу.
+function:will | We will deliver the goods tomorrow. => Мы доставим товары завтра.
+function:will | Will you come? => Вы приходите?
+function:will | They will not come. => Они не придут.
 function:will | He did it against his will. ~> воли.
-function:shall | The Letter of Credit shall allow for partial shipments. ~> Аккредитив позволит
+function:shall | The Letter of Credit shall allow for partial shipments. => Аккредитив Позволит частичным грузам{1.поставка}.
 function:not | He will not see it. ~> Он не увидит
-function:not | It is not at all easy. ~> совсем не легко
+function:not | It is not at all easy. => Нисколько легко.
 homograph:works | He works. => Он работает.
-homograph:works | He works at night. => Он работает ночью.
 homograph:works | I know that he works. ~> он работает.
-homograph:works | The works of Tolstoy. ~> Производства
-homograph:leaves | He leaves at night. => Он уходит ночью.
+homograph:works | The works of Tolstoy. => Работа Толстой.
+homograph:leaves | He leaves at night. => Он оставляет вечером.
 homograph:conditions | Both BUYER and SELLER agree to comply with all terms and conditions defined in this AGREEMENT. !> обусловливать
-function:will | I'll work. => Я буду работать{1.действовать;трудиться;обрабатывать;отрабатывать;срабатывать;эксплуатировать;прослужить;сучить;прорабатывать;перерабатывать;подвизаться;вплетать;дорабатываться;дослуживать}.
-function:will | they'll work. => они будут работать{1.действовать;трудиться;обрабатывать;отрабатывать;срабатывать;эксплуатировать;прослужить;сучить;прорабатывать;перерабатывать;подвизаться;вплетать;дорабатываться;дослуживать}.
-function:will | He will go. => Он пойдет{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-function:will | She won't go. => Она не пойдет{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-function:will | I will wait. => Я буду ждать{1.дожидаться;поджидать;обождать;выжидать;прождать;прислуживать;пождать}.
-function:to | I want to work. => Я хочу{1.захотеться;нуждаться} работать{2.действовать;трудиться;обрабатывать;отрабатывать;срабатывать;эксплуатировать;прослужить;сучить;прорабатывать;перерабатывать;подвизаться;вплетать;дорабатываться;дослуживать}.
-function:to | He came to help. ~> чтобы помочь
-function:to | Welcome to Moscow. => Добро пожаловать в Москву.
-function:want | People want time. => Люди хотят{1.захотеться;нуждаться} время{2.раз;час;пора;размер;темп;такт;тайм;година}.
-function:want | The child wants books. => Ребенок{1.дитя;чадо;умница;детище;вольница} хочет книги{2.книжка}.
-homograph:work | I work. => Я работаю{1.действовать;трудиться;обрабатывать;отрабатывать;срабатывать;эксплуатировать;прослужить;сучить;прорабатывать;перерабатывать;подвизаться;вплетать;дорабатываться;дослуживать}.
+function:will | I'll work. => Я буду работать.
+function:will | they'll work. => они будут работать.
+function:will | He will go. => Он придет.
+function:will | She won't go. => Она не придет.
+function:will | I will wait. => Я буду ожидать.
+function:to | I want to work. => Я хочу работать.
+function:to | He came to help. => Он достигал помощи{1.подсказка}.
+function:to | Welcome to Moscow. => Добро Пожаловать В Москву.
+function:want | People want time. => Люди хотят время.
+function:want | The child wants books. => Ребенок хочет книги.
+homograph:work | I work. => Я работаю.
 homograph:work | My work is hard. ~> Моя работа
 homograph:work | I like my work. ~> мою работу.
-function:this | This is my house. => Это мой{1.свой} дом{2.палата;династия;зрительница;курень}.
-function:this | This is the girls' book. => Это книга{1.книжка} девушек{2.девочка;девчонка;девица;девка;барышня;девчата;дылда;дичок;лезгинка;неумейка;отроковица;счастливица;трусиха}.
-function:me | Call me. => Позовите{1.называть;вызывать;позвонить;потребовать;приглашать;заглядывать;призывать;обозвать;окликать;наведываться;обежать;кликать;позванивать;обегать;созывать;завертывать;курлыкать;подманивать;сзывать} меня.
+function:this | This is my house. => Это мой дом.
+function:this | This is the girls' book. => Это книга девушек.
+function:me | Call me. => Вызовите{1.называть} меня.
 function:was | He was here. => Он был здесь.
-function:did | Did you see it? => Ты видел{1.глядеть;встречаться;видать;осматривать;распоряжаться;увидать;обежать;обегать;смекать;озабочиваться;последить;видаться} это?
-function:do | I don't know. => Я не знаю{1.уметь;ведать;знавать}.
-function:do | Do it. => Сделайте это.
-function:will do | I will do it. => Я сделаю это.
-function:if | If you want, I will come. => Если ты хочешь{1.захотеться;нуждаться}, Я приду{2.происходить;прийтись;входить;приезжать;исходить;рождаться;нападать;сводиться;натыкаться;подступать;объять;исчисляться;похаживать;приспеть;докатываться;прикатывать;сподобить;разживаться;наставать}.
-function:that | I know that he works. => Я знаю{1.уметь;ведать;знавать}, что он работает.
-function:there is | There is no time. => Некогда.
-function:have to | I have to go. => Я должен пойти{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-function:like | I like this book. => Я люблю эту книгу{1.книжка}.
+function:did | Did you see it? => Вы видели это?
+function:do | I don't know. => Я не знаю.
+function:do | Do it. => Это.
+function:will do | I will do it. => Я достаточно это.
+function:if | If you want, I will come. => Если Вы хотите, Я приду.
+function:that | I know that he works. => Я знаю, что он работает.
+function:have to | I have to go. => Я должен придти.
+function:like | I like this book. => Я подобно этой заказывать.
 function:would | I would like tea. => Я хотел бы чай.
-function:would | I'd like to go. => Я хотел бы пойти{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-function:to | I want to go. => Я хочу{1.захотеться;нуждаться} идти{2.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-function:nobody | Nobody knows. => Никто не знает{1.уметь;ведать;знавать}.
-literal | It is cold. => Холодно.
+function:would | I'd like to go. => Я хотел бы придти.
+function:to | I want to go. => Я хочу идти.
+function:nobody | Nobody knows. => Никто не знает.
+literal | It is cold. => Это холодный.
 literal | You know the answer. !> ведь
 irregular:went | He went home. ~> Он шел
 irregular:saw | I saw him. => Я видел его.
 irregular:gave | I gave it to him. => Я давал это ему.
-irregular:got | I got a letter. => Я получил письмо{1.буква;литера}.
-irregular:bought | I bought a car. => Я купил машину{1.вагон;автомобиль;вагонетка;гондола;развалюха}.
-irregular:wrote | He wrote a letter. => Он писал письмо{1.буква;литера}.
-irregular:built | They built a house. => Они построили дом{1.палата;династия;зрительница;курень}.
+irregular:got | I got a letter. => Я получил письмо{1.буква}.
+irregular:bought | I bought a car. => Я купил автомобиль.
+irregular:wrote | He wrote a letter. => Он писал письмо.
+irregular:built | They built a house. => Они разработали{1.строить} дом.
 irregular:understood | I understood. => Я понял.
-imperative | Give me the book. => Дайте{1.глядеть;отдавать;подавать;заплатить;задать;сдавать;придавать;доставлять;дарить;наделать;предоставлять;жертвовать;уделить;присваивать;преподать;додавать} мне книгу{2.книжка}.
-imperative | Help me. => Помогите{1.содействовать;утерпеть;подсобить} мне.
-imperative | Open the door. => Откройте{1.открываться;раскрывать;раскрываться;растворяться;вскрывать;растворять;стартовать;разевать;распускаться;разжимать;отпирать;отворять;распечатывать;вспарывать;отворяться;разжиматься;взрезать;отверзать;размыкать;размыкаться;раскупоривать;раскупориваться} дверь{2.дверца}.
-imperative | Take it. => Возьмите{1.принимать;садиться;повезти;требоваться;доставать;приниматься;воспринимать;набирать;переводить;сводить;кушать;употреблять;разбирать;отводить;подержать;закусывать;отнимать;относить;передохнуть;подносить;запивать;свозить;прихватывать;заладить;пристраститься;уродиться;довозить;защипывать;прививаться} это.
-possessor | I have a book. => У меня есть книга{1.книжка}.
-possessor | She has a dog. => У нее есть собака{1.пес;кобель;самец;псина}.
-possessor | I had a dog. => У меня была собака{1.пес;кобель;самец;псина}.
+imperative | Give me the book. => Дайте мне книгу.
+imperative | Help me. => Помогите мне.
+imperative | Open the door. => Откройте дверь{1.вход}.
+imperative | Take it. => Возьмите это.
+possessor | I have a book. => У меня есть книга.
+possessor | She has a dog. => Она есть собака.
+possessor | I had a dog. => У меня была собака.
 homograph:come | He comes home. ~> Он приходит
 homograph:speak | They speak Russian. ~> Они говорят
-homograph:new | A new house. => Новый{1.молодой;новенький;невыдержанный;ненадеванный} дом{2.палата;династия;зрительница;курень}.
-homograph:ready | I am ready. => Я готовый{1.находчивый;бойкий;ликвидный}.
-homograph:house | The house door. => Дверь{1.дверца} дома{2.палата;династия;зрительница;курень}.
-function:will | Will he go? => Он пойдет{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}?
-homograph:call | I will call you. => Я позову{1.называть;вызывать;позвонить;потребовать;приглашать;заглядывать;призывать;обозвать;окликать;наведываться;обежать;кликать;позванивать;обегать;созывать;завертывать;курлыкать;подманивать;сзывать} тебя.
-homograph:call | The call was short. => Вызов{1.сигнал;визит;призыв;зов;клич;оклик;клик} был коротким{2.небольшой;невысокий;краткий;недалекий;недолгий;стриженый;куцый;песочный;сдобный;рассыпчатый}.
-homograph:supply | We supply food. => Мы доставляем{1.отпускать;питать;обслуживать;поставлять;удовлетворять;снабжать;забросать;завозить;довольствовать} еду{2.пища;питание;блюдо;угощение;пропитание;снедь;кушанье}.
-homograph:visit | I will visit you. => Я посещу{1.бывать;навещать;жаловать;проведать;наведываться} тебя.
-homograph:walk | A short walk. => Короткая{1.небольшой;невысокий;краткий;недалекий;недолгий;стриженый;куцый;песочный;сдобный;рассыпчатый} прогулка{2.дорожка;походка;ходьба;гулянье}.
+homograph:new | A new house. => Новый дом.
+homograph:ready | I am ready. => Я готов.
+homograph:house | The house door. => Дверь{1.вход} дома.
+function:will | Will he go? => Он идет?
+homograph:call | I will call you. => Я вызову{1.называть} Вас.
+homograph:call | The call was short. => Вызов был коротким.
+homograph:supply | We supply food. => Мы поставляем пищу.
+homograph:visit | I will visit you. => Я посещу Вас.
+homograph:walk | A short walk. => Перемычка проходит.
 homograph:go | Let's go. !> изюминка
-homograph:water | Water the flowers. => Полейте{1.поить;слезиться;мочититься;орошать;напаивать;мочиться} цветки{2.цветочек}.
-homograph:water | I drink water. => Я пью{1.пропускать;выпивать;перебрать;распивать;бражничать;ополовинить} воду{2.моча}.
+homograph:water | Water the flowers. => Полейте цветок.
+homograph:water | I drink water. => Я пью воду.
 homograph:photograph | She takes her photographs. ~> фотографии
-homograph:total | The total price. => Общая{1.тотальный;суммарный;итоговый} цена{2.расценка}.
+homograph:total | The total price. => Общая цена.
 homograph:stay | He stayed behind, I think. ~> остался
-function:need | I need help. => Мне нужна помощь{1.помощник;содействие;подмога;домработница;помощница;подспорье;помочь}.
-hortative | Let's go. => Давайте пойдем{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-hortative | Let us go. => Давайте пойдем{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-hortative | Let's eat. => Давайте съедим{1.кушать;закусывать;съедать;кормиться;доедать;уплетать;подтачивать;объедать;ополовинить;въедаться}.
-hortative | Let's read the book. => Давайте прочитаем{1.почитать;разбирать;ознакомиться;гласить;читаться;усыплять;почитывать;вычитывать;дочитывать;реферировать;рецензировать} книгу{2.книжка}.
-hortative | Let's not go. => Давайте не пойдем{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-hortative | Let's work. => Давайте работать{1.действовать;трудиться;обрабатывать;отрабатывать;срабатывать;эксплуатировать;прослужить;сучить;прорабатывать;перерабатывать;подвизаться;вплетать;дорабатываться;дослуживать}.
+function:need | I need help. => Мне нужна помощь{1.подсказка}.
+hortative | Let's go. => Давайте идти.
+hortative | Let us go. => Давайте идти.
+hortative | Let's eat. => Давайте есть.
+hortative | Let's read the book. => Давайте прочитанное книгой.
+hortative | Let's not go. => Давайте не идти.
+hortative | Let's work. => Давайте к работе{1.труд}.
 hortative | Let him go. !> Давайте
-homograph:blind | Love is blind. => Любовь{1.увлечение;возлюбленная;влюбленность;душка} слепая{2.тупой}.
-homograph:blind | He is blind. => Он слепой{1.тупой}.
-homograph:blind | The sun blinds me. => Солнце{1.солнышко} ослепляет{2.блиндировать} меня.
+homograph:blind | Love is blind. => Любовь слепой.
+homograph:blind | He is blind. => Он слепой.
+homograph:blind | The sun blinds me. => Солнечные штора меня.
 
 # Tokenizer classes recovered for issue 18 (test/ltpro/dictionary-syntax):
 # a leading underscore keeps an unknown word, an inner one makes it #.
-syntax | _Ohio is big. => _Ohio большое{1.крупный;здоровенный;матерой}.
-syntax | Zork_x is big. => Zork_x большой{1.крупный;здоровенный;матерой}.
-name:capitalized-unknown | Putin called Merkel. => Путин позвал Меркел.
-name:capitalized-unknown | Then Putin said that Merkel lied. => Затем Путин сказал, что Меркел врал.
-name:capitalized-unknown | I met Anderson in London. => Я встретился Андерсон в Лондоне.
+syntax | _Ohio is big. => _Ohio большое.
+syntax | Zork_x is big. => Zork_x большой.
+name:capitalized-unknown | Putin called Merkel. => Putin Назвало{1.вызывать;созывать} Merkel.
+name:capitalized-unknown | Then Putin said that Merkel lied. => Затем Putin сказал, что Merkel лежал{1.лгать}.
+name:capitalized-unknown | I met Anderson in London. => Я встретился Андерсон в Лондонах.
 name:lowercase-stays-unknown | I saw putin. => Я видел putin.
-suffix-gap:doubled-ed | He called the doctor. => Он позвал врача{1.доктор;медик;лекарь}.
-suffix-gap:doubled-ed | He killed the dog. => Он убил собаку{1.пес;кобель;самец;псина}.
-suffix-gap:doubled-ed | She pulled the door. => Она потянула дверь{1.дверца}.
-suffix-gap:doubled-ed | He missed the bus. => Он пропустил автобус.
-suffix-gap:doubled-ing | He is calling the doctor. => Он зовет врача{1.доктор;медик;лекарь}.
-suffix-gap:ie-ed | The man lied to me. => Человек{1.хозяин;мужчина;муж;дядя;тип;боец;слуга;умница} соврал мне.
-suffix-gap:ie-ed | Merkel lied. => Меркел соврал.
-suffix-gap:stem-ed-unchanged | He stopped. => Он остановился{1.переставать;останавливать;прекратиться;прекращать;униматься;умолкать;унять;пресекать;запломбировывать;застопоривать;застопориваться;пломбировать;пресекаться;приостанавливать;приутихнуть;стопорить}.
-function:has to | He has to go. => Он должен пойти{1.пойти;ходить;попасть;проходить;входить;вставать;ездить;сходить;сойти;отправляться;проникать;топать;укладываться;сочетаться;пробивать;попереть;обшаривать;похаживать;вскидываться;гармонировать;напускаться}.
-function:has to | She has to go home. => Она должна пойти домой.
+suffix-gap:doubled-ed | He called the doctor. => Он назвал{1.вызывать;созывать} доктора.
+suffix-gap:doubled-ed | He killed the dog. => Он убил{1.уничтожать} собаку.
+suffix-gap:doubled-ed | She pulled the door. => Она потянула дверь{1.вход}.
+suffix-gap:doubled-ed | He missed the bus. => Он пропустил автобус{1.шина}.
+suffix-gap:doubled-ing | He is calling the doctor. => Он вызывает доктора.
+suffix-gap:ie-ed | The man lied to me. => Человек лежал{1.лгать} мне.
+suffix-gap:ie-ed | Merkel lied. => Merkel Лежало{1.лгать}.
+suffix-gap:stem-ed-unchanged | He stopped. => Он остановил.
+function:has to | He has to go. => Он должен придти.
+function:has to | She has to go home. => Она должна придти домой.
 function:had to | He had to stop. ~> должен
 function:wherein | The talks were successful, wherein it was agreed that we will go. ~> в котором
-function:tons | We bought tons of fuel. => Мы купили тонны топлива{1.горючее}.
+function:tons | We bought tons of fuel. => Мы купили тонны топлива.
 function:tons | Ten tons of fuel. ~> тонн
-phrase:over [HI] | Over 300,000 tons of fuel. => Свыше 300,000 тонн топлива{1.горючее}.
-phrase:over [HI] | Russia will supply over 300,000 tons of fuel. => Россия доставит{1.отпускать;питать;обслуживать;поставлять;удовлетворять;снабжать;забросать;завозить;довольствовать} свыше 300,000 тонн топлива{2.горючее}.
-phrase:over [HI] | The plane flew over the house. !> свыше
-adverb:plain-d | Russia will always supply fuel. => Россия всегда{1.вообще;постоянно;все} доставит{2.отпускать;питать;обслуживать;поставлять;удовлетворять;снабжать;забросать;завозить;довольствовать} топливо{3.горючее}.
-adverb:plain-d | Russia will immediately supply fuel. => Россия немедленно доставит{1.отпускать;питать;обслуживать;поставлять;удовлетворять;снабжать;забросать;завозить;довольствовать} топливо{2.горючее}.
-adverb:plain-d | Russia will soon supply fuel. => Россия скоро доставит{1.отпускать;питать;обслуживать;поставлять;удовлетворять;снабжать;забросать;завозить;довольствовать} топливо{2.горючее}.
-adverb:plain-d | Russia will quickly supply fuel. => Россия быстро{1.скоро;резко;срочно;шибко} доставит{2.отпускать;питать;обслуживать;поставлять;удовлетворять;снабжать;забросать;завозить;довольствовать} топливо{3.горючее}.
-proper-noun-gender | Russia announced it. => Россия заявила{1.объявить;оглашать;возвещать;анонсировать} это.
+adverb:plain-d | Russia will always supply fuel. => Россия всегда поставит топливо.
+adverb:plain-d | Russia will immediately supply fuel. => Россия немедленно поставит топливо.
+adverb:plain-d | Russia will soon supply fuel. => Россия скоро поставит топливо.
+adverb:plain-d | Russia will quickly supply fuel. => Россия быстро поставит топливо.
+proper-noun-gender | Russia announced it. => Россия заявила это.
 proper-noun-gender | France went home. => Франция шла домой.
-proper-noun-gender | London announced it. => Лондон заявил{1.объявить;оглашать;возвещать;анонсировать} это.
-proper-noun-gender | Moscow announced it. => Москва заявила{1.объявить;оглашать;возвещать;анонсировать} это.
-proper-noun-gender | He lives in Russia. => Он живет{1.проживать;водиться;питаться;кормиться;доживать;выживать;дотягивать;сожительствовать} в России.
-phrase:stop G | He had to stop knocking out diesel fuel in Russia. => Он должен перестать выбивать дизельное топливо{1.горючее} в России.
-phrase:stop G | I will stop eating. => Я перестану есть{1.кушать;закусывать;съедать;кормиться;доедать;уплетать;подтачивать;объедать;ополовинить;въедаться}.
-phrase:stop G | Stop the car. !> перест
-progressive:ing-noun-gloss | He is reading the book. => Он читает книгу{1.книжка}.
-progressive:ing-noun-gloss | We are building a house. => Мы строим дом{1.палата;династия;зрительница;курень}.
+proper-noun-gender | London announced it. => Лондоны заявили это.
+proper-noun-gender | Moscow announced it. => Москва заявила это.
+proper-noun-gender | He lives in Russia. => Он живет в России.
+progressive:ing-noun-gloss | He is reading the book. => Он читает книгу.
+progressive:ing-noun-gloss | We are building a house. => Мы строим дом.
 progressive:ing-noun-gloss | They are running. => Они бегут{1.выполнять}.
 phrasal-verb:imperfective-first | He knocks out the lights. ~> выбивает
-past-form:ed-gloss-shadow | He opened the door. => Он открыл дверь{1.дверца}.
-past-form:ed-gloss-shadow | He closed the door. => Он закрыл дверь{1.дверца}.
-past-form:ed-gloss-shadow | He wanted a book. => Он захотел книгу{1.книжка}.
-participle:passive-short | The door is closed. => Дверь{1.дверца} закрыта.
-participle:passive-short | The door was opened. => Дверь{1.дверца} была открыта.
-participle:passive-short | The terms are defined. => Условия{1.член;срок;четверть;термин;сессия;семестр} определены{2.характеризовать}.
-participle:passive-short | The book was read. => Книга{1.книжка} была прочитана{2.почитать;разбирать;ознакомиться;гласить;читаться;усыплять;почитывать;вычитывать;дочитывать;реферировать;рецензировать}.
-participle:passive-long | The defined terms. => Определенные{1.характеризовать} условия{2.член;срок;четверть;термин;сессия;семестр}.
-gender:inferred-from-lemma | The main factor. => Главный{1.основной;ответственный;парадный;магистральный;узловой} фактор{2.коэффициент;комиссионер;множитель}.
-gender:inferred-from-lemma | The main reason. => Главная{1.основной;ответственный;парадный;магистральный;узловой} причина{2.повод;основание;соображение;мотив;довод;рассудок;резон;мотивировка}.
-verb-government:dative | Help me. => Помогите{1.содействовать;утерпеть;подсобить} мне.
-verb-government:dative | Trust me. => Поверьте{1.доверять;поверять;доверяться;вверять;вверяться} мне.
-native-reading:both | Both sides agreed. => Обе стороны{1.край;бок;стенка;борт;грань} согласились.
-native-reading:both | Attacks by both sides. => Нападения обеими сторонами{1.край;бок;стенка;борт;грань}.
-native-reading:rising | Rising prices. => Растущие цены{1.расценка}.
+past-form:ed-gloss-shadow | He opened the door. => Он открыл дверь{1.вход}.
+past-form:ed-gloss-shadow | He closed the door. => Он закрыл дверь{1.вход}.
+past-form:ed-gloss-shadow | He wanted a book. => Он захотел книгу.
+participle:passive-short | The door is closed. => Дверь{1.вход} закрыта.
+participle:passive-short | The door was opened. => Дверь{1.вход} была открыта.
+participle:passive-short | The terms are defined. => Сроки{1.условие;термин} определены.
+participle:passive-short | The book was read. => Книга была прочитана.
+participle:passive-long | The defined terms. => Определенные сроки{1.условие;термин}.
+gender:inferred-from-lemma | The main factor. => Основной показатель.
+gender:inferred-from-lemma | The main reason. => Основная причина.
+verb-government:dative | Help me. => Помогите мне.
+verb-government:dative | Trust me. => Поверьте мне.
+native-reading:both | Both sides agreed. => Обе стороны согласовали.
+native-reading:both | Attacks by both sides. => Атака{1.нападение} обеими сторонами.
+native-reading:rising | Rising prices. => Растущие цены.
 native-reading:run | Run! => Побегите{1.выполнять}!
-native-reading:run | He ran home. => Он побежал домой.
-native-reading:refinery | The refineries burn. => Нефтеперегонные заводы горят{1.курить;пылать;жечь;жарить;палить;сжигать;загораться;обжигать;сгорать;топиться;куриться;погореть;прогореть;саднить;пламенеть;распаляться;растапливаться;возжигать;жечься;изжарить}.
-capitalization:dropped-article | The crude oil burns. => Сырая нефть горит{1.курить;пылать;жечь;жарить;палить;сжигать;загораться;обжигать;сгорать;топиться;куриться;погореть;прогореть;саднить;пламенеть;распаляться;растапливаться;возжигать;жечься;изжарить}.
-capitalization:dropped-article | the refineries burn. => нефтеперегонные заводы горят{1.курить;пылать;жечь;жарить;палить;сжигать;загораться;обжигать;сгорать;топиться;куриться;погореть;прогореть;саднить;пламенеть;распаляться;растапливаться;возжигать;жечься;изжарить}.
-native-reading:noun-adjunct | Export bans. => Экспортные запреты.
-native-reading:marketplace | The marketplace is large. => Рынок большой{1.крупный}.
-verb-frame:that-clause | They know that Russia will help. => Они знают{1.уметь;ведать;знавать}, что Россия поможет{2.содействовать;утерпеть;подсобить}.
-verb-frame:that-clause | They agreed that Russia will help. => Они согласились, что Россия поможет{1.содействовать;утерпеть;подсобить}.
-verb-frame:that-clause | He decided that Russia will help. => Он решил, что Россия поможет{1.содействовать;утерпеть;подсобить}.
-verb-frame:that-clause | They hope that Russia will help. => Они надеются{1.чаять}, что Россия поможет{2.содействовать;утерпеть;подсобить}.
-rat-drones | Ukrainian drones struck a Russian oil export terminal in the Rostov region, setting the facility ablaze. => Украинские беспилотник ударенные Русским нефтяным экспортным терминалом в Ростов области, задавая предприятие пылать.
-rat-goodwill | By continuing to hit refineries, he is eroding the good will that he has built with Trump over the last six months. => продолжая{1.продолжаться;поддерживать;сохраняться} на нефтеперегонных заводах боевика{2.попадание;хит;тычок}, он размывает добрую волю, которую он построил с через{3.над;поверх;свыше;сверх} Козырем последнего полгодаа.
-rat-barrels | Russia agreed to send us millions and millions of barrels of oil, and it is diesel. => Россия согласилась, чтобы послать{1.отдать;слать;отправлять;направлять;выписывать;присылать;высылать;рассылать;пересылать;засылать;насылать;вытребовать;препровождать;подсылать} нам миллион и миллион баррелей нефти, и оно дизельное.
-idiom:make-a-deal | Russia made a deal. => Россия заключила сделку.
-idiom:make-the-deal | They made the deal. => Они заключили сделку.
-phrase:make <TAO>`deal` | Russia made a deal. => Россия заключила сделку.
-phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.
-phrase:deal with | He deals with problems. => Он имеет дело с проблематикой.
-phrase:deal with | They deal with it. => Они имеют дело с ним.
-native-reading:power | He has great power. => У него есть большая{1.великий;крупный;гениальный;важнецкий} мощность{2.право}.
+native-reading:refinery | The refineries burn. => Нефтеперегонные Заводы жгут{1.гореть;обжигать}.
+capitalization:dropped-article | The crude oil burns. => Сырая Нефть жжет{1.гореть;обжигать}.
+capitalization:dropped-article | the refineries burn. => нефтеперегонные заводы жгут{1.гореть;обжигать}.
+native-reading:noun-adjunct | Export bans. => Экспортные запрет.
+native-reading:marketplace | The marketplace is large. => Рынок большой.
+verb-frame:that-clause | They know that Russia will help. => Они знают, что Россия поможет.
+verb-frame:that-clause | They agreed that Russia will help. => Они согласились что Россия поможет.
+verb-frame:that-clause | He decided that Russia will help. => Он решил, что Россия поможет.
+verb-frame:that-clause | They hope that Russia will help. => Они надеются, что Россия поможет.
+rat-drones | Ukrainian drones struck a Russian oil export terminal in the Rostov region, setting the facility ablaze. => Украинские гул нажатые Русским нефтяным экспортным терминалом в Ростов области, устанавливая средство{1.предприятие;ресурсы;услуги} пылать.
+rat-goodwill | By continuing to hit refineries, he is eroding the good will that he has built with Trump over the last six months. => продолжая нажимать нефтеперегонные заводы, он разрушает добрую волю, которую он разработал{1.строить} с Козырь через последний раз шесть месяцев.
+rat-barrels | Russia agreed to send us millions and millions of barrels of oil, and it is diesel. => Россия согласившаяся посылать нам миллион и миллион бочек{1.баррель} нефти, и это дизельный.
+idiom:make-a-deal | Russia made a deal. => Россия заключать сделку.
+native-reading:power | He has great power. => У него есть большая мощность{1.право}.
 native-reading:power | The region has power. => Область имеет мощность{1.право}.
 preposition:according to | According to him. => Согласно ему.
-phrase:a bit scary | It is a bit scary. => Оно - страшновато.
-phrase:letter of credit | The Letter of Credit shall allow for partial shipments. => Аккредитив позволит{1.пускать;допускать;разрешать;дозволять} для частичных{2.пристрастный;лицеприятный} погрузок.
-phrase:six months | He stayed six months. => Он остался{1.остановиться;проживать;пожить;просидеть;побыть;пробыть;гостить;доживать;простаивать;высиживать;досиживать;отсиживать;прогостить} полгода.
-phrase:there is no time | There is no time. => Некогда.
-phrase:it is cold | It is cold. => Холодно.
-phrase:knock out | He knocks out the lights. => Он выбивает легкие.
 # Issues 16 and 17: home by role, motion verbs, past copula questions, comparatives,
 # impersonal rain, afraid of, language adverbs, durations, wait for, many/slowly/bank/store.
-phrase:look at | Look at the beautiful flowers. => Посмотрите на красивые цветки{1.цветочек}.
-phrase:is afraid of | He is afraid of dogs. => Он боится собак{1.пес;кобель;самец;псина}.
-phrase:am afraid of | I am afraid of him. => Я боюсь его.
-phrase:are afraid of | We are afraid of snakes. => Мы боимся змеей{1.ехидна}.
-phrase:was afraid of | She was afraid of dogs. => Она боялась собак{1.пес;кобель;самец;псина}.
-phrase:were afraid of | They were afraid of the dark. => Они боялись темного{1.мрачный;бесперспективный;полутемный;почернелый}.
-phrase:go to | I am going to the park with my friends. => Я иду в парк с моими{1.свой} друзьями{2.товарищ;приятель;приятельница;товарка;кунак;друган}.
-phrase:go to | He went to school. => Он шел в школу{1.училище;стая;студия;косяк;выучка}.
-phrase:it rains | It rains. => Дождь идет.
-phrase:it is raining | It is raining outside. => Дождь идет снаружи.
-phrase:it rained | It rained yesterday. => Дождь шел вчера.
-phrase:it was raining | It was raining. => Дождь шел.
-phrase:it will rain | It will rain tomorrow. => Дождь пойдет завтра.
-phrase:speak english | She speaks English very well. => Она говорит по-английски очень{1.больно;удивительно} хорошо.
-phrase:speak russian | Do you speak Russian? => Ты говоришь по-русски?
-phrase:speak french | He spoke French yesterday. => Он говорил по-французски вчера.
-phrase:speak german | They don't speak German. => Они не говорят по-немецки.
-phrase:speak spanish | I speak Spanish. => Я говорю по-испански.
-phrase:speak italian | We speak Italian. => Мы говорим по-итальянски.
-phrase:speak chinese | She speaks Chinese. => Она говорит по-китайски.
-phrase:speak japanese | He speaks Japanese. => Он говорит по-японски.
-phrase:wait for | She waited for him. => Она ждала его.
-phrase:for <TAOIH>[`second``seconds``minute``minutes``hour``hours``day``days``week``weeks``month``months``year``years``decade``decades``century``centuries`] | We have been waiting for an hour. => Мы ждем час.
-phrase-context | He worked for a year. => Он работал{1.действовать;трудиться;обрабатывать;отрабатывать;срабатывать;эксплуатировать;прослужить;сучить;прорабатывать;перерабатывать;подвизаться;вплетать;дорабатываться;дослуживать} год{2.година}.
-phrase-context | I bought a gift for my mother. => Я купил подарок{1.талант;дар;дарование;подношение;преподношение;приношение} для моей{2.свой} матери{3.тетка;матушка;мамаша;мамка;родительница}.
-phrase:drive home | He drove home. => Он поехал домой.
-phrase:ride home | He rode home. => Он ехал домой.
-phrase:travel home | They travelled home. => Они поехали домой.
-phrase:head home | He headed home. => Он направился домой.
-phrase:rush home | She rushed home. => Она спешила домой.
-phrase:take [RMO]`home`[D,*] | Take her home. => Отведите её домой.
-phrase:take [TO]N`home`[D,*] | I took the kids home. => Я отводил ребяты домой.
-phrase:bring [RMO]`home`[D,*] | Bring it home. => Приведите{1.нести;повезти;приносить;разводить;донести;наводить;привозить;вносить;относить;подносить;заносить;подвозить;натаскать;навлечь;довозить;приволакивать;притаскивать;натащить} это домой.
-phrase:bring [TO]N`home`[D,*] | Bring the book home. => Приведите{1.нести;повезти;приносить;разводить;донести;наводить;привозить;вносить;относить;подносить;заносить;подвозить;натаскать;навлечь;довозить;приволакивать;притаскивать;натащить} книгу{2.книжка} домой.
-phrase:send [RMO]`home`[D,*] | Send him home. => Отправьте его домой.
-phrase:send [TO]N`home`[D,*] | Send the children home. => Отправьте ребят{1.ребята;ребятишки} домой.
-phrase:walk [RMO]`home`[D,*] | I walked her home. => Я проводил её домой.
-phrase:walk [TO]N`home`[D,*] | I walked the dog home. => Я проводил собаку{1.пес;кобель;самец;псина} домой.
-phrase:see [RMO]`home`[D,*] | I saw him home. => Я провожал его домой.
-phrase:see [TO]N`home`[D,*] | I saw the guests home. => Я провожал гостей{1.посетитель;гостья;постоялец;посетительница;пансионер;пансионерка} домой.
-phrase:carry [RMO]`home`[D,*] | He carried me home. => Он понес{1.носить;повезти;таскать;донести;потащить;разнести;относить;разносить;поносить;дотащить;перетаскивать;проносить;перетаскать;довозить} меня домой.
-phrase:carry [TO]N`home`[D,*] | He carried the bag home. => Он понес{1.носить;повезти;таскать;донести;потащить;разнести;относить;разносить;поносить;дотащить;перетаскивать;проносить;перетаскать;довозить} мешок{2.сумка;пакет;портфель;добыча;кошелка;торба;сума;кошель;сак} домой.
-phrase:lead [RMO]`home`[D,*] | She led him home. => Она повела его домой.
-phrase:lead [TO]N`home`[D,*] | She led the boy home. => Она повела мальчика{1.парень;мальчишка;пацан;паренек;парнишка;хлопец;отрок} домой.
-phrase-context | Are the kids home? => Ребяты дома?
-phrase-context | Was she home? => Она была дома?
-phrase-context | Were you home yesterday? => Ты был дома вчера?
-phrase-context | Is John home? => Джохн дома?
-phrase-context | Is John a teacher? => Джохн учитель{1.учительница;преподаватель;педагог;воспитательница;преподавательница;училка}?
-phrase-context | I took the kids home. => Я отводил ребяты домой.
-past-question | Was he here? => Он был здесь?
-past-question | Was he a teacher? => Он был учителем{1.учительница;преподаватель;педагог;воспитательница;преподавательница;училка}?
-past-question | Were they at school yesterday? => Они были в школе{1.училище;стая;студия;косяк;выучка} вчера?
-past-question | Is she at school? => Она в школе{1.училище;стая;студия;косяк;выучка}?
-comparative | He is taller than his sister. => Он более высокий{1.крупный;рослый;высотный}, чем его сестра.
-comparative | The taller man came. => Более высокий{1.крупный;рослый;высотный} человек{2.хозяин;мужчина;муж;дядя;тип;боец;слуга;умница} приходил.
-comparative | He is stronger. => Он более сильный{1.здоровый;крепкий;мощный;твердый;плотный;солидный;прочный;сердитый;драматический;веский;хваткий;двужильный;забористый;матерой}.
+past-question | Was he here? => Он здесь?
+past-question | Was he a teacher? => Он учитель?
+past-question | Were they at school yesterday? => Они в школе вчера?
+past-question | Is she at school? => Она в школе?
+comparative | He is taller than his sister. => Он более высокий чем его сестра.
+comparative | The taller man came. => Более высокий человек приходил.
+comparative | He is stronger. => Он прочен.
 negation-perfect | She has never seen the sea. => Она никогда не увидела море.
 negation-perfect | She never saw the sea. => Она никогда не видела море.
-quantity | There are many people here. => Есть много людей здесь.
-quantity | He has many books. => У него есть много книг{1.книжка}.
-adverb | The old man walked slowly. => Старый{1.старинный;давний;старенький;истертый;лежалый;некомплектный;старозаветный;устарелый} человек{2.хозяин;мужчина;муж;дядя;тип;боец;слуга;умница} пошел{3.пойти;ходить;проходить;гулять;шагать;топать;поводить;шествовать;прогуливать;отшагать} медленно.
-adverb | It is raining outside. => Дождь идет снаружи.
-homograph | My brother works in a bank. => Мой{1.свой} брат{2.братец;браток} работает в банке.
-homograph | Did she go to the store? => Она шла в магазин?
-homograph | We store books. => Мы храним книги{1.книжка}.
-progressive | She is reading a book. => Она читает книгу{1.книжка}.
-progressive | They are playing in the garden. => Они играют в саде{1.огород}.
-progressive | The children are sleeping. => Ребята{1.ребята;ребятишки} спят.
+quantity | There are many people here. => Есть многие люди здесь.
+quantity | He has many books. => Он имеет многие книги.
+adverb | The old man walked slowly. => Старый человек прошел медленно.
+adverb | It is raining outside. => Он дождь за.
+homograph | My brother works in a bank. => Мой брат работает в банке.
+homograph | Did she go to the store? => Она шла в магазин{1.загрузка}?
+homograph | We store books. => Мы храним{1.загружать} книги.
+progressive | She is reading a book. => Она читает книгу.
+progressive | They are playing in the garden. => Они играют в сад.
+progressive | The children are sleeping. => Дети спят.

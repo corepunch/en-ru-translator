@@ -1,7 +1,7 @@
 local engine = require 'core.engine'
 local lexicon = require 'core.lexicon'
 local encoding = require 'core.encoding'
-local file=assert(io.open('openrussian/BASE.DIC','rb'))
+local file=assert(io.open('dictionary/BASE.DIC','rb'))
 local dictionary=lexicon.from_bytes(file:read('*a'));file:close()
 
 -- Cases are the `greeting` lines in test/translations.txt. Besides the

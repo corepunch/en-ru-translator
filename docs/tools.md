@@ -1,22 +1,14 @@
 # Python Extraction Tools
 
-## Binary Dictionary Database
+## Dictionaries
 
-`tools/openrussian_db.c` imports all four pinned OpenRussian dictionary tables
-into indexed LTech `.DIC` and `.RUS` binary databases. It stores English
-glosses and literal expressions in `.DIC`. `.RUS` keeps the original LTech
-format, CP866 headwords, native binary POS codes and LTPRO paradigm numbers
-assigned by `tools/fit_paradigms.lua`; no forms are stored. The C utility can
-also inspect image headers and find all records for a headword.
-
-```sh
-cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db -liconv
-lua tools/fit_paradigms.lua openrussian/upstream > /tmp/fit.tsv
-/tmp/openrussian_db build openrussian/upstream \
-  openrussian/BASE.DIC openrussian/BASE.RUS /tmp/fit.tsv
-/tmp/openrussian_db info openrussian/BASE.RUS
-/tmp/openrussian_db find openrussian/BASE.RUS читать
-```
+`sh tools/build_dictionary.sh` builds the default `dictionary/BASE.DIC` and
+`dictionary/BASE.RUS` from LTGOLD's dictionaries and our diffs
+(`dictionary/changes.txt`, `dictionary/changes-rus.txt`); `--verify` requires
+the checked-in files to match. `tools/ltech_dict.py` inspects and edits LTech
+images (`find`, `info`, `export`, `import`, `check`); its `import` applies a
+diff file, `-headword` lines included, and takes `.RUS` codes as a class
+letter plus hex bytes.
 
 These tools in `LTGOLD/` were used to reverse-engineer the LTGOLD.EXE binary and
 extract the translation rules, dictionaries, and grammatical data.

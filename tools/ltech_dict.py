@@ -20,6 +20,7 @@ Publish a dictionary with the commercial headwords removed::
 ``--in-place`` is set.
 """
 
+import re
 import argparse
 import bisect
 import struct
@@ -587,15 +588,47 @@ def command_add(dictionary, args):
     print(f'added {args.key} -> {destination} ({sum(1 for _k, _v in dictionary.entries())} entries)')
 
 
+def rus_code(text):
+    """A .RUS code written as text: the class letter, its code bytes in hex,
+    then any trailing lemma (a verb's perfective partner): `N 80 80 80`,
+    `V C0 88 80 00 сделать`."""
+    parts = text.split()
+    if not parts or len(parts[0]) != 1:
+        raise DictError(f'expected a class letter and hex bytes: {text!r}')
+    value = bytearray(encode_cp866(parts[0]))
+    rest = parts[1:]
+    while rest and re.fullmatch(r'[0-9A-Fa-f]{2}', rest[0]):
+        value.append(int(rest.pop(0), 16))
+    if rest:
+        value += encode_cp866(' '.join(rest))
+    return bytes(value)
+
+
 def command_import(dictionary, args):
-    if dictionary.binary_codes or dictionary.buckets == 32:
-        raise DictError('UTF-8 entry import is for text .DIC dictionaries; use add --hex for .RUS codes')
+    russian = dictionary.binary_codes or dictionary.buckets == 32
     seen = set()
     pairs = []
+    removed = set()
     for number, line in enumerate(args.entries.read_text(encoding='utf-8').splitlines(), 1):
         if not line.strip() or line.lstrip().startswith('#'):
             continue
-        key, value = line_parts(encode_cp866(line))
+        # Diff-like entries: "-headword" removes that headword's records,
+        # "+headword*code" or plain "headword*code" adds or replaces one.
+        if line.startswith('-'):
+            folded = fold_key(encode_cp866(line[1:]))
+            if not folded or folded in removed:
+                raise DictError(f'{args.entries}:{number}: expected one -headword per line')
+            removed.add(folded)
+            continue
+        if line.startswith('+'):
+            line = line[1:]
+        if russian:
+            head, star, code = line.partition('*')
+            if not star:
+                raise DictError(f'{args.entries}:{number}: expected lemma*class hex...')
+            key, value = encode_cp866(head), rus_code(code)
+        else:
+            key, value = line_parts(encode_cp866(line))
         if not key or not value:
             raise DictError(f'{args.entries}:{number}: expected nonempty headword*code')
         folded = fold_key(key)
@@ -604,11 +637,18 @@ def command_import(dictionary, args):
         seen.add(folded)
         pairs.append((key, value))
     count = len(pairs)
-    if not count:
+    if not count and not removed:
         raise DictError(f'{args.entries}: no entries to import')
+    if removed & seen:
+        raise DictError(f'{args.entries}: a headword is both removed and added')
+    present = {fold_key(key) for key, _value in dictionary.entries()}
+    missing = sorted(decode_cp866(key) for key in removed - present)
+    if missing:
+        raise DictError(f'{args.entries}: removed headwords not in the dictionary: {", ".join(missing)}')
+    deleted = dictionary.delete_folded(removed) if removed else 0
     dictionary.add_lines(pairs, replace=args.replace)
     destination = _write_result(dictionary, args.output, args.in_place)
-    print(f'imported {count} entries -> {destination}')
+    print(f'imported {count} entries, removed {deleted} -> {destination}')
 
 
 def command_delete(dictionary, args):

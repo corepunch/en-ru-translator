@@ -16,7 +16,7 @@ Paths below are relative to the repository root. Sources of authority are
 `LTGOLD/BASE.DIC`, `BUSINESS.DIC`, and `COMPUTER.DIC`; and the implementation in
 `core/lexicon.lua`, `core/senses.lua`, `core/matching.lua`, `core/phrasing.lua`,
 `core/agreement.lua`, and `core/generation.lua`. The curated greetings are in
-the `## phrases` section of `openrussian/dictionary.txt` and exercised by `test/greetings_test.lua`.
+`dictionary/pending.txt` (waiting to return to `dictionary/changes.txt`).
 
 Examples labeled **historical** are dictionary encodings, not claims about a
 captured translation. A tag's linguistic name does not prove every engine path
@@ -417,14 +417,13 @@ bit in an isolated copy of LTGOLD's `BASE.RUS` gave:
 | --- | --- | --- | --- |
 | `V` | `0x08` | Future is analytic `буду` + infinitive, ignoring any partner. Without it, a verb with no partner uses its own present as the future. | работать `e8`: `Я буду работать`; cleared: `Я работаю`. видеть with `0x08`: `Я буду видеть его`. |
 | `V` | `0x02` | Set on native perfectives (увидеть `e3`, помочь `e2`). Lua skips the partner lookup for it. | Clearing it on увидеть changed nothing. |
-| `V` | `0x04` | Lua forces perfective aspect when `0x08` is clear. Native: прийти `a6`, быть `e4`. | Setting it on увидеть changed nothing. The OpenRussian builder writes it for perfectives. |
+| `V` | `0x04` | Lua forces perfective aspect when `0x08` is clear. Native: прийти `a6`, быть `e4`. | Setting it on увидеть changed nothing. |
 | `A` | `0x20` | Short form everywhere, including attributive. | рад `a0`: `Он рад`, `Рад человек`; cleared: `Он радый`. |
 | `A` | `0x01` | Short form as a present predicate after a noun or pronoun; instrumental long form in the past. | рад `81`: `Человек рад`, `Он был радым`, `Радый человек`. |
 
 LTGOLD's `BASE.RUS` has no record for глубокий, and the original prints
 `Река глубока` (but `Дом большой`); what selects that short form without a
-record is not isolated. OpenRussian writes `c0` for every adjective, so the
-default dictionary prints `Река глубокая`.
+record is not isolated.
 
 ### Program switches
 

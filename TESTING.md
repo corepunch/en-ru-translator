@@ -51,11 +51,9 @@ instructions are in `test/ltpro/curated-phrases/` (captured for the
 earlier 43-entry source). Boundary-subrule cases may check only the span the
 entry owns. Raw native differences remain
 visible; the default expectations are not assertions of exact LTPRO parity.
-`prepositions_test.lua` maps every `P`/`p` row in `openrussian/dictionary.txt` to a
-case checking the preposition and governed noun form, plus в/на, из/с/от and
-animate selection from `.RUS` noun flags; captures are in
-`test/ltpro/prepositions/`. `openrussian_others_test.lua` checks that generated
-`others.tsv` readings use `WD`, not the `#` class that drops a leading с/м/ж.
+`prepositions_test.lua` maps every `P`/`p` row in `dictionary/changes.txt` to a
+case checking the preposition and governed noun form; captures are in
+`test/ltpro/prepositions/`.
 `encoding_test.lua` verifies standard CP866 bytes for both `Ё` and `ё`.
 
 `W` capitalization applies to the complete phrase, including inserted words.

@@ -139,14 +139,9 @@ end
 
 function senses.expand_phrase(state,r)
   local value=r.text
-  -- W readings expanded after native T4 subrules need the same phrase-wide
-  -- casing as equivalents distributed during lexical analysis.
+  -- A subrule's W expansion carries its casing (phrasing.lua); otherwise each
+  -- component keeps LTPRO's casing.
   local casing=r.phrase_case
-  if not casing then
-    local _,caps=(r.source or ''):gsub('[A-Z]','')
-    casing={caps=caps,first=r}
-    r.phrase_case=casing
-  end
   local i=1
   local function c() return value:byte(i) or 0 end
   local function step() i=i+1 end

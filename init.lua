@@ -6,7 +6,8 @@ local engine = require 'core.engine'
 local usage = [[Usage: lua init.lua [--data DIR] [--dic FILE] [--rus FILE] [sentence]
        printf '%s' 'English sentence.' | lua init.lua [asset options]
 
---data selects runtime assets; OpenRussian dictionaries are used by default.
+--data selects runtime assets; dictionary/ (LTGOLD's dictionaries with our
+changes) is used by default.
 Input and output are UTF-8. The translator accepts one sentence;
 it does not split multiple sentences. Asset options accept paths.
 Inline {~text~} preserves text; {~=text~} transliterates it.
@@ -16,6 +17,8 @@ Inline {~text~} preserves text; {~=text~} transliterates it.
 --prefixes FILE supplies prefix data; --no-prefixes disables prefix analysis.
 --dic-overlay FILE and --rus-overlay FILE add indexed binary dictionary records.
 --domain LABEL prefers readings with that dictionary domain label (e.g. инф).
+--names transliterates an unknown capitalized word as a name (Xylophornium ->
+Ксилофорниум); LTPRO leaves it in Latin.
 ]]
 
 local options, words = {}, {}
@@ -42,6 +45,9 @@ while i <= #arg do
     i = i + 1
   elseif not end_options and key == '--trace' then
     trace = true
+    i = i + 1
+  elseif not end_options and key == '--names' then
+    options.proper_names = true
     i = i + 1
   elseif not end_options and key == '--no-prefixes' then
     options.prefixes = false

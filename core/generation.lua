@@ -110,8 +110,6 @@ function generation.pronoun_form(state,word,person,gender,plural,case,prefix)
   local result=word:sub(1,#word-cut)
   if case~=5 and prefix~=0 and (index==2 or index==3 or index==4 or index==7) then result=a:string('n') end
   local ending=slot(cases[index],signed(case)-1)
-  -- Prefer the explicit ё spelling for the feminine genitive/accusative form.
-  if index==4 and ending=='\xA5\xA5' then ending='\xA5\xF1' end
   return ending and result..ending
 end
 
@@ -149,9 +147,6 @@ local function record(state,node)
     return r.save(generation.adjective_form(state,r.w('paradigm'),r.text(),r.b('gender'),r.b('number'),generation.case(r.b('case_mask'))))
   end
   function r.verb(id,aspect)
-    -- A let's hortative without perfective forms stays infinitive (Давайте
-    -- работать); see phrasing handler 23.
-    if node.hortative and not russian.has_verb_aspect(state,r.text(),1) then return true end
     return r.save(generation.verb_form(state,id or r.w('paradigm'),r.text(),aspect or r.b('aspect'),r.b('verb_flags'),r.b('person'),
       r.b('number'),r.b('tense'),r.b('gender')))
   end

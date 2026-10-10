@@ -138,224 +138,13 @@ A segment of another class is a grammatical reading, not just a listed
 meaning. An `A.` segment on a noun lets grammar read the noun as an adjective
 before another noun (LTGOLD gives `table` its `A.табличный` on purpose).
 
-**How `openrussian/BASE.DIC` follows this.** OpenRussian has one row per
-Russian word, so a key such as `economy` has nine source readings. The builder
-(`merge_readings` in `tools/openrussian_db.c`) writes one record per key: it
-keeps the record grammar was given (its classes chosen by the rules in
-[openrussian/README.md](../openrussian/README.md)) and folds *all* of the key's
-other readings of each of its classes into that segment, most frequent first:
-
-```
-economy*NN.хозяйство;экономика;экономия;сбережение;…;экономность
-table*NN.стол;таблица;табель;скрижаль
-break*ZV.рваться;перебить;ломать;нарушать;…N.разрыв;перерыв;перелом;…
-above*WDнад;вверху;сверх
-```
-
-A perfective whose imperfective partner is already a reading is not repeated,
-since grammar chooses the aspect. The builder adds no segment for a class the
-record lacks. Adding `A.` segments from OpenRussian's adjective glosses turned
-nouns into adjectives across the corpus: *Is the dog home?* became
-`Псиный дом?`, and *The house door.* became `Домашняя дверь`. Such a segment
-belongs in `dictionary.txt` as a native reading when LTGOLD has it.
-
-#### Simple unambiguous entries
-
-```
-economic*Aэкономический          → adjective
-economically*Dэкономически        → adverb
-economize*Vэкономить              → verb
-economy*Nэкономика;экономия       → noun (two meanings separated by ;)
-after-effect*Nпоследействие       → hyphenated noun
-```
-
-Multiple meanings are separated by `;`. The **first meaning is the primary one**.
-
-#### Plural nouns and 3sg verb forms (lowercase codes)
-
-When a dictionary entry is a plural noun or a -s/-es verb form, the code is **lowercase**
-and the translation is given in the **base/citation form**:
-
-```
-accessories*nпринадлежность   → plural of noun
-adds*vдобавлять               → 3sg present, with infinitive as translation
-adds*vдобавляет               → OR: translation can be the 3sg form directly
-```
-
-#### Ambiguity entries — multiple grammatical roles
-
-When a word is grammatically ambiguous (could be verb OR noun OR adjective), all roles
-are listed in a single entry using ambiguity tags `Z`, `E`, `G`, `e`:
-
-**Z — verb/noun/adjective ambiguity:**
-```
-answer*ZотвечатьNответ
-credit*ZкредитоватьNкредитAкредитный
-work*ZработатьNработаAрабочий
-```
-Format: `Z<verb_translation>N<noun_translation>A<adj_translation>`
-(The `V` tag is implicit before the first translation; the `Z` signals ambiguity.)
-
-**E — past participle / adjective / other:**
-```
-crossed*Eпересекать\cross
-plugged*EподключатьAнаборный\plug
-```
-The `\base_form` suffix is a **back-reference to the infinitive entry** — the system
-generates other forms from there rather than listing them again.
-
-**G — -ing forms (gerund / present participle / noun / adjective):**
-```
-interesting*GинтересоватьсяAинтересный\interest
-interfacing*GсвязыватьNсопряжение\interface
-```
-
-**e — infinitive = past tense coincidence:**
-```
-come*eприходить
-read*eчитатьNчтение
-set*eустанавливатьNнабор;множество
-```
-
-#### Back-reference `\`
-
-`\base_form` at the end of an entry means: "for forms not listed here, look up
-`base_form` in the dictionary and derive them." The system generates missing forms
-(past participle, gerund, etc.) from the base infinitive.
-
-```
-crossed*Eпересекать\cross        → E-form of "cross"
-misunderstood*EEWEпониматьDнеправильно/\misunderstand
-```
-
-#### Prepositions with case government
-
-Prepositions can govern a specific Russian grammatical case. The case letter (first
-letter of the Russian case name) follows the `P` code:
-
-| Letter | Russian case | Example |
-|--------|-------------|---------|
-| `Р` | Родительный (genitive) | `PРс точностью до` |
-| `Д` | Дательный (dative) | `PД` |
-| `В` | Винительный (accusative) | `PВчерез` |
-| `Т` | Творительный (instrumental) | `PТ` |
-| `П` | Предложный (prepositional) | `PПв` |
-
-```
-accurate to*PРс точностью до    → "accurate to" governs genitive
-across*PВчерез                  → governs accusative
-```
-
-#### Proper nouns and untranslatable units (`#`)
-
-Proper nouns, brand names, and technical designations use `#` with gender/number info:
-
-```
-#<count><gender>
-  count: 0 = singular, 1 = plural
-  gender: м = masculine, ж = feminine, с = neuter
-```
-
-```
-brown*#0м          → Mr. Brown (kept in English, masculine)
-mountain view*#0ж  → Mountain View (feminine)
-```
-
-This preserves the English form in output while allowing correct agreement.
-
-#### Noun with `на` instead of `в` for locative
-
-If a noun uses preposition "на" instead of "в" for the locative case (e.g. "на ленту"),
-mark it with `[Н]` in the grammar flags. This is encoded in the `.RUS` binary, not
-visible in `.DIC` text.
-
-#### Phrase / compound entries (`W`)
-
-The `W` tag marks a **compound equivalent** — a multi-word Russian translation that must
-be inflected together as a unit.
-
-**For phrase input (multi-word English entry):** only the Russian words needing
-grammatical agreement get codes; fixed words are left bare:
-
-```
-after-sale services*WAпослепродажныйNсервис
-```
-→ "after-sale services" translates to "послепродажный сервис" where `A` inflects
-the adjective and `N` inflects the noun.
-
-**For single-word input:** the English word gets a double code (its own category + the
-phrase indicator), and each Russian word gets a code:
-
-```
-after-treatment*NNWAпоследующаяNобработка
-afterclap*NNWAнеприятноеNсобытие
-misconfigure*VVWVкомпоноватьDнеправильно
-```
-Format: `<en_class><en_class>W<ru_word1_class><ru_word1><ru_word2_class><ru_word2>`
-
-**Non-inflecting phrase** (fixed phrase, no agreement needed):
-```
-interfere*VWVсоздавать помехи
-after a while*Dспустя некоторое время
-```
-
-**The `/` separator** ends a phrase block when a word has multiple readings:
-```
-bond*ZWVподписывать обязательство/Nобязательство;облигация
-affect*ZVWVвоздействоватьPВна/NвоздействиеA.активизированный
-```
-Everything before `/` is the phrase reading; after `/` is the plain reading.
-
-**The `.` marker** in a compound entry indicates the code belongs to the **English
-(input) side**, not the Russian translation:
-```
-after-sale services*WAпослепродажныйNсервис
-    W = phrase marker (Russian side)
-    A = adjective (Russian word)
-executive*NNWAдолжностноеNлицо/A.исполнительный
-    A. = adjective on English side
-```
-
-#### `~` wildcard in multi-word entries
-
-A `~` in a phrase pattern is a placeholder that matches any single word in the input:
-
-```
-on ~ account*WPВза~Nсчет   → matches "on our account", "on Boris account", etc.
-```
-The matched word is substituted into the translation at the `~` position.
-
-#### Z-ambiguity with phrase equivalents
-
-```
-average*ZVусреднятьN.WAсреднееNчисло/A.средний
-respond to*ZWVотвечатьPВна/N.WNответPВна
-```
-The `.` before `W` marks that the following phrase code applies to the English input
-classification, not the Russian output.
-
-### Current loader
-
-`core.lexicon.from_bytes` builds an ordered record list and a case-insensitive key
-index. `analyze` performs lookup, supported suffix fallback, phrase matching and
-reading decoding into linked table nodes. Dictionary syntax described above is
-historical; it is not a promise that every macro or derivation is supported.
-Unsupported paths raise explicit errors. Custom overlay merging has been retired.
-
 ### Adding reviewed phrase entries
 
 English phrase keys and their Russian readings belong in `.DIC`. `.RUS` holds
-Russian morphology codes. The active dictionary is
-`openrussian/BASE.DIC`; historical `LTGOLD/BASE.DIC` is a separate
-asset and is not automatically combined with OpenRussian.
-
-Keep new entries in the `## phrases` section of UTF-8 `openrussian/dictionary.txt`, then import them:
-
-```sh
-python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/dictionary.txt --replace --in-place
-python3 tools/ltech_dict.py check openrussian/BASE.DIC
-```
+Russian morphology codes. The default dictionary is `dictionary/BASE.DIC`:
+`LTGOLD/BASE.DIC` with our diff `dictionary/changes.txt` applied by
+`sh tools/build_dictionary.sh` (`-headword` removes, `headword*code` adds or
+replaces).
 
 Each nonblank source line is `headword*code`. Grammatical subrules use
 `head pattern*$action`; stars inside a pattern belong to its key. The auxiliary
@@ -374,14 +163,10 @@ and a composite `M` pronoun plus `J0nдело`. Replacement changes tag/reading 
 preserving the pronoun node's grammatical fields. The empty `M` component uses
 those fields during normal generation. `J0` closes the prepositional group before
 the independent nominative plural noun, generated from lemma `дело`.
-This rule has been executed in original LTPRO. Original third-person forms omit
-`н`; Lua's agreement/generation fixes produce `него/неё/них`. The custom pre-T1
-retained-slot execution path has been removed. Lua now protects the authored
-composite from the native sentence-final `it` rewrite for `How is it?`; see the skill reference
-for this captured limitation.
+This rule has been executed in original LTPRO; its third-person forms omit
+`н`. It waits in `dictionary/pending.txt` until it is checked against LTGOLD's
+own `how` and `what` records.
 
-Structural function words are maintained in the `## function-words` section of
-`openrussian/dictionary.txt`, ahead of the phrase entries.
 A literal `W#ты#` is not an `R` pronoun, and an auxiliary classified as a noun
 cannot match `X`. Use proper structural readings rather than enumerating the
 surface spellings of a grammatical family.
@@ -399,9 +184,7 @@ what <X>`up`[*]*$DDWDкакnдело\ $ \
 This follows BASE.DIC entries such as ``thank `you`[*]*$Dблагодарю вас\ \``.
 The auxiliary span may be empty because the native question pass removes `is`.
 `[*]` requires sentence end; final punctuation stays separate from phrase keys.
-The prior Lua-specific final-punctuation matching has been removed. See the
-[curated phrases](../openrussian/README.md#curated-phrases) and the
-[dictionary-writing skill](../skills/dictionary-writing/SKILL.md).
+See the [dictionary-writing skill](../skills/dictionary-writing/SKILL.md).
 
 ## BASE.RUS (Russian) Code Format
 
@@ -477,12 +260,8 @@ general (1 each). `dic.txt` does not describe them. The Lua engine reads them:
 others appear as `{1.…}` alternatives.
 
 Both mechanisms exist in this project. The dictionary chain is
-`--dic-overlay FILE`: the theme `.DIC` is loaded after `BASE.DIC` and wins for
-the same key. The themes are text sources in `openrussian/themes/` (one
-`key*code` file each, `business.txt` and `computer.txt` carried over from
-LTGOLD) that `tools/rebuild_openrussian.sh` compiles to `openrussian/BUSINESS.DIC`
-and `openrussian/COMPUTER.DIC`. A politics or any other theme is one more file
-there. The `тема)` marks can be written in any `dictionary.txt` or theme row.
+`--dic-overlay FILE`: the theme `.DIC` (`LTGOLD/BUSINESS.DIC`,
+`LTGOLD/COMPUTER.DIC`) is chained ahead of `BASE.DIC` and wins for the same key.
 
 ## Encoding
 

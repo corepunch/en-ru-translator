@@ -62,13 +62,18 @@ function lexicon.overlay(dictionary, bytes)
     end
     return list
   end
+  -- The theme dictionary comes first in the chain: its records go ahead of
+  -- the base's for the same key or first word, in their own order.
+  local placed = {}
+  local function put(list, record)
+    placed[list] = (placed[list] or 0) + 1
+    table.insert(list, placed[list], record)
+  end
   for _, record in ipairs(addition.records) do
     merged.records[#merged.records + 1] = record
-    local by_key = own(merged.by_key, record.key)
-    by_key[#by_key + 1] = record
+    put(own(merged.by_key, record.key), record)
     local token = record.key:match('^([^ *]*)'):gsub('[A-Z]', string.lower)
-    local by_token = own(merged.by_token, token)
-    by_token[#by_token + 1] = record
+    put(own(merged.by_token, token), record)
   end
   return merged
 end
@@ -517,11 +522,9 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   if value:sub(1,1)=='W' and value:sub(2,2)~='~' and not value:sub(2,2):match('[A-Za-z#]') then
     value='Ww'..value:sub(2)
   end
+  -- A subrule's W expansion carries its casing (phrasing.lua); a literal W
+  -- phrase keeps LTPRO's casing of each component (Рыбная Мука).
   local casing=record.casing
-  if value:sub(1,1)=='W' and not casing then
-    local _,caps=node.source:gsub('[A-Z]','')
-    casing={caps=caps,first=node}
-  end
   if captures and #captures>0 then
     local held,literals,rendered={},{},{}
     for _,capture in ipairs(captures) do for _,n in ipairs(capture) do held[n]=true end end
@@ -556,7 +559,7 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     -- Only explicit output gaps reinsert captured words. Idioms such as
     -- "do your best" consume a possessive already expressed by their reading.
     for _=first,last do table.remove(records,first) end
-    for at=#rendered,1,-1 do rendered[at].phrase_literal=true;table.insert(records,first,rendered[at]) end
+    for at=#rendered,1,-1 do table.insert(records,first,rendered[at]) end
     return first
   end
   if value:find('~',1,true) then value=table.concat(phrase_patterns.segments(value)) end
@@ -566,9 +569,6 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
     if not (t:match('[VZ]') and nodes.tag(node):match('[EeGFh]')) then node.tag=t:byte() end
     if nodes.tag(node)=='V' and node.source:sub(-1)~="'" then node.number=0 end
     node.marker=0x77
-    -- A multiword key's reading belongs to the whole phrase; English lexical
-    -- T4 rules must not reread its first word (it is cold -> Это).
-    if last>first then node.phrase_literal=true end
     local source = {}
     for index=first,last do table.insert(source, records[index].source) end
     local macroSource = table.concat(source, ' ')
@@ -635,7 +635,6 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
       n.reading_state=2
     end
     n.phrase_case=casing
-    if last>first then n.phrase_literal=true end
     if (n.marker or 0)==0 then n.marker=0x77 end
     tag,pos=nexttag,stop+1
     if tag=='' then
@@ -694,9 +693,8 @@ for i, row in ipairs(ltpro_rules.contractions) do
 	contractions[i] = { row[1], row[3], row[2], row[5] }
 end
 -- rules.lists.contracted_is, plus the exceptions LTPRO's contraction code tests
--- as literals (there's, here's, what's, that's, who's); how is
--- a Lua addition (How's it going?).
-local contractedIs = { there = true, here = true, what = true, that = true, who = true, how = true }
+-- as literals (there's, here's, what's, that's, who's).
+local contractedIs = { there = true, here = true, what = true, that = true, who = true }
 for i = 0, #ltpro_rules.lists.contracted_is do contractedIs[ltpro_rules.lists.contracted_is[i]] = true end
 local negativeStems = { ca = "can", wo = "will", sha = "shall" }
 

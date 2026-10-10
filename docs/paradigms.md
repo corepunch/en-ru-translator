@@ -7,21 +7,18 @@ LTPRO's morphology tables are in `core/rules.lua` (`rules.paradigms`: `noun-m`,
 `verb-imperfective`, `verb-perfective`, `replacement`), extracted byte for byte
 from the unpacked executable, together with the pronoun table
 (`rules.lists.pronouns` nominatives, `rules.lists.pronoun_cases` oblique cases). A dictionary directory may carry its own
-text copy: `openrussian/paradigms.txt` (one row per paradigm: cut count, endings
-per slot) takes precedence for the OpenRussian dictionaries. Each `.RUS` record names its paradigm in the native byte
-(`0x80|id`), assigned at build time by `tools/fit_paradigms.lua`.
+text copy: `dictionary/paradigms.txt` (one row per paradigm: cut count, endings
+per slot, with two fixes to LTPRO's data) takes precedence for the default dictionaries. Each `.RUS` record names its paradigm in the native byte
+(`0x80|id`).
 
 Every table row has a list of the lemma endings it serves, in the same order as
 the rows: `rules.lists.endings_noun_m` (66 rows), `endings_noun_f` (35),
 `endings_noun_n` (33), `endings_adjective` (26), `endings_verb_imperfective`
 (106), `endings_verb_perfective` (113) and `endings_replacement` (the
 `replacement` table, 47). For example `noun-m` row 0 serves `в г д з к л м р с т`
-(дом) and row 2 `г к х йл ок ик рок`. `russian.paradigm_candidates` returns the
-rows whose list matches a lemma, longest ending first in LTPRO's order;
-`tools/fit_paradigms.lua` takes the candidate unless OpenRussian's listed forms
-show another row regenerates more of them. Nothing is stored beyond the
-paradigm number: OpenRussian's dictionaries have no form file, and the tables
-are LTPRO's own, never extended.
+(дом) and row 2 `г к х йл ок ик рок`. `russian.ending_matches` returns the
+rows whose list matches a word's end, longest ending first in LTPRO's order;
+a new word's paradigm is chosen the same way.
 
 The form functions accept sentence state, table ID, a CP866 string and
 grammatical arguments. They return a new string, or `nil` when no form exists:

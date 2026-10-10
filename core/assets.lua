@@ -53,7 +53,7 @@ end
 
 -- Inflection tables by name (noun-m, verb-perfective, replacement, ...). A
 -- dictionary directory may carry its own text copy of the eight inflection
--- tables (openrussian/paradigms.txt), which then takes precedence.
+-- tables (dictionary/paradigms.txt), which then takes precedence.
 function assets:load_paradigms(text, encode)
   local tables, current = {}, nil
   for line in text:gmatch('[^\n]+') do

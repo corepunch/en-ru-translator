@@ -4,29 +4,9 @@
    "lua": "Имейте это в виду.",
    "reason": "Lua applies phrase-wide sentence casing to W equivalents; the original title-cases every component after a capitalized one (see curated-phrases/README.md)."
   },
-  "The afterclap was bad.": {
-   "lua": "Неприятное событие было плохим.",
-   "reason": "Lua applies phrase-wide sentence casing to W equivalents; the original title-cases every component after a capitalized one (see curated-phrases/README.md)."
-  },
   "This prevents him from working.": {
    "lua": "Это предохраняет его от работы.",
    "reason": "The original drops the object between prevent and from (also 'ошибки' in 'It prevents errors from occurring'); not yet explained. Lua keeps it, which is the correct Russian."
-  },
-  "Zorkx is big.": {
-   "lua": "Зорккс большой.",
-   "reason": "Lua transliterates a capitalized word with no dictionary reading as a proper name (native = macro, as {~=Name~}); the original leaves it in Latin."
-  },
-  "Bandar is here.": {
-   "lua": "Бандар - здесь.",
-   "reason": "Lua transliterates a capitalized word with no dictionary reading as a proper name (native = macro, as {~=Name~}); the original leaves it in Latin."
-  },
-  "Corned is good.": {
-   "lua": "Корнед хороший.",
-   "reason": "Lua transliterates a capitalized word with no dictionary reading as a proper name (native = macro, as {~=Name~}); the original leaves it in Latin."
-  },
-  "Smithers is here.": {
-   "lua": "Смизерс - здесь.",
-   "reason": "Lua transliterates a capitalized word with no dictionary reading as a proper name (native = macro, as {~=Name~}); the original leaves it in Latin."
   }
  },
  "cyrillic-es-class": {
@@ -51,10 +31,6 @@
   "Corned beef is good.": {
    "lua": "Солонина хороший.",
    "reason": "Without a corned headword the original no longer finds the corned beef phrase; that is what corned*: is for. Lua finds phrases without a head entry, which generated OpenRussian phrases rely on."
-  },
-  "Bandar is here.": {
-   "lua": "Бандар - здесь.",
-   "reason": "Lua transliterates a capitalized word with no dictionary reading as a proper name (native = macro, as {~=Name~}); the original leaves it in Latin."
   }
  }
 }

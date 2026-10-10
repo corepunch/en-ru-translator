@@ -14,11 +14,11 @@ for _,case in ipairs(require('test.cases').load()) do
   if case.group=='phrase' then covered[case.entry]=true end
 end
 
-local file=assert(io.open('openrussian/BASE.DIC','rb'))
+local file=assert(io.open('dictionary/BASE.DIC','rb'))
 local dictionary=lexicon.from_bytes(file:read('*a'));file:close()
 local entries=0
 local in_phrases=false
-for line in io.lines('openrussian/dictionary.txt') do
+for line in io.lines('dictionary/changes.txt') do
   if line:match('^## ') then in_phrases=line=='## phrases' end
   if in_phrases and line:match('%S') and not line:match('^#') then
     local key=line:match('^(.-)%*%$') or line:match('^(.-)%*')

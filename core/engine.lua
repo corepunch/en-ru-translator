@@ -39,7 +39,7 @@ function engine.read_asset(source, name)
 end
 
 -- Parsed dictionary and executable assets are immutable. Keep one parsed copy
--- per path so repeatedly translating with the full OpenRussian tables does not
+-- per path so repeatedly translating with the full dictionaries does not
 -- rebuild their indexes for every sentence. Comparing the bytes also keeps
 -- edits to a file visible during long-running Lua sessions.
 local function memoized_asset(source,name,decoder,secondary,secondary_name)
@@ -62,7 +62,7 @@ function engine.new_state(russian_source,russian_overlay)
   local exe_assets=assets.new()
   -- A dictionary directory with its own paradigms.txt inflects from it; the
   -- original LTGOLD assets keep LTPRO's tables (core/rules.lua).
-  local directory=type(russian_source)=='string' and russian_source:match('^(.*/)') or 'openrussian/'
+  local directory=type(russian_source)=='string' and russian_source:match('^(.*/)') or 'dictionary/'
   local tables=paradigm_cache[directory]
   if tables==nil then
     local file=io.open(directory..'paradigms.txt','rb')
@@ -120,11 +120,11 @@ function engine.run(input, options)
       meanings_text=options.meanings and encoding.decode(meanings) or nil}
   end
   local data = options.data_dir or 'LTGOLD'
-  local openrussian = 'openrussian'
-  -- OpenRussian is the standard dictionary set; --data selects runtime assets
-  -- only. Alternate dictionary files require explicit --dic/--rus options.
-  local dic_source = options.dictionary or options.dic or (openrussian .. '/BASE.DIC')
-  local rus_source = options.russian or options.rus or (openrussian .. '/BASE.RUS')
+  local default = 'dictionary'
+  -- dictionary/ (LTGOLD's dictionaries with our changes) is the standard set;
+  -- --data selects runtime assets only. Other dictionary files need --dic/--rus.
+  local dic_source = options.dictionary or options.dic or (default .. '/BASE.DIC')
+  local rus_source = options.russian or options.rus or (default .. '/BASE.RUS')
 
   local state = engine.new_state(rus_source, options.rus_overlay)
   state.meaning_start=options.meaning_start
@@ -150,7 +150,8 @@ function engine.run(input, options)
   end
   local analysis_options = {}
   for key, value in pairs(options) do analysis_options[key] = value end
-  analysis_options.proper_names = options.transliterate ~= false
+  -- Off by default, as in LTPRO; --names turns it on.
+  analysis_options.proper_names = options.proper_names == true and options.transliterate ~= false
   local analyzed = lexicon.analyze(dict, encoding.encode(input), analysis_options)
 
   local stages = {}

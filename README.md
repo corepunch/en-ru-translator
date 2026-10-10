@@ -8,8 +8,9 @@ the translation code without the executable, DOSBox or process snapshots.
 
 ## Run
 
-Requires Lua 5.3+ and the OpenRussian dictionaries in `openrussian/`.
-OpenRussian `BASE.DIC` and `BASE.RUS` are used by default; the
+Requires Lua 5.3+. The default dictionaries are `dictionary/BASE.DIC` and
+`dictionary/BASE.RUS`: LTGOLD's own dictionaries with our changes applied
+(`sh tools/build_dictionary.sh`, see [`dictionary/`](dictionary/changes.txt)); the
 prefix rules come from `LTGOLD/`. The supplied unpacked `LTPRO.EXE` (not tracked)
 is needed only to regenerate `core/rules.lua` and as the translation oracle.
 
@@ -88,27 +89,11 @@ Slash-separated phrase readings default to the first alternative; the Lua option
 `phrase_reading = function(key, readings) return index end` selects another.
 The raw CP866 choices remain available as `node.phrase_readings` for diagnostics.
 
-Curated phrases and structural word readings live in UTF-8
-`openrussian/dictionary.txt`, compiled into the default `.DIC` with
-`tools/ltech_dict.py import`. The greeting entries use
-native T4 dictionary-subrule matching and context replacement:
-
-```text
-how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\
-what <X>`up`[*]*$DDWDкакnдело\ $ \
-```
-
-The `how` pattern preserves the pronoun node's number/person/gender through
-native replacement and generates `Как у меня/тебя/него/неё/нас/них дела?`.
-`PР01у` supplies genitive government and pronoun-prefix control; `J0` closes that
-group before independent plural `nдело`. The `what` idiom allows question cleanup
-to remove `is` and requires the final `[*]` boundary. Both rule forms have been
-executed in original LTPRO. No custom retained-slot pass or final-punctuation
-phrase-key matcher is needed. Lua corrects the original third-person pronoun
-forms and applies casing to the whole phrase.
-
-See [adding phrases](openrussian/README.md#curated-phrases) and the
-[dictionary-writing skill](skills/dictionary-writing/SKILL.md).
+Our own phrases and readings are a diff on LTGOLD's dictionary in UTF-8
+`dictionary/changes.txt` (`-headword` removes, `headword*code` adds or
+replaces), compiled into the default `.DIC` by `sh tools/build_dictionary.sh`.
+See the [dictionary-writing skill](skills/dictionary-writing/SKILL.md) and
+[how LTGOLD works](docs/ltgold.md).
 
 ## Structure
 

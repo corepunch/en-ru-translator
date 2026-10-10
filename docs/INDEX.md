@@ -3,6 +3,7 @@
 | Document | Scope |
 |---|---|
 | [Pipeline](pipeline.md) | Single-engine API, functional modules and representations |
+| [How LTGOLD works](ltgold.md) | Records, tables, ending lists and verified quirks; read first |
 | [Dictionary](dictionary.md) | Historical DIC/RUS formats and grammatical codes |
 | [Morphology](paradigms.md) | Production inflection, native arguments and shared tables |
 | [Rules](rules.md) | Verified matching, replacement, tags and reorder semantics |

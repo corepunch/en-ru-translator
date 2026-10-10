@@ -9,7 +9,7 @@ prints the original output next to the current Lua/OpenRussian output.
       --entry 'after `all`[j,*]*$DDWPПвNконецPРnконец\\ \\' \\
       --delete 'after all' 'After all, he knows.' 'After all the guests left.'
 
-  python3 tools/ltpro_try_entries.py --entries openrussian/dictionary.txt \\
+  python3 tools/ltpro_try_entries.py --entries dictionary/changes.txt \\
       'Good night.'
 
 With no --entry/--entries it captures the untouched supplied assets. The

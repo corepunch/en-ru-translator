@@ -141,14 +141,6 @@ local function inside_equivalent(match)
     return true
   end
 end
--- A node translated from a multiword dictionary key. Native T4 rereads its
--- first English word (it is cold*WDхолодно -> `it` rule -> Это); like an
--- authored W equivalent, it is not reinterpreted by lexical rules.
-local function touches_literal(match)
-  for i=match.first,match.last do
-    if match.node(i).phrase_literal then return true end
-  end
-end
 handlers[11] = replace_and_stop
 
 local function stop_unmarked_participle(match)
@@ -206,31 +198,10 @@ end
 handlers[17] = resolve_gerund_nouns
 handlers[45] = resolve_gerund_nouns
 
--- Last node of the subject that follows a sentence-initial copula, or nil.
-local SUBJECT_MODIFIER = { T = true, O = true, A = true, I = true, H = true }
-local function question_subject(head)
-  local n = head.next
-  while n and SUBJECT_MODIFIER[tag(n)] do n = n.next end
-  local kind = n and tag(n)
-  if kind ~= 'R' and kind ~= 'N' and kind ~= '#' then return nil end
-  while n.next and tag(n.next) == 'N' do n = n.next end
-  return n
-end
-
 handlers[18] = function(match)
   local head = match.head
   local exit = 'replace'
-  local subject = match.first == 1 and number(head, 'tense') ~= values.tense.present and question_subject(head)
-  if subject then
-    -- Lua improvement: a past copula question keeps its verb after the subject
-    -- (Was he here? -> Он был здесь?), where the original drops it.
-    local before = match.vector[match.first - 1]
-    before.next = head.next
-    head.next = subject.next
-    subject.next = head
-    if (head.source or ''):match('^%u%l') then head.source = head.source:lower() end
-    match.rebuild()
-  elseif match.first == 1 then set(head, ' ')
+  if match.first == 1 then set(head, ' ')
   else
     local c = (head.source or ''):sub(1, 1)
     if (c == 'i' or c == 'I') and number(head, 'tense') == 0 then head.reading = '-'; head.reading_state = 3 end
@@ -271,24 +242,6 @@ handlers[23] = function(match)
   local tail = match.tail
   local exit = 'replace'
   tail.reading = ''; exit = 'replace_and_stop'
-  -- Native *`let``us` (rule 83) makes the next verb an infinitive after
-  -- давайте (original "Давайте идти"). Lua improvement: the hortative is the
-  -- first person plural of the perfective, "Давайте пойдем"; a verb without
-  -- a perfective keeps the infinitive (Давайте работать, in generation).
-  if (tail.source or ''):lower() == 'us' then
-    local k = match.last + 1
-    while match.vector[k] and ('DdK'):find(tag(match.vector[k]), 1, true) do k = k + 1 end
-    local verb = match.vector[k]
-    -- Grammar may already have read an ambiguous verb as its noun (Z reading
-    -- V.работатьN.работа) or participle (read); the hortative needs the verb.
-    if verb and (('VZeE'):find(tag(verb), 1, true)
-        or tag(verb) == 'N' and (verb.reading or ''):sub(1, 2) == 'V.') then
-      set(verb, 'V'); verb.previous_tag = 0x56
-      verb.person, verb.number, verb.aspect, verb.tense = 1, 1, 1, 0
-      verb.passive, verb.short_form, verb.marker = 0, 0, 0
-      verb.hortative = true
-    end
-  end
   return exit
 end
 
@@ -822,7 +775,7 @@ function phrasing.run(root, options)
         -- English lexical idioms cannot reinterpret nodes already assigned to
         -- one W equivalent, including equivalents authored by an earlier T4
         -- subrule. Tag-based agreement rules still run normally.
-        if pattern:find('`',1,true) and (inside_equivalent(match) or touches_literal(match)) then exit='advance_past_match'
+        if pattern:find('`',1,true) and inside_equivalent(match) then exit='advance_past_match'
         elseif apply then exit, at = apply(match) end
         last, count = match.last, match.count
         if exit == 'replace' or exit == 'replace_and_stop' then

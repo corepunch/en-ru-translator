@@ -31,17 +31,6 @@ function russian.verb_record(state, word)
   return {perfective = (code:byte(2) or 0) & 0x06 ~= 0, paradigm = (code:byte(4) or 0) & 0x7F,
     partner = partner ~= '' and partner or nil}
 end
--- Whether the lemma has a verb of this aspect: the .RUS verb record's byte 2
--- carries the perfective flags (0x04 forced, 0x02 native), and an
--- imperfective lists its perfective partner after the code.
-function russian.has_verb_aspect(state, word, aspect)
-  local line=russian.lookup(state, word, 0, 'V')
-  if not line then return false end
-  local code=line:match('%*(.*)') or ''
-  local perfective=(code:byte(2) or 0) & 0x06 ~= 0
-  if aspect==1 then return perfective or #code>5 end
-  return not perfective
-end
 
 -- Dictionary lines are immutable strings; no shared read buffer or DOS handles.
 -- A lemma can be both a noun and a verb (помочь), so callers that know the
@@ -189,18 +178,6 @@ local function sort(items, pivot, count)
       pivot, count = left, right_count
     end
   end
-end
-
--- LTPRO's paradigm candidates for a lemma: the rows of the class table whose
--- ending list matches its end, longest ending first, in native order.
--- class: 0x4E noun (variant: gender 1 m, 2 f, 0 n), 0x41 adjective,
--- 0x56 verb (variant 1 perfective).
-function russian.paradigm_candidates(state, word, class, variant)
-  local matches = russian.ending_matches(state, word, class, variant)
-  sort(matches,1,#matches)
-  local ids = {}
-  for i, m in ipairs(matches) do ids[i] = m.id end
-  return ids
 end
 
 function russian.replace_ending(state, word)

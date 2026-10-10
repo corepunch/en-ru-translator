@@ -1,0 +1,11 @@
+# Our changes to LTGOLD's Russian dictionary, as a diff. dictionary/BASE.RUS is
+# LTGOLD/BASE.RUS with this file applied by tools/build_dictionary.sh. UTF-8,
+# one entry per line:
+#   -lemma             remove LTGOLD's records for that lemma
+#   lemma*C hex...     add a record, replacing LTGOLD's records for that lemma:
+#                      the class letter, the code bytes in hex, then any
+#                      trailing lemma (a verb's perfective partner), e.g.
+#                      утро*N 80 80 80   (neuter, paradigm 0, like дело)
+# A new Russian word needs a record only when LTGOLD's defaults (a noun
+# inflects as masculine row 0) are wrong for it; pick its paradigm from the
+# ending lists (docs/ltgold.md). Lines starting with # are comments.

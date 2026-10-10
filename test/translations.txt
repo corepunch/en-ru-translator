@@ -430,3 +430,4 @@ rat-drones | Ukrainian drones struck a Russian oil export terminal in the Rostov
 rat-goodwill | By continuing to hit refineries, he is eroding the good will that he has built with Trump over the last six months. => продолжая на нефтеперегонных заводах боевика, он размывает добрую волю, которую он построил с через Козырем последнего полугода.
 rat-barrels | Russia agreed to send us millions and millions of barrels of oil, and it is diesel. => Россия согласилась, чтобы послать нам миллион и миллион баррелей нефти, и оно дизельное.
 idiom:make-a-deal | Russia made a deal. => Россия заключила сделку.
+idiom:make-the-deal | They made the deal. => Они заключили сделку.

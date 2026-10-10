@@ -52,9 +52,18 @@ Each step takes seconds; do all of them.
    `deal with*ZVWVиметьNделоPТс/N.WNделоPТс`. Bare `deal` is the noun,
    `deal*Nсделка`. Do not hang the preposition's object on the one-word key.
 
-   An idiom is its own key too. `make a deal` is not `deal` and not
-   `deal with`: `make a deal*WVзаключатьNсделка`. The past form matches the
-   key (`Russia made a deal` → `Россия заключила сделку`).
+   An idiom is its own key too, and an article in it is a placeholder, not a
+   literal word. LTGOLD codes this class as `make <TAO>`agreement`*$заключать`:
+   `<TAO>` matches the article (`a`, `the`, `an`) and an optional adjective.
+   So `make a deal` is
+
+   ```
+   make <TAO>`deal`*$заключать\$`Nсделка`\
+   ```
+
+   not `make a deal*WVзаключатьNсделка`. Add the literal key to
+   `removed-headwords.txt` or it hides the subrule. `Russia made a deal` and
+   `They made the deal` both give `заключила/заключили сделку`.
 3. **Edit** `openrussian/overlays/phrases.txt`. If step 1 showed a generated
    literal starting with the same words, add its key to
    `openrussian/overlays/removed-headwords.txt`, or it will hide a subrule.

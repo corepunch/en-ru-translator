@@ -9,9 +9,9 @@ records, including 4,978 shared templates.
 The checked-in `BASE.DIC` applies 177 reviewed structural readings from
 `function-words.txt` (pronouns, determiners, conjunctions, question words,
 auxiliaries, modals, quantifiers, prepositions, and a few grammatical phrases),
-replacing all records for those exact keys, 102 phrase entries from
+replacing all records for those exact keys, 111 phrase entries from
 `phrases.txt`, and 215 irregular verb forms from `irregular-verbs.txt`. It contains
-98,232 DIC records after replacement.
+98,241 DIC records after replacement.
 
 OpenRussian is a Russian dictionary and has no English grammar: it coded `this`
 as the adverb `сего`, `us` as `Америка`, `and` as `W`-text, and lacked `me`, `him`,
@@ -158,6 +158,13 @@ comes from verb phrases, here with tagged components rather than its frozen tail
 reached from irregular forms through the stem backreference (`He went home` →
 `Он шел домой`). `am/is/are/was/were/be home` and `stay home` give `дома`
 (`Она была дома`). The original prints the same for the captured cases.
+Questions keep the auxiliary until T4, so native subrules on `is/are/am/was/were`
+read bare `home` after a subject at a clause end as `дома`:
+``is [RN?#]`home`[D,*]*$@\.`Dдома`\`` (`Is he home?` → `Он дома?`, as in the
+original) and ``is [TO]N`home`[D,*]`` (`Is the dog home?` → `Собака дома?`). An
+article keeps the noun (`Is he a home?` → `Он дом?`). Question cleanup drops a
+present `are` before `the` + noun, so `Are the kids home?` stays unhandled, and
+past questions lose their copula generally (`Was he here?` → `Он здесь?`).
 
 `let us` (and `let's`) is native T4 rule 83, which gives `давайте` plus an
 infinitive (original `Давайте идти`). The Lua port makes the next verb first
@@ -277,7 +284,7 @@ original captures remain separate. The
 [dictionary-writing skill](../../skills/ltgold-dictionary-writing/SKILL.md)
 records manual references and the authoring workflow.
 
-The complete source has 67 `W` composites, 15 native T4 subrules, and 20
+The complete source has 67 `W` composites, 24 native T4 subrules, and 20
 single-word `D` equivalents. The only uninflected tail is the invariant
 infinitive in `nice to meet you*WDприятно познакомиться`: a `V` component would
 become imperative sentence-initially (`Приятно познакомься`).

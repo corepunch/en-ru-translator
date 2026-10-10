@@ -246,6 +246,13 @@ from the lexeme's own forms (`определить` → `определенны�
 present passive `-емый`, active `-ющий`/`-вший`) and lets the native adjective
 and short-form code agree it (`Дверь закрыта`, `Условия определены`).
 
+Native T3 rule 78 reads `that` after a verb as a demonstrative unless the verb
+has a nonzero frame digit (`know*V1знать`, `decide*V11решать`); OpenRussian verbs
+have frame 0, so `They know that Russia will help` printed `знают этой России`.
+[`verb-frames.txt`](overlays/verb-frames.txt) carries the 65 verbs LTGOLD codes with a
+frame (`tools/export_verb_frames.py`); the builder writes the digit into their
+verb, `Z`, `-ed` and `-ing` records.
+
 Some plural nouns are their own OpenRussian glosses (`works` → `производство`).
 Such a literal shadowed suffix analysis of the verb's -s form (“He works” →
 `Он производство`). For a one-word -s gloss whose stem is a verb gloss, which is

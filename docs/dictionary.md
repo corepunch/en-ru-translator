@@ -272,11 +272,11 @@ Russian morphology codes. The active dictionary is
 `openrussian/BASE.DIC`; historical `LTGOLD/BASE.DIC` is a separate
 asset and is not automatically combined with OpenRussian.
 
-Keep new entries in UTF-8 `openrussian/overlays/phrases.txt`, then import them:
+Keep new entries in the `## phrases` section of UTF-8 `openrussian/dictionary.txt`, then import them:
 
 ```sh
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/phrases.txt --replace --in-place
+  --entries openrussian/dictionary.txt --replace --in-place
 python3 tools/ltech_dict.py check openrussian/BASE.DIC
 ```
 
@@ -303,8 +303,8 @@ retained-slot execution path has been removed. Lua now protects the authored
 composite from the native sentence-final `it` rewrite for `How is it?`; see the skill reference
 for this captured limitation.
 
-Structural function words are maintained in
-`openrussian/overlays/function-words.txt` and imported before phrase entries.
+Structural function words are maintained in the `## function-words` section of
+`openrussian/dictionary.txt`, ahead of the phrase entries.
 A literal `W#ты#` is not an `R` pronoun, and an auxiliary classified as a noun
 cannot match `X`. Use proper structural readings rather than enumerating the
 surface spellings of a grammatical family.
@@ -363,6 +363,44 @@ The older `compiler.base` table API no longer exists.
 | `LTGOLD.dat` | Binary | Extracted data section |
 | `morph.txt` | UTF-8 | Morphological suffix data (872 lines) |
 | `dic.txt` | UTF-8 | SARMA DIC format documentation (Russian) |
+
+## LTGOLD theme dictionaries
+
+LTGOLD picks among the senses of a polysemous word (`table` → `стол` or
+`таблица`) with two mechanisms.
+
+**Dictionary chain.** Several `.DIC` files sit in a queue and a word is looked
+up in queue order; the first dictionary holding the key wins. `dic.txt`
+documents the queue in the Словари dialog (the list order "is the order in which
+words are searched for translation") and on the `DIC.EXE` command line:
+`/C dicchain` with `c` = `COMPUTER.DIC`, `b` = `BUSINESS.DIC`, `u` = `USER.DIC`,
+so `/C bc` searches `BASE`, `BUSINESS`, `COMPUTER` in that order. Theme
+dictionaries use the same record format as `BASE.DIC`. `BUSINESS.DIC` has 3,136
+entries and `COMPUTER.DIC` 7,318; most are multiword terms absent from `BASE`
+(`advising bank*WAавизующийNбанк`, `alarm circuit*WNцепь аварийной сигнализации`),
+and 444 / 1,795 of their keys also exist in `BASE` and override it when the
+theme dictionary is earlier in the queue (`cost benefit`: `BASE`
+`WnзатратаCиNдоход`, `BUSINESS` `WAфинансовыеnльгота`). A theme dictionary holds a
+complete record per key, not a patch to a `BASE` record.
+
+**Theme marks inside a record.** An alternative sense in `BASE.DIC` can carry a
+theme abbreviation followed by `)`:
+
+```text
+table*NN.стол{piece of furniture};инф)таблица{chart}A.табличный
+admission*Nдопущение;инф)доступ
+april*Nмес)апрельAапрельский
+```
+
+Marks in the shipped `BASE.DIC`: `штт)` US states (41), `инф)` informatics (32),
+`мес)` months (25), `дел)` business (10), `врм)` time (5), `юр)` law and `общ)`
+general (1 each). `dic.txt` does not describe them, and the Lua engine does not
+interpret them: the first sense is used and the others appear as `{1.…}`
+alternatives in the output.
+
+For this project a theme dictionary is the same shape as
+`openrussian/dictionary.txt`: a `key*code` file imported after it with
+`--replace`.
 
 ## Encoding
 

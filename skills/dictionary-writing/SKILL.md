@@ -14,10 +14,11 @@ additional Lua/internal tags, numeric fields, pattern operators, subrule control
 and worked breakdowns of the greeting entries. Consult it rather than guessing
 what a letter or digit means; distinguish dictionary codes from runtime tags.
 
-The default English dictionary is `openrussian/BASE.DIC`. Keep reviewed
-UTF-8 entries in `openrussian/overlays/phrases.txt` and structural word readings
-in `openrussian/overlays/function-words.txt`; import them with
-`tools/ltech_dict.py`. Historical `LTGOLD/BASE.DIC` is a separate reference,
+The default English dictionary is `openrussian/BASE.DIC`. All authored
+English entries live in `openrussian/dictionary.txt`, under `## function-words`,
+`## irregular-verbs`, `## native-readings` and `## phrases`; Russian lemma
+attributes (verb government, aspect, на-nouns) in `openrussian/lexemes.tsv` and
+English word attributes in `openrussian/words.tsv`. There are no other sources. Historical `LTGOLD/BASE.DIC` is a separate reference,
 not an automatically merged source. English phrase rules belong in `.DIC`;
 `.RUS` and `.MORPH` supply Russian morphology.
 
@@ -65,9 +66,9 @@ Each step takes seconds; do all of them.
 
    not `make a deal*WVзаключатьNсделка`. `Russia made a deal` and `They made
    the deal` both give `заключила/заключили сделку`.
-3. **Edit** `openrussian/overlays/phrases.txt`. The builder emits no multiword
-   literals, so nothing generated can hide a subrule. If a multiword English
-   phrase is needed, it is an overlay row; never a delete list.
+3. **Edit** the `## phrases` section of `openrussian/dictionary.txt`. The
+   builder emits no multiword literals, so nothing generated can hide a
+   subrule. A multiword English phrase is always a `dictionary.txt` row.
 4. **Rebuild:** `sh tools/rebuild_openrussian.sh` (always from source).
 5. **Check and record:** `lua init.lua 'Good night.'`, then add lines to
    `test/translations.txt`: `phrase:<exact key> | Good night. => Спокойной ночи.`,
@@ -83,8 +84,8 @@ Each step takes seconds; do all of them.
 ## Changing the sense of a single word
 
 `BASE.DIC` is generated; a hand edit is lost on rebuild and shows up as a
-failing `--verify`. The only durable way to change a word's reading is a row in
-`openrussian/overlays/native-readings.txt` (imported with `--replace`).
+failing `--verify`. The only durable way to change a word's reading is a row in the
+`## native-readings` section of `openrussian/dictionary.txt` (`--replace`).
 
 1. `find` the word in `LTGOLD/BASE.DIC` and in `openrussian/BASE.DIC`. If the
    installed first reading already equals LTGOLD's, add nothing.
@@ -109,9 +110,10 @@ failing `--verify`. The only durable way to change a word's reading is a row in
   `lua init.lua` output after the final rebuild, never from the PR text.
 - The PR body's "after" examples equal those lines and describe the final
   entries, not an earlier attempt.
-- Sources stay `.upstream tsv → builder → overlays`. No post-build delete or
-  blocklist step: fix the builder or add an overlay row. Search docs, tools
-  and tests for any file name you remove.
+- Sources stay `upstream/*.tsv` + `lexemes.tsv` + `words.tsv` → builder →
+  `dictionary.txt`. No new source files, no post-build delete or blocklist
+  step: fix the builder or add a row. Search docs, tools and tests for any
+  file name you remove.
 - Docstrings and prose you edit still read as complete sentences and runnable
   commands.
 

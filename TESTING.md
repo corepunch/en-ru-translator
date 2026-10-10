@@ -51,7 +51,7 @@ instructions are in `test/ltpro/curated-phrases/` (captured for the
 earlier 43-entry source). Boundary-subrule cases may check only the span the
 entry owns. Raw native differences remain
 visible; the default expectations are not assertions of exact LTPRO parity.
-`prepositions_test.lua` maps every `P`/`p` row in `function-words.txt` to a
+`prepositions_test.lua` maps every `P`/`p` row in `openrussian/dictionary.txt` to a
 case checking the preposition and governed noun form, plus в/на, из/с/от and
 animate selection from `.RUS` noun flags; captures are in
 `test/ltpro/prepositions/`. `openrussian_others_test.lua` checks that generated

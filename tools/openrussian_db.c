@@ -163,7 +163,7 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
        * shadowed every infinitive (I want to go -> пройнный). */
       if(!strcmp(pos,"verb")&&!strncmp(alias,"to ",3)){alias+=3;while(*alias==' ')alias++;if(!*alias)continue;}
       /* A multiword gloss is a description, not a headword: as a literal key
-       * it would win over grammar and phrase rules. Phrases live in overlays. */
+       * it would win over grammar and phrase rules. Phrases live in dictionary.txt. */
       /* "growth (in quantity, prices, etc)" splits at its commas; everything
        * from an open parenthesis to its close is a note, not a gloss. */
       {int was=depth;for(char *c=alias;*c;c++){if(*c=='(')depth++;else if(*c==')'&&depth>0)depth--;}
@@ -182,55 +182,44 @@ static void parse_glosses(Records *dic,const char *gloss,const char *pos,const c
   free(copy);
 }
 
-/* Curated lemmas taking на/с for location/source (на столе, со станции).
- * OpenRussian has no such data; native noun flag bit 6 (0x40) marks them. */
+/* openrussian/lexemes.tsv and openrussian/words.tsv: attributes the OpenRussian
+ * tables lack, one `key<TAB>attribute[<TAB>value]` row each. LTGOLD keeps the
+ * same facts as bytes inside its .RUS/.DIC records. */
 static char **na_nouns;static size_t na_noun_count;
-static void load_na_nouns(const char *path) {
+static char **imperfective_only;static size_t imperfective_only_count;
+static char **content_first;static size_t content_first_count;
+static char **plain_adverbs;static size_t plain_adverb_count;
+static char **partner_pairs;static size_t partner_pair_count;
+static char **government_lemma;static unsigned char *government_byte;static size_t government_count;
+static char **frame_verb;static char *frame_digit_of;static size_t frame_count;
+static void push(char ***list,size_t *count,const char *item) {
+  *list=realloc(*list,(*count+1)*sizeof **list);if(!*list||!((*list)[(*count)++]=strdup(item)))fail("out of memory");
+}
+static void load_attributes(const char *path,int russian) {
   FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
   while(getline(&line,&cap,file)>=0) {
     size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    na_nouns=realloc(na_nouns,(na_noun_count+1)*sizeof *na_nouns);if(!na_nouns)fail("out of memory");
-    if(!(na_nouns[na_noun_count++]=strdup(line)))fail("out of memory");
+    char *tab=strchr(line,'\t');if(!tab)fail("attribute row needs key<TAB>attribute");*tab=0;
+    const char *key=line,*attribute=tab+1,*value="";char *tab2=strchr(tab+1,'\t');if(tab2){*tab2=0;value=tab2+1;}
+    if(russian&&!strcmp(attribute,"na"))push(&na_nouns,&na_noun_count,key);
+    else if(russian&&!strcmp(attribute,"imperfective-only"))push(&imperfective_only,&imperfective_only_count,key);
+    else if(russian&&!strcmp(attribute,"partner")){if(!*value)fail("partner needs a verb");push(&partner_pairs,&partner_pair_count,key);push(&partner_pairs,&partner_pair_count,value);}
+    else if(russian&&!strcmp(attribute,"government")){
+      if(!*value)fail("government needs a hex byte");push(&government_lemma,&government_count,key);
+      government_byte=realloc(government_byte,government_count*sizeof *government_byte);if(!government_byte)fail("out of memory");
+      government_byte[government_count-1]=(unsigned char)strtoul(value,NULL,16);}
+    else if(!russian&&!strcmp(attribute,"adverb"))push(&plain_adverbs,&plain_adverb_count,key);
+    else if(!russian&&!strcmp(attribute,"content-first"))push(&content_first,&content_first_count,key);
+    else if(!russian&&!strcmp(attribute,"frame")){
+      if(!*value)fail("frame needs a digit");push(&frame_verb,&frame_count,key);
+      frame_digit_of=realloc(frame_digit_of,frame_count);if(!frame_digit_of)fail("out of memory");frame_digit_of[frame_count-1]=value[0];}
+    else{fprintf(stderr,"%s: unknown attribute %s for %s\n",path,attribute,key);exit(1);}
   }
   free(line);fclose(file);
 }
 static int is_na_noun(const char *lemma) { for(size_t i=0;i<na_noun_count;i++)if(!strcmp(na_nouns[i],lemma))return 1; return 0; }
-/* Curated imperfective verbs that LTGOLD codes without a partner. */
-static char **imperfective_only;static size_t imperfective_only_count;
-static void load_imperfective_only(const char *path) {
-  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
-  while(getline(&line,&cap,file)>=0) {
-    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    imperfective_only=realloc(imperfective_only,(imperfective_only_count+1)*sizeof *imperfective_only);if(!imperfective_only)fail("out of memory");
-    if(!(imperfective_only[imperfective_only_count++]=strdup(line)))fail("out of memory");
-  }
-  free(line);fclose(file);
-}
-/* Curated words whose unclassified others.tsv adverb reading must not come
- * first (open -> открыто); LTGOLD codes them as verb, adjective or Z. */
-static char **content_first;static size_t content_first_count;
-static void load_content_first(const char *path) {
-  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
-  while(getline(&line,&cap,file)>=0) {
-    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    content_first=realloc(content_first,(content_first_count+1)*sizeof *content_first);if(!content_first)fail("out of memory");
-    if(!(content_first[content_first_count++]=strdup(line)))fail("out of memory");
-  }
-  free(line);fclose(file);
-}
-/* One-word adverbs that stay plain D: every -ly word, plus the curated list
- * (LTGOLD codes always, soon, often... as D). Other unclassified words may
- * be prepositions or conjunctions and keep the W wrapper. */
-static char **plain_adverbs;static size_t plain_adverb_count;
-static void load_plain_adverbs(const char *path) {
-  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
-  while(getline(&line,&cap,file)>=0) {
-    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    plain_adverbs=realloc(plain_adverbs,(plain_adverb_count+1)*sizeof *plain_adverbs);if(!plain_adverbs)fail("out of memory");
-    if(!(plain_adverbs[plain_adverb_count++]=strdup(line)))fail("out of memory");
-  }
-  free(line);fclose(file);
-}
+/* A one-word adverb is plain D: every -ly word plus the listed ones. Other
+ * unclassified words may be prepositions or conjunctions and keep W. */
 static int is_plain_adverb(const char *alias,const char *lemma) {
   if(strchr(alias,' ')||strchr(lemma,' '))return 0;
   size_t n=strlen(alias);if(n>4&&!strcmp(alias+n-2,"ly"))return 1;
@@ -238,18 +227,6 @@ static int is_plain_adverb(const char *alias,const char *lemma) {
   return 0;
 }
 static int is_content_first(const char *word) { for(size_t i=0;i<content_first_count;i++)if(!strcmp(content_first[i],word))return 1; return 0; }
-/* Curated "imperfective perfective" pairs the partner column lacks. */
-static char **partner_pairs;static size_t partner_pair_count;
-static void load_verb_partners(const char *path) {
-  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
-  while(getline(&line,&cap,file)>=0) {
-    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    char *space=strchr(line,' ');if(!space||!space[1])fail("verb-partners.txt needs \"imperfective perfective\"");*space=0;
-    partner_pairs=realloc(partner_pairs,(partner_pair_count+2)*sizeof *partner_pairs);if(!partner_pairs)fail("out of memory");
-    if(!(partner_pairs[partner_pair_count++]=strdup(line))||!(partner_pairs[partner_pair_count++]=strdup(space+1)))fail("out of memory");
-  }
-  free(line);fclose(file);
-}
 static const char *curated_partner(const char *lemma) { for(size_t i=0;i+1<partner_pair_count;i+=2)if(!strcmp(partner_pairs[i],lemma))return partner_pairs[i+1]; return NULL; }
 static int is_imperfective_only(const char *lemma) { for(size_t i=0;i<imperfective_only_count;i++)if(!strcmp(imperfective_only[i],lemma))return 1; return 0; }
 
@@ -340,39 +317,11 @@ static const char *inferred_gender(const char *lemma) {
   for(size_t i=0;i<sizeof feminine/sizeof *feminine;i++)if(has_suffix(lemma,feminine[i]))return "f";
   return "m";
 }
-/* LTGOLD's native government byte (0x80 intransitive, 0x84 dative, 0x90
- * instrumental, ...) for the verbs it codes; OpenRussian has no valency, so
- * every other verb stays transitive 0x88. tools/export_verb_government.py. */
-static char **government_lemma;static unsigned char *government_byte;static size_t government_count;
-static void load_verb_government(const char *path) {
-  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
-  while(getline(&line,&cap,file)>=0) {
-    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    char *tab=strchr(line,'\t');if(!tab)fail("verb government row needs lemma<TAB>hex");*tab=0;
-    government_lemma=realloc(government_lemma,(government_count+1)*sizeof *government_lemma);
-    government_byte=realloc(government_byte,(government_count+1)*sizeof *government_byte);
-    if(!government_lemma||!government_byte||!(government_lemma[government_count]=strdup(line)))fail("out of memory");
-    government_byte[government_count++]=(unsigned char)strtoul(tab+1,NULL,16);
-  }
-  free(line);fclose(file);
-}
+/* Verb government byte (0x80 intransitive, 0x84 dative, 0x90 instrumental);
+ * every verb without a lexemes.tsv row stays transitive 0x88. */
 static unsigned char verb_government(const char *lemma) {
   for(size_t i=0;i<government_count;i++)if(!strcmp(government_lemma[i],lemma))return government_byte[i];
   return 0x88;
-}
-/* English verbs LTGOLD codes with a that-clause frame (V1, V11): the digit that
- * follows the class letter. tools/export_verb_frames.py. */
-static char **frame_verb;static char *frame_digit_of;static size_t frame_count;
-static void load_verb_frames(const char *path) {
-  FILE *file=fopen(path,"r");if(!file){perror(path);exit(1);}char *line=NULL;size_t cap=0;
-  while(getline(&line,&cap,file)>=0) {
-    size_t n=strcspn(line,"\r\n");line[n]=0;if(!n||line[0]=='#')continue;
-    char *tab=strchr(line,'\t');if(!tab)fail("verb frame row needs verb<TAB>digit");*tab=0;
-    frame_verb=realloc(frame_verb,(frame_count+1)*sizeof *frame_verb);frame_digit_of=realloc(frame_digit_of,frame_count+1);
-    if(!frame_verb||!frame_digit_of||!(frame_verb[frame_count]=strdup(line)))fail("out of memory");
-    frame_digit_of[frame_count++]=tab[1];
-  }
-  free(line);fclose(file);
 }
 static char verb_frame(const char *alias) {
   for(size_t i=0;i<frame_count;i++)if(!strcmp(frame_verb[i],alias))return frame_digit_of[i];
@@ -807,14 +756,9 @@ static void command_build(int argc,char **argv) {
   add_utf8_record(&source_dic,"i","R011я");
   add_utf8_record(&source_dic,"want","V21хотеть");add_utf8_record(&source_dic,"wants","vхотеть");
   add_utf8_record(&source_dic,"can","e00мочь");
-  snprintf(path,need,"%s/../overlays/na-nouns.txt",dir);load_na_nouns(path);
+  snprintf(path,need,"%s/../lexemes.tsv",dir);load_attributes(path,1);
+  snprintf(path,need,"%s/../words.tsv",dir);load_attributes(path,0);
   snprintf(path,need,"%s/verbs.tsv",dir);load_verbs(path);
-  snprintf(path,need,"%s/../overlays/imperfective-only.txt",dir);load_imperfective_only(path);
-  snprintf(path,need,"%s/../overlays/verb-partners.txt",dir);load_verb_partners(path);
-  snprintf(path,need,"%s/../overlays/content-first.txt",dir);load_content_first(path);
-  snprintf(path,need,"%s/../overlays/plain-adverbs.txt",dir);load_plain_adverbs(path);
-  snprintf(path,need,"%s/../overlays/verb-government.txt",dir);load_verb_government(path);
-  snprintf(path,need,"%s/../overlays/verb-frames.txt",dir);load_verb_frames(path);
   snprintf(path,need,"%s/others.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"other");
   snprintf(path,need,"%s/nouns.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"noun");
   snprintf(path,need,"%s/verbs.tsv",dir);import_file(&source_dic,&source_rus,&morph,path,"verb");

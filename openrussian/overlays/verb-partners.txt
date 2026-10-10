@@ -1,4 +1,0 @@
-# Perfective partners missing from the OpenRussian partner column, one
-# "imperfective perfective" pair per line. Native LTGOLD pairs идти with a
-# perfective (придти); пойти is the plain future of go.
-идти пойти

@@ -355,11 +355,7 @@ cc -std=c11 -Wall -Wextra -Werror tools/openrussian_db.c -o /tmp/openrussian_db 
   openrussian/BASE.DIC openrussian/BASE.RUS \
   openrussian/BASE.MORPH
 python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/function-words.txt --replace --in-place
-python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/irregular-verbs.txt --replace --in-place
-python3 tools/ltech_dict.py import openrussian/BASE.DIC \
-  --entries openrussian/overlays/phrases.txt --replace --in-place
+  --entries openrussian/dictionary.txt --replace --in-place
 python3 tools/ltech_dict.py check openrussian/BASE.DIC
 python3 -m unittest discover -s tools -p test_ltech_dict.py
 sh test/run_all.sh

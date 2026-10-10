@@ -87,9 +87,9 @@ Slash-separated phrase readings default to the first alternative; the Lua option
 `phrase_reading = function(key, readings) return index end` selects another.
 The raw CP866 choices remain available as `node.phrase_readings` for diagnostics.
 
-Curated phrases live in UTF-8 `openrussian/overlays/phrases.txt`; structural
-word readings live in `function-words.txt` alongside it. Both are compiled into
-the default `.DIC` with `tools/ltech_dict.py import`. The greeting entries use
+Curated phrases and structural word readings live in UTF-8
+`openrussian/dictionary.txt`, compiled into the default `.DIC` with
+`tools/ltech_dict.py import`. The greeting entries use
 native T4 dictionary-subrule matching and context replacement:
 
 ```text

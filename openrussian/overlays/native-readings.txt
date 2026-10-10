@@ -12,3 +12,15 @@ hard*dтрудноAжесткий
 million*I1миллионAмиллионный
 release*ZV.выпускатьN.выпуск
 refinery*NNWAнефтеперегонныйNзавод
+deal*ZVWVиметь дело/Nсделка
+russian*NрусскийAрусский
+good will*NNWAдобраяNволя
+ablaze*Vпылать
+oil*NнефтьAнефтяной
+terminal*NтерминалAтерминальный
+region*Nобласть
+plant*ZV.устанавливатьN.завод
+power*Nмощность
+drone*Nбеспилотник
+struck*Eударить\strike
+facility*Nпредприятие

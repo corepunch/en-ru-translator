@@ -363,6 +363,10 @@ phrase:walk home | We walked home. => Мы пришли домой.
 phrase:run home | He ran home. => Он побежал домой.
 phrase:get home | I got home late. ~> добрался домой
 phrase:hurry home | We hurry home. => Мы спешим домой.
+phrase:hurry home | We hurried home. => Мы поспешили домой.
+phrase:hurry home | She hurries home. => Она спешит домой.
+phrase:hurry home | We are hurrying home. => Мы спешим домой.
+hurried | We made a hurried visit. => Мы сделали поспешный визит.
 phrase:fly home | They will fly home. ~> домой
 phrase:stay home | We stay home. => Мы остаемся дома.
 phrase:be <RN?#>`home`[D,*] | I am home. => Я дома.

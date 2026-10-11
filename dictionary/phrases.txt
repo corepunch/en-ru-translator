@@ -64,6 +64,8 @@ there is no time*WDнекогда
 six months*Nполгода
 
 ## home
+# Inflected verbs inherit these stem phrases; do not add walked/ran/got rows.
+# hurried's missing verb reading and \hurry reference are in changes.txt.
 walk home*WVидтиDдомой
 run home*WVбежатьDдомой
 get home*WVдобиратьсяDдомой

@@ -9,3 +9,5 @@
 # The literal wins before T4 and consumes longer sentences, preventing the
 # bounded article rule in phrases.txt from running.
 -have a good day
+# Keep the adjective and let the past verb inherit hurry's phrases.
+hurried*EспешитьAпоспешный\hurry

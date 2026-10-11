@@ -39,9 +39,9 @@ welcome back*WPТсNвозвращение
 welcome home*WPТсNвозвращениеDдомой
 enjoy your meal*WPРAприятныйNаппетит
 bon appetit*WPРAприятныйNаппетит
-# Keep the adjective; delete only the article. The boundary limits the wish.
-have [T]A`day`[*]*$DDWPР\ \
-have [T]A`trip`[*]*$DDWPР\ @`Nпуть`\
+# Keep the adjective and following modifiers; delete only the article.
+have [T]A`day`*$DDWPР\ \
+have [T]A`trip`*$DDWPР\ @`Nпуть`\
 bon voyage*WPРAсчастливыйNпуть
 sweet dreams*WPРAсладкийnсон
 what a pity*WDкакDжаль

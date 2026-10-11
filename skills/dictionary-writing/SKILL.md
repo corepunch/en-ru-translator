@@ -220,11 +220,11 @@ and grammar. It is not an empty adjective lemma: do not write `A~` or invent
 not restrict the input to that class or require sentence end. Check the whole
 phrase's case and its behavior in longer sentences before choosing a gap.
 
-The add-on's wishes use an adjective slot and an end boundary together:
+The add-on's wishes use an adjective slot and allow following modifiers:
 
 ```text
-have [T]A`day`[*]*$DDWPР\ \
-have [T]A`trip`[*]*$DDWPР\ @`Nпуть`\
+have [T]A`day`*$DDWPР\ \
+have [T]A`trip`*$DDWPР\ @`Nпуть`\
 ```
 
 Here `A` retains the actual adjective, so one entry handles `nice`, `good`,
@@ -232,7 +232,11 @@ Here `A` retains the actual adjective, so one entry handles `nice`, `good`,
 `an`, as in `a nice day` and `an excellent day`. `PР` supplies silent genitive
 government; the article is deleted. The day rule leaves the remaining context
 untouched; the trip rule uses `@` to keep the adjective and rewrites `trip` as
-`Nпуть`. The adjective comes from its own dictionary entry: `good` gives
+`Nпуть`. Neither rule requires sentence end: `Have a nice day at work` and
+`Have a good trip with us` are still wishes, and their following words must
+remain available for normal translation. Add a boundary only when continuation
+actually changes the phrase's meaning, not as a universal precaution.
+The adjective comes from its own dictionary entry: `good` gives
 `хорошего пути`, not the idiomatic substitution `счастливого пути`. Use a fixed
 equivalent when that substitution is the intended meaning. This is useful
 generalization; merely matching `the nice day` as well as `a nice day` would

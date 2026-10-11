@@ -50,6 +50,10 @@ without add-ons; use it to see what LTGOLD alone does.
 
 ## Quick path: add a phrase
 
+Establish the intended meaning and useful variants first. Inspect only the
+relevant entries and mechanisms, reuse already verified syntax and captures,
+and make the smallest change that covers the requested behavior.
+
 1. **What does LTGOLD do now?** `lua init.lua --base-only 'Thank you very much.'`.
    If that is already right, stop. Look up LTGOLD's coding:
    `python3 tools/ltech_dict.py find LTGOLD/BASE.DIC 'thank you'` (also lists
@@ -83,17 +87,27 @@ without add-ons; use it to see what LTGOLD alone does.
 3. **Edit** `dictionary/phrases.txt`, then `sh tools/build_dictionary.sh`.
    The build runs `tools/check_phrase_formulas.py`, which rejects frozen
    multiword `D` readings and untagged spaces in `W` readings.
-4. **Check and record** with `lua init.lua`, then add to `test/translations.txt`
+4. **Use targeted checks while editing.** Run a compact set of affected
+   sentences with `lua init.lua`; use `--trace` only to resolve a specific
+   uncertainty. Add to `test/translations.txt`
    a `phrase:<exact key> | Sentence. => …` line copied from the actual output,
-   a variant (capitals, contraction, another case form) and a `!>` line for a
-   nearby sentence the phrase must not consume. `common_phrases_test.lua` fails
-   for an entry without a `phrase:` line.
+   meaningful variants, and ordinary continuations that should still work.
+   Use `!>` for a genuine wrong match, not an invented exclusion.
+   `common_phrases_test.lua` fails for an entry without a `phrase:` line.
 5. **Original program**, for any new syntax:
    `python3 tools/ltpro_try_entries.py --entry '<row>' 'Sentence.'` prints what
    LTPRO makes of the entry. Its "lua" column ignores the entry; compare with
    `lua init.lua --dic <scratch BASE.DIC>` built by
    `python3 tools/ltech_dict.py import <copy> --entries <file> --replace --in-place`.
-6. `sh test/run_all.sh` and `sh tools/build_dictionary.sh --verify`.
+   Batch relevant cases into one capture per candidate dictionary. Reuse
+   existing evidence when the mechanism is unchanged; repeat a capture only
+   to resolve changed behavior or a concrete remaining uncertainty.
+6. **Run the full gates once at the end**, after the edits and targeted checks
+   have settled: `sh test/run_all.sh` and
+   `sh tools/build_dictionary.sh --verify`. Do not run them between small
+   experiments. Repeat a gate only when a failure, a subsequent relevant
+   change, or a concrete unresolved concern requires it. Then commit and push
+   the completed step as required by `AGENTS.md`.
 
 ## Use patterns when they add useful coverage or context
 
@@ -106,6 +120,11 @@ needs a context check. Merely allowing an unlikely article variant is not a
 reason to introduce a pattern. For a variable slot, match the relevant classes
 and retain number, person, gender, case and tense where the meaning permits.
 Use a lexical backtick for a word whose identity matters within a context rule.
+Do not invent restrictions. Before adding `[*]` or another constraint, identify
+the actual wrong interpretation it prevents and check that legitimate uses
+remain covered. A longer sentence is not automatically a different meaning:
+`Have a nice day at work` is still a wish. Do not encode a hypothetical
+restriction in the dictionary, tests or skill as though it were a requirement.
 On the Russian side, use a `W` reading with tagged lemmas for words that must
 agree or decline. A whole literal key is valid native syntax, but the original
 dictionary's repetition and uninflected tails are not an authoring target.
@@ -333,7 +352,7 @@ checks in [docs/ltgold.md](../../docs/ltgold.md#verifying) before and after.
 | Gap word missing | a longer key extends the matched one, or the reading is not `W`-led | rewrite the key or the reading |
 | `у его`, `от его` | LTPRO's н- rule (`--original`) | default output has `у него` |
 | First letter с/м/ж missing | Russian text in a `#` component | `D` or `WD` |
-| Idiom swallows a longer sentence | literal key | boundary subrule ending `[*]` or `[,*]` |
+| Idiom gives the wrong meaning in a longer sentence | match is too broad | constrain the demonstrated wrong match; use `[*]` or `[,*]` only if valid continuations remain covered |
 | Subrule fails before a comma after a sentence-initial preposition | comma retagged `j` or `;` | `[j,*]`, `[j;,*]` |
 | Single-word key prints a stray case letter (`Рдо`) | `W` reading without an input class | `goodbye*Dдо свидания` |
 | Third `\`-section of a subrule does nothing | only the selector's first character is read | put the edit in the tail action |
@@ -350,8 +369,10 @@ literals or uninflected tails to hide missing support. Recover
 LTGOLD's mechanism before changing anything; an apparent missing feature is an
 investigation task, not permission to invent an extension.
 
-Test every entry you add or change, with agreement/case variants and a nearby
-context that must not be consumed. Every expected line in
+Test every entry you add or change with relevant agreement/case variants,
+valid continuations and genuine negative contexts. Follow the targeted checks
+and final gates above rather than rerunning the full suite while experimenting.
+Every expected line in
 `test/translations.txt` is copied from actual `lua init.lua` output. The
 original executable is the oracle: use explicit temporary capture paths,
 report original and Lua outputs separately, and never alter a capture. Never

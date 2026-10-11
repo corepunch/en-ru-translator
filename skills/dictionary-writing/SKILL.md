@@ -95,63 +95,85 @@ without add-ons; use it to see what LTGOLD alone does.
    `python3 tools/ltech_dict.py import <copy> --entries <file> --replace --in-place`.
 6. `sh test/run_all.sh` and `sh tools/build_dictionary.sh --verify`.
 
-## Choose literal keys or native patterns by meaning
+## Generalize phrase families with native patterns
 
-Before adding a key, look up each English word's active tag in `BASE.DIC` and
-read the matching operators in [codes.md](references/codes.md#context-patterns-and-actions).
-Literal multiword keys are native and can be the right choice for a fixed
-expression. Prefer one native T4 subrule over several literal keys when the
-variable words share a meaning **and** the rule can preserve or correctly
-inflect their grammatical fields. A tag match alone does not prove that it can.
-Check that the pattern also *excludes* nearby meanings, and whether an LTGOLD
-literal will win before the subrule runs. Keep literal variants when the
-attempted generalization changes meaning, case, tense or agreement.
+Before adding a key, look up each English word's active tag in `BASE.DIC`,
+search nearby literal variants and comparable native subrules, and read the
+matching operators in [codes.md](references/codes.md#context-patterns-and-actions).
+Use a typed T4 subrule for a phrase family by default: match the variable input
+words by class and retain their number, person, gender, case and tense where the
+meaning permits. Use a lexical backtick only for a word whose identity matters.
+On the Russian side, use a `W` reading with tagged lemmas for words that must
+agree or decline. A whole literal key is valid native syntax, but the original
+dictionary's repetition and uninflected tails are not an authoring target.
 
-BASE.DIC contains these complete literal entries:
+These are **independent examples from BASE.DIC**, decoded from its CP866
+records. They show that the original authors already used typed slots, even
+though other entries were written out separately:
+
+| Historical entry | What to learn from it |
+| --- | --- |
+| ``make <TAO>`claim`*$подавать\$`Nиск` `` | Vary article, adjective or determiner before the exact `claim`; replace the noun reading in the context action. |
+| ``make <TAO>`decision`*$Vпринимать`` | The same modifier span works before another lexical noun. Do not enumerate `a/the` and adjective spellings. |
+| ``write <TAO>`letter`*$Vписать\$`письмо` `` | A typed span can coexist with a fixed idiom anchor and a context rewrite. |
+| ``agreement X`on`*$договор\ `PПо` `` | `X` matches an auxiliary form while `` `on` `` still requires that English word. Check tense variants before reusing this shape. |
+| `afford [MR]*$Vпозволять\M\6` | `[MR]` accepts one pronoun of either class. Choose classes from actual tags, not the English spelling alone. |
+| ``where R<$>`go`*$куда`` | `R` consumes a personal pronoun; the lexical anchor still requires `go`. |
+| ``thank `you`[*]*$Dблагодарю вас\ \`` | Here `you` is deliberately literal and `[*]` requires the boundary; not every English word is a variable slot. |
+| ``relieve <TAONw>`of`*$освобождать\`PРот` `` | The intervening span allows exactly the listed classes. It excludes `M`, so it cannot be copied as a rule for `relieve him of …`. |
+
+BASE.DIC also repeats these complete keys with the **same** Russian reading:
+
+```text
+come up with a solution*Weприходить к решению
+come up with the solution*Weприходить к решению
+view a file*WVпросматриватьNфайл
+view the file*WVпросматриватьNфайл
+aspect of a problem*WNсторона вопроса
+aspect of the problem*WNсторона вопроса
+```
+
+These are good candidates for an article-class slot when writing a new rule.
+The `view` pair also shows a tagged `W` noun; the `come up with` pair has an
+uninflected `W` tail that a new rule need not copy. The following BASE.DIC
+family is another candidate, this time for a pronoun slot:
 
 ```text
 teach her a lesson*WVпроучить ее
 teach him a lesson*WVпроучить его
 teach them a lesson*WVпроучить их
-teach a course*WVпреподаватьPВ
 ```
 
-They establish that a whole English phrase key is valid. The `teach` pronoun
-entries are form-specific, with Russian pronouns frozen in an uninflected `W`
-tail. They are candidates for consolidation, not proof that an `M` placeholder
-will preserve the object case or inflect the verb correctly. In the current
-Lua trace without those literals, `her`, `him` and `them` have tag `M` at the
-relevant stage, but `teach` assigns them dative; a candidate rule would need
-to restore accusative and be checked in both engines. Historical entries
-establish legal syntax, not necessarily the best output for this engine. Do
-not replace literal keys with an unverified rule merely to reduce their count.
+Its uninflected Russian pronouns show why the output action must preserve the
+correct case. A Lua trace without those literals gives
+`her`, `him` and `them` tag `M` there; `teach` then assigns dative. Test a
+candidate `M` rule for accusative in both engines before using it.
 
-BASE.DIC also has:
-
-```text
-relieve <TAONw>`of`*$освобождать\`PРот`
-```
-
-Here, `<TAONw>` permits an intervening span made of those listed classes before
-the exact `of` anchor. It does **not** include `M`, so it does not by itself
-handle `relieve him of ...` or solve the `teach` pronoun family. Choose the
-classes that the actual inputs carry; verify them with `--trace`.
+Generalization is useful, but a placeholder is not automatically equivalent
+to every literal it can match. In BASE.DIC, `at a time*Dза один раз` and
+`at the time*Jкогда` differ in meaning; `set a limit*eограничивать` and
+`set the limit*WVустанавливать предел` also differ. Keep that distinction.
+Test positive variants and nearby negative contexts, and check whether an
+existing longer literal wins before the subrule runs. If a typed rule cannot
+preserve meaning or grammatical fields, keep the necessary literal key and
+record the reason.
 
 | English slot | Native code | Scope |
 | --- | --- | --- |
 | `a`, `the` | `T` (`a*T`, `the*T` in `BASE.DIC`) | `[T]` consumes exactly one article. `<T>` permits a span of zero or more `T` words before a lexical anchor. |
 | article, adjective, determiner before a noun | `<TAO>` | `T` is article, `A` adjective, `O` determiner; the whole span may be empty. This is the spelling in BASE.DIC's ``make <TAO>`claim`*$…`` and ``make <TAO>`agreement`*$…``. It is broader than an article slot. |
 | `am`, `are`, `is` | `X` | Match the auxiliary class when its form can vary without changing the idiom's meaning; `X` also includes past forms, so test those. |
-| personal pronoun | `R` | Keep person, number and gender, as `how XR[*]` does; do not list `you`, `he`, `she`, `they`. |
+| personal or object pronoun | `R`, `M`, `[MR]` | Keep person, number and gender; choose from the tags at the matching stage. `how XR[*]` and historical `afford [MR]` show two different slots. |
 | exact lexical anchor or sentence end | backticks, `[*]` | Backticks require the named word; `[*]` requires the boundary. They prevent a short idiom from swallowing a longer clause. |
 
-Use the narrowest valid pattern. `<TAO>` is not a magic spelling for `a/the`:
-the article alone is `T`. `[T]` is appropriate for the article in the greeting
-below; `<TAO>` would also accept adjectives and determiners, potentially making
-“Have a bad day” into “Хорошего дня”. Conversely, `X` is not always a safe
-replacement for a literal `are`: ``you `are``welcome`[*]`` deliberately
-excludes “You were welcome”. The original executable also makes the proposed
-`you X` rule produce `Пожалуйста` for that past-tense sentence.
+Use the narrowest pattern that covers the meaningful variation. `<TAO>` is not
+a magic spelling for `a/the`: the article alone is `T`. `[T]` is appropriate
+for the article in the greeting below; `<TAO>` would also accept adjectives and
+determiners, potentially making “Have a bad day” into “Хорошего дня”. Likewise,
+`X` includes past forms: ``you `are``welcome`[*]`` deliberately excludes “You
+were welcome”. The original executable makes a proposed `you X` rule produce
+`Пожалуйста` for that past-tense sentence. These are reasons to test a
+placeholder's scope, not reasons to avoid placeholders in general.
 
 | Avoid for a productive family | Prefer after verification | Reason |
 | --- | --- | --- |

@@ -65,14 +65,17 @@ without add-ons; use it to see what LTGOLD alone does.
    | Only standalone or clause-final | boundary subrule | ``you `are``welcome`[*]*$Dпожалуйста\  \`` |
    | Variable pronoun or auxiliary | typed subrule | `how XR[*]*$…` (below) |
 
-   **Require `W` with a tag for each Russian component** in a new multiword
-   equivalent. Write lemmas, case governors and explicit plural tags, including
+   For a new multiword equivalent whose Russian words must agree or decline,
+   use `W` with tagged lemmas, case governors and explicit plural tags, including
    `best wishes*WAнаилучшийnпожелание`. Do not put an inflected surface phrase
    after `D`, or try to append tags to a `D` reading. A single invariant word
    can use `D` (`thank you*Dспасибо`); the seven existing multiword fixed
    utterances in `tools/check_phrase_formulas.py` are reviewed exceptions, not
-   templates for new entries. The build rejects new multiword `D` readings.
-   The default add-on uses sentence-wide casing for `W` readings. A `W` noun without a
+   templates for new entries. This is an **add-on authoring policy**, not a
+   restriction of LTGOLD's format: `BASE.DIC` also has literal phrase keys and
+   uninflected text inside `W` readings. The build rejects new multiword `D`
+   readings and untagged `W` tails in this add-on. The default add-on uses
+   sentence-wide casing for `W` readings. A `W` noun without a
    `.RUS` record may still inflect as a masculine (`Добрый Утро`). A
    multiword lemma keeps its space inside one tag
    (`Vиметь дело` → `имеет дело`), but a one-component verb loses the
@@ -92,16 +95,47 @@ without add-ons; use it to see what LTGOLD alone does.
    `python3 tools/ltech_dict.py import <copy> --entries <file> --replace --in-place`.
 6. `sh test/run_all.sh` and `sh tools/build_dictionary.sh --verify`.
 
-## Require native key patterns, not spelling lists
+## Choose literal keys or native patterns by meaning
 
 Before adding a key, look up each English word's active tag in `BASE.DIC` and
 read the matching operators in [codes.md](references/codes.md#context-patterns-and-actions).
-Use a native T4 subrule for variable articles, auxiliaries, pronouns and
-modifiers when the same translation applies. Encode each changing slot with
-its tag and preserve its grammatical fields; do not enumerate spellings or
-hardcode one Russian form per person, article or tense. Check that the pattern
-also *excludes* nearby meanings, and check whether an LTGOLD literal will win
-before the subrule runs.
+Literal multiword keys are native and can be the right choice for a fixed
+expression. Prefer one native T4 subrule over several literal keys when the
+variable words share a meaning **and** the rule can preserve or correctly
+inflect their grammatical fields. A tag match alone does not prove that it can.
+Check that the pattern also *excludes* nearby meanings, and whether an LTGOLD
+literal will win before the subrule runs. Keep literal variants when the
+attempted generalization changes meaning, case, tense or agreement.
+
+BASE.DIC contains these complete literal entries:
+
+```text
+teach her a lesson*WVпроучить ее
+teach him a lesson*WVпроучить его
+teach them a lesson*WVпроучить их
+teach a course*WVпреподаватьPВ
+```
+
+They establish that a whole English phrase key is valid. The `teach` pronoun
+entries are form-specific, with Russian pronouns frozen in an uninflected `W`
+tail. They are candidates for consolidation, not proof that an `M` placeholder
+will preserve the object case or inflect the verb correctly. In the current
+Lua trace without those literals, `her`, `him` and `them` have tag `M` at the
+relevant stage, but `teach` assigns them dative; a candidate rule would need
+to restore accusative and be checked in both engines. Historical entries
+establish legal syntax, not necessarily the best output for this engine. Do
+not replace literal keys with an unverified rule merely to reduce their count.
+
+BASE.DIC also has:
+
+```text
+relieve <TAONw>`of`*$освобождать\`PРот`
+```
+
+Here, `<TAONw>` permits an intervening span made of those listed classes before
+the exact `of` anchor. It does **not** include `M`, so it does not by itself
+handle `relieve him of ...` or solve the `teach` pronoun family. Choose the
+classes that the actual inputs carry; verify them with `--trace`.
 
 | English slot | Native code | Scope |
 | --- | --- | --- |
@@ -119,18 +153,20 @@ replacement for a literal `are`: ``you `are``welcome`[*]`` deliberately
 excludes “You were welcome”. The original executable also makes the proposed
 `you X` rule produce `Пожалуйста` for that past-tense sentence.
 
-| Do not write | Write | Reason |
+| Avoid for a productive family | Prefer after verification | Reason |
 | --- | --- | --- |
 | `best wishes*Dнаилучшие пожелания` or `best wishes*Dнаилучшиеnпожелание` | `best wishes*WAнаилучшийnпожелание` | `W` distributes tagged lemmas; `with` can then govern instrumental: `с наилучшими пожеланиями`. |
-| Separate `make a deal`, `make the deal`, `make his deal` keys | ``make <TAO>`deal`*$заключать\$`Nсделка`\`` | One T4 rule retains the varying modifier; modeled on BASE.DIC's `make <TAO>` subrules. |
+| Separate `make a deal`, `make the deal`, `make his deal` keys when one rule handles all three | ``make <TAO>`deal`*$заключать\$`Nсделка`\`` | This T4 rule handles the modifier slot; it is modeled on BASE.DIC's `make <TAO>` subrules. |
 | `have a nice day*WPРAхорошийNдень` plus an article spelling variant | ``have [T]`nice``day`[*]*$DDWPРAхорошийNдень\   \`` | One article slot, exact `nice day`, and a sentence boundary. The original executable accepts this syntax. |
 | Separate `how are you`, `how is he` and `how are they` keys | `how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\` | `X` and `R` cover the grammatical family and retain the pronoun fields. |
 | `what is up*Dкак дела` and `what's up*Dкак дела` | ``what <X>`up`[*]*$DDWDкакnдело\ $ \`` | The auxiliary may be present or removed by question cleanup; the boundary keeps “What is up there?” outside the idiom. |
 
 `~` in a literal key is only an arbitrary one-word gap, not a typed article or
 pronoun. `[]` consumes one class choice; `<>` searches a permitted span up to
-its following anchor. Copy a verified BASE.DIC pattern and its action spacing
-exactly, then test variants and negative contexts with both Lua and LTPRO.
+its following anchor. When considering a pattern, start from a verified
+BASE.DIC mechanism, preserve its action spacing, then test variants and
+negative contexts with both Lua and LTPRO. If the generalized rule cannot
+produce the right grammatical result, retain the literal keys and record why.
 
 ## Worked example: how are you, what's up
 
@@ -233,9 +269,10 @@ checks in [docs/ltgold.md](../../docs/ltgold.md#verifying) before and after.
 
 Honor the requested scope; for a batch, review every entry, and keep only
 entries that improve on LTGOLD. Use verified dictionary syntax, grammatical
-tags, reusable patterns and normal agreement. Do not hardcode surface forms,
-enumerate grammatical variants (one `how XR[*]`, not one rule per pronoun), or
-use `#` literals or uninflected tails to hide missing support. Recover
+tags, reusable patterns and normal agreement. Avoid hardcoded surface forms
+and enumerated grammatical variants when one verified rule can retain the
+varying words (one `how XR[*]`, not one rule per pronoun). Do not use `#`
+literals or uninflected tails to hide missing support. Recover
 LTGOLD's mechanism before changing anything; an apparent missing feature is an
 investigation task, not permission to invent an extension.
 

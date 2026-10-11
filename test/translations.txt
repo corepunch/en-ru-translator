@@ -2,7 +2,7 @@
 # checks each greeting case for the native rule and retained pronoun fields.
 
 # Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
-phrase:are [RN?#]`home`[D,*] | Are you home? => Вы дома?
+phrase:be <RN?#>`home`[D,*] | Are you home? => Вы дома?
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.
@@ -365,14 +365,17 @@ phrase:get home | I got home late. ~> добрался домой
 phrase:hurry home | We hurry home. => Мы спешим домой.
 phrase:fly home | They will fly home. ~> домой
 phrase:stay home | We stay home. => Мы остаемся дома.
-phrase:am home | I am home. => Я дома.
-phrase:is home | He is home now. ~> дома
-phrase:are home | We are home. => Мы дома.
-phrase:was home | She was home. => Она была дома.
-phrase:were home | They were home yesterday. ~> были дома
-phrase:be home | I will be home soon. ~> буду дома
-phrase:is [RN?#]`home`[D,*] | Is he home? => Он дома?
-phrase:am [RN?#]`home`[D,*] | Am I home? => Я дома?
-phrase:was [RN?#]`home`[D,*] | Was she home? ~> дома?
-phrase:were [RN?#]`home`[D,*] | Were they home? ~> дома?
+phrase:be <RN?#>`home`[D,*] | I am home. => Я дома.
+phrase:be <RN?#>`home`[D,*] | He is home now. ~> дома
+# Shared rules retain LTGOLD's ordinary copula formatting, including its dash.
+phrase:be <RN?#>`home`[D,*] | We are home. => Мы - дома.
+phrase:be <RN?#>`home`[D,*] | She was home. => Она была дома.
+phrase:be <RN?#>`home`[D,*] | They were home yesterday. ~> были дома
+phrase:will <XRN?#>`home`[D,*] | I will be home soon. ~> буду дома
+phrase:will <XRN?#>`home`[D,*] | I will be home. => Я буду дома.
+phrase:be <RN?#>`home`[D,*] | This is home furniture. => Это домашняя мебель{1.обстановка}.
+phrase:be <RN?#>`home`[D,*] | Is he home? => Он дома?
+phrase:be <RN?#>`home`[D,*] | Am I home? => Я дома?
+phrase:be <RN?#>`home`[D,*] | Was she home? ~> дома?
+phrase:be <RN?#>`home`[D,*] | Were they home? ~> дома?
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

@@ -70,15 +70,9 @@ get home*WVдобиратьсяDдомой
 hurry home*WVспешитьDдомой
 fly home*WVлететьDдомой
 stay home*WVоставатьсяDдома
-am home*WX001Dдома
-is home*WX003Dдома
-are home*WX013Dдома
-was home*WX103бытьDдома
-were home*WX113бытьDдома
-be home*WXбытьDдома
-is [RN?#]`home`[D,*]*$@\.`Dдома`\
-are [RN?#]`home`[D,*]*$@\.`Dдома`\
-am [RN?#]`home`[D,*]*$@\.`Dдома`\
-was [RN?#]`home`[D,*]*$@\.`Dдома`\
-were [RN?#]`home`[D,*]*$@\.`Dдома`\
+# The auxiliary forms inherit be's rule through their native \be reference.
+# Keep their grammatical fields; the optional subject also covers questions.
+be <RN?#>`home`[D,*]*$@\$`Dдома`\
+# Future cleanup can remove be; will retains the X auxiliary and its tense.
+will <XRN?#>`home`[D,*]*$@\$`Dдома`\
 make <TAO>`deal`*$заключать\$`Nсделка`\

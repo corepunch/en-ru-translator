@@ -188,6 +188,25 @@ record the reason.
 | personal or object pronoun | `R`, `M`, `[MR]` | Keep person, number and gender; choose from the tags at the matching stage. `how XR[*]` and historical `afford [MR]` show two different slots. |
 | exact lexical anchor or sentence end | backticks, `[*]` | Backticks require the named word; `[*]` requires the boundary. They prevent a short idiom from swallowing a longer clause. |
 
+If the varying auxiliary is the dictionary head, use its native stem reference
+instead of listing `am`, `is`, `are`, `was` and `were`. Those records refer to
+`be` through `\be` and inherit its subrules. `X` is a class inside a pattern;
+an entry headed `X` would look up the literal English letter, not all auxiliaries.
+The home family uses two shared rules:
+
+```text
+be <RN?#>`home`[D,*]*$@\$`Dдома`\
+will <XRN?#>`home`[D,*]*$@\$`Dдома`\
+```
+
+The first covers statements and inverted questions through the `be` family.
+The second covers future constructions: `will` has no `\be` reference, and
+grammar can remove the following `be` before T4. The span retains any subject
+and auxiliary nodes; `$` finds `home`, and only its reading changes to `Dдома`.
+Keep the auxiliary's existing tense/person fields instead of writing separate
+`WX001`, `WX003`, `WX103`, etc. equivalents. The following-context check
+distinguishes the locative adverb from nouns such as `home furniture`.
+
 Use the narrowest pattern that covers the meaningful variation. `<TAO>` is not
 a magic spelling for `a/the`: the article alone is `T`. A pattern such as
 ``have <TAO>`day`[*]`` paired with fixed `хороший` would also turn “Have a bad

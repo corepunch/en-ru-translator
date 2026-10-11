@@ -43,7 +43,7 @@ end
 -- Theme dictionaries (BUSINESS.DIC, COMPUTER.DIC) load after the base and win
 -- for the same key, as in LTGOLD's dictionary chain. The base is a shared,
 -- memoized asset, so the merge copies what it touches instead of mutating it.
-function lexicon.overlay(dictionary, bytes)
+function lexicon.overlay(dictionary, bytes, phrase_casing)
   local addition = lexicon.from_bytes(bytes)
   local merged = {}
   for field, value in pairs(dictionary) do merged[field] = value end
@@ -70,6 +70,7 @@ function lexicon.overlay(dictionary, bytes)
     table.insert(list, placed[list], record)
   end
   for _, record in ipairs(addition.records) do
+    record.phrase_casing = phrase_casing
     merged.records[#merged.records + 1] = record
     put(own(merged.by_key, record.key), record)
     local token = record.key:match('^([^ *]*)'):gsub('[A-Z]', string.lower)
@@ -565,9 +566,14 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
       value='Ww'..value:sub(2)
     end
   end
-  -- A subrule's W expansion carries its casing (phrasing.lua); a literal W
-  -- phrase keeps LTPRO's casing of each component (Рыбная Мука).
+  -- An authored add-on phrase shares sentence casing across its components.
+  -- The historical dictionaries keep LTPRO's per-component casing, and
+  -- --original retains it even for an experimental add-on.
   local casing=record.casing
+  if not casing and record.phrase_casing and not options.original and value:sub(1,1)=='W' then
+    local _,caps=(node.source or ''):gsub('[A-Z]','')
+    casing={caps=caps,first=node}
+  end
   if captures and #captures>0 then
     -- 0A4F:18F8 gives each component of the reading the next record of the
     -- phrase in order; at ~ it links the gap word back in and goes on with
@@ -635,6 +641,11 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
   end
   local pos,tag=3,value:sub(2,2)
   local oldtag,number=nodes.tag(node),node.number or 0
+  -- The add-on declares plurality in its Russian component tags (`n`). A
+  -- plural English head such as "thanks" must not make `Nспасибо` plural.
+  if record.phrase_casing and not options.original then
+    number,node.number=0,0
+  end
   local index=first
   while index<=last or tag~='' do
     assert(tag~='' and tag:match('[A-Za-z#]'), 'invalid W phrase selector: '..tag)

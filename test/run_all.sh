@@ -7,6 +7,7 @@ cd "$ROOT_DIR"
 
 # One Lua process: dictionaries are parsed once and shared by every test.
 lua test/run_all.lua
+python3 test/test_phrase_formulas.py
 
 echo
 sh test/cli_test.sh

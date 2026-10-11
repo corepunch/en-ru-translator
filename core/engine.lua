@@ -187,7 +187,7 @@ function engine.run(input, options)
   end
   local dict = memoized_asset(dic_source,'BASE.DIC',lexicon.from_bytes)
   for _, path in ipairs(addons('DIC')) do
-    dict = merged(dict, path, lexicon.overlay)
+    dict = merged(dict, path, function(base, bytes) return lexicon.overlay(base, bytes, true) end)
   end
   if options.dic_overlay then
     dict = lexicon.overlay(dict, engine.read_asset(options.dic_overlay, 'BASE.DIC'))

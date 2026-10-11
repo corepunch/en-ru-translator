@@ -60,18 +60,23 @@ without add-ons; use it to see what LTGOLD alone does.
 
    | Expression | Shape | Example |
    | --- | --- | --- |
-   | Fixed formula, nothing agrees | `D` text | `thank you very much*Dбольшое спасибо` |
+   | One invariant equivalent | `D` text | `thank you*Dспасибо` |
    | Words that agree or decline with the sentence | `W` + tagged lemmas | `walk home*WVидтиDдомой` |
    | Only standalone or clause-final | boundary subrule | ``you `are``welcome`[*]*$Dпожалуйста\  \`` |
    | Variable pronoun or auxiliary | typed subrule | `how XR[*]*$…` (below) |
 
-   Use `D` for every fixed greeting or formula. A `W` composite at the start of
-   a sentence is printed with every component capitalized (`Большой Спасибо`,
-   `Как Жаль`), and a `W` noun without a `.RUS` record inflects as a masculine
-   (`Добрый Утро`). A multiword lemma keeps its space inside one tag
+   Use `W` with tagged lemmas when a phrase contains words that agree or
+   decline, including `best wishes*WAнаилучшийnпожелание`. A multiword `D`
+   reading is reserved for the small reviewed list of fixed utterances in
+   `tools/check_phrase_formulas.py`; the build rejects new ones. The default
+   add-on uses sentence-wide casing for `W` readings. A `W` noun without a
+   `.RUS` record may still inflect as a masculine (`Добрый Утро`). A
+   multiword lemma keeps its space inside one tag
    (`Vиметь дело` → `имеет дело`), but a one-component verb loses the
    imperative (`stay home*Vоставаться дома` → `Оставаться дома`).
 3. **Edit** `dictionary/phrases.txt`, then `sh tools/build_dictionary.sh`.
+   The build runs `tools/check_phrase_formulas.py`, which rejects frozen
+   multiword `D` readings and untagged spaces in `W` readings.
 4. **Check and record** with `lua init.lua`, then add to `test/translations.txt`
    a `phrase:<exact key> | Sentence. => …` line copied from the actual output,
    a variant (capitals, contraction, another case form) and a `!>` line for a

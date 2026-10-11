@@ -9,6 +9,7 @@
 set -eu
 ROOT_DIR="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
+python3 tools/check_phrase_formulas.py dictionary/phrases.txt
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT HUP INT TERM
 

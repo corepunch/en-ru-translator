@@ -18,7 +18,7 @@ end
 local file=assert(io.open('dictionary/BASE.DIC','rb'))
 local dictionary=lexicon.from_bytes(file:read('*a'));file:close()
 file=assert(io.open('dictionary/BASE2.DIC','rb'))
-dictionary=lexicon.overlay(dictionary,file:read('*a'));file:close()
+dictionary=lexicon.overlay(dictionary,file:read('*a'),true);file:close()
 local entries=0
 for line in io.lines('dictionary/phrases.txt') do
   if line:match('%S') and not line:match('^#') then

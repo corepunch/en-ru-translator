@@ -307,6 +307,7 @@ phrase:so far so good | So far so good. => Пока всё хорошо.
 phrase:just a moment | Just a moment. => Минутку.
 phrase:wait a minute | Wait a minute. => Подождите минутку.
 phrase:best wishes | Best wishes. => Наилучшие пожелания.
+phrase:best wishes | With best wishes. => С наилучшими пожеланиями.
 phrase:merry christmas | Merry christmas. => С Рождеством.
 phrase:happy new year | Happy new year. => С Новым годом.
 phrase:happy new year | Happy New Year! => С Новым годом!

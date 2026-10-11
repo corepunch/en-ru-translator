@@ -1,9 +1,9 @@
 # Our phrase add-on to LTGOLD's dictionary: only phrases LTGOLD lacks or gets
 # wrong. tools/build_dictionary.sh builds it into dictionary/BASE2.DIC, which
 # the engine loads after BASE.DIC (--original or --base-only leave it out).
-# Fixed formulas are D text: a W composite at the start of a sentence is
-# printed with every component capitalized. Every entry has a phrase:<key>
-# case in test/translations.txt (common_phrases_test.lua checks).
+# Encode inflectable words as tagged lemmas in W readings. D is for a single
+# invariant word or an intentional fixed formula, never a shortcut for case or
+# agreement. Every entry has a phrase:<key> case in test/translations.txt.
 
 ## greetings: native T4 grammatical subrules
 how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\
@@ -12,11 +12,11 @@ what <X>`up`[*]*$DDWDкакnдело\ $ \
 how `is``it`[*]*$Dкак дела\  \
 how `is``it``going`[*]*$Dкак дела\   \
 
-## fixed formulas
+## everyday formulas and grammatical phrases
 thank you*Dспасибо
-thank you very much*Dбольшое спасибо
-thanks a lot*Dбольшое спасибо
-many thanks*Dбольшое спасибо
+thank you very much*WAбольшойNспасибо
+thanks a lot*WAбольшойNспасибо
+many thanks*WAбольшойNспасибо
 you `are``welcome`[*]*$Dпожалуйста\  \
 my `pleasure`[*]*$Dпожалуйста\ \
 no `problem`[,*]*$DDWPРбезnпроблема\ \
@@ -25,37 +25,37 @@ goodbye*Dдо свидания
 nice to meet you*Dприятно познакомиться
 pleased to meet you*Dприятно познакомиться
 long time no see*Dдавно не виделись
-so far so good*Dпока всё хорошо
+so far so good*WDпокаSвсёDхорошо
 just a moment*Dминутку
 wait a minute*Dподождите минутку
-best wishes*Dнаилучшие пожелания
-merry christmas*Dс Рождеством
-happy new year*Dс Новым годом
-happy easter*Dс Пасхой
-happy holidays*Dс праздниками
+best wishes*WAнаилучшийnпожелание
+merry christmas*WPТсNРождество
+happy new year*WPТсAНовыйNгод
+happy easter*WPТсNПасха
+happy holidays*WPТсnпраздник
 bless you*Dбудьте здоровы
 get well soon*Dпоправляйтесь скорее
-welcome back*Dс возвращением
-welcome home*Dс возвращением домой
-enjoy your meal*Dприятного аппетита
-bon appetit*Dприятного аппетита
-have a nice day*Dхорошего дня
-have a good day*Dхорошего дня
-have a good trip*Dсчастливого пути
-bon voyage*Dсчастливого пути
-sweet dreams*Dсладких снов
-what a pity*Dкак жаль
-what a shame*Dкак жаль
-what time is it*Dкоторый час
-just in case*Dна всякий случай
-never again*Dбольше никогда
-as usual*Dкак обычно
+welcome back*WPТсNвозвращение
+welcome home*WPТсNвозвращениеDдомой
+enjoy your meal*WPРAприятныйNаппетит
+bon appetit*WPРAприятныйNаппетит
+have a nice day*WPРAхорошийNдень
+have a good day*WPРAхорошийNдень
+have a good trip*WPРAсчастливыйNпуть
+bon voyage*WPРAсчастливыйNпуть
+sweet dreams*WPРAсладкийnсон
+what a pity*WDкакDжаль
+what a shame*WDкакDжаль
+what time is it*WOкоторыйNчас
+just in case*WPВнаAвсякийNслучай
+never again*WDбольшеDникогда
+as usual*WDкакDобычно
 for now*Dпока
 for free*Dбесплатно
 for sure*Dнаверняка
 at night*Dночью
 in the afternoon*Dднём
-this morning*Dсегодня утром
+this morning*WDсегодняDутром
 in `the``end`[j;,*]*$DDWPПвNконецPРnконец\  \
 behind [,*]*$Dпозади
 inside [,*]*$Dвнутри

@@ -1,2 +1,5 @@
 # Russian records for the phrase add-on (dictionary/phrases.txt), as
 # changes-rus.txt: lemma*C hex... Built into dictionary/BASE2.RUS.
+спасибо*N c0 80 ff
+рождество*N 80 80 80
+сон*N 80 81 9b

@@ -95,14 +95,17 @@ without add-ons; use it to see what LTGOLD alone does.
    `python3 tools/ltech_dict.py import <copy> --entries <file> --replace --in-place`.
 6. `sh test/run_all.sh` and `sh tools/build_dictionary.sh --verify`.
 
-## Generalize phrase families with native patterns
+## Use patterns when they add useful coverage or context
 
 Before adding a key, look up each English word's active tag in `BASE.DIC`,
 search nearby literal variants and comparable native subrules, and read the
 matching operators in [codes.md](references/codes.md#context-patterns-and-actions).
-Use a typed T4 subrule for a phrase family by default: match the variable input
-words by class and retain their number, person, gender, case and tense where the
-meaning permits. Use a lexical backtick only for a word whose identity matters.
+Do not force phrases into templates. Use a literal key for a fixed expression;
+use a pattern when one entry usefully covers a real family of expressions or
+needs a context check. Merely allowing an unlikely article variant is not a
+reason to introduce a pattern. For a variable slot, match the relevant classes
+and retain number, person, gender, case and tense where the meaning permits.
+Use a lexical backtick for a word whose identity matters within a context rule.
 On the Russian side, use a `W` reading with tagged lemmas for words that must
 agree or decline. A whole literal key is valid native syntax, but the original
 dictionary's repetition and uninflected tails are not an authoring target.
@@ -114,7 +117,7 @@ though other entries were written out separately:
 | Historical entry | What to learn from it |
 | --- | --- |
 | ``make <TAO>`claim`*$подавать\$`Nиск` `` | Vary article, adjective or determiner before the exact `claim`; replace the noun reading in the context action. |
-| ``make <TAO>`decision`*$Vпринимать`` | The same modifier span works before another lexical noun. Do not enumerate `a/the` and adjective spellings. |
+| ``make <TAO>`decision`*$Vпринимать`` | One entry covers useful variation in the modifiers before `decision`. |
 | ``write <TAO>`letter`*$Vписать\$`письмо` `` | A typed span can coexist with a fixed idiom anchor and a context rewrite. |
 | ``agreement X`on`*$договор\ `PПо` `` | `X` matches an auxiliary form while `` `on` `` still requires that English word. Check tense variants before reusing this shape. |
 | `afford [MR]*$Vпозволять\M\6` | `[MR]` accepts one pronoun of either class. Choose classes from actual tags, not the English spelling alone. |
@@ -167,9 +170,10 @@ record the reason.
 | exact lexical anchor or sentence end | backticks, `[*]` | Backticks require the named word; `[*]` requires the boundary. They prevent a short idiom from swallowing a longer clause. |
 
 Use the narrowest pattern that covers the meaningful variation. `<TAO>` is not
-a magic spelling for `a/the`: the article alone is `T`. `[T]` is appropriate
-for the article in the greeting below; `<TAO>` would also accept adjectives and
-determiners, potentially making “Have a bad day” into “Хорошего дня”. Likewise,
+a magic spelling for `a/the`: the article alone is `T`. A pattern such as
+``have <TAO>`day`[*]`` paired with fixed `хороший` would also turn “Have a bad
+day” into “Хорошего дня”; retain a variable adjective when its meaning matters.
+Likewise,
 `X` includes past forms: ``you `are``welcome`[*]`` deliberately excludes “You
 were welcome”. The original executable makes a proposed `you X` rule produce
 `Пожалуйста` for that past-tense sentence. These are reasons to test a
@@ -179,7 +183,7 @@ placeholder's scope, not reasons to avoid placeholders in general.
 | --- | --- | --- |
 | `best wishes*Dнаилучшие пожелания` or `best wishes*Dнаилучшиеnпожелание` | `best wishes*WAнаилучшийnпожелание` | `W` distributes tagged lemmas; `with` can then govern instrumental: `с наилучшими пожеланиями`. |
 | Separate `make a deal`, `make the deal`, `make his deal` keys when one rule handles all three | ``make <TAO>`deal`*$заключать\$`Nсделка`\`` | This T4 rule handles the modifier slot; it is modeled on BASE.DIC's `make <TAO>` subrules. |
-| `have a nice day*WPРAхорошийNдень` plus an article spelling variant | ``have [T]`nice``day`[*]*$DDWPРAхорошийNдень\   \`` | One article slot, exact `nice day`, and a sentence boundary. The original executable accepts this syntax. |
+| An unrestricted greeting key when a longer sentence has another meaning | ``you `are``welcome`[*]*$Dпожалуйста\  \`` | The boundary is useful even with no variable slot: it excludes “You are welcome here.” |
 | Separate `how are you`, `how is he` and `how are they` keys | `how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\` | `X` and `R` cover the grammatical family and retain the pronoun fields. |
 | `what is up*Dкак дела` and `what's up*Dкак дела` | ``what <X>`up`[*]*$DDWDкакnдело\ $ \`` | The auxiliary may be present or removed by question cleanup; the boundary keeps “What is up there?” outside the idiom. |
 
@@ -189,6 +193,50 @@ its following anchor. When considering a pattern, start from a verified
 BASE.DIC mechanism, preserve its action spacing, then test variants and
 negative contexts with both Lua and LTPRO. If the generalized rule cannot
 produce the right grammatical result, retain the literal keys and record why.
+
+### Literal keys, context rules and deletion actions
+
+These are different native record forms; do not mix their separators:
+
+```text
+you are welcome*Dпожалуйста
+you `are``welcome`[*]*$Dпожалуйста\  \
+on ~ behalf*WPРот~Nимя
+```
+
+The first is an unrestricted whole-phrase equivalent. The second translates
+the same words only at the specified boundary: `you` is the head, the pattern
+matches `are`, `welcome` and the boundary, and `Dпожалуйста` rewrites the head.
+The two spaces after the first backslash delete `are` and `welcome`; they do
+not print spaces. The final backslash begins the optional selector section,
+which is empty here. Literal phrase entries consume their words together and
+need no such deletion action. BASE.DIC uses the same mechanism in
+``in `full`[*]*$Dполностью\ \`` and ``thank `you`[*]*$Dблагодарю вас\ \``.
+
+The third example is an actual BASE.DIC gap phrase. The input `~` captures a
+word; the `~` inside the `W` reading reinserts that word with its own reading
+and grammar. It is not an empty adjective lemma: do not write `A~` or invent
+`A{capture}`. This mechanism can retain an adjective or a determiner, but does
+not restrict the input to that class or require sentence end. Check the whole
+phrase's case and its behavior in longer sentences before choosing a gap.
+
+The add-on's wishes use an adjective slot and an end boundary together:
+
+```text
+have [T]A`day`[*]*$DDWPР\ \
+have [T]A`trip`[*]*$DDWPР\ @`Nпуть`\
+```
+
+Here `A` retains the actual adjective, so one entry handles `nice`, `good`,
+`wonderful`, `bad`, and other adjective readings. `[T]` covers both `a` and
+`an`, as in `a nice day` and `an excellent day`. `PР` supplies silent genitive
+government; the article is deleted. The day rule leaves the remaining context
+untouched; the trip rule uses `@` to keep the adjective and rewrites `trip` as
+`Nпуть`. The adjective comes from its own dictionary entry: `good` gives
+`хорошего пути`, not the idiomatic substitution `счастливого пути`. Use a fixed
+equivalent when that substitution is the intended meaning. This is useful
+generalization; merely matching `the nice day` as well as `a nice day` would
+not itself be a reason to use a template.
 
 ## Worked example: how are you, what's up
 

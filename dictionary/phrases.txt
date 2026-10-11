@@ -39,9 +39,9 @@ welcome back*WPТсNвозвращение
 welcome home*WPТсNвозвращениеDдомой
 enjoy your meal*WPРAприятныйNаппетит
 bon appetit*WPРAприятныйNаппетит
-have [T]`nice``day`[*]*$DDWPРAхорошийNдень\   \
-have [T]`good``day`[*]*$DDWPРAхорошийNдень\   \
-have [T]`good``trip`[*]*$DDWPРAсчастливыйNпуть\   \
+# Keep the adjective; delete only the article. The boundary limits the wish.
+have [T]A`day`[*]*$DDWPР\ \
+have [T]A`trip`[*]*$DDWPР\ @`Nпуть`\
 bon voyage*WPРAсчастливыйNпуть
 sweet dreams*WPРAсладкийnсон
 what a pity*WDкакDжаль

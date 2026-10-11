@@ -295,6 +295,8 @@ phrase:thank you very much | THANK YOU VERY MUCH! => БОЛЬШОЕ СПАСИБ
 phrase:thanks a lot | Thanks a lot. => Большое спасибо.
 phrase:many thanks | Many thanks. => Большое спасибо.
 phrase:you `are``welcome`[*] | You are welcome. => Пожалуйста.
+phrase:you `are``welcome`[*] | You were welcome. !> Пожалуйста
+phrase:you `are``welcome`[*] | You are welcome to stay. !> Пожалуйста
 phrase:my `pleasure`[*] | My pleasure. => Пожалуйста.
 phrase:no `problem`[,*] | No problem. => Без проблем.
 phrase:excuse me | Excuse me. => Извините.
@@ -319,9 +321,15 @@ phrase:welcome back | Welcome back. => С возвращением.
 phrase:welcome home | Welcome home. => С возвращением домой.
 phrase:enjoy your meal | Enjoy your meal. => Приятного аппетита.
 phrase:bon appetit | Bon appetit. => Приятного аппетита.
-phrase:have a nice day | Have a nice day. => Хорошего дня.
-phrase:have a good day | Have a good day. => Хорошего дня.
-phrase:have a good trip | Have a good trip. => Счастливого пути.
+phrase:have [T]`nice``day`[*] | Have a nice day. => Хорошего дня.
+phrase:have [T]`nice``day`[*] | Have the nice day. => Хорошего дня.
+phrase:have [T]`nice``day`[*] | Have a nice day at work. !> Хорошего дня
+phrase:have [T]`good``day`[*] | Have a good day. => Хорошего дня.
+phrase:have [T]`good``day`[*] | Have the good day. => Хорошего дня.
+phrase:have [T]`good``day`[*] | Have a good day at work. !> Хорошего дня
+phrase:have [T]`good``trip`[*] | Have a good trip. => Счастливого пути.
+phrase:have [T]`good``trip`[*] | Have the good trip. => Счастливого пути.
+phrase:have [T]`good``trip`[*] | Have a bad trip. !> Счастливого пути
 phrase:bon voyage | Bon voyage. => Счастливого пути.
 phrase:sweet dreams | Sweet dreams. => Сладких снов.
 phrase:what a pity | What a pity. => Как жаль.

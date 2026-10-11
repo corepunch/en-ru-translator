@@ -65,11 +65,14 @@ without add-ons; use it to see what LTGOLD alone does.
    | Only standalone or clause-final | boundary subrule | ``you `are``welcome`[*]*$Dпожалуйста\  \`` |
    | Variable pronoun or auxiliary | typed subrule | `how XR[*]*$…` (below) |
 
-   Use `W` with tagged lemmas when a phrase contains words that agree or
-   decline, including `best wishes*WAнаилучшийnпожелание`. A multiword `D`
-   reading is reserved for the small reviewed list of fixed utterances in
-   `tools/check_phrase_formulas.py`; the build rejects new ones. The default
-   add-on uses sentence-wide casing for `W` readings. A `W` noun without a
+   **Require `W` with a tag for each Russian component** in a new multiword
+   equivalent. Write lemmas, case governors and explicit plural tags, including
+   `best wishes*WAнаилучшийnпожелание`. Do not put an inflected surface phrase
+   after `D`, or try to append tags to a `D` reading. A single invariant word
+   can use `D` (`thank you*Dспасибо`); the seven existing multiword fixed
+   utterances in `tools/check_phrase_formulas.py` are reviewed exceptions, not
+   templates for new entries. The build rejects new multiword `D` readings.
+   The default add-on uses sentence-wide casing for `W` readings. A `W` noun without a
    `.RUS` record may still inflect as a masculine (`Добрый Утро`). A
    multiword lemma keeps its space inside one tag
    (`Vиметь дело` → `имеет дело`), but a one-component verb loses the
@@ -88,6 +91,46 @@ without add-ons; use it to see what LTGOLD alone does.
    `lua init.lua --dic <scratch BASE.DIC>` built by
    `python3 tools/ltech_dict.py import <copy> --entries <file> --replace --in-place`.
 6. `sh test/run_all.sh` and `sh tools/build_dictionary.sh --verify`.
+
+## Require native key patterns, not spelling lists
+
+Before adding a key, look up each English word's active tag in `BASE.DIC` and
+read the matching operators in [codes.md](references/codes.md#context-patterns-and-actions).
+Use a native T4 subrule for variable articles, auxiliaries, pronouns and
+modifiers when the same translation applies. Encode each changing slot with
+its tag and preserve its grammatical fields; do not enumerate spellings or
+hardcode one Russian form per person, article or tense. Check that the pattern
+also *excludes* nearby meanings, and check whether an LTGOLD literal will win
+before the subrule runs.
+
+| English slot | Native code | Scope |
+| --- | --- | --- |
+| `a`, `the` | `T` (`a*T`, `the*T` in `BASE.DIC`) | `[T]` consumes exactly one article. `<T>` permits a span of zero or more `T` words before a lexical anchor. |
+| article, adjective, determiner before a noun | `<TAO>` | `T` is article, `A` adjective, `O` determiner; the whole span may be empty. This is the spelling in BASE.DIC's ``make <TAO>`claim`*$…`` and ``make <TAO>`agreement`*$…``. It is broader than an article slot. |
+| `am`, `are`, `is` | `X` | Match the auxiliary class when its form can vary without changing the idiom's meaning; `X` also includes past forms, so test those. |
+| personal pronoun | `R` | Keep person, number and gender, as `how XR[*]` does; do not list `you`, `he`, `she`, `they`. |
+| exact lexical anchor or sentence end | backticks, `[*]` | Backticks require the named word; `[*]` requires the boundary. They prevent a short idiom from swallowing a longer clause. |
+
+Use the narrowest valid pattern. `<TAO>` is not a magic spelling for `a/the`:
+the article alone is `T`. `[T]` is appropriate for the article in the greeting
+below; `<TAO>` would also accept adjectives and determiners, potentially making
+“Have a bad day” into “Хорошего дня”. Conversely, `X` is not always a safe
+replacement for a literal `are`: ``you `are``welcome`[*]`` deliberately
+excludes “You were welcome”. The original executable also makes the proposed
+`you X` rule produce `Пожалуйста` for that past-tense sentence.
+
+| Do not write | Write | Reason |
+| --- | --- | --- |
+| `best wishes*Dнаилучшие пожелания` or `best wishes*Dнаилучшиеnпожелание` | `best wishes*WAнаилучшийnпожелание` | `W` distributes tagged lemmas; `with` can then govern instrumental: `с наилучшими пожеланиями`. |
+| Separate `make a deal`, `make the deal`, `make his deal` keys | ``make <TAO>`deal`*$заключать\$`Nсделка`\`` | One T4 rule retains the varying modifier; modeled on BASE.DIC's `make <TAO>` subrules. |
+| `have a nice day*WPРAхорошийNдень` plus an article spelling variant | ``have [T]`nice``day`[*]*$DDWPРAхорошийNдень\   \`` | One article slot, exact `nice day`, and a sentence boundary. The original executable accepts this syntax. |
+| Separate `how are you`, `how is he` and `how are they` keys | `how XR[*]*$Dкак\`PР01у``MMWMJ0nдело`\` | `X` and `R` cover the grammatical family and retain the pronoun fields. |
+| `what is up*Dкак дела` and `what's up*Dкак дела` | ``what <X>`up`[*]*$DDWDкакnдело\ $ \`` | The auxiliary may be present or removed by question cleanup; the boundary keeps “What is up there?” outside the idiom. |
+
+`~` in a literal key is only an arbitrary one-word gap, not a typed article or
+pronoun. `[]` consumes one class choice; `<>` searches a permitted span up to
+its following anchor. Copy a verified BASE.DIC pattern and its action spacing
+exactly, then test variants and negative contexts with both Lua and LTPRO.
 
 ## Worked example: how are you, what's up
 
@@ -174,8 +217,8 @@ checks in [docs/ltgold.md](../../docs/ltgold.md#verifying) before and after.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| Words of a phrase capitalized (`Большой Спасибо`) | sentence-initial `W` composite | `D` text |
-| Noun inflects as masculine (`Добрый Утро`) | no `.RUS` record | add one, or `D` text |
+| Words of a phrase capitalized (`Большой Спасибо`) | missing phrase-wide casing on a `W` reading | check add-on loading and casing; do not freeze the reading as `D` |
+| Noun inflects as masculine (`Добрый Утро`) | no `.RUS` record | add the verified Russian record; keep tagged lemmas |
 | Subrule never fires | an LTGOLD literal or a shorter LTGOLD subrule wins | check with `--trace`; `-` the conflicting record only if ours is better, and test both |
 | Gap word missing | a longer key extends the matched one, or the reading is not `W`-led | rewrite the key or the reading |
 | `у его`, `от его` | LTPRO's н- rule (`--original`) | default output has `у него` |

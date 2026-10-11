@@ -39,9 +39,9 @@ welcome back*WPТсNвозвращение
 welcome home*WPТсNвозвращениеDдомой
 enjoy your meal*WPРAприятныйNаппетит
 bon appetit*WPРAприятныйNаппетит
-have a nice day*WPРAхорошийNдень
-have a good day*WPРAхорошийNдень
-have a good trip*WPРAсчастливыйNпуть
+have [T]`nice``day`[*]*$DDWPРAхорошийNдень\   \
+have [T]`good``day`[*]*$DDWPРAхорошийNдень\   \
+have [T]`good``trip`[*]*$DDWPРAсчастливыйNпуть\   \
 bon voyage*WPРAсчастливыйNпуть
 sweet dreams*WPРAсладкийnсон
 what a pity*WDкакDжаль

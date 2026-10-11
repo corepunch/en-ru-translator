@@ -6,3 +6,6 @@
 #                      (a leading + is allowed)
 # Lines starting with # are comments. Every entry needs a case in
 # test/translations.txt, and LTGOLD's own entries need none here.
+# The literal wins before T4 and consumes longer sentences, preventing the
+# bounded article rule in phrases.txt from running.
+-have a good day

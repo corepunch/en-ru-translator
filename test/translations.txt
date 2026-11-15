@@ -2,7 +2,7 @@
 # checks each greeting case for the native rule and retained pronoun fields.
 
 # Curated phrases.txt entries; common_phrases_test.lua fails if an entry has no line.
-phrase:be <RN?#>`home`[D,*] | Are you home? => Вы дома?
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Are you home? => Вы дома?
 
 # Prepositions in function-words.txt; prepositions_test.lua fails if one has no line.
 # The checked span is the preposition and its governed noun form.
@@ -367,19 +367,42 @@ phrase:hurry home | We hurried home. => Мы поспешили домой.
 phrase:hurry home | She hurries home. => Она спешит домой.
 phrase:hurry home | We are hurrying home. => Мы спешим домой.
 hurried | We made a hurried visit. => Мы сделали поспешный визит.
-phrase:fly home | They will fly home. ~> домой
+phrase:fly <D>`home`[DdIf,C&jJ*] | I fly home => Я лечу домой
+phrase:fly <D>`home`[DdIf,C&jJ*] | She flies home. => Она летит домой.
+phrase:fly <D>`home`[DdIf,C&jJ*] | I was flying home => Я летел домой
+phrase:fly <D>`home`[DdIf,C&jJ*] | She was flying home. => Она летела домой.
+phrase:fly <D>`home`[DdIf,C&jJ*] | They will fly home. => Они будут лететь домой.
+phrase:fly <D>`home`[DdIf,C&jJ*] | Fly home with me. => Летите домой со мной.
+phrase:fly <D>`home`[DdIf,C&jJ*] | I fly home flags. ~> домашние флаги
+phrase:fly <D>`home`[Pp^][$] | I fly home on Friday. => Я лечу домой в Пятницу.
+phrase:fly <D>`home``every`N | I fly home every year => Я летаю домой каждый год
+phrase:fly <D>`home``every`N | She flies home every week. => Она летает домой каждую неделю.
+phrase:flew <D>`home`[DdIf,C&jJ*] | They flew home. => Они полетели домой.
+phrase:flew <D>`home`[Pp^][$] | I flew home on Friday. => Я полетел домой в Пятницу.
+phrase:arrive <D>`home`[DdIf,C&jJ*] | I arrived home. => Я прибыл домой.
+phrase:arrive <D>`home`[Pp^][$] | I arrived home on Friday. => Я прибыл домой в Пятницу.
+phrase:sweet `home`[*] | Sweet home => Милый дом
+phrase:sweet `home`[*] | Sweet home furniture. => Сладкая домашняя мебель{1.обстановка}.
+phrase:home sweet home | Home sweet home. => Милый дом.
+home-role | Good home => Хороший дом
+home-role | I bought a good home. => Я купил хороший дом.
+home-role | Home furniture => Домашняя мебель{1.обстановка}
+home-role | I go home => Я иду домой
 phrase:stay home | We stay home. => Мы остаемся дома.
-phrase:be <RN?#>`home`[D,*] | I am home. => Я дома.
-phrase:be <RN?#>`home`[D,*] | He is home now. ~> дома
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | I am home. => Я дома.
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | I am finally home. ~> дома
+phrase:be <RN?#D>`home`[Pp^][$] | I am home for the weekend. ~> дома
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | He is home now. ~> дома
 # Shared rules retain LTGOLD's ordinary copula formatting, including its dash.
-phrase:be <RN?#>`home`[D,*] | We are home. => Мы - дома.
-phrase:be <RN?#>`home`[D,*] | She was home. => Она была дома.
-phrase:be <RN?#>`home`[D,*] | They were home yesterday. ~> были дома
-phrase:will <XRN?#>`home`[D,*] | I will be home soon. ~> буду дома
-phrase:will <XRN?#>`home`[D,*] | I will be home. => Я буду дома.
-phrase:be <RN?#>`home`[D,*] | This is home furniture. => Это домашняя мебель{1.обстановка}.
-phrase:be <RN?#>`home`[D,*] | Is he home? => Он дома?
-phrase:be <RN?#>`home`[D,*] | Am I home? => Я дома?
-phrase:be <RN?#>`home`[D,*] | Was she home? ~> дома?
-phrase:be <RN?#>`home`[D,*] | Were they home? ~> дома?
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | We are home. => Мы - дома.
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | She was home. => Она была дома.
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | They were home yesterday. ~> были дома
+phrase:will <XRN?#D>`home`[DdIf,C&jJ*] | I will be home soon. ~> буду дома
+phrase:will <XRN?#D>`home`[DdIf,C&jJ*] | I will be home. => Я буду дома.
+phrase:will <XRN?#D>`home`[Pp^][$] | I will be home after work. ~> буду дома после работы
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | This is home furniture. => Это домашняя мебель{1.обстановка}.
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Is he home? => Он дома?
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Am I home? => Я дома?
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Was she home? ~> дома?
+phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Were they home? ~> дома?
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

@@ -192,11 +192,11 @@ If the varying auxiliary is the dictionary head, use its native stem reference
 instead of listing `am`, `is`, `are`, `was` and `were`. Those records refer to
 `be` through `\be` and inherit its subrules. `X` is a class inside a pattern;
 an entry headed `X` would look up the literal English letter, not all auxiliaries.
-The home family uses two shared rules:
+The home family uses shared rules on `be` and `will`:
 
 ```text
-be <RN?#>`home`[D,*]*$@\$`Dдома`\
-will <XRN?#>`home`[D,*]*$@\$`Dдома`\
+be <RN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
+will <XRN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
 ```
 
 The first covers statements and inverted questions through the `be` family.
@@ -206,6 +206,9 @@ and auxiliary nodes; `$` finds `home`, and only its reading changes to `Dдом�
 Keep the auxiliary's existing tense/person fields instead of writing separate
 `WX001`, `WX003`, `WX103`, etc. equivalents. The following-context check
 distinguishes the locative adverb from nouns such as `home furniture`.
+The companion `[Pp^][$]` rules match through the first word after a
+preposition so that marking the last matched node leaves the preposition
+available for normal processing.
 
 Use the narrowest pattern that covers the meaningful variation. `<TAO>` is not
 a magic spelling for `a/the`: the article alone is `T`. A pattern such as

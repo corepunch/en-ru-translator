@@ -64,17 +64,31 @@ there is no time*WDнекогда
 six months*Nполгода
 
 ## home
-# Inflected verbs inherit these stem phrases; do not add walked/ran/got rows.
-# hurried's missing verb reading and \hurry reference are in changes.txt.
+# Inflected verbs inherit these stem phrases; hurried has its native stem
+# reference in changes.txt.
 walk home*WVидтиDдомой
 run home*WVбежатьDдомой
 get home*WVдобиратьсяDдомой
 hurry home*WVспешитьDдомой
-fly home*WVлететьDдомой
 stay home*WVоставатьсяDдома
-# The auxiliary forms inherit be's rule through their native \be reference.
-# Keep their grammatical fields; the optional subject also covers questions.
-be <RN?#>`home`[D,*]*$@\$`Dдома`\
-# Future cleanup can remove be; will retains the X auxiliary and its tense.
-will <XRN?#>`home`[D,*]*$@\$`Dдома`\
+# Check the word after home so home can still modify a following noun.
+# A preposition rule matches one word beyond it so LTGOLD can still pick
+# the preposition in context (on Friday -> в Пятницу).
+fly <D>`home`[DdIf,C&jJ*]*$@лететь\$`Dдомой`\n
+fly <D>`home`[Pp^][$]*$@лететь\$`Dдомой`\n
+# Frequency keeps the usual летать. The silent PВ governs every + noun.
+fly <D>`home``every`N*$@\$`DDWDдомойPВ`\n
+# A completed departure in the simple past takes полететь.
+flew <D>`home`[DdIf,C&jJ*]*$@полететь\$`Dдомой`\3
+flew <D>`home`[Pp^][$]*$@полететь\$`Dдомой`\3
+arrive <D>`home`[DdIf,C&jJ*]*$@\$`Dдомой`\
+arrive <D>`home`[Pp^][$]*$@\$`Dдомой`\
+# Forms such as am and was inherit the be rules through their stem link.
+# Future cleanup can remove be, so will has the same locative check.
+be <RN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
+be <RN?#D>`home`[Pp^][$]*$@\$`Dдома`\
+will <XRN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
+will <XRN?#D>`home`[Pp^][$]*$@\$`Dдома`\
+sweet `home`[*]*$@милый
+home sweet home*WAмилыйNдом
 make <TAO>`deal`*$заключать\$`Nсделка`\

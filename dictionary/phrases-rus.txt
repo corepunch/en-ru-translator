@@ -3,3 +3,6 @@
 спасибо*N c0 80 ff
 рождество*N 80 80 80
 сон*N 80 81 9b
+# Existing verb paradigm 67 in the imperfective and perfective tables.
+лететь*V a8 80 c3 80
+полететь*V a2 80 c3 80

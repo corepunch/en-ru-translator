@@ -6,10 +6,12 @@ LTPRO's morphology tables are in `core/rules.lua` (`rules.paradigms`: `noun-m`,
 `noun-f`, `noun-n`, `adjective-m`, `adjective-f`, `adjective-n`,
 `verb-imperfective`, `verb-perfective`, `replacement`), extracted byte for byte
 from the unpacked executable, together with the pronoun table
-(`rules.lists.pronouns` nominatives, `rules.lists.pronoun_cases` oblique cases). A dictionary directory may carry its own
-text copy: `dictionary/paradigms.txt` (one row per paradigm: cut count, endings
-per slot, with two fixes to LTPRO's data) takes precedence for the default dictionaries. Each `.RUS` record names its paradigm in the native byte
-(`0x80|id`).
+(`rules.lists.pronouns` nominatives, `rules.lists.pronoun_cases` oblique cases).
+A dictionary directory can provide a complete replacement for a table in
+`paradigms.txt`. The default dictionary uses that format to restore the missing
+`т` in the past stem of imperfective row 67 (`лететь` → `летел`). The other
+tables still come from `core/rules.lua`. Each `.RUS` record names its paradigm
+in the native byte (`0x80|id`).
 
 Every table row has a list of the lemma endings it serves, in the same order as
 the rows: `rules.lists.endings_noun_m` (66 rows), `endings_noun_f` (35),

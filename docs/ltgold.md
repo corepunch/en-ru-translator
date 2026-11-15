@@ -41,6 +41,12 @@ bits, verified minimal pairs).
   which has its own `.RUS` record (plural-only, paradigm 23); `people*Nлюди`
   the same with paradigm 30. A plural is not built from ребенок.
 
+The default Lua engine uses the native possessive suffix analysis to keep
+a recognized owner noun and its modifiers together during reordering. An
+ambiguous noun/verb head needs a modifier to establish the nominal group.
+The existing agreement and inflection passes then generate the Russian forms.
+`--original` follows LTPRO's own choices of reading and word order.
+
 ## Unknown words
 
 LTPRO's lexical routine (file 0x10E91 and 0x119A5) tags a word no lookup

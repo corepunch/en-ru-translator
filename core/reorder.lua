@@ -6,6 +6,76 @@ local reorder = {}
 -- Port of LTPRO's reorder pass, operating on original-shaped lexical nodes.
 -- The native +98 text pointer addresses the record's own +11C translation.
 local number = nodes.number
+local tag = nodes.tag
+
+local function after_modifiers(vector, first, classes)
+  while vector[first] and classes:find(tag(vector[first]), 1, true) do first = first + 1 end
+  return first
+end
+
+local function has_noun(node)
+  return node and (tag(node) == 'N' or tag(node) == 'Z' and
+    (nodes.has_reading(node, 'N') or nodes.has_reading(node, 'n')))
+end
+
+local function possessive_form(node)
+  -- Exact noun readings can already encode the genitive, as in john's*Nджона.
+  if number(node, 'reading_state') < 2 or
+    (number(node, 'case_mask') ~= 2 and tag(node) ~= 'N') then return false end
+  local source = node.source or ''
+  return source:sub(-1) == "'" or source:sub(-2):lower() == "'s"
+end
+
+function reorder.prepare_possessives(vector, count)
+  for index = 1, count - 2 do
+    local owner = vector[index]
+    if possessive_form(owner) and has_noun(owner) then
+      local head_index = after_modifiers(vector, index + 1, 'A')
+      local head = vector[head_index]
+      local modified = head_index > index + 1 or ('AO'):find(tag(vector[index - 1]), 1, true)
+      -- The -'s/-s' suffix has already supplied the case and number.
+      -- An ambiguous verb/noun head needs a modifier to resolve the group.
+      if has_noun(head) and (tag(head) == 'N' or modified) then
+        nodes.mark_possessive(owner)
+      end
+    end
+  end
+end
+
+local function reverse(vector, first, last)
+  while first < last do
+    vector[first], vector[last] = vector[last], vector[first]
+    first, last = first + 1, last - 1
+  end
+end
+
+local function move_possessive(vector, first)
+  local last = after_modifiers(vector, first, 'AOT')
+  if not vector[last] or tag(vector[last]) ~= 'N' or not nodes.possessive(vector[last]) then return end
+  local ends = {}
+  while vector[last] and tag(vector[last]) == 'N' and nodes.possessive(vector[last]) do
+    ends[#ends + 1] = last
+    last = after_modifiers(vector, last + 1, 'A')
+  end
+  if not vector[last] or tag(vector[last]) ~= 'N' then return end
+
+  -- Reverse the groups [owner ...] [head], keeping each group's modifiers.
+  local initial = vector[first]
+  if first == 1 and ('AO'):find(tag(initial), 1, true) and
+    not initial.phrase_case and initial.source:match('^[A-Z][a-z]+$') then
+    initial.phrase_case = {caps = 0}
+  end
+  local start, following = first, vector[last].next
+  for _, finish in ipairs(ends) do
+    reverse(vector, start, finish)
+    start = finish + 1
+  end
+  reverse(vector, start, last)
+  reverse(vector, first, last)
+  for i = first - 1, last - 1 do vector[i].next = vector[i + 1] end
+  vector[last].next = following
+  return last - first + 1
+end
 
 local handlers = {
   [1] = function(v, first, last)
@@ -82,13 +152,14 @@ local function eligible(v, first)
     number(v[first + 2], 'marker') ~= 0x3D and prior ~= 0x44 and prior ~= 0x2D
 end
 
-function reorder.apply(root, tables)
+function reorder.apply(root, tables, possessives)
   tables = tables or { rules[5], rules[6] }
   local vector, count = nodes.vector(root)
   local first = 1
   while first < count - 1 do
-    local consumed = 1
-    if eligible(vector, first) then
+    local grouped = possessives and move_possessive(vector, first)
+    local consumed = grouped or 1
+    if not grouped and eligible(vector, first) then
       local applied = false
       for _, block in ipairs(tables) do
         for _, rule in ipairs(block) do

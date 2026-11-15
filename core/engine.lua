@@ -224,12 +224,16 @@ function engine.run(input, options)
   for key, value in pairs(options) do analysis_options[key] = value end
   -- Off by default, as in LTPRO; --names turns it on.
   analysis_options.proper_names = options.proper_names == true and options.transliterate ~= false
+  analysis_options.possessives = not options.original
   local analyzed = lexicon.analyze(dict, encoding.encode(input), analysis_options)
 
   local stages = {}
   stages.lexical_word_count = analyzed.word_count or 0
   local grammar_entered = stages.lexical_word_count > 0
   if grammar_entered then
+    if analysis_options.possessives then
+      reorder.prepare_possessives(analyzed.vector, analyzed.count)
+    end
     local t1 = grammar.first(analyzed.root, {terminator = analyzed.terminator})
     stages.T1 = t1
     local grammar_result = t1.result
@@ -238,11 +242,12 @@ function engine.run(input, options)
       stages.T2 = t2
       local t3 = grammar.third(analyzed.root, {count = t2.count, terminator = analyzed.terminator})
       stages.T3 = t3
-      local t4 = phrasing.run(analyzed.root, {count = t3.count, terminator = analyzed.terminator})
+      local t4 = phrasing.run(analyzed.root, {count = t3.count, terminator = analyzed.terminator,
+        possessives = analysis_options.possessives})
       stages.T4 = t4
     end
     if grammar_result ~= 0 then
-      local vector, count, rebuilt = reorder.apply(analyzed.root)
+      local vector, count, rebuilt = reorder.apply(analyzed.root, nil, analysis_options.possessives)
       stages.reorder = {vector = vector, count = count, rebuilt = rebuilt}
     end
   end

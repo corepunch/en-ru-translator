@@ -114,22 +114,7 @@ fly <D>`home``alone`*$@лететь\$`Dдомой`\n
 # the whole nominal subject. The N C V tail keeps один nominative.
 # After and, a silent S131 supplies plural agreement without changing the
 # printed nouns. Keep these subrules short enough for the DOS matcher.
-# T6 A-NN moves the head noun ahead of the determiner, modifier and owner.
-# The temporary hyphen retains the modifier. Its W reading restores A for
-# genitive agreement. The груп) label on the new home reading selects старший.
-was <D>`your`!опр!!род![N]<DKk>`home``alone`*$JJ\$`Aтвой`-@@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-were <D>`your`!опр!!род![N]<DKk>`home``alone`*$JJ\$`Aтвой`-@@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-was <Dd>[AO]!опр!!род![N]<DKk>`home``alone`*$JJ\$A-@@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-were <Dd>[AO]!опр!!род![N]<DKk>`home``alone`*$JJ\$A-@@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-# T5 ANNAN moves the head noun together with its adjective. The shared
-# possessor subrule restores the head adjective's A tag and marks the
-# head noun as a phrase endpoint. The owner's adjective regains A via W.
-was <D>`your`!опр!!род![A][N]<DKk>`home``alone`*$JJ\$`Aтвой`N@w@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-were <D>`your`!опр!!род![A][N]<DKk>`home``alone`*$JJ\$`Aтвой`N@w@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-was <Dd>[AO]!опр!!род![A][N]<DKk>`home``alone`*$JJ\$AN@w@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-were <Dd>[AO]!опр!!род![A][N]<DKk>`home``alone`*$JJ\$AN@w@$`VVгруп)WVбытьDдомаNCV``Aодин`\
-possessor [w][N]*$@\A
-older !род!<NwDKk>!груп!`alone`*$@AWAстарший
+older !род!<NAODKkd>`home``alone`*$@AWAстарший
 # The your branch uses informal Russian only in this construction.
 was <Kk>`your`<TAOIH>[RNS#?]<TAORI#?NS&CHDdkKPpw>`home``alone`*$JJ\$`Aтвой`$@$`VVWVбытьDдомаNCV``Aодин`\
 was <TAOIH>[RNS#?]<TAORI#?NS&CHDdkKPpw>`home``alone`*$JJ\$@$`VVWVбытьDдомаNCV``Aодин`\

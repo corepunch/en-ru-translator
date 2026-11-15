@@ -1072,6 +1072,11 @@ local function decode(dictionary,records,index,options)
   end
   if value then
     lexicon.decode_reading(node,value:sub(2):match('^[^\\]*'),options)
+    -- A verb reading can overwrite the case found by the possessive suffix.
+    if options.possessives and derived and derived.fields.case_mask == 2 then
+      node.case_mask = 2
+      if derived.record.value:sub(1, 1) == 'n' then node.number = 1 end
+    end
 
   elseif nodes.tag(node)=='?' or nodes.tag(node)=='#' then node.person,node.gender=3,1 end
   return index+1

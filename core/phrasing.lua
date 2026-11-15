@@ -504,7 +504,8 @@ handlers[53] = function(match)
   local exit = 'replace'
   local n = match.node(match.seek_up(match.first, match.last, 'N'))
   local text = n.reading or ''
-  if ascii_letter(text:sub(1, 1)) or not reading(n, 'A') or number(n, 'number') ~= 0 then exit = 'advance_past_match' end
+  if ascii_letter(text:sub(1, 1)) or not reading(n, 'A') or number(n, 'number') ~= 0
+    or match.possessives and nodes.possessive(n) then exit = 'advance_past_match' end
   return exit
 end
 
@@ -621,7 +622,8 @@ function phrasing.run(root, options)
   while count - 3 >= di do
     local n = V(di)
     local step = 1
-    if (number(n, 'marker') == 0 or (number(n, 'marker') == 0x67 and tag(V(di - 1)) ~= 'p'))
+    if not (options.possessives and nodes.possessive(n))
+      and (number(n, 'marker') == 0 or (number(n, 'marker') == 0x67 and tag(V(di - 1)) ~= 'p'))
       and number(n, 'marker') ~= 0x25 and number(n, 'number') == 0 then
       local context = state.tags:sub(di + 1)
       if context:sub(1, 2) == 'NN' or context:sub(1, 3) == 'NAN' or context:sub(1, 3) == 'NdN'
@@ -754,6 +756,7 @@ function phrasing.run(root, options)
         local match = {
           first = di, last = last, count = count, vector = vector,
           head = head, tail = tail, node = V,
+          possessives = options.possessives,
         }
         function match.new_boundary(...)
           new_boundary(...)

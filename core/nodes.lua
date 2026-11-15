@@ -1,4 +1,5 @@
 local nodes = {}
+local genitive_label = require('core.encoding').encode('род)')
 
 -- Native lexical-node operations recovered from LTPRO.
 -- Grammar properties are named Lua fields; links preserve ordinary table identity.
@@ -46,6 +47,15 @@ end
 
 function nodes.has_reading(node, tag)
   return (assert(node, 'missing native node').reading or ''):find(tag, 1, true) ~= nil
+end
+
+function nodes.possessive(node)
+  return (node.reading or ''):sub(1, #genitive_label) == genitive_label
+end
+
+function nodes.mark_possessive(node)
+  node.tag, node.previous_tag = 0x4E, 0x4E
+  node.reading = genitive_label .. node.reading
 end
 
 function nodes.link(records)

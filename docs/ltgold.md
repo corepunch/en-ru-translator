@@ -89,7 +89,11 @@ nearly every record; it never needs more ids than the tables have.
   `endings_verb_perfective`, ...; `noun-m` row 0 serves `в г д з к л м р с т`,
   verb row 18 only `бежать`). This is how a paradigm is assigned to a new
   word: the rows whose list matches the lemma's end, longest ending first
-  (`russian.paradigm_candidates`).
+  (`russian.ending_matches`). By default, a Russian noun on `-а` without a
+  dictionary paradigm uses the longest matching first-declension ending.
+  This supplies case and number forms, leaving agreement gender to the
+  grammatical analysis. Exact possessive readings and recognized `пол-`
+  quantities can already contain a case form and use their supplied reading.
 - **Fixed behaviour of the tables**, which the original shows and the engine
   keeps: one prepositional form (`в саде`); imperatives are plural
   (`Помогите`, `Полейте`); the comparative is analytic (`более высокий`); the
@@ -115,10 +119,10 @@ python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/cases.json \
   --dictionary LTGOLD/BASE.DIC --russian LTGOLD/BASE.RUS
 ```
 
-In default mode this gives 77/77 on the main corpus and 375/386 on
-`review-2026-10-08`, including the intentional change to `cities'`.
-`tools/ltpro_feature_review.py` checks 596 exact matches, 27 intentional
-differences and 4 known limitations, with 0 unexpected results.
+In default mode this gives 77/77 on the main corpus and 373/386 on
+`review-2026-10-08`. `tools/ltpro_feature_review.py` checks 592 exact matches,
+33 intentional differences and 2 known limitations, with 0 unexpected
+results.
 With `--original`, all 627 feature cases match LTPRO exactly.
 Whole files (`DEMO.TXT` and layout cases) are compared byte for byte by
 `test/document_test.lua` against `test/ltpro/documents/reference.json`. A dictionary change is judged by what it does

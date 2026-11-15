@@ -44,7 +44,8 @@ for index, case in ipairs(reference.cases) do
   end
 end
 -- Every one-line capture is a document too: the whole output file, CRLF and
--- meanings appendix included, must match for these fully matching corpora.
+-- meanings appendix included, must match in the original profile.
+options.original = true
 local corpora = {
   'test/ltpro/reference.json', 'test/ltpro/holdout_reference.json', 'test/ltpro/macro_reference.json',
   'test/ltpro/capitalization-reference.json', 'test/ltpro/prepositions/reference.json',

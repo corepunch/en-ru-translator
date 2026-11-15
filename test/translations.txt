@@ -57,7 +57,7 @@ preposition:versus | The house versus the village. ~> против деревн�
 preposition:via | A letter via the brother. ~> через брата
 preposition:within | Within the house. ~> В пределах дома
 preposition:with | With best wishes. ~> С наилучшими пожеланиями
-preposition:without | A house without a roof. => Дом без крыша.
+preposition:without | A house without a roof. => Дом без крыши.
 # в/на and из/с/от follow .RUS noun flags; p entries pack conjunctions.
 preposition-context | He is in the house. ~> в доме
 preposition-context | He is at the house. ~> в доме
@@ -166,7 +166,7 @@ hortative | Let's work. => Давайте к работе{1.труд}.
 hortative | Let him go. !> Давайте
 homograph:blind | Love is blind. => Любовь слепой.
 homograph:blind | He is blind. => Он слепой.
-homograph:blind | The sun blinds me. => Солнечные штора меня.
+homograph:blind | The sun blinds me. => Солнечные шторы меня.
 
 # Tokenizer classes recovered for issue 18 (test/ltpro/dictionary-syntax):
 # a leading underscore keeps an unknown word, an inner one makes it #.
@@ -216,7 +216,7 @@ gender:inferred-from-lemma | The main reason. => Основная причина
 verb-government:dative | Help me. => Помогите мне.
 verb-government:dative | Trust me. => Поверьте мне.
 native-reading:both | Both sides agreed. => Обе стороны согласовали.
-native-reading:both | Attacks by both sides. => Атака{1.нападение} обеими сторонами.
+native-reading:both | Attacks by both sides. => Атаки{1.нападение} обеими сторонами.
 native-reading:rising | Rising prices. => Растущие цены.
 native-reading:run | Run! => Побегите{1.выполнять}!
 native-reading:refinery | The refineries burn. => Нефтеперегонные Заводы жгут{1.гореть;обжигать}.
@@ -520,4 +520,14 @@ possessive | She's reading the book. => Она читает книгу.
 possessive | The cities’ names are here. => Имена городов - здесь.
 possessive | The babies’ names are here. => Имена младенцев - здесь.
 possessive | The pies’ prices are here. => Цены пирогов - здесь.
+noun | The ladies’ books are here. => Книги дам - здесь.
+noun | The books of the lady are here. => Книги дамы - здесь.
+noun | I spoke with the lady. => Я говорил с дамой.
+noun | I saw the lady. ~> даму.
+noun | The antennas are here. => Антенны - здесь.
+noun | The doors of the tents are open. => Двери{1.вход} палаток открыты.
+noun | The pizzas are here. => Пиццы - здесь.
+noun | The books of my dad are here. => Книги моего папы - здесь.
+noun | My dad was home alone. => Мой папа был дома один.
+noun | John's book is good. => Книга Джона хорошая.
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

@@ -22,8 +22,7 @@ local function possessive_form(node)
   -- Exact noun readings can already encode the genitive, as in john's*Nджона.
   if number(node, 'reading_state') < 2 or
     (number(node, 'case_mask') ~= 2 and tag(node) ~= 'N') then return false end
-  local source = node.source or ''
-  return source:sub(-1) == "'" or source:sub(-2):lower() == "'s"
+  return nodes.possessive_spelling(node)
 end
 
 function reorder.prepare_possessives(vector, count)

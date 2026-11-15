@@ -187,8 +187,17 @@ function generation.word(state, node)
   local r = record(state, node)
   local tag = r.b('tag')
   if tag == 0x4E then -- N
-    if r.valid() and (r.b('number') ~= 0 or r.b('case_mask') > 1) then
-      r.save(generation.noun_form(state, r.w('paradigm'), r.text(), r.b('gender'), r.b('number'), generation.case(r.b('case_mask'))))
+    if r.b('number') ~= 0 or r.b('case_mask') > 1 then
+      local paradigm, gender = r.w('paradigm'), r.b('gender')
+      -- Exact possessive readings may already be inflected (john's -> джона).
+      if not r.valid() and not state.original and r.b('record_class') == 0 and
+        ((node.lookup or '') ~= '' or not nodes.possessive_spelling(node)) then
+        -- The same declension can serve different agreement genders (мама, папа).
+        paradigm, gender = russian.a_noun_paradigm(state, r.text()), 2
+      end
+      if paradigm and paradigm >= 0 and paradigm < 0x7F then
+        r.save(generation.noun_form(state, paradigm, r.text(), gender, r.b('number'), generation.case(r.b('case_mask'))))
+      end
     end
   elseif tag == 0x55 then -- U
     local n = r.length()

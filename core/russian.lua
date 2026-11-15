@@ -1,5 +1,7 @@
 local text = require 'core.text'
+local encoding = require 'core.encoding'
 local russian = {}
+local half_prefix = encoding.encode('пол')
 
 function russian.from_bytes(bytes, overlay)
   local entries = {}
@@ -123,6 +125,34 @@ function russian.ending_matches(state, word, class, variant)
     end
   end
   return matches
+end
+
+local function half_quantity(state, word, ending)
+  if word:sub(1, #half_prefix) ~= half_prefix then return false end
+  local lemma = word:sub(#half_prefix + 1, -2)
+  local line = russian.lookup(state, lemma .. '*N', 1, 'N')
+  local code = line and line:match('%*N(.+)')
+  if not code or #code < 3 or code:byte(2) & 3 ~= 1 then return false end
+  local paradigm = code:byte(3) & 0x7F
+  if paradigm == 0x7F then return false end
+  local cut, forms = state.assets:paradigm('noun-m', paradigm)
+  return cut == 0 and forms:sub(1, #ending + 1) == ending .. ' '
+end
+
+function russian.a_noun_paradigm(state, word)
+  local ending = state.assets:string('a')
+  if not text.ends(word, ending) then return end
+  for i = 1, #word do
+    local byte = word:byte(i)
+    if not text.is_lower_cyrillic(byte) or text.is_upper_cyrillic(byte) then return end
+  end
+  -- Compounds such as полгода use the genitive of a masculine noun.
+  if half_quantity(state, word, ending) then return end
+  local best
+  for _, match in ipairs(russian.ending_matches(state, word, 0x4E, 2)) do
+    if not best or match.length > best.length then best = match end
+  end
+  return best and best.id
 end
 
 -- Preserve the original ordering of equal-length suffix candidates, expressed

@@ -49,6 +49,11 @@ function nodes.has_reading(node, tag)
   return (assert(node, 'missing native node').reading or ''):find(tag, 1, true) ~= nil
 end
 
+function nodes.possessive_spelling(node)
+  local source = node.source or ''
+  return source:sub(-1) == "'" or source:sub(-2):lower() == "'s"
+end
+
 function nodes.possessive(node)
   return (node.reading or ''):sub(1, #genitive_label) == genitive_label
 end

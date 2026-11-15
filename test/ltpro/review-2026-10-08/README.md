@@ -22,7 +22,7 @@ test engine behavior; many are deliberately not natural English sentences.
 ## Results and interpretation
 
 [comparison.json](comparison.json) records each input, original `ltpro` output,
-current `lua` output, classification and review reason separately:
+Lua output at the initial review, classification and review reason separately:
 
 | Classification | Cases |
 | --- | ---: |
@@ -58,14 +58,11 @@ raw-output hash and a reason. These expectations do not modify oracle evidence.
 
 ## Known linguistic limitations
 
-Six case rows (including repeated sentences across groups) expose three broader
-quality limitations. They remain open in `PLAN.md`; they are not accepted as
-correct Russian:
+The default engine now generates `дам` and `дамы` using the regular
+first-declension fallback. The original restores `ladies'` to `lad` and
+leaves `дама` uninflected in the expanded `of the lady` / `of the ladies`
+controls. Two other quality limitations from the initial review remain:
 
-- The supplied Russian data lacks morphology for `дама`. Lua correctly restores
-  `ladies'` to `lady`, but leaves the Russian noun uninflected. Expanded
-  `of the lady` / `of the ladies` controls reproduce that data limitation in
-  the original. Original `ladies'` incorrectly restores `lad` instead.
 - `At your convenience.` produces original `К Ваше Услугам.` and Lua
   `К ваше услугам.`. The phrase reading does not provide enough information for
   correct possessive agreement; the difference also includes ordinary Lua casing.

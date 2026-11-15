@@ -156,10 +156,10 @@
     "expected_lua": "Имена младенцев - здесь."
   },
   "review-extra-184": {
-    "classification": "known_limitation",
-    "reason": "Lua restores lady as the stem of ladies', while LTPRO looks up lad. The supplied Russian dictionary has no inflection record for дама.",
+    "classification": "intentional_difference",
+    "reason": "Lua restores lady as the plural possessive base and inflects дама using the regular -а paradigm. LTPRO looks up lad.",
     "oracle_raw_sha256": "f9ee98ce490ecfc05a2de0325fd848d94879b6c2073ed3796919b9b817bf9d37",
-    "expected_lua": "Книги дама - здесь."
+    "expected_lua": "Книги дам - здесь."
   },
   "review-extra-185": {
     "classification": "intentional_difference",
@@ -168,10 +168,10 @@
     "expected_lua": "Имена городов - здесь."
   },
   "natural-027": {
-    "classification": "known_limitation",
-    "reason": "Lua restores lady as the stem of ladies', while LTPRO looks up lad. The supplied Russian dictionary has no inflection record for дама.",
+    "classification": "intentional_difference",
+    "reason": "Lua restores lady as the plural possessive base and inflects дама using the regular -а paradigm. LTPRO looks up lad.",
     "oracle_raw_sha256": "f9ee98ce490ecfc05a2de0325fd848d94879b6c2073ed3796919b9b817bf9d37",
-    "expected_lua": "Книги дама - здесь."
+    "expected_lua": "Книги дам - здесь."
   },
   "natural-029": {
     "classification": "intentional_difference",
@@ -184,5 +184,29 @@
     "reason": "Lua restores the -y stem of the plural possessive and uses the native plural genitive. LTPRO drops the entire -ies' ending and leaves this token untranslated.",
     "oracle_raw_sha256": "54da5bb21a6049876059a2eb46fa1c47305bc6bc13ba29295065e82582ebc3f7",
     "expected_lua": "Имена городов - здесь."
+  },
+  "noun-endings-074": {
+    "classification": "intentional_difference",
+    "reason": "Without a Russian dictionary record, the regular -а paradigm supplies the accusative темноту.",
+    "oracle_raw_sha256": "be89292c48aaa9dd715e7449f39f018b10ff8494e62e52fcc9acac52882b73b6",
+    "expected_lua": "Я вижу темноту."
+  },
+  "noun-endings-078": {
+    "classification": "intentional_difference",
+    "reason": "Without a Russian dictionary record, the regular -а paradigm supplies the accusative крутизну.",
+    "oracle_raw_sha256": "920da1fd48c25cecaa1a85929fddc774abaefb270c5a91319f6e0ea3cc737df6",
+    "expected_lua": "Я вижу крутизну."
+  },
+  "control-004": {
+    "classification": "intentional_difference",
+    "reason": "The regular -а paradigm supplies дам, the plural genitive of дама, whose Russian dictionary record is absent.",
+    "oracle_raw_sha256": "296ba48be49cf5bfe2ac7a8f9b6097a074b41ab157d8823c1437a471ac04f7e8",
+    "expected_lua": "Книги дам - здесь."
+  },
+  "control-005": {
+    "classification": "intentional_difference",
+    "reason": "The regular -а paradigm supplies дамы, the singular genitive of дама, whose Russian dictionary record is absent.",
+    "oracle_raw_sha256": "57933a04c62ad4b4c1ee1c74c77da29893def1fe7767afa199add99bb8fef633",
+    "expected_lua": "Книга дамы - здесь."
   }
 }

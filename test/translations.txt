@@ -379,6 +379,16 @@ phrase:fly <D>`home``every`N | I fly home every year => Я летаю домой
 phrase:fly <D>`home``every`N | She flies home every week. => Она летает домой каждую неделю.
 phrase:flew <D>`home`[DdIf,C&jJ*] | They flew home. => Они полетели домой.
 phrase:flew <D>`home`[Pp^][$] | I flew home on Friday. => Я полетел домой в Пятницу.
+phrase:fly <D>`straight``home`[DdIf,C&jJ*] | I fly straight home. => Я лечу прямо домой.
+phrase:fly <D>`straight``home`[DdIf,C&jJ*] | She was flying straight home. => Она летела прямо домой.
+phrase:fly <D>`straight``home`[Pp^][$] | Fly straight home with me. => Летите прямо домой со мной.
+phrase:flew <D>`straight``home`[DdIf,C&jJ*] | He flew straight home => Он полетел прямо домой
+phrase:flew <D>`straight``home`[Pp^][$] | They flew straight home on Friday. => Они полетели прямо домой в пятницу.
+phrase:straight `home`[DdIf,C&jJ*] | Straight home! => Прямо домой!
+phrase:straight `home`[DdIf,C&jJ*] | The line is straight. => Линия прямая.
+phrase:straight `home`[DdIf,C&jJ*] | They flew straight home flags. ~> прямые домашние флаги
+phrase:straight `home`[Pp^][$] | They flew straight home on Friday. ~> прямо домой в пятницу
+phrase:straight `home``every`N | He flew straight home every evening. => Он летал прямо домой каждый вечер.
 phrase:arrive <D>`home`[DdIf,C&jJ*] | I arrived home. => Я прибыл домой.
 phrase:arrive <D>`home`[Pp^][$] | I arrived home on Friday. => Я прибыл домой в Пятницу.
 phrase:sweet `home`[*] | Sweet home => Милый дом
@@ -405,4 +415,9 @@ phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Is he home? => Он дома?
 phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Am I home? => Я дома?
 phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Was she home? ~> дома?
 phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Were they home? ~> дома?
+phrase:am <RN?#DKk>`home``alone` | I am home alone => Я дома один
+phrase:am <RN?#DKk>`home``alone` | Am I home alone? => Я дома один?
+phrase:be <RN?#DKk>`home``alone` | She was home alone. => Она была дома в одиночестве.
+phrase:be <RN?#DKk>`home``alone` | We were home alone yesterday. => Мы были дома в одиночестве вчера.
+phrase:will <XRN?#DKk>`home``alone` | I will be home alone. => Я буду дома в одиночестве.
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

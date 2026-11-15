@@ -81,6 +81,15 @@ fly <D>`home``every`N*$@\$`DDWDдомойPВ`\n
 # A completed departure in the simple past takes полететь.
 flew <D>`home`[DdIf,C&jJ*]*$@полететь\$`Dдомой`\3
 flew <D>`home`[Pp^][$]*$@полететь\$`Dдомой`\3
+# Straight is still tagged as an adjective at T4. Match it explicitly on
+# the motion verbs, then let its own rule translate the two adverbs.
+fly <D>`straight``home`[DdIf,C&jJ*]*$@лететь\\n
+fly <D>`straight``home`[Pp^][$]*$@лететь\\n
+flew <D>`straight``home`[DdIf,C&jJ*]*$@полететь\\3
+flew <D>`straight``home`[Pp^][$]*$@полететь\\3
+straight `home`[DdIf,C&jJ*]*$DDWDпрямо\`DDWDдомой`\
+straight `home`[Pp^][$]*$DDWDпрямо\`DDWDдомой`\
+straight `home``every`N*$DDWDпрямо\`DDWDдомойPВ`\
 arrive <D>`home`[DdIf,C&jJ*]*$@\$`Dдомой`\
 arrive <D>`home`[Pp^][$]*$@\$`Dдомой`\
 # Forms such as am and was inherit the be rules through their stem link.
@@ -89,6 +98,11 @@ be <RN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
 be <RN?#D>`home`[Pp^][$]*$@\$`Dдома`\
 will <XRN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
 will <XRN?#D>`home`[Pp^][$]*$@\$`Dдома`\
+# am keeps the nominative один. The shared copula rules use в одиночестве
+# to avoid the instrumental that be would otherwise impose on один.
+am <RN?#DKk>`home``alone`*$@\$`Dдома`\
+be <RN?#DKk>`home``alone`*$@\$`Dдома``PPWPПвNодиночество`\
+will <XRN?#DKk>`home``alone`*$@\$`Dдома``PPWPПвNодиночество`\
 sweet `home`[*]*$@милый
 home sweet home*WAмилыйNдом
 make <TAO>`deal`*$заключать\$`Nсделка`\

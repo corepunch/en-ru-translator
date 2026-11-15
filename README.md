@@ -125,12 +125,11 @@ remain unchanged as research evidence. See [testing](TESTING.md) for the feature
 checks and optional historical comparisons.
 
 The [expanded executable review](test/ltpro/review-2026-10-08/README.md) adds 627
-fresh two-run captures: 574 exact matches, 47 intentional Lua differences, and
-6 known-limitation cases. It covers `-ness`, `'re`, `'ve`, other contractions and
-phrase gaps, and records both engines' output separately. Known limits include
-missing `дама` morphology, possessive agreement in `at ~ convenience`, and
-modal-perfect/conditional grammar. Matching the original is evidence of stable
-behavior, not proof of correct Russian.
+two-run captures covering noun endings, contractions and phrase gaps.
+It records both engines' output separately. Known limits include possessive
+agreement in `at ~ convenience` and modal-perfect/conditional grammar.
+See [current parity results](docs/ltgold.md#verifying). Default translation
+quality is evaluated separately from DOS compatibility.
 
 ```sh
 sh test/run_all.sh

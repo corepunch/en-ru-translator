@@ -54,6 +54,10 @@ function nodes.possessive_spelling(node)
   return source:sub(-1) == "'" or source:sub(-2):lower() == "'s"
 end
 
+function nodes.exact_possessive(node)
+  return (node.lookup or '') == '' and nodes.possessive_spelling(node)
+end
+
 function nodes.possessive(node)
   return (node.reading or ''):sub(1, #genitive_label) == genitive_label
 end

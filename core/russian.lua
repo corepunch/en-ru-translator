@@ -155,6 +155,31 @@ function russian.a_noun_paradigm(state, word)
   return best and best.id
 end
 
+function russian.feminine_a_noun(state, word)
+  if not russian.a_noun_paradigm(state, word) then return false end
+  local ending, feminine, total = word:sub(-2), 0, 0
+  for lemma, entries in pairs(state.russian.entries) do
+    if text.ends(lemma, ending) then
+      for _, line in ipairs(entries) do
+        local code = line:match('%*N(.+)')
+        if code and #code >= 3 then
+          local flags = code:byte(2)
+          if flags & 8 == 0 then
+            total = total + 1
+            if flags & 3 == 2 then feminine = feminine + 1 end
+          end
+          break
+        end
+      end
+    end
+  end
+  -- Require the lower score bound to clear a two-thirds majority. A short
+  -- ending shared by only a few lemmas is weak evidence for agreement.
+  local share = 2 / 3
+  local margin = 2 * math.sqrt(total * share * (1 - share))
+  return feminine > share * total + margin
+end
+
 -- Preserve the original ordering of equal-length suffix candidates, expressed
 -- as a sort of Lua objects rather than swaps in a byte-addressed array.
 local function exchange(items, a, b) items[a],items[b]=items[b],items[a] end

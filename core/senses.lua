@@ -336,7 +336,9 @@ function senses.select(state, original, r, alt, wtag, wflag)
     set(r, 'person', 3)
   elseif t == 0x4E then
     put_reading(length, 0)
-    set(r, 'gender', 1)
+    local feminine = not state.original and not nodes.exact_possessive(r)
+      and russian.feminine_a_noun(state, r.text)
+    set(r, 'gender', feminine and 2 or 1)
     set(r, 'person', 3)
   end
   put_reading(length, 0)

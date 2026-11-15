@@ -191,7 +191,7 @@ function generation.word(state, node)
       local paradigm, gender = r.w('paradigm'), r.b('gender')
       -- Exact possessive readings may already be inflected (john's -> джона).
       if not r.valid() and not state.original and r.b('record_class') == 0 and
-        ((node.lookup or '') ~= '' or not nodes.possessive_spelling(node)) then
+        not nodes.exact_possessive(node) then
         -- The same declension can serve different agreement genders (мама, папа).
         paradigm, gender = russian.a_noun_paradigm(state, r.text()), 2
       end

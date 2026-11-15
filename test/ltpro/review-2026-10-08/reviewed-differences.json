@@ -208,5 +208,23 @@
     "reason": "The regular -а paradigm supplies дамы, the singular genitive of дама, whose Russian dictionary record is absent.",
     "oracle_raw_sha256": "57933a04c62ad4b4c1ee1c74c77da29893def1fe7767afa199add99bb8fef633",
     "expected_lua": "Книга дамы - здесь."
+  },
+  "noun-endings-073": {
+    "classification": "intentional_difference",
+    "reason": "The Russian noun lacks an explicit record. Sufficient feminine evidence for its -а ending in BASE.RUS supplies feminine agreement.",
+    "oracle_raw_sha256": "eb28abcf7f38f6060ef5e8472279d71e5f013470bc1916a7d3061abf7c167181",
+    "expected_lua": "Темнота хорошая."
+  },
+  "noun-endings-077": {
+    "classification": "intentional_difference",
+    "reason": "The Russian noun lacks an explicit record. Sufficient feminine evidence for its -а ending in BASE.RUS supplies feminine agreement.",
+    "oracle_raw_sha256": "f90a8325a0446e6d0eed719300256f6780ba31ad1d594bf7ccc0c57575d26d74",
+    "expected_lua": "Крутизна хорошая."
+  },
+  "natural-034": {
+    "classification": "intentional_difference",
+    "reason": "The Russian noun lacks an explicit record. Sufficient feminine evidence for its -а ending in BASE.RUS supplies feminine agreement.",
+    "oracle_raw_sha256": "6e43d77b4c938de84ba4ae8dda68cdc62df79260e4852e5aba40cd6f029cb663",
+    "expected_lua": "Темнота глубока."
   }
 }

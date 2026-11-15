@@ -1,5 +1,9 @@
 {
  "stock": {
+  "Corned beef is good.": {
+   "lua": "Солонина хорошая.",
+   "reason": "The regular -а noun lacks a Russian record. Evidence from nouns with the same ending supplies feminine agreement."
+  },
   "This prevents him from working.": {
    "lua": "Это предохраняет его от работы.",
    "reason": "The original drops the object between prevent and from (also 'ошибки' in 'It prevents errors from occurring'); not yet explained. Lua keeps it, which is the correct Russian."
@@ -29,8 +33,8 @@
  },
  "reading-punctuation": {
   "Corned beef is good.": {
-   "lua": "Солонина хороший.",
-   "reason": "Without a corned headword the original no longer finds the corned beef phrase; that is what corned*: is for. Lua finds phrases without a head entry, which generated OpenRussian phrases rely on."
+   "lua": "Солонина хорошая.",
+   "reason": "Lua finds the phrase without a corned headword and infers feminine agreement for солонина from the Russian ending evidence."
   }
  }
 }

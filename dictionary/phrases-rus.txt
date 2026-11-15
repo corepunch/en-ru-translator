@@ -9,3 +9,5 @@
 одиночество*N 80 80 80
 # один as a predicative adjective uses the existing numeral paradigm 17.
 од*A 80 91
+# твой uses the existing мой/свой paradigm.
+тв*A 80 8B

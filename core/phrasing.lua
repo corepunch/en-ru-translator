@@ -719,6 +719,9 @@ function phrasing.run(root, options)
           if chosen.action:find('W',1,true) then
             local _,caps=(head.source or ''):gsub('[A-Z]','')
             local casing={caps=caps,first=head}
+            -- A silent conjunction can pass tense across a retained subject.
+            -- Keep the spelling of its names while casing the first output word.
+            if tag(head)=='J' and action=='J' then casing.by_source=true end
             for at=di,best do V(at).phrase_case=casing end
           end
           if tail_action and tail_action ~= '' then

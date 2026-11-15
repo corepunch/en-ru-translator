@@ -7,3 +7,5 @@
 лететь*V a8 80 c3 80
 полететь*V a2 80 c3 80
 одиночество*N 80 80 80
+# один as a predicative adjective uses the existing numeral paradigm 17.
+од*A 80 91

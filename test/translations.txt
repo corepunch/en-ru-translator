@@ -417,7 +417,13 @@ phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Was she home? ~> дома?
 phrase:be <RN?#D>`home`[DdIf,C&jJ*] | Were they home? ~> дома?
 phrase:am <RN?#DKk>`home``alone` | I am home alone => Я дома один
 phrase:am <RN?#DKk>`home``alone` | Am I home alone? => Я дома один?
-phrase:be <RN?#DKk>`home``alone` | She was home alone. => Она была дома в одиночестве.
-phrase:be <RN?#DKk>`home``alone` | We were home alone yesterday. => Мы были дома в одиночестве вчера.
+phrase:was <DKk>`home``alone` | She was home alone => Она была дома одна
+phrase:was <DKk>`home``alone` | He was home alone. => Он был дома один.
+phrase:was <DKk>`home``alone` | My daughter was home alone. => Моя дочь была дома одна.
+phrase:was <DKk>`home``alone` | She was not home alone. => Она не была дома одна.
+phrase:were <DKk>`home``alone` | We were home alone => Мы были дома одни
+phrase:were <DKk>`home``alone` | The children were home alone. => Дети были дома одни.
+phrase:were <DKk>`home``alone` | We were home alone yesterday. => Мы были дома одни вчера.
+phrase:be <RN?#DKk>`home``alone` | Was she home alone? => Она дома в одиночестве?
 phrase:will <XRN?#DKk>`home``alone` | I will be home alone. => Я буду дома в одиночестве.
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

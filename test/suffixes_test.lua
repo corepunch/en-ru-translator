@@ -97,13 +97,25 @@ assert(result.candidate == 'dog' and result.native_suffix == "s'")
 assert(result.fields.number == 1 and result.fields.case_mask == 2)
 result = assert(lexicon.lookup(derived, 'busier'))
 assert(result.candidate == 'busy' and result.native_suffix == 'ier' and result.fields.tense == 1)
--- LTPRO cuts ies' without restoring y (ladies' -> lad, cities' -> cit).
-local possessives=lexicon.from_bytes('city*Nгород\nlad*Nпарень\nhouse*Nдом\nclass*Nкласс\n')
-for source,stem in pairs({["ladies'"]='lad',["houses'"]='house',["classes'"]='class'}) do
-  local found=assert(lexicon.lookup(possessives,source))
-  assert(found.candidate==stem and found.fields.number==1 and found.fields.case_mask==2)
+-- Plural possessives keep the native case and number through stem lookup.
+local possessives = {
+  {"cities'", 'city'},
+  {"ladies'", 'lady', 'lad'},
+  {"babies'", 'baby'},
+  {"ties'", 'tie', 't'},
+  {"cookies'", 'cookie', 'cook'},
+  {"houses'", 'house', 'house'},
+  {"classes'", 'class', 'class'},
+}
+for _, fixture in ipairs(possessives) do
+  local source, stem, original_stem = table.unpack(fixture)
+  local found = assert(lexicon.lookup(base, source), source)
+  assert(found.candidate == stem and found.fields.number == 1 and found.fields.case_mask == 2, source)
+  local original = lexicon.lookup(base, source, {original = true})
+  assert((original and original.candidate) == original_stem, source)
 end
-assert(not lexicon.lookup(possessives,"cities'"))
+local truncated_stem = lexicon.from_bytes('lad*Nпарень\n')
+assert(not lexicon.lookup(truncated_stem, "ladies'"))
 
 local duplicate = lexicon.from_bytes('book*Zкнига\nbook*Nкнижка\n')
 result, reason = lexicon.lookup(duplicate, 'books')

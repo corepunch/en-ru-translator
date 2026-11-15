@@ -45,7 +45,9 @@ The default Lua engine uses the native possessive suffix analysis to keep
 a recognized owner noun and its modifiers together during reordering. An
 ambiguous noun/verb head needs a modifier to establish the nominal group.
 The existing agreement and inflection passes then generate the Russian forms.
-`--original` follows LTPRO's own choices of reading and word order.
+For plural possessives ending in `-ies'`, Lua looks up the base in `-ie` or
+`-y`. `--original` follows LTPRO's truncation and choices of reading and word
+order.
 
 ## Unknown words
 
@@ -113,10 +115,11 @@ python3 tools/ltpro_pipeline_probe.py --cases test/ltpro/cases.json \
   --dictionary LTGOLD/BASE.DIC --russian LTGOLD/BASE.RUS
 ```
 
-This gives 77/77 on the main corpus and 376/386 on `review-2026-10-08`; the
-ten differences there are reviewed intentional differences
-(`tools/ltpro_feature_review.py`: 603 exact, 22 intentional, 2 known
-limitations, 0 unexpected).
+In default mode this gives 77/77 on the main corpus and 375/386 on
+`review-2026-10-08`, including the intentional change to `cities'`.
+`tools/ltpro_feature_review.py` checks 596 exact matches, 27 intentional
+differences and 4 known limitations, with 0 unexpected results.
+With `--original`, all 627 feature cases match LTPRO exactly.
 Whole files (`DEMO.TXT` and layout cases) are compared byte for byte by
 `test/document_test.lua` against `test/ltpro/documents/reference.json`. A dictionary change is judged by what it does
 to translations; an engine change must keep these numbers.

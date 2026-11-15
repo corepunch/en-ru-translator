@@ -222,16 +222,19 @@ local function adjective_candidates(word, ending)
   return with_extra(stem, extra)
 end
 
-local function class_candidates(word, row)
+local function class_candidates(word, row, original)
   local class = row.selector:sub(1, 1)
   local ending = row.ending
   if class == "N" and not ending:find("'", 1, true) then return {} end
   if class == "A" then return adjective_candidates(word, ending) end
   local stem = word:sub(1, #word - #ending)
   if class == "V" then return with_extra(stem, ending:sub(1, 1) == "e" and "e" or nil) end
-  -- LTPRO cuts ies' without restoring y: ladies' reads lad (парень), and
-  -- cities' finds no cit and stays untranslated.
-  if ending == "ies'" then return {stem} end
+  if ending == "ies'" then
+    -- LTPRO truncates the whole ending. The default tries nouns ending
+    -- in -ie (pies') and restores -y for consonant + y plurals (cities').
+    if original then return { stem } end
+    return { stem .. 'ie', stem .. 'y' }
+  end
   if ending == "es'" then return with_extra(stem, 'e') end
   return { stem }
 end
@@ -276,7 +279,8 @@ function lexicon.lookup(dictionary, source, options)
 
   for _, row in ipairs(rows) do
     if #word > #row.ending and word:sub(-#row.ending) == row.ending then
-      local choices = row.transform == "class" and class_candidates(word, row) or candidates(word, row)
+      local choices = row.transform == "class" and class_candidates(word, row, options and options.original)
+        or candidates(word, row)
       for _, candidate in ipairs(choices) do
         local record, resolved = resolve(dictionary, candidate, options)
         if record then

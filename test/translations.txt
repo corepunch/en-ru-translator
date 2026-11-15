@@ -517,4 +517,7 @@ possessive | The doctor's new book is here. => Новая книга докто�
 possessive | I saw my tall neighbor's young daughter. ~> молодую дочь моего высокого соседа.
 possessive | My tall neighbor's young daughter was home alone. => Молодая дочь моего высокого соседа была дома одна.
 possessive | She's reading the book. => Она читает книгу.
+possessive | The cities’ names are here. => Имена городов - здесь.
+possessive | The babies’ names are here. => Имена младенцев - здесь.
+possessive | The pies’ prices are here. => Цены пирогов - здесь.
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

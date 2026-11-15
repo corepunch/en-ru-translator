@@ -17,10 +17,23 @@ anybody*R031кто-нибудь
 anyone*R031кто-нибудьAлюбой
 # Give these apostrophe forms a noun reading. Looking up their bare stem
 # also offers an adjective, which T4 selects before native genitive reordering.
-brother's*Nбрат
-daughter's*Nдочь
-father's*Nотец
-friend's*Nдруг
-mother's*Nмать
-sister's*Nсестра
-son's*Nсын
+# The род) label lets the possessive group rule distinguish owners from
+# ordinary noun modifiers. Brothers' and teacher's already have noun readings.
+brother's*Nрод)брат
+brothers'*nрод)брат
+daughter's*Nрод)дочь
+father's*Nрод)отец
+friend's*Nрод)друг
+mother's*Nрод)мать
+sister's*Nрод)сестра
+son's*Nрод)сын
+teacher's*Nрод)учитель
+# The опр) label identifies packed modifier readings. Their W equivalent
+# restores the adjective tag after T6 moves the possessive group.
+biological*AAопр)WAбиологический
+elder*AAопр)WAстарший
+eldest*AAопр)WAсамыйAстарший
+favorite*AAопр)WAлюбимый
+older*AAопр)WDболееAстарый
+younger*AAопр)WAмладший
+youngest*AAопр)WAсамыйAмолодой

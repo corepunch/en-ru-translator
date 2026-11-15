@@ -11,3 +11,7 @@
 -have a good day
 # Keep the adjective and let the past verb inherit hurry's phrases.
 hurried*EспешитьAпоспешный\hurry
+# These indefinite pronouns take third-person singular masculine agreement.
+somebody*R031кто-то
+anybody*R031кто-нибудь
+anyone*R031кто-нибудьAлюбой

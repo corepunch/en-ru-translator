@@ -617,6 +617,9 @@ function lexicon.apply_phrase(record, records, first, last, options, captures)
         end
       end
     end
+    -- A leading capture takes the sentence capital in its new position.
+    -- The English head's single capital should not repeat on the next word.
+    if casing and casing.caps==1 and held[rendered[1]] then casing.caps=0 end
     -- Only explicit output gaps reinsert captured words. Idioms such as
     -- "do your best" consume a possessive already expressed by their reading.
     for _=first,last do table.remove(records,first) end

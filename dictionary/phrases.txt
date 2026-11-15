@@ -98,11 +98,19 @@ be <RN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
 be <RN?#D>`home`[Pp^][$]*$@\$`Dдома`\
 will <XRN?#D>`home`[DdIf,C&jJ*]*$@\$`Dдома`\
 will <XRN?#D>`home`[Pp^][$]*$@\$`Dдома`\
-# Only the finite past heads use Vбыть. The silent N C V after дома
+# The finite past and future use Vбыть. The silent N C V after дома
 # triggers native coordinated-verb agreement, which copies gender and
 # number to the silent V. That V governs один in the nominative.
 was <DKk>`home``alone`*$Vбыть\$`DDWDдомаNCV``Aодин`\
 were <DKk>`home``alone`*$Vбыть\$`DDWDдомаNCV``Aодин`\
+will <DKk>`home``alone`*$Vбыть\$`DDWDдомаNCV``Aодин`\
+# In inverted past questions, reinsert the original subject before the
+# past-tense h component. The empty D consumes the initial English auxiliary.
+# Native phrase gaps hold one word, optionally after the silent article.
+was ~ home alone*W~DhбытьDдомаNCVAодин
+was the ~ home alone*W~DhбытьDдомаNCVAодин
+were ~ home alone*W~DhбытьDдомаNCVAодин
+were the ~ home alone*W~DhбытьDдомаNCVAодин
 # am keeps the nominative один. The shared copula rules use в одиночестве
 # to avoid the instrumental that be would otherwise impose on один.
 am <RN?#DKk>`home``alone`*$@\$`Dдома`\

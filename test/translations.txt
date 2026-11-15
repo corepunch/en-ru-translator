@@ -424,6 +424,21 @@ phrase:was <DKk>`home``alone` | She was not home alone. => Она не была 
 phrase:were <DKk>`home``alone` | We were home alone => Мы были дома одни
 phrase:were <DKk>`home``alone` | The children were home alone. => Дети были дома одни.
 phrase:were <DKk>`home``alone` | We were home alone yesterday. => Мы были дома одни вчера.
-phrase:be <RN?#DKk>`home``alone` | Was she home alone? => Она дома в одиночестве?
-phrase:will <XRN?#DKk>`home``alone` | I will be home alone. => Я буду дома в одиночестве.
+phrase:was ~ home alone | Was she home alone? => Она была дома одна?
+phrase:was ~ home alone | Was he home alone? => Он был дома один?
+phrase:was ~ home alone | Was Mary home alone? => Мери была дома одна?
+phrase:was ~ home alone | Was she home alone yesterday? => Она была дома одна вчера?
+phrase:were ~ home alone | Were they home alone? => Они были дома одни?
+phrase:were ~ home alone | Were you home alone? => Вы были дома одни?
+phrase:was the ~ home alone | Was the girl home alone? => Девушка была дома одна?
+phrase:were the ~ home alone | Were the children home alone? => Дети были дома одни?
+phrase:be <RN?#DKk>`home``alone` | Was she already home alone? => Она уже дома в одиночестве?
+phrase:will <DKk>`home``alone` | We will be home alone => Мы будем дома одни
+phrase:will <DKk>`home``alone` | She will be home alone. => Она будет дома одна.
+phrase:will <DKk>`home``alone` | The children will be home alone. => Дети будут дома одни.
+phrase:will <DKk>`home``alone` | Will anyone be home alone? ~> дома один
+phrase:will <DKk>`home``alone` | Somebody will be home alone. => Кто-то будет дома один.
+phrase:will <DKk>`home``alone` | Anybody will be home alone. => Кто-нибудь будет дома один.
+phrase:will <XRN?#DKk>`home``alone` | Will there be anyone home alone? ~> дома в одиночестве
+home-role | Was she at home? => Она дома?
 phrase:make <TAO>`deal` | They made the deal. => Они заключили сделку.

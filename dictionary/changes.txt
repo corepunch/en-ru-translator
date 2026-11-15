@@ -15,3 +15,12 @@ hurried*EспешитьAпоспешный\hurry
 somebody*R031кто-то
 anybody*R031кто-нибудь
 anyone*R031кто-нибудьAлюбой
+# Give these apostrophe forms a noun reading. Looking up their bare stem
+# also offers an adjective, which T4 selects before native genitive reordering.
+brother's*Nбрат
+daughter's*Nдочь
+father's*Nотец
+friend's*Nдруг
+mother's*Nмать
+sister's*Nсестра
+son's*Nсын

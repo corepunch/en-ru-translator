@@ -1,0 +1,158 @@
+# lemma	pos	target	frame
+be	v	быть	copula
+have	v	иметь	possess
+go	v	идти	motion
+walk	v	идти	motion
+walk	v	гулять	intr
+come	v	приходить	motion
+return	v	возвращаться	motion
+fly	v	лететь	motion
+fly	v	летать	intr
+run	v	бежать	motion
+leave	v	уходить	intr
+leave	v	покидать	obj
+work	v	работать	intr
+stay	v	оставаться	intr
+live	v	жить	intr
+fall	v	упасть	intr
+fall	v	падать	intr
+read	v	читать	obj
+see	v	видеть	obj
+see	v	увидеть	obj
+send	v	посылать	dobj
+send	v	отправить	dobj
+give	v	давать	dobj
+give	v	дать	dobj
+take	v	брать	obj
+take	v	взять	obj
+write	v	писать	obj
+write	v	написать	obj
+find	v	находить	obj
+find	v	найти	obj
+buy	v	покупать	obj
+buy	v	купить	obj
+want	v	хотеть	content
+think	v	думать	content
+say	v	говорить	content
+say	v	сказать	content
+know	v	знать	content
+report	v	сообщать	obj
+report	v	сообщить	obj
+resign	v	уволиться	intr
+surprise	v	удивить	obj
+arrive	v	прибыть	motion
+open	v	открывать	obj
+open	v	открыть	obj
+close	v	закрывать	obj
+close	v	закрыть	obj
+drop	v	падать	intr
+drop	v	уронить	obj
+drop	v	сбросить	obj.connection
+support	v	поддерживать	obj
+support	v	поддержать	obj
+reject	v	отклонять	obj
+reject	v	отклонить	obj
+eat	v	есть	obj
+drink	v	пить	obj
+understand	v	понимать	obj
+help	v	помогать	dat
+help	v	помочь	dat
+thank	v	благодарить	obj
+wait	v	ждать	gen
+repair	v	ремонтировать	obj
+home	n	дом
+house	n	дом
+book	n	книга
+answer	n	ответ
+news	n	новость	content
+report	n	отчёт
+claim	n	утверждение	content
+request	n	запрос
+connection	n	соединение
+server	n	сервер
+client	n	клиент
+committee	n	комитет
+member	n	член
+proposal	n	предложение
+water	n	вода
+time	n	время
+meeting	n	встреча
+letter	n	письмо
+sister	n	сестра
+brother	n	брат
+child	n	ребёнок
+person	n	человек
+woman	n	женщина
+man	n	мужчина
+dog	n	собака
+store	n	магазин
+room	n	комната
+city	n	город
+day	n	день
+new	a	новый
+old	a	старый
+good	a	хороший
+interesting	a	интересный
+updated	a	обновлённый
+short	a	короткий
+long	a	длинный
+false	a	ложный
+beautiful	a	красивый
+open	a	открытый
+early	r	рано
+later	r	позже
+yesterday	r	вчера
+today	r	сегодня
+tomorrow	r	завтра
+already	r	уже
+always	r	всегда
+never	r	никогда
+here	r	здесь	deictic
+there	r	там	deictic
+inside	r	внутри	deictic
+outside	r	снаружи	deictic
+home	r	дома	deictic
+i	n	я
+you	n	ты
+he	n	он
+she	n	она
+it	n	оно
+we	n	мы
+they	n	они
+you	n	вы
+this	a	этот
+that	a	тот
+my	a	мой
+your	a	твой
+your	a	ваш
+our	a	наш
+whose	a	чей
+which	a	который
+nothing	n	ничто
+nobody	n	никто
+something	n	что-то
+can	v	мочь	intr
+possess	v	владеть	intr
+mine	a	мой
+your	a	ваш
+his	a	его
+her	a	её
+its	a	его
+their	a	их
+one	a	один
+figure	n	рисунок
+fig	n	рисунок
+require	v	требовать	obj
+save	v	сохранить	obj
+save	v	сохранять	obj
+see	v	смотреть	imperative
+require	v	требоваться	passive
+test	v	тестировать	obj
+test	v	протестировать	obj
+speak	v	говорить	speech
+russian	r	по-русски	language
+weather	n	погода
+do	v	делать	obj
+english	r	по-английски	language
+french	r	по-французски	language
+german	r	по-немецки	language

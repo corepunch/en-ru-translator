@@ -1,0 +1,37 @@
+Language data for English → Russian Offline Translator
+
+lex-*.tsv — WikDict by Karl Bartel and contributors, based on English
+Wiktionary contributors’ material extracted by DBnary (Université Grenoble
+Alpes, Getalp/LIG). From the dated WikDict SQLite 2_2026-11 English to Russian
+export. The entries were filtered to single headwords and single target
+lemmas, stress marks normalized, target parts of speech checked, and candidate
+sets sorted/deduplicated. The adapted lexicon is CC BY-SA 4.0.
+Source download: https://download.wikdict.com/dictionaries/sqlite/2_2026-11/en-ru.sqlite3
+WikDict license/credits: https://www.wikdict.com/page/download
+DBnary license/credits: https://kaiko.getalp.org/about-dbnary/download/
+Original contributor histories: https://en.wiktionary.org/wiki/<English-headword>
+License: https://creativecommons.org/licenses/by-sa/4.0/
+SHA-256 (source): 0a547256d3868d0eebe38e0b6c4306e70f7dadb12622c3877249ae117de8d7a7
+
+forms-*.tsv — OpenCorpora project and contributors, dictionary revision
+417150, extracted using pymorphy3's pinned Russian dictionary package.
+Selected paradigms were keyed by target lemma and grammatical features,
+stripped of unneeded forms, and encoded as prefix deltas. This adaptation
+is distributed as CC BY-SA 3.0.
+Source and credits: https://opencorpora.org/
+Package: https://pypi.org/project/pymorphy3-dicts-ru/2.4.417150.4580142/
+License: https://creativecommons.org/licenses/by-sa/3.0/
+SHA-256 (upstream wheel): 718bac64c73c10c16073a199402657283d9b64c04188b694f6d3e9b0d85440f4
+
+exceptions-*.tsv — Princeton University WordNet 3.0 exception lists, filtered
+to English lemma/POS combinations with entries in the export.
+Source download: https://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz
+Source license and retained disclaimer: licenses/wordnet-3.0.txt
+SHA-256 (archive): 640db279c949a88f61f851dd54ebbb22d003f8b90b85267042ef85a3781d3a52
+
+vocabulary.tsv — independently authored lexical defaults and argument frames.
+assets.tsv — generated inventory of the data shards, by data type.
+
+To regenerate using the pinned inputs (no runtime installation needed):
+  python -m pip install pymorphy3==2.0.6 pymorphy3-dicts-ru==2.4.417150.4580142
+  python tools/export_dictionary.py en-ru.sqlite3 WordNet-3.0.tar.gz dictionary

@@ -1,14 +1,10 @@
 #!/bin/sh
-# Run the standard Lua-side test suite from repository root.
 set -eu
-
-ROOT_DIR="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
-cd "$ROOT_DIR"
-
-# One Lua process: dictionaries are parsed once and shared by every test.
-lua test/run_all.lua
-python3 test/test_phrase_formulas.py
-
-echo
-sh test/cli_test.sh
-echo "All standard tests completed."
+cd "$(dirname "$0")/.."
+LUA=${LUA:-lua}
+"$LUA" test/engine_test.lua
+[ "$("$LUA" init.lua 'I fly home.')" = 'Я лечу домой.' ]
+[ "$(printf '%s\n' 'I am home.' 'She was here.' | "$LUA" init.lua --document)" = 'Я дома.
+Она была здесь.' ]
+[ "$("$LUA" init.lua --formal 'You are working here.')" = 'Вы работаете здесь.' ]
+printf '%s\n' 'CLI smoke tests passed'

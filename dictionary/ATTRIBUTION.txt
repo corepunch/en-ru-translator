@@ -39,3 +39,6 @@ To regenerate using the pinned inputs (no runtime installation needed):
 scene.tsv — independently authored lexical meanings, arguments and nominal
 compounds for descriptive text. scene-forms.tsv is the corresponding small
 OpenCorpora export (same CC BY-SA 3.0, revision and generator as forms above).
+
+editor-words.tsv and editor-forms.tsv — local overrides and deletions,
+maintained by the dictionary CLI. Re-export does not overwrite these files.

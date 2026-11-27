@@ -1,3 +1,4 @@
+local format = require "en_ru.data_format"
 local M = {}
 local cache = {}
 
@@ -6,9 +7,7 @@ local function records(read, path, fn)
     if not body then error(("cannot read %s: %s"):format(path, err or "missing data"), 0) end
     for line in body:gmatch("[^\r\n]+") do
         if line:sub(1, 1) ~= "#" then
-            local row = {}
-            for item in (line .. "\t"):gmatch("(.-)\t") do row[#row + 1] = item end
-            fn(row)
+            fn(format.fields(line))
         end
     end
 end
@@ -26,19 +25,24 @@ local function at(map, key)
     return map[key]
 end
 
-function M.load(root, reader)
+M.disk = disk
+
+function M.load(root, reader, base_only)
     root = root or "dictionary"
-    if not reader and cache[root] then return cache[root] end
+    if not reader and not base_only and cache[root] then return cache[root] end
     local function file(name, fn)
-        records(reader or disk, root .. "/" .. name, fn)
+        records(reader or disk, root .. "/" .. name, function(row)
+            row.source=name
+            fn(row)
+        end)
     end
     local data = {words = {}, forms = {}, exceptions = {}}
     local function authored(row)
         local group = at(at(data.words, row[1]), row[2])
-        group[#group + 1] = {word = row[3], frame = row[4] or "", modifier = row[5], authored = true}
+        group[#group + 1] = {word = row[3], frame = row[4] or "", modifier = row[5], authored = true, source = row.source}
     end
     local function form(row)
-        at(data.forms, row[1])[row[2]] = {flags = row[3], variants = row[4] or ""}
+        at(data.forms, row[1])[row[2]] = {flags = row[3], variants = row[4] or "", source = row.source}
     end
     local vocabulary, assets = {}, {}
     file("vocabulary.tsv", function(row) vocabulary[#vocabulary+1]=row end)
@@ -51,7 +55,7 @@ function M.load(root, reader)
             if asset[1] == "lex" then
                 local group = at(at(data.words, row[1]), row[2])
                 for word in row[3]:gmatch("[^|]+") do
-                    group[#group + 1] = {word = word, frame = ""}
+                    group[#group + 1] = {word = word, frame = "", source = row.source}
                 end
             elseif asset[1] == "forms" then
                 form(row)
@@ -63,12 +67,46 @@ function M.load(root, reader)
         end)
     end
     file("scene-forms.tsv", form)
-    if not reader then cache[root] = data end
+    if not base_only then
+        local edited={}
+        file("editor-words.tsv",function(row)
+            local action,en,pos,ru=table.unpack(row,1,4)
+            local senses=at(at(data.words,en),pos)
+            for i=#senses,1,-1 do if senses[i].word==ru then table.remove(senses,i) end end
+            if action=="set" then
+                local group=at(at(edited,en),pos)
+                group[#group+1]={word=ru,frame=row[5] or "",modifier=row[6],
+                    source=row.source, authored=true}
+            else assert(action=="delete","unknown dictionary edit: "..tostring(action)) end
+        end)
+        for en, tags in pairs(edited) do
+            for pos, senses in pairs(tags) do
+                for _, entry in ipairs(data.words[en][pos]) do senses[#senses+1]=entry end
+                data.words[en][pos]=senses
+            end
+        end
+        for en,tags in pairs(data.words) do
+            for pos,senses in pairs(tags) do
+                if #senses==0 then tags[pos]=nil end
+            end
+            if not next(tags) then data.words[en]=nil end
+        end
+        file("editor-forms.tsv",function(row)
+            local action,ru,pos=table.unpack(row,1,3)
+            if action=="set" then
+                at(data.forms,ru)[pos]={flags=row[4],variants=row[5] or "",source=row.source}
+            elseif action=="delete" then
+                if data.forms[ru] then data.forms[ru][pos]=nil end
+            else error("unknown paradigm edit: "..tostring(action)) end
+        end)
+    end
+    if not reader and not base_only then cache[root] = data end
     return data
 end
 
 local function has(data, word, pos)
-    return data.words[word] and data.words[word][pos]
+    local senses=data.words[word] and data.words[word][pos]
+    return senses and #senses>0 and senses or nil
 end
 
 function M.english(data, word, pos)
@@ -113,10 +151,7 @@ end
 local function variant(paradigm, lemma, key)
     if not paradigm then return nil end
     if not paradigm.decoded then
-        paradigm.decoded = {}
-        for feature, len, suffix in paradigm.variants:gmatch("([^,=]+)=(%d+):([^,]*)") do
-            paradigm.decoded[feature] = lemma:sub(1, tonumber(len)) .. suffix
-        end
+        paradigm.decoded = format.decode(lemma,paradigm.variants)
     end
     return paradigm.decoded[key]
 end

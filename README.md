@@ -36,3 +36,6 @@ through; the translator does not use a sentence-to-sentence lookup table.
 For game hosts, [Adventure text](ARCHITECTURE.md#adventure-text) describes
 the optional display-only adapter. See [the Zork I evaluation](docs/adventure-evaluation.md)
 for route examples, transfer checks, and remaining gaps.
+
+Use [the Lua dictionary editor](docs/dictionary-editor.md) to inspect or
+change translation senses and Russian inflections without editing data codes.

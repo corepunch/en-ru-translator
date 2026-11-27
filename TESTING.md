@@ -9,3 +9,6 @@ network access. The snapshots are authored examples, not runtime data.
 For asset provenance, export into a fresh directory and compare the generated
 `assets.tsv` and named shards byte-for-byte with the checked-in copies. The
 source archives and SHA-256 values are documented in the attribution file.
+
+For a reusable document smoke against public-domain books, see
+[real-prose evaluation](docs/prose-evaluation.md).

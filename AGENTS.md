@@ -8,3 +8,6 @@
   and the reusable engine entry point with `sh test/run_all.sh`.
 - Commit only intended changes and use a review branch for cross-project
   runtime and data migrations.
+- Use `lua tools/dictionary.lua` to inspect or edit dictionary entries. Start
+  with `dict select` or `rus select` and use the named forms from `schema`.
+  Keep generated shards read-only; see [the editor guide](docs/dictionary-editor.md).

@@ -15,6 +15,10 @@ M.frames = {
     content="content clause", copula="copula", possess="possession",
     imperative="imperative sense", passive="passive sense", speech="speech",
     language="language (adverbial)", deictic="place or direction",
+    infrastructure="infrastructure or utility sense",
+    proper="proper name when capitalized in the source",
+    participle="verb also used in bare result messages",
+    statistic="label for a numeric reading",
 }
 local function keys(t)
     local out={}

@@ -24,6 +24,7 @@ local function translate_line(input, options, data, traces)
     if not prefix then prefix,text=input:match("^(%s*)(.*)$") end
     local tokens = tokenize.words(text)
     local sentences, current={}, {}
+    local sentence_start=true
     local function flush()
         if #current == 0 then return end
         local ending, quoted={},false
@@ -32,16 +33,21 @@ local function translate_line(input, options, data, traces)
             table.insert(ending,1,current[#current].raw); current[#current]=nil
         end
         local result,trace=grammar.sentence(data,current,options,table.concat(ending):find("?",1,true)~=nil)
-        result=tokenize.upper_first(result)..table.concat(ending)
+        if sentence_start then result=tokenize.upper_first(result) end
+        result=result..table.concat(ending)
         if quoted then result=result.."»" end
         sentences[#sentences+1]=result
         traces[#traces+1]=trace
+        sentence_start=ending[#ending]~=";"
         current={}
     end
+    local in_quote=false
     for i,t in ipairs(tokens) do
+        if t.raw=='"' then in_quote=not in_quote end
         if t.raw~="." or after_dot(tokens,i) then current[#current+1]=t end
         if (t.raw=="." and after_dot(tokens,i) or t.raw=="?" or t.raw=="!") and
            (not tokens[i+1] or not tokens[i+1].raw:match('^[.?!"]$')) then flush()
+        elseif t.raw==";" and not in_quote then flush()
         elseif t.raw=='"' and tokens[i-1] and tokens[i-1].raw:match("^[.?!]$") then flush() end
     end
     flush()

@@ -48,7 +48,9 @@ and `choice({label=..., command=..., ...})`. Use it after a host parses the
 story markup and before displaying the turn. The host retains canonical
 actions, object IDs and save data; the adapter copies choice metadata and
 localizes only its label. Do not pass an unparsed link string to `prose`.
-The adapter is tested in isolation; no UI is switched to it by this change.
+`labelForms(text)` returns the distinct Russian case forms in nominative-first
+order. A host can use those forms to find an inflected link inside the translated
+sentence while keeping the original command.
 
 The authored `scene.tsv` entries cover reusable object names, direction and
 scene verbs. A multiword headword is a single constituent, not a sentence

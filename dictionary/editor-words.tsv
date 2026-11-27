@@ -1,1 +1,54 @@
 # action	english	pos	russian	frame	modifier
+set	dispatch office	n	диспетчерская
+set	dispatch	n	диспетчерская	proper
+set	blackout	n	отключение		свет
+set	meridian	n	меридиан	proper
+set	superhero	n	супергерой
+set	superhero	a	супергеройский
+set	prototype	n	прототип
+set	release	n	версия
+set	hero	n	герой
+set	character sheet	n	лист		персонаж
+set	hero name	n	имя		герой
+set	power	n	электричество	infrastructure.lose
+set	city	n	город	infrastructure
+set	building	n	здание	infrastructure
+set	town	n	город	infrastructure
+set	station	n	станция	infrastructure
+set	draw	v	рисовать	obj.line
+set	silver	a	серебристый
+set	name	v	назвать	imperative
+set	choose	v	выбрать	imperative
+set	rescue	v	спасти	imperative
+set	rescue crew	n	бригада		спасательный
+set	relay station	n	станция		релейный
+set	guard drone	n	дрон		охранный
+set	relay console	n	пульт		управление
+set	emergency kit	n	набор		аварийный
+set	bulwark	n	бастион	proper
+set	arc	n	дуга	proper
+set	lens	n	линза	proper
+set	register	v	зарегистрировать	participle
+set	people	n	люди
+set	carriage	n	вагон
+set	horse carriage	n	карета
+set	hit	n	удар
+set	take	v	получать	obj.hit
+set	lose	v	лишиться	gen.power
+set	fighting	n	бой
+set	strength	n	сила
+set	reason	n	разум
+set	power	n	мощь	statistic.value
+set	rank	n	ранг
+set	failure	n	неудача
+set	success	n	успех
+set	steady	v	удерживать	obj
+set	drone	n	дрон
+set	integrity	n	целостность
+set	control signal	n	сигнал		управление
+set	rogue	a	посторонний
+set	manual bypass	n	обход		ручной
+set	rescue team	n	команда		спасательный
+set	mark	v	отметить	imperative
+set	use	v	пользоваться	ins
+set	emergency recovery kit	n	набор		аварийный

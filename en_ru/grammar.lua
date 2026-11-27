@@ -5,6 +5,7 @@ local M = {}
 
 local articles = {a=true, an=true, the=true, some=true, no=true}
 local lex_pos = {"n", "v", "a", "r"}
+local fallback_pos = {"r", "n", "a", "v"}
 local pronouns = {
     i={"я","s","1","m"}, me={"я","s","1","m"},
     you={"ты","s","2","m"}, he={"он","s","3","m"}, him={"он","s","3","m"},
@@ -17,9 +18,10 @@ local possessives = {my="мой", your="твой", his="его", her="её", its
 local preps = {
     ["in"]={"в","l","a"}, into={"в","a"}, at={"в","l"}, ["on"]={"на","l","a"},
     from={"из","g"}, to={"к","d"}, ["for"]={"для","g"}, ["with"]={"с","i"},
-    without={"без","g"}, behind={"за","i"}, above={"над","i"}, below={"под","i"},
+    without={"без","g"}, behind={"за","i"}, above={"над","i"}, over={"над","i"}, below={"под","i"},
     through={"через","a"}, across={"через","a"}, by={"у","g"}, toward={"к","d"}, of={"","g"}, before={"перед","i"}, after={"после","g"},
     about={"о","l"}, near={"около","g"}, beside={"рядом с","i"}, under={"под","i","a"}, between={"между","i"},
+    using={"с помощью","g"},
 }
 local joins = {["and"]="и", ["or"]="или", but="но", although="хотя", because="потому что",
     when="когда", ["while"]="пока", before="прежде чем", after="после того как", ["if"]="если"}
@@ -68,13 +70,21 @@ local function analyse_words(data, words)
             local name=table.concat(parts," ")
             local group=data.words[name]
             local verb_name=root and root.." "..table.concat(parts," ",2)
-            if group or (verb_name and data.words[verb_name]) then
-                combined,length={word=name,raw=name,pos={}},n
+            local noun_root, noun_number=lex.english(data,words[i+n-1].word,"n")
+            local compound=noun_number and table.concat(parts," ",1,n-1).." "..noun_root
+            local compound_noun=compound and data.words[compound] and data.words[compound].n
+            if group or compound_noun or (verb_name and data.words[verb_name]) then
+                local surface={}
+                for j=i,i+n-1 do surface[#surface+1]=words[j].raw end
+                combined,length={word=name,raw=table.concat(surface," "),pos={}},n
                 if group then
                     for _,pos in ipairs(lex_pos) do if group[pos] then combined.pos[pos]={root=name} end end
                 end
                 if verb_name and data.words[verb_name] and data.words[verb_name].v then
                     combined.pos.v={root=verb_name,feature=feature}
+                end
+                if compound_noun and not combined.pos.n then
+                    combined.pos.n={root=compound,feature=noun_number}
                 end
                 break
             end
@@ -84,6 +94,14 @@ local function analyse_words(data, words)
             i=i+length
         else
             local expansion = contractions[t.word]
+            local owner=not expansion and words[i+1] and t.word:match("^(.+)'s$")
+            if owner then
+                local next_word, following_word=words[i+1].word,words[i+2] and words[i+2].word
+                if lex.english(data,next_word,"n") or (following_word and lex.english(data,next_word,"a")
+                    and lex.english(data,following_word,"n")) then
+                    expansion={owner,"'s"}
+                end
+            end
             if not expansion then
                 local base = t.word:match("^(.+)n't$")
                 if base then expansion = {base,"not"} end
@@ -97,7 +115,8 @@ local function analyse_words(data, words)
                 if base then expansion = {base,"have"} end
             end
             for _, value in ipairs(expansion or {t.word}) do
-                local w = {word=value, raw=expansion and value or t.raw, pos={}}
+                local surface=value==owner and t.raw:sub(1,-3) or expansion and value or t.raw
+                local w = {word=value, raw=surface, pos={}}
                 if value:match("^%a") then
                     for _, pos in ipairs(lex_pos) do
                         local root, feature = lex.english(data, value, pos)
@@ -148,7 +167,7 @@ end
 local function np(ctx, i, last, depth)
     local t, data = ctx.t, ctx.data
     local start, mods = i, {}
-    local number, possessive, neg, count, quantity
+    local number, possessive, possessor, neg, count, quantity
     if i > last then return nil, i end
     if t[i].word=="all" and i<last and (articles[t[i+1].word] or lexical_head(t[i+1])) then
         mods[#mods+1]="весь"; i=i+1
@@ -156,7 +175,8 @@ local function np(ctx, i, last, depth)
     if articles[t[i].word] then neg = t[i].word == "no"; i = i + 1 end
     if i <= last and possessives[t[i].word] and i < last and
             (not pronouns[t[i].word] or lexical_head(t[i+1]) or t[i+1].pos.a) then
-        possessive = possessives[t[i].word]
+        possessor = t[i].word
+        possessive = possessives[possessor]
         if t[i].word == "your" and ctx.formal then possessive = "ваш" end
         i = i + 1
     end
@@ -168,6 +188,7 @@ local function np(ctx, i, last, depth)
     end
     while i < last and t[i].pos.a and (not follows_group(t[i]) or compass[t[i].word]) do
         local next=t[i+1]
+        if i+1==last and next.raw:match("^%d+$") and t[i].pos.n then break end
         local coordinated=next.word=="and" and i+2<last and t[i+2].pos.a
         if not coordinated and (follows_group(next) or not(lexical_head(next) or next.pos.a)) then break end
         if t[i].pos.v and t[i].pos.v.feature=="past" and t[i].pos.n and i==start then break end
@@ -180,7 +201,10 @@ local function np(ctx, i, last, depth)
         return nil, start
     end
     local p = pronouns[head.word]
-    local sense = candidate(data,head,"n")
+    local sense
+    for _, item in ipairs(lexical(data,head,"n")) do
+        if not item.frame:find(".",1,true) then sense=item; break end
+    end
     if not p and not sense and not lexical_head(head) and (i == start or head.pos.v or head.pos.r) then
         return nil, start
     end
@@ -190,6 +214,8 @@ local function np(ctx, i, last, depth)
     local complement
     if authored_modifier and authored_modifier ~= "" then
         if authored_modifier:find(" ",1,true) then complement=authored_modifier
+        elseif lex.paradigm(data,authored_modifier,"n") and not lex.paradigm(data,authored_modifier,"a") then
+            complement=lex.noun(data,authored_modifier,"s","g")
         else mods[#mods+1]=authored_modifier end
     end
     local par = lex.paradigm(data, lemma,"n")
@@ -197,6 +223,7 @@ local function np(ctx, i, last, depth)
     number = p and p[2] or head.pos.n and head.pos.n.feature or "s"
     if head.word == "you" and ctx.formal then lemma, number = "вы", "p" end
     if english_lemma == "news" then number = "s" end
+    if english_lemma == "people" and lemma == "люди" then number = "p" end
     if quantity then number = quantity == 1 and "s" or "p" end
     if (head.word=="nothing" or head.word=="something" or head.word=="nobody") and
         i<last and t[i+1].pos.a and not vtoken(t[i+1]) then
@@ -210,10 +237,18 @@ local function np(ctx, i, last, depth)
     if (depth or 0)<3 and i+2<=last and t[i+1].word=="of" then
         child,finish=np(ctx,i+2,last,(depth or 0)+1)
     end
-    return {lemma=lemma, complement=complement, child=child, num=number, person=p and p[3] or "3", gender=p and p[4] or
+    local group={lemma=lemma, complement=complement, child=child, num=number, person=p and p[3] or "3", gender=p and p[4] or
         par and par.flags:sub(1,1) or "m", animate=par and par.flags:sub(2,2) or p and "+" or "-",
-        neg=neg, mods=mods, possessive=possessive, count=count, quantity=quantity, word=english_lemma,
-        content=sense and sense.frame == "content", token=head}, finish or i + 1
+        neg=neg, mods=mods, possessive=possessive, possessor=possessor, count=count, quantity=quantity, word=english_lemma,
+        frame=sense and sense.frame, content=sense and sense.frame == "content", token=head}
+    if not child and (depth or 0)<3 and i+2<=last and t[i+1].word=="'s" then
+        local owned, after=np(ctx,i+2,last,(depth or 0)+1)
+        if owned and not owned.child then
+            owned.child=group
+            return owned,after
+        end
+    end
+    return group,finish or i+1
 end
 
 local function noun(ctx, group, case, pp)
@@ -243,7 +278,9 @@ local function noun(ctx, group, case, pp)
     for _, mod in ipairs(group.mods) do
         if mod then add_adj(mod) else forms[#forms+1]="и" end
     end
-    forms[#forms + 1] = lex.noun(ctx.data, group.lemma, nounnum, nouncase, pp)
+    local nominal=lex.noun(ctx.data,group.lemma,nounnum,nouncase,pp)
+    if group.frame=="proper" and group.token.raw:match("^%u") then nominal=tokenize.upper_first(nominal) end
+    forms[#forms + 1] = nominal
     if group.complement then forms[#forms+1]=group.complement end
     if group.child then forms[#forms+1]=noun(ctx,group.child,"g") end
     if group.mods.post then
@@ -252,13 +289,25 @@ local function noun(ctx, group, case, pp)
     return table.concat(forms," ")
 end
 
+local function select_nominal_sense(data, group, frame)
+    for _, reading in ipairs(lexical(data,group.token,"n")) do
+        if reading.frame==frame then
+            local paradigm=lex.paradigm(data,reading.word,"n")
+            if paradigm then
+                group.lemma,group.gender,group.animate=reading.word,paradigm.flags:sub(1,1),paradigm.flags:sub(2,2)
+            end
+            return
+        end
+    end
+end
+
 local function located_np(ctx, first, last, case)
     local group, after=np(ctx,first,last)
     if not group then return nil,first end
     return noun(ctx,group,case,true),after
 end
 
-local function place(ctx, first,last,directed,only_preposition)
+local function place(ctx, first,last,directed,only_preposition,stationary)
     local t=ctx.t
     if first>last or not t[first] then return nil,first end
     local w=t[first].word
@@ -268,7 +317,10 @@ local function place(ctx, first,last,directed,only_preposition)
     end
     if w=="to" and first<last then
         local k=t[first+1].word=="the" and first+2 or first+1
-        if k<=last and compass[t[k].word] then return "на "..compass[t[k].word],k+1 end
+        if k<=last and compass[t[k].word] then
+            local direction=compass[t[k].word]
+            return stationary and "к "..lex.noun(ctx.data,direction,"s","d") or "на "..direction,k+1
+        end
     end
     if not only_preposition then
         if bare_place[w] and place_particle(t,first,last) then
@@ -291,9 +343,14 @@ local function verb(ctx,i,last)
     if i > last or not vtoken(t[i]) then return end
     local root, tense, aux = t[i].pos.v.root, t[i].pos.v.feature, t[i].aux
     local base = i
-    local neg, modal, passive
+    local neg, modal, passive, modifier
     i = i + 1
     if i <= last and t[i].word == "not" then neg=true; i=i+1 end
+    local following=t[i+1] and t[i+1].pos.v
+    if aux=="be" and i<last and t[i].pos.r and not t[i].pos.n and not articles[t[i].word] and following and
+        (following.feature=="ing" or following.feature=="past") then
+        modifier=t[i]; i=i+1
+    end
     if i <= last and vtoken(t[i]) then
         local nextv=t[i].pos.v
         if aux == "will" or aux == "do" or modals[aux] or (aux == "be" and nextv.feature == "ing")
@@ -311,7 +368,7 @@ local function verb(ctx,i,last)
         i=i+1
     end
     return {root=root, tense=tense == "ing" and "present" or tense or "present",
-        neg=neg, modal=modal, passive=passive, token=t[base]},i
+        neg=neg, modal=modal, passive=passive, modifier=modifier, token=t[base]},i
 end
 
 local function existential_at(ctx,i,last)
@@ -331,6 +388,7 @@ local function sense(ctx, v, obj, gap, direction)
         local has_obj=obj or gap
         local score=item.authored and 5 or 0
         if frame=="passive" then score=score+(v.passive and 40 or -60)
+        elseif frame=="participle" then score=score+(v.passive and 30 or has_obj and 8 or -5)
         elseif frame=="imperative" then score=score+(v.tense=="imperative" and 20 or -30)
         elseif frame=="motion" then score=score+(direction and 12 or has_obj and -12 or 2)
         elseif frame=="intr" then score=score+(has_obj and -14 or 7)
@@ -367,8 +425,14 @@ local function single(ctx,t)
         ctx.quote=not ctx.quote
         return ctx.quote and "«" or "»"
     end
-    local value=candidate(ctx.data,t,"r") or candidate(ctx.data,t,"n") or candidate(ctx.data,t,"a") or candidate(ctx.data,t,"v")
-    return value and value.word or t.raw
+    for _, pos in ipairs(fallback_pos) do
+        for _, value in ipairs(lexical(ctx.data,t,pos)) do
+            if pos~="n" or not value.frame:find(".",1,true) then
+                return value.frame=="proper" and t.raw:match("^%u") and tokenize.upper_first(value.word) or value.word
+            end
+        end
+    end
+    return t.raw
 end
 
 local function object_case(frame)
@@ -382,7 +446,7 @@ local function subject_relative(ctx, head, i, last, depth)
     local explicit=marker=="which" or marker=="who" or marker=="that"
     local start=explicit and i+1 or i
     local reading=vtoken(t[start])
-    if not reading or not explicit and reading.feature~="ing" then return nil,i end
+    if not reading or not explicit and (reading.feature~="ing" or preps[marker]) then return nil,i end
     local v=verb(ctx,start,last)
     if not v then return nil,i end
     local stop=start+1
@@ -491,16 +555,25 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         end
     end
     if ex then v,nextpos=existential,ex_end end
+    -- Status messages such as "Device registered" omit the passive auxiliary.
+    if v and not inherited and subject and subject.animate=="-" and subject.token.pos.n
+        and not articles[t[lead].word] and not v.passive and v.token.word:match("ed$")
+        and nextpos==last+1 then
+        for _, entry in ipairs(lexical(data,v.token,"v")) do
+            if entry.frame=="participle" then v.passive,v.tense=true,"present"; break end
+        end
+    end
     local imperative=false
+    local command_start=not pronouns[t[first].word] and vtoken(t[first])
     if v and subject and not inherited and not opening and i==first+1 and subject.num=="s" and subject.person=="3" and
-        not v.token.pos.v.feature and not v.token.aux and vtoken(t[first]) then
+        not v.token.pos.v.feature and not v.token.aux and command_start then
         subject=nil; v,nextpos=verb(ctx,first,last); imperative=true
     end
-    if not v and not subject and first<=last and vtoken(t[first]) then
+    if not v and not subject and command_start then
         v,nextpos=verb(ctx,first,last); imperative=true
     elseif v and not subject and not ex and not opening then
         imperative=true
-    elseif not v and subject and vtoken(t[first]) and first<last then
+    elseif not v and subject and command_start and first<last then
         subject=nil
         v,nextpos=verb(ctx,first,last); imperative=true
     end
@@ -530,7 +603,14 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         end
     end
     local location=place(ctx,i,last,false)
-    if not content_start and not speech and not location then obj,after=tail_np(ctx,i,last) end
+    local predicate_adverb=copula and not ex and i<last and t[i].pos.r and not articles[t[i].word]
+        and (place(ctx,i+1,last,false) or t[i+1].pos.a)
+    if not content_start and not speech and not location and not predicate_adverb then obj,after=tail_np(ctx,i,last) end
+    -- Select a utility meaning only when the subject and verb license it.
+    -- A city can lose electricity while a minister loses political power.
+    if obj and subject and subject.frame=="infrastructure" then
+        select_nominal_sense(data,obj,subject.frame.."."..v.root)
+    end
     if obj and t[i].pos.a and i==last and copula then obj=nil end
     if obj and t[i].word=="nothing" and not copula then v.neg=true end
     local directional=false
@@ -561,6 +641,7 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         if rel then if not is_content then put(",") end; put(rel); put(",") end
     end
     local neg=v.neg or obj and (obj.neg or negative_pronouns[obj.word])
+    if v.modifier then put(single(ctx,v.modifier)) end
     if ex or possess and obj then
         local ex_features=neg and {num="s",gender="n",person="3"} or obj or features
         local copula_word=v.tense=="past" and lex.verb(data,"быть",ex_features,"past")
@@ -619,12 +700,15 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         end
         if indirect then put(noun(ctx,indirect,"d")) end
         if frame=="toward" then put("на") end
+        if imperative and obj.possessor=="your" then obj.possessive="свой" end
         put(noun(ctx,obj,(ex or possess) and (neg and "g" or "n") or copula and "n" or object_case(frame)))
         i=after
         if i and i<=last then
             local part, post=subject_relative(ctx,obj,i,last,depth)
             local content
-            if not part and i<last and not vtoken(t[i]) then part,post,content=relative(ctx,obj,i,last,true) end
+            if not part and i<last and not preps[t[i].word] and not vtoken(t[i]) then
+                part,post,content=relative(ctx,obj,i,last,true)
+            end
             if part then if not content then put(",") end; put(part); i=post end
         end
     end
@@ -645,9 +729,16 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
             put("прямо"); i=i+1
         elseif joins[w] and (not pp or linked_subject and vtoken(t[linked_verb])) then
             if w~="and" and w~="or" and out[#out]~="," then put(",") end
-            put(joins[w]); put(clause(ctx,i+1,last,depth+1)); break
+            put(joins[w])
+            if subject and (w=="and" or w=="or") and vtoken(t[i+1])
+                and not (linked_subject and vtoken(t[linked_verb])) then
+                put(clause(ctx,i+1,last,depth+1,nil,subject,""))
+            else
+                put(clause(ctx,i+1,last,depth+1))
+            end
+            break
         elseif pp or is_place(w) then
-            local location, location_end=place(ctx,i,last,frame=="motion")
+            local location, location_end=place(ctx,i,last,frame=="motion",false,copula)
             local group,following=np(ctx,i+1,last)
             if location and not (w=="at" and group and group.word=="home") then
                 put(location)
@@ -671,7 +762,7 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
                 end
                 i=following
             else
-                put(pp[1])
+                put(w=="over" and single(ctx,t[i]) or pp[1])
                 i=i+1
             end
         else put(single(ctx,t[i])); i=i+1 end
@@ -679,18 +770,47 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
     return tokenize.format(out)
 end
 
+local function numeric_label(ctx)
+    local t,last=ctx.t,#ctx.t
+    if last<3 or not t[last].raw:match("^%d+$") then return end
+    local colon=last-1
+    if last>=5 and t[colon].raw=="/" and t[colon-1].raw:match("^%d+$") then colon=colon-2 end
+    if t[colon].raw~=":" then return end
+    local group,finish=np(ctx,1,colon-1)
+    if not group then return end
+    if finish~=colon then
+        local head,after=np(ctx,finish,colon-1)
+        if not head or after~=colon or head.child then return end
+        head.child,group=group,head
+    end
+    select_nominal_sense(ctx.data,group,"statistic.value")
+    local value={}
+    for i=colon+1,last do value[#value+1]=t[i].raw end
+    return noun(ctx,group,"n")..": "..table.concat(value)
+end
+
 function M.sentence(data, words, options, question)
     local ctx={data=data,t=analyse_words(data,words),formal=options.formal,question=question}
-    local text
+    local text=numeric_label(ctx)
     if options.kind=="heading" or options.kind=="label" then
         local location,after=place(ctx,1,#ctx.t,false,true)
         if location and after==#ctx.t+1 then text=location
         else
             local group,nextpos=np(ctx,1,#ctx.t)
-            if group and nextpos==#ctx.t+1 then text=noun(ctx,group,"n") end
-            if group and nextpos==#ctx.t then
-                local head,finish=np(ctx,nextpos,#ctx.t)
-                if head and finish==#ctx.t+1 then text=noun(ctx,head,"n").." "..noun(ctx,group,"g") end
+            if group then
+                local case=options.kind=="label" and options.case or "n"
+                local nominal=noun(ctx,group,case)
+                if nextpos==#ctx.t+1 then text=nominal
+                elseif nextpos==#ctx.t and ctx.t[nextpos].raw:match("^%d+$") then
+                    text=nominal.." "..ctx.t[nextpos].raw
+                else
+                    local qualifier,finish=place(ctx,nextpos,#ctx.t,false,true)
+                    if qualifier and finish==#ctx.t+1 then text=nominal.." "..qualifier
+                    elseif nextpos==#ctx.t then
+                        local head,finish=np(ctx,nextpos,#ctx.t)
+                        if head and finish==#ctx.t+1 then text=noun(ctx,head,case).." "..noun(ctx,group,"g") end
+                    end
+                end
             end
         end
     end

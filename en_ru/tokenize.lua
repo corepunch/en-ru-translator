@@ -18,7 +18,7 @@ function M.words(text)
                 end
             end
             local dashes=text:match("^%-%-+",i)
-            local raw = word or dashes or
+            local raw = text:match("^%a+%d+", i) or word or dashes or
                 text:match("^%d+[.,]%d+", i) or text:match("^%d+", i) or
                 text:match("^[\194-\244][\128-\191]*", i) or c
             -- A trailing quote is punctuation, not part of the word.

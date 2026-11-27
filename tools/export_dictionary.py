@@ -40,13 +40,15 @@ def delta(lemma, word):
     return f"{len(lemma[:i].encode())}:{word[i:]}"
 
 
-def form_key(tag, pos):
+def form_key(tag, pos, scene=False):
     num = "p" if tag.number == "plur" else "s"
     gender = GENDERS.get(tag.gender, "m")
     case = CASES.get(tag.case)
     if pos == "n" and case:
         return num + case + ("x" if "Af-p" in tag else "")
-    if pos == "a" and tag.POS == "ADJF" and case:
+    if scene and pos == "a" and tag.POS in ("ADJS", "PRTS"):
+        return "q" + (num if num == "p" else gender)
+    if pos == "a" and tag.POS in ("ADJF", "PRTF") and case:
         key = (num if num == "p" else gender) + case
         return key + ("+" if tag.animacy == "anim" else "-" if tag.animacy == "inan" else "")
     if pos == "v" and tag.POS == "PRTS" and tag.voice == "pssv":
@@ -104,11 +106,15 @@ def main():
     fields = [line.split("\t") for line in curated.splitlines() if line and not line.startswith("#")]
 
     @lru_cache(maxsize=None)
-    def parse(word, pos):
-        for item in morph.parse(word):
-            if item.tag.POS in RPOS[pos] and item.is_known and "Abbr" not in item.tag:
-                return item
-        return None
+    def parse(word, pos, scene=False):
+        allowed=RPOS[pos] | ({"PRTF"} if scene and pos == "a" else set())
+        candidates = [item for item in morph.parse(word)
+                      if item.tag.POS in allowed and item.is_known and "Abbr" not in item.tag]
+        if scene:
+            for item in candidates:
+                if item.normal_form == word:
+                    return item
+        return candidates[0] if candidates else None
 
     rows = defaultdict(list)
     c = sqlite3.connect(args.wikdict.resolve().as_uri() + "?mode=ro", uri=True)
@@ -135,11 +141,10 @@ def main():
     # Independently authored lexical frames are kept separate from the export.
     used = {(ru, pos) for (_, pos), targets in rows.items() for ru in targets if pos != "r"}
     used |= {(f[2], f[1]) for f in fields if f[1] in ("n", "v", "a")}
-    forms = []
-    for word, pos in sorted(used):
-        item = parse(word, pos)
+    def form_row(word, pos, scene=False):
+        item = parse(word, pos, scene)
         if not item:
-            continue
+            return None
         tag = item.tag
         flags = (GENDERS.get(tag.gender, "m") + ("+" if tag.animacy == "anim" else "-") +
                  ("t" if tag.transitivity == "tran" else "i" if tag.transitivity == "intr" else "-") +
@@ -148,13 +153,28 @@ def main():
         for inf in item.lexeme:
             if {"Infr", "Arch", "V-oy", "V-ey"} & inf.tag.grammemes:
                 continue
-            key = form_key(inf.tag, pos)
+            if scene and pos == "a" and tag.POS == "PRTF" and (
+                inf.tag.POS not in ("PRTF", "PRTS") or
+                inf.tag.voice != tag.voice or inf.tag.tense != tag.tense
+            ):
+                continue
+            key = form_key(inf.tag, pos, scene)
             if key and key not in values and inf.word != word and RU.fullmatch(inf.word):
                 values[key] = delta(word, inf.word)
             elif key and key not in values and inf.word == word:
                 values[key] = "="
-        forms.append("\t".join((word, pos, flags, ",".join(k + "=" + v for k, v in sorted(values.items()) if v != "="))))
+        return "\t".join((word, pos, flags, ",".join(k + "=" + v for k, v in sorted(values.items()) if v != "="))).rstrip("\t")
 
+    forms = [row for word, pos in sorted(used) if (row := form_row(word, pos))]
+    scene_fields = [
+        line.split("\t")
+        for line in (Path(__file__).resolve().parents[1] / "dictionary" / "scene.tsv").read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+    scene_used = {(f[2], f[1]) for f in scene_fields if f[1] in ("n", "v", "a")}
+    scene_used |= {(f[4], "a") for f in scene_fields if len(f) > 4 and RU.fullmatch(f[4])}
+    rows_scene = [row for word, pos in sorted(scene_used) if (row := form_row(word, pos, True))]
+    (out / "scene-forms.tsv").write_text("\n".join(rows_scene) + "\n", encoding="utf-8")
     lex = ["\t".join((en, pos, "|".join(targets))) for (en, pos), targets in sorted(rows.items()) if targets]
     known = {key for key, val in rows.items() if val} | {(f[0],f[1]) for f in fields}
     exc_rows = []

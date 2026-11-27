@@ -35,3 +35,7 @@ assets.tsv — generated inventory of the data shards, by data type.
 To regenerate using the pinned inputs (no runtime installation needed):
   python -m pip install pymorphy3==2.0.6 pymorphy3-dicts-ru==2.4.417150.4580142
   python tools/export_dictionary.py en-ru.sqlite3 WordNet-3.0.tar.gz dictionary
+
+scene.tsv — independently authored lexical meanings, arguments and nominal
+compounds for descriptive text. scene-forms.tsv is the corresponding small
+OpenCorpora export (same CC BY-SA 3.0, revision and generator as forms above).

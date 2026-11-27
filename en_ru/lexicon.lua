@@ -33,11 +33,19 @@ function M.load(root, reader)
         records(reader or disk, root .. "/" .. name, fn)
     end
     local data = {words = {}, forms = {}, exceptions = {}}
-    file("vocabulary.tsv", function(row)
+    local function authored(row)
         local group = at(at(data.words, row[1]), row[2])
-        group[#group + 1] = {word = row[3], frame = row[4] or "", authored = true}
-    end)
-    file("assets.tsv", function(asset)
+        group[#group + 1] = {word = row[3], frame = row[4] or "", modifier = row[5], authored = true}
+    end
+    local function form(row)
+        at(data.forms, row[1])[row[2]] = {flags = row[3], variants = row[4] or ""}
+    end
+    local vocabulary, assets = {}, {}
+    file("vocabulary.tsv", function(row) vocabulary[#vocabulary+1]=row end)
+    file("assets.tsv", function(row) assets[#assets+1]=row end)
+    file("scene.tsv", authored)
+    for _, row in ipairs(vocabulary) do authored(row) end
+    for _, asset in ipairs(assets) do
         assert(asset[2]:match("^[a-z]+%-%d+%.tsv$"), "invalid data manifest")
         file(asset[2], function(row)
             if asset[1] == "lex" then
@@ -46,14 +54,15 @@ function M.load(root, reader)
                     group[#group + 1] = {word = word, frame = ""}
                 end
             elseif asset[1] == "forms" then
-                at(data.forms, row[1])[row[2]] = {flags = row[3], variants = row[4] or ""}
+                form(row)
             elseif asset[1] == "exceptions" then
                 at(data.exceptions, row[1])[row[2]] = row[3]
             else
                 error("unknown dictionary shard type: " .. asset[1])
             end
         end)
-    end)
+    end
+    file("scene-forms.tsv", form)
     if not reader then cache[root] = data end
     return data
 end
@@ -137,6 +146,10 @@ function M.verb(data, lemma, subject, tense)
             (variant(M.paradigm(data, "быть", "v"), "быть", "f" .. ending) or "будет") .. " " .. lemma
     end
     return variant(p, lemma, "p" .. ending) or variant(p, lemma, "f" .. ending) or lemma
+end
+
+function M.short(data, lemma, subject)
+    return variant(M.paradigm(data, lemma, "a"), lemma, "q" .. (subject.num=="p" and "p" or subject.gender))
 end
 
 function M.passive(data, lemma, subject)

@@ -3,8 +3,9 @@ local root = (arg[0] or ""):match("^(.*[/\\])") or "./"
 package.path = root .. "?.lua;" .. package.path
 local engine = require "en_ru.engine"
 
-local usage = [[Usage: lua init.lua [--data DIR] [--formal] [--trace] [--] [TEXT]
+local usage = [[Usage: lua init.lua [--data DIR] [--formal] [--heading] [--trace] [--] [TEXT]
        lua init.lua --document [FILE]
+Use --heading to translate names as nominal labels.
 Translate English→Russian offline. Reads stdin when no text or file is given.
 ]]
 local options, extra = {data_dir=root .. "dictionary"}, {}
@@ -16,6 +17,7 @@ while i<=#arg do
     elseif not no_options and a=="--" then no_options=true
     elseif not no_options and a=="--document" then whole=true
     elseif not no_options and a=="--formal" then options.formal=true
+    elseif not no_options and a=="--heading" then options.kind="heading"
     elseif not no_options and a=="--trace" then trace=true
     elseif not no_options and a=="--data" then i=i+1; options.data_dir=assert(arg[i],"missing data directory")
     elseif not no_options and a:sub(1,1)=="-" then io.stderr:write("Unknown option: ",a,"\n",usage); os.exit(2)

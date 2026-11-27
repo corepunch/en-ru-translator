@@ -40,3 +40,18 @@ idioms and reference across sentences are only partially handled. Candidate
 order is a default, not evidence that a sense is correct. Data coverage and
 successful book processing do not measure accuracy. The debug token trace
 exposes ambiguity rather than claiming a complete syntactic parse.
+
+## Adventure text
+
+`require("en_ru.adventure").new()` exposes `heading(text)`, `prose(text)`
+and `choice({label=..., command=..., ...})`. Use it after a host parses the
+story markup and before displaying the turn. The host retains canonical
+actions, object IDs and save data; the adapter copies choice metadata and
+localizes only its label. Do not pass an unparsed link string to `prose`.
+The adapter is tested in isolation; no UI is switched to it by this change.
+
+The authored `scene.tsv` entries cover reusable object names, direction and
+scene verbs. A multiword headword is a single constituent, not a sentence
+shortcut. For example, a window can be "boarded up" under an ordinary
+passive rule; a locative existential never guesses an object's posture.
+Regeneration adds `scene-forms.tsv` without changing the base data shards.

@@ -1,0 +1,11 @@
+# Zork I runtime excerpts, in route order. No entries in runtime vocabulary contain sentences.
+heading	West of House	К западу от дома
+prose	There is a small mailbox here.	Здесь есть небольшой почтовый ящик.
+prose	There is no door here, and all the windows are boarded up.	Здесь нет двери, и все окна заколочены.
+prose	To the north a narrow path winds through the trees.	На север узкая тропинка вьётся через деревья.
+heading	Behind House	За домом
+prose	A path leads into the forest to the east.	Тропинка ведёт в лес на восток.
+prose	A bottle is sitting on the table.	Бутылка стоит на столе.
+heading	Living Room	Гостиная
+prose	Above the trophy case hangs an elvish sword of great antiquity.	Над витриной висит эльфийский меч великой античности.
+heading	The Troll Room	Комната тролля

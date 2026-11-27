@@ -1,0 +1,95 @@
+# lemma	pos	target	frame	modifier or nominal complement
+small	a	небольшой
+narrow	a	узкий
+white	a	белый
+dark	a	тёмный
+damp	a	сырой
+brown	a	коричневый
+wooden	a	деревянный
+bloody	a	окровавленный
+bloody	a	кровавый
+ajar	a	приоткрытый
+only	a	единственный
+stand	v	стоять	intr
+sit	v	сидеть	intr
+sit	v	стоять	locative
+lie	v	лежать	intr
+hang	v	висеть	intr
+lead	v	вести	motion
+wind	v	виться	motion
+face	v	смотреть	toward
+board up	v	заколотить	obj
+mailbox	n	ящик		почтовый
+field	n	поле
+path	n	тропинка
+forest	n	лес
+passage	n	проход
+passageway	n	коридор
+crawlway	n	лаз
+window	n	окно
+door	n	дверь
+doorway	n	проём		дверной
+front door	n	дверь		входной
+wood	n	лес
+tree	n	дерево
+living room	n	гостиная
+trophy case	n	витрина	с трофеями
+kitchen	n	кухня
+cellar	n	подвал
+attic	n	чердак
+table	n	стол
+bottle	n	бутылка
+glass bottle	n	бутылка		стеклянный
+sack	n	мешок
+stairway	n	лестница
+staircase	n	лестница
+chimney	n	дымоход
+corner	n	угол
+exit	n	выход
+side	n	сторона
+axe	n	топор
+ramp	n	пандус
+rug	n	ковёр
+rope	n	верёвка
+knife	n	нож
+sword	n	меч
+lantern	n	фонарь
+troll	n	тролль
+elvish	a	эльфийский
+oriental	a	восточный
+steep	a	крутой
+metal	a	металлический
+large	a	большой
+deep	a	глубокий
+boarded	a	заколоченный
+closed	a	закрытый
+this	n	это
+fierce	a	свирепый
+all	a	весь
+north	n	север
+south	n	юг
+east	n	восток
+west	n	запад
+northeast	n	северо-восток
+northwest	n	северо-запад
+southeast	n	юго-восток
+southwest	n	юго-запад
+nasty-looking	a	зловещий
+elongated	a	продолговатый
+hot	a	острый
+pepper	n	перец
+smell	v	пахнуть	ins
+scratch	n	царапина
+brandish	v	размахивать	ins
+block	v	преграждать	obj
+empty	a	пустой
+stow	v	складывать	obj
+slightly	r	слегка
+north	a	северный
+south	a	южный
+east	a	восточный
+west	a	западный
+coil	n	моток
+quantity	n	количество
+battery-powered	a	батарейный
+brass	a	латунный

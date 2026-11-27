@@ -32,3 +32,7 @@ through; the translator does not use a sentence-to-sentence lookup table.
 - [Architecture and grammar coverage](ARCHITECTURE.md)
 - [Data origins, licenses and reproducible export](dictionary/ATTRIBUTION.txt)
 - [Testing](TESTING.md)
+
+For game hosts, [Adventure text](ARCHITECTURE.md#adventure-text) describes
+the optional display-only adapter. See [the Zork I evaluation](docs/adventure-evaluation.md)
+for route examples, transfer checks, and remaining gaps.

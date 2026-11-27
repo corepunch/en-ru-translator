@@ -55,3 +55,9 @@ scene verbs. A multiword headword is a single constituent, not a sentence
 shortcut. For example, a window can be "boarded up" under an ordinary
 passive rule; a locative existential never guesses an object's posture.
 Regeneration adds `scene-forms.tsv` without changing the base data shards.
+
+Bare directional complements reuse the same location table and lexical verb
+frames (e.g. motion + upstairs → наверх, static upstairs → наверху).
+An overt complement instead makes inside/outside prepositions, and noun
+phrases keep their lexical sense. Fronted BE questions recover the subject
+before rendering a locative predicate; this is not a general question parser.

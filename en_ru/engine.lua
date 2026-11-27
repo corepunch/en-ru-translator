@@ -31,7 +31,7 @@ local function translate_line(input, options, data, traces)
         while #current>0 and current[#current].raw:match("^[.?!:;]$") do
             table.insert(ending,1,current[#current].raw); current[#current]=nil
         end
-        local result,trace=grammar.sentence(data,current,options)
+        local result,trace=grammar.sentence(data,current,options,table.concat(ending):find("?",1,true)~=nil)
         result=tokenize.upper_first(result)..table.concat(ending)
         if quoted then result=result.."»" end
         sentences[#sentences+1]=result

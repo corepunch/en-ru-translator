@@ -41,6 +41,9 @@ local bare_place = {
     home={static="дома", toward="домой"}, here={static="здесь", toward="сюда"},
     there={static="там", toward="туда"}, inside={static="внутри", toward="внутрь"},
     outside={static="снаружи", toward="наружу"},
+    upstairs={static="наверху", toward="наверх"}, downstairs={static="внизу", toward="вниз"},
+    ashore={static="на берегу", toward="на берег"}, back={toward="обратно"},
+    forward={toward="вперёд", static="вперёд"},
 }
 local compass = {north="север", south="юг", west="запад", east="восток",
     northeast="северо-восток", northwest="северо-запад", southeast="юго-восток", southwest="юго-запад"}
@@ -127,6 +130,17 @@ local function candidate(data,t,pos)
 end
 local function lexical_head(t)
     return t and (pronouns[t.word] or t.pos.n or t.raw:match("^%d") or t.raw:match("^%u"))
+end
+
+local function place_particle(t, i, last)
+    local w=t[i] and t[i].word
+    if not is_place(w) then return false end
+    if not bare_place[w] then return true end
+    local next=t[i+1]
+    if i>=last or not next then return true end
+    return not (articles[next.word] or possessives[next.word] or pronouns[next.word]
+        or w=="back" and next.word=="of"
+        or next.pos.n and not (next.pos.r or vtoken(next)) and not joins[next.word])
 end
 
 -- Recognize an NP by its grammatical shape, not by matching a translated phrase.
@@ -256,11 +270,15 @@ local function place(ctx, first,last,directed,only_preposition)
         if k<=last and compass[t[k].word] then return "на "..compass[t[k].word],k+1 end
     end
     if not only_preposition then
-        if bare_place[w] then return directed and bare_place[w].toward or bare_place[w].static,first+1 end
+        if bare_place[w] and place_particle(t,first,last) then
+            local phrase
+            if directed then phrase=bare_place[w].toward else phrase=bare_place[w].static end
+            if phrase then return phrase,first+1 end
+        end
         if vertical[w] then return vertical[w],first+1 end
         if compass[w] then return "на "..compass[w],first+1 end
     end
-    local pp=preps[w]
+    local pp=preps[w] or (w=="inside" and {"в","l","a"}) or (w=="outside" and {"за пределами","g"})
     if not pp or w=="before" or w=="after" or w=="of" then return nil,first end
     local phrase,after=located_np(ctx,first+1,last,directed and (pp[3] or pp[2]) or pp[2])
     if phrase then return pp[1] .. " " .. phrase,after end
@@ -328,7 +346,7 @@ end
 
 local function tail_np(ctx,i,last)
     local t=ctx.t[i]
-    if not t or i>last or is_place(t.word) or t.aux or clause_markers[t.word] then return nil,i end
+    if not t or i>last or place_particle(ctx.t,i,last) or t.aux or clause_markers[t.word] then return nil,i end
     if not lexical_head(t) and not articles[t.word] and not possessives[t.word] and not t.pos.a then return nil,i end
     return np(ctx,i,last)
 end
@@ -422,6 +440,22 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         if candidate_verb then group,finish=tail_np(ctx,start,last) end
         if group then subject,v,nextpos,inverted=group,candidate_verb,finish,true end
     end
+    if not ex and not inherited and ctx.question
+        and t[lead] and t[lead].aux=="be" then
+        local question_verb, start=verb(ctx,lead,last)
+        if question_verb and question_verb.root=="be" then
+            local group,finish=np(ctx,start,last)
+            local extra
+            if group and finish<last and t[finish].word=="and" then extra,finish=np(ctx,finish+1,last) end
+            if group and place(ctx,finish,last,false) then
+                if extra then
+                    inherited_label=noun(ctx,group,"n").." и "..noun(ctx,extra,"n")
+                    group.num, group.person="p","3"
+                end
+                subject,v,nextpos=group,question_verb,finish
+            end
+        end
+    end
     if ex then v,nextpos=existential,ex_end end
     local imperative=false
     if v and subject and not inherited and not opening and i==first+1 and subject.num=="s" and subject.person=="3" and
@@ -455,14 +489,15 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
             if entry.frame=="speech" then speech=true; break end
         end
     end
-    if not sentential and not speech then obj,after=tail_np(ctx,i,last) end
+    local location=place(ctx,i,last,false)
+    if not sentential and not speech and not location then obj,after=tail_np(ctx,i,last) end
     if obj and t[i].pos.a and i==last and copula then obj=nil end
     if obj and t[i].word=="nothing" and not copula then v.neg=true end
     local directional=false
     v.location=(opening~=nil or place(ctx,i,last,false)~=nil) and subject and subject.animate=="-"
         and not pronouns[subject.token.word]
     for j=i,last do
-        if is_place(t[j].word) and (j==i or not preps[t[j-1].word]) or
+        if place_particle(t,j,last) and (j==i or not preps[t[j-1].word]) or
             (t[j].word=="to" or t[j].word=="into") and lexical_head(t[j+1]) then
             directional=true; break
         end
@@ -559,7 +594,9 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         local pp=preps[w]
         local linked_subject, linked_verb
         if joins[w] then linked_subject, linked_verb=np(ctx,i+1,last) end
-        if joins[w] and (not pp or linked_subject and vtoken(t[linked_verb])) then
+        if w=="right" and place(ctx,i+1,last,frame=="motion") then
+            put("прямо"); i=i+1
+        elseif joins[w] and (not pp or linked_subject and vtoken(t[linked_verb])) then
             if w~="and" and w~="or" and out[#out]~="," then put(",") end
             put(joins[w]); put(clause(ctx,i+1,last,depth+1)); break
         elseif pp or is_place(w) then
@@ -595,8 +632,8 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
     return tokenize.format(out)
 end
 
-function M.sentence(data, words, options)
-    local ctx={data=data,t=analyse_words(data,words),formal=options.formal}
+function M.sentence(data, words, options, question)
+    local ctx={data=data,t=analyse_words(data,words),formal=options.formal,question=question}
     local text
     if options.kind=="heading" or options.kind=="label" then
         local location,after=place(ctx,1,#ctx.t,false,true)

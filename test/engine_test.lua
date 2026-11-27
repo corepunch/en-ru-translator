@@ -47,3 +47,23 @@ assert(#state.sentences==3, "figure reference, numeric start and decimal")
 local loaded, err=pcall(engine.load,{read_file=function() return nil,"missing fixture" end})
 assert(not loaded and err:find("vocabulary.tsv",1,true), "missing asset is explicit")
 print(("%d translation assertions plus data IO and boundary checks"):format(count))
+
+-- Directional complements vs locations, particles vs overt prepositions,
+-- and fronted copulas vs ordinary existential or noun uses.
+options.formal=nil
+check("I paddle home.", "Я гребу домой.")
+check("She rode back.", "Она ехала обратно.")
+check("They hurried right home.", "Они поспешили прямо домой.")
+check("You ran slowly upstairs.", "Ты бежал медленно наверх.")
+check("She stayed downstairs.", "Она оставалась внизу.")
+check("We went ashore.", "Мы шли на берег.")
+check("They are ashore.", "Они на берегу.")
+check("I paddle forward.", "Я гребу вперёд.")
+check("Are the boys and girls home?", "Мальчики и девочки дома?")
+check("Is the child inside the house?", "Ребёнок в доме?")
+check("I bought a home.", "Я купил дом.")
+check("They waited inside the house.", "Они ждали в доме.")
+check("He sat outside the house.", "Он сидел за пределами дома.")
+check("She worked at home.", "Она работала дома.")
+assert(not engine.translate("He drove home the point.", options):find("домой",1,true))
+print("Locative transfer and nominal controls passed")

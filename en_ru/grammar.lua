@@ -53,6 +53,7 @@ local numerals = {one=1,two=2,three=3,four=4,five=5,six=6,seven=7,eight=8,nine=9
 local number_text = {"один","два","три","четыре","пять","шесть","семь","восемь","девять","десять"}
 local fixed_pronouns = {["его"]=true,["её"]=true,["их"]=true}
 local default_subject = {num="s", gender="m", person="3"}
+local negative_pronouns = {nobody=true, nothing=true, ["no one"]=true}
 
 local function analyse_words(data, words)
     local out = {}
@@ -313,6 +314,13 @@ local function verb(ctx,i,last)
         neg=neg, modal=modal, passive=passive, token=t[base]},i
 end
 
+local function existential_at(ctx,i,last)
+    if i<=last and ctx.t[i] and ctx.t[i].word=="there" then
+        local v,after=verb(ctx,i+1,last)
+        if v and v.root=="be" then return v,after end
+    end
+end
+
 local function sense(ctx, v, obj, gap, direction)
     local group = lexical(ctx.data,v.token,"v")
     local best,max
@@ -417,8 +425,34 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         return result
     end)()," ") end
     local t,data=ctx.t,ctx.data
+    if not inherited and t[first].word=="if" then
+        for j=first+1,last-1 do
+            if t[j].raw=="," then
+                return "если "..clause(ctx,first+1,j-1,depth+1)..", "..clause(ctx,j+1,last,depth+1)
+            end
+        end
+    end
     local opening, after_opening
-    if not inherited then opening,after_opening=place(ctx,first,last,false,true) end
+    if not inherited then
+        opening,after_opening=place(ctx,first,last,false,true)
+        if not opening and (t[first].word=="after" or t[first].word=="before" or t[first].word=="that") then
+            local front,after=np(ctx,first+1,last)
+            local body=after and t[after] and t[after].raw=="," and after+1 or after
+            if front and existential_at(ctx,body,last) then
+                local preposition=preps[t[first].word]
+                if preposition then
+                    opening=preposition[1].." "..noun(ctx,front,preposition[2],true)
+                    after_opening=after
+                else
+                    local nominal=candidate(data,front.token,"n")
+                    if nominal and nominal.frame=="time" then
+                        opening=lex.adjective(data,"тот",front.num,front.gender,"i",front.animate).." "..noun(ctx,front,"i")
+                        after_opening=after
+                    end
+                end
+            end
+        end
+    end
     if opening and t[after_opening] and t[after_opening].raw=="," then after_opening=after_opening+1 end
     local lead=opening and after_opening or first
     local subject, i=np(ctx,lead,last)
@@ -429,8 +463,8 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         if part then rel,i,is_content=part,post,content end
     end
     local existential, ex_end
-    if not inherited and t[lead] and t[lead].word=="there" then existential, ex_end=verb(ctx,lead+1,last) end
-    local ex=existential and existential.root=="be"
+    if not inherited then existential,ex_end=existential_at(ctx,lead,last) end
+    local ex=existential~=nil
     if ex then subject,i=nil,lead+1 end
     local v,nextpos=verb(ctx,i or lead,last)
     local inverted
@@ -480,7 +514,13 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
     i=nextpos
     local copula,possess = v.root=="be",v.root=="have"
     local sentential=t[i] and t[i].word=="that" and i<last and
-        (ctx.t[i+1].pos.n or pronouns[ctx.t[i+1].word])
+        (ctx.t[i+1].pos.n or pronouns[ctx.t[i+1].word] or existential_at(ctx,i+1,last))
+    local content_start=sentential and i+1
+    if not content_start and existential_at(ctx,i,last) then
+        for _,entry in ipairs(lexical(data,v.token,"v")) do
+            if entry.frame=="content" then content_start=i; break end
+        end
+    end
     local obj,after
     local language = candidate(data,t[i],"r")
     local speech = false
@@ -490,7 +530,7 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         end
     end
     local location=place(ctx,i,last,false)
-    if not sentential and not speech and not location then obj,after=tail_np(ctx,i,last) end
+    if not content_start and not speech and not location then obj,after=tail_np(ctx,i,last) end
     if obj and t[i].pos.a and i==last and copula then obj=nil end
     if obj and t[i].word=="nothing" and not copula then v.neg=true end
     local directional=false
@@ -520,7 +560,7 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
         else put(noun(ctx,subject,"n")) end
         if rel then if not is_content then put(",") end; put(rel); put(",") end
     end
-    local neg=v.neg or obj and (obj.neg or obj.word=="nobody" or obj.word=="nothing")
+    local neg=v.neg or obj and (obj.neg or negative_pronouns[obj.word])
     if ex or possess and obj then
         local ex_features=neg and {num="s",gender="n",person="3"} or obj or features
         local copula_word=v.tense=="past" and lex.verb(data,"быть",ex_features,"past")
@@ -588,7 +628,14 @@ clause = function(ctx, first, last, depth, gap, inherited, inherited_label)
             if part then if not content then put(",") end; put(part); i=post end
         end
     end
-    if sentential then put(","); put("что"); put(clause(ctx,i+1,last,depth+1)); i=last+1 end
+    if ex and obj and neg then
+        while i<last and (t[i].word=="and" or t[i].word=="or") do
+            local item,after=tail_np(ctx,i+1,last)
+            if not item or after<=last and vtoken(t[after]) then break end
+            put(joins[t[i].word]); put(noun(ctx,item,"g")); i=after
+        end
+    end
+    if content_start then put(","); put("что"); put(clause(ctx,content_start,last,depth+1)); i=last+1 end
     while i<=last do
         local w=t[i].word
         local pp=preps[w]
